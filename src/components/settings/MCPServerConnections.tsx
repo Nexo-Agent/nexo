@@ -21,6 +21,11 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HeadersEditor } from "@/components/settings/HeadersEditor";
 import { useConnections } from "@/contexts/ConnectionsContext";
+import {
+  createMCPServerConnection,
+  updateMCPServerConnection,
+  deleteMCPServerConnection,
+} from "@/lib/db-api";
 
 export interface MCPServerConnection {
   id: string;
@@ -31,7 +36,7 @@ export interface MCPServerConnection {
 }
 
 export function MCPServerConnections() {
-  const { mcpConnections, setMCPConnections } = useConnections();
+  const { mcpConnections, refreshConnections } = useConnections();
   const [editingConnection, setEditingConnection] = useState<MCPServerConnection | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -45,28 +50,48 @@ export function MCPServerConnections() {
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setMCPConnections(mcpConnections.filter((conn) => conn.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMCPServerConnection(id);
+      // Refresh connections from database
+      await refreshConnections();
+    } catch (error) {
+      console.error("Error deleting MCP connection:", error);
+      alert("Không thể xóa connection");
+    }
   };
 
-  const handleSave = (connection: Omit<MCPServerConnection, "id">) => {
-    if (editingConnection) {
-      setMCPConnections(
-        mcpConnections.map((conn) =>
-          conn.id === editingConnection.id
-            ? { ...connection, id: editingConnection.id }
-            : conn
-        )
-      );
-    } else {
-      const newConnection: MCPServerConnection = {
-        ...connection,
-        id: Date.now().toString(),
-      };
-      setMCPConnections([...mcpConnections, newConnection]);
+  const handleSave = async (connection: Omit<MCPServerConnection, "id">) => {
+    try {
+      const headers = connection.headers || "{}";
+
+      if (editingConnection) {
+        // Update existing connection
+        await updateMCPServerConnection(editingConnection.id, {
+          name: connection.name,
+          url: connection.url,
+          type: connection.type,
+          headers: headers,
+        });
+      } else {
+        // Create new connection
+        const id = Date.now().toString();
+        await createMCPServerConnection(
+          id,
+          connection.name,
+          connection.url,
+          connection.type,
+          headers
+        );
+      }
+      // Refresh connections from database
+      await refreshConnections();
+      setDialogOpen(false);
+      setEditingConnection(null);
+    } catch (error) {
+      console.error("Error saving MCP connection:", error);
+      alert("Không thể lưu connection");
     }
-    setDialogOpen(false);
-    setEditingConnection(null);
   };
 
   return (

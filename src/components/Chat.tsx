@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PanelLeftClose, PanelLeftOpen, Settings as SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WorkspaceSelector, type Workspace } from "@/components/WorkspaceSelector";
@@ -10,15 +10,47 @@ import { WorkspaceSettingsDialog, type WorkspaceSettings } from "@/components/Wo
 import { useConnections } from "@/contexts/ConnectionsContext";
 import { sendChatCompletion } from "@/lib/llm-api";
 import { cn } from "@/lib/utils";
+import {
+  getWorkspaces,
+  createWorkspace,
+  updateWorkspace,
+  getChats,
+  createChat,
+  updateChat,
+  deleteChat,
+  getMessages,
+  createMessage,
+  getWorkspaceSettings,
+  saveWorkspaceSettings,
+  type Workspace as DbWorkspace,
+  type Chat as DbChat,
+  type Message as DbMessage,
+} from "@/lib/db-api";
 
 export function Chat() {
   // Workspace state
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([
-    { id: "1", name: "Default" },
-  ]);
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace>(
-    workspaces[0]
-  );
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
+
+  // Load workspaces from database
+  useEffect(() => {
+    const loadWorkspaces = async () => {
+      try {
+        const dbWorkspaces = await getWorkspaces();
+        const frontendWorkspaces: Workspace[] = dbWorkspaces.map((w) => ({
+          id: w.id,
+          name: w.name,
+        }));
+        setWorkspaces(frontendWorkspaces);
+        if (frontendWorkspaces.length > 0 && !selectedWorkspace) {
+          setSelectedWorkspace(frontendWorkspaces[0]);
+        }
+      } catch (error) {
+        console.error("Error loading workspaces:", error);
+      }
+    };
+    loadWorkspaces();
+  }, []);
 
   // Update selected model when workspace changes
   const handleWorkspaceChange = (workspace: Workspace) => {
@@ -27,48 +59,136 @@ export function Chat() {
     setAttachedFiles([]); // Clear files when switching workspace
   };
 
-  const handleAddWorkspace = (name: string) => {
-    const newWorkspace: Workspace = {
-      id: Date.now().toString(),
-      name: name,
-    };
-    setWorkspaces((prev) => [...prev, newWorkspace]);
-    handleWorkspaceChange(newWorkspace);
+  const handleAddWorkspace = async (name: string) => {
+    try {
+      const id = Date.now().toString();
+      await createWorkspace(id, name);
+      const newWorkspace: Workspace = { id, name };
+      setWorkspaces((prev) => [...prev, newWorkspace]);
+      handleWorkspaceChange(newWorkspace);
+    } catch (error) {
+      console.error("Error creating workspace:", error);
+      alert("Không thể tạo workspace mới");
+    }
   };
 
   const handleWorkspaceSettings = (_workspace: Workspace) => {
     setWorkspaceSettingsOpen(true);
   };
 
-  const handleSaveWorkspaceSettings = (settings: WorkspaceSettings) => {
-    setWorkspaceSettings((prev) => ({
-      ...prev,
-      [settings.id]: settings,
-    }));
-    // Update workspace name if changed
-    if (settings.name !== selectedWorkspace.name) {
-      setWorkspaces((prev) =>
-        prev.map((w) => (w.id === settings.id ? { ...w, name: settings.name } : w))
+  const handleSaveWorkspaceSettings = async (settings: WorkspaceSettings) => {
+    try {
+      // Save to database
+      await saveWorkspaceSettings(
+        settings.id,
+        settings.llmConnectionId,
+        settings.systemMessage || null,
+        settings.mcpConnectionIds || null
       );
-      if (selectedWorkspace.id === settings.id) {
-        setSelectedWorkspace({ ...selectedWorkspace, name: settings.name });
+
+      // Update workspace name if changed
+      if (settings.name !== selectedWorkspace?.name) {
+        await updateWorkspace(settings.id, settings.name);
+        setWorkspaces((prev) =>
+          prev.map((w) => (w.id === settings.id ? { ...w, name: settings.name } : w))
+        );
+        if (selectedWorkspace && selectedWorkspace.id === settings.id) {
+          setSelectedWorkspace({ ...selectedWorkspace, name: settings.name });
+        }
       }
-    }
-    // Reset model selection if LLM connection changed
-    if (settings.id === selectedWorkspace.id) {
-      setSelectedModel(undefined);
+
+      // Update local state
+      setWorkspaceSettings((prev) => ({
+        ...prev,
+        [settings.id]: settings,
+      }));
+
+      // Reset model selection if LLM connection changed
+      if (selectedWorkspace && settings.id === selectedWorkspace.id) {
+        setSelectedModel(undefined);
+      }
+    } catch (error) {
+      console.error("Error saving workspace settings:", error);
+      alert("Không thể lưu cài đặt workspace");
     }
   };
 
   // Chat list state
-  const [chats, setChats] = useState<ChatItem[]>([
-    {
-      id: "1",
-      title: "Cuộc trò chuyện mới",
-      timestamp: new Date(),
-    },
-  ]);
-  const [selectedChatId, setSelectedChatId] = useState<string>("1");
+  const [chats, setChats] = useState<ChatItem[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string>("");
+
+  // Load chats when workspace changes
+  useEffect(() => {
+    if (!selectedWorkspace) return;
+
+    const loadChats = async () => {
+      try {
+        const dbChats = await getChats(selectedWorkspace.id);
+        const frontendChats: ChatItem[] = dbChats.map((c) => ({
+          id: c.id,
+          title: c.title,
+          lastMessage: c.last_message || undefined,
+          timestamp: new Date(c.updated_at * 1000),
+        }));
+        setChats(frontendChats);
+        if (frontendChats.length > 0 && !selectedChatId) {
+          setSelectedChatId(frontendChats[0].id);
+        } else if (frontendChats.length === 0) {
+          // Create default chat if none exists
+          const newChatId = Date.now().toString();
+          await createChat(newChatId, selectedWorkspace.id, "Cuộc trò chuyện mới");
+          const newChat: ChatItem = {
+            id: newChatId,
+            title: "Cuộc trò chuyện mới",
+            timestamp: new Date(),
+          };
+          setChats([newChat]);
+          setSelectedChatId(newChatId);
+        }
+      } catch (error) {
+        console.error("Error loading chats:", error);
+      }
+    };
+
+    loadChats();
+  }, [selectedWorkspace]);
+
+  // Load workspace settings when workspace changes
+  useEffect(() => {
+    if (!selectedWorkspace) return;
+
+    const loadWorkspaceSettings = async () => {
+      try {
+        const dbSettings = await getWorkspaceSettings(selectedWorkspace.id);
+        if (dbSettings) {
+          let mcpConnectionIds: string[] | undefined;
+          if (dbSettings.mcp_connection_ids) {
+            try {
+              mcpConnectionIds = JSON.parse(dbSettings.mcp_connection_ids);
+            } catch (e) {
+              console.error("Error parsing mcp_connection_ids:", e);
+            }
+          }
+
+          const frontendSettings: WorkspaceSettings = {
+            id: dbSettings.workspace_id,
+            name: selectedWorkspace.name,
+            systemMessage: dbSettings.system_message || "",
+            llmConnectionId: dbSettings.llm_connection_id || undefined,
+            mcpConnectionIds,
+          };
+          setWorkspaceSettings((prev) => ({
+            ...prev,
+            [selectedWorkspace.id]: frontendSettings,
+          }));
+        }
+      } catch (error) {
+        console.error("Error loading workspace settings:", error);
+      }
+    };
+
+    loadWorkspaceSettings();
+  }, [selectedWorkspace]);
 
   // Messages state
   const [messages, setMessages] = useState<Message[]>([]);
@@ -87,8 +207,30 @@ export function Chat() {
   // Get connections context
   const { llmConnections } = useConnections();
 
+  // Load messages when chat changes
+  useEffect(() => {
+    if (!selectedChatId) return;
+
+    const loadMessages = async () => {
+      try {
+        const dbMessages = await getMessages(selectedChatId);
+        const frontendMessages: Message[] = dbMessages.map((m) => ({
+          id: m.id,
+          role: m.role as "user" | "assistant",
+          content: m.content,
+          timestamp: new Date(m.timestamp * 1000),
+        }));
+        setMessages(frontendMessages);
+      } catch (error) {
+        console.error("Error loading messages:", error);
+      }
+    };
+
+    loadMessages();
+  }, [selectedChatId]);
+
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !selectedWorkspace || !selectedChatId) return;
 
     // Get workspace settings and LLM connection
     const workspaceSetting = workspaceSettings[selectedWorkspace.id];
@@ -118,16 +260,36 @@ export function Chat() {
       console.log("Tools enabled");
     }
 
+    const userMessageId = Date.now().toString();
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: userMessageId,
       role: "user",
       content: input.trim(),
       timestamp: new Date(),
     };
 
+    // Save user message to database
+    try {
+      await createMessage(
+        userMessageId,
+        selectedChatId,
+        "user",
+        input.trim()
+      );
+    } catch (error) {
+      console.error("Error saving user message:", error);
+    }
+
     setMessages((prev) => [...prev, userMessage]);
     
-    // Update chat last message
+    // Update chat last message in database
+    try {
+      await updateChat(selectedChatId, undefined, input.trim());
+    } catch (error) {
+      console.error("Error updating chat:", error);
+    }
+
+    // Update chat last message in UI
     setChats((prev) =>
       prev.map((chat) =>
         chat.id === selectedChatId
@@ -219,7 +381,30 @@ export function Chat() {
         assistantContent = response.content;
       }
 
-      // Update chat last message
+      // Save assistant message to database
+      try {
+        await createMessage(
+          assistantMessageId,
+          selectedChatId,
+          "assistant",
+          assistantContent || "Phản hồi từ AI"
+        );
+      } catch (error) {
+        console.error("Error saving assistant message:", error);
+      }
+
+      // Update chat last message in database
+      try {
+        await updateChat(
+          selectedChatId,
+          undefined,
+          assistantContent || "Phản hồi từ AI"
+        );
+      } catch (error) {
+        console.error("Error updating chat:", error);
+      }
+
+      // Update chat last message in UI
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === selectedChatId
@@ -234,16 +419,23 @@ export function Chat() {
     } catch (error: any) {
       console.error("Error sending message:", error);
       // Replace the placeholder message with error message
+      const errorContent = `Lỗi: ${error.message || "Không thể kết nối đến LLM API"}`;
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMessageId
             ? {
                 ...msg,
-                content: `Lỗi: ${error.message || "Không thể kết nối đến LLM API"}`,
+                content: errorContent,
               }
             : msg
         )
       );
+      // Save error message to database
+      try {
+        await createMessage(assistantMessageId, selectedChatId, "assistant", errorContent);
+      } catch (dbError) {
+        console.error("Error saving error message:", dbError);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -253,33 +445,49 @@ export function Chat() {
     setAttachedFiles(files);
   };
 
-  const handleNewChat = () => {
-    const newChat: ChatItem = {
-      id: Date.now().toString(),
-      title: "Cuộc trò chuyện mới",
-      timestamp: new Date(),
-    };
-    setChats((prev) => [newChat, ...prev]);
-    setSelectedChatId(newChat.id);
-    setMessages([]);
+  const handleNewChat = async () => {
+    if (!selectedWorkspace) return;
+
+    try {
+      const newChatId = Date.now().toString();
+      await createChat(newChatId, selectedWorkspace.id, "Cuộc trò chuyện mới");
+      const newChat: ChatItem = {
+        id: newChatId,
+        title: "Cuộc trò chuyện mới",
+        timestamp: new Date(),
+      };
+      setChats((prev) => [newChat, ...prev]);
+      setSelectedChatId(newChatId);
+      setMessages([]);
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+      alert("Không thể tạo cuộc trò chuyện mới");
+    }
   };
 
   const handleChatSelect = (chatId: string) => {
     setSelectedChatId(chatId);
-    // In a real app, you would load messages for this chat
-    // For now, just reset messages
-    setMessages([]);
+    // Messages will be loaded by useEffect when selectedChatId changes
     // Clear attached files when switching chats
     setAttachedFiles([]);
   };
 
-  const handleDeleteChat = (chatId: string) => {
-    setChats((prev) => prev.filter((chat) => chat.id !== chatId));
-    if (selectedChatId === chatId && chats.length > 1) {
-      const remainingChats = chats.filter((chat) => chat.id !== chatId);
-      setSelectedChatId(remainingChats[0]?.id || "");
-    } else if (chats.length === 1) {
-      handleNewChat();
+  const handleDeleteChat = async (chatId: string) => {
+    try {
+      await deleteChat(chatId);
+      setChats((prev) => prev.filter((chat) => chat.id !== chatId));
+      if (selectedChatId === chatId) {
+        const remainingChats = chats.filter((chat) => chat.id !== chatId);
+        if (remainingChats.length > 0) {
+          setSelectedChatId(remainingChats[0].id);
+        } else if (selectedWorkspace) {
+          // Create a new chat if none remain
+          await handleNewChat();
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+      alert("Không thể xóa cuộc trò chuyện");
     }
   };
 
@@ -289,13 +497,15 @@ export function Chat() {
       <header className="border-b border-border bg-background px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <WorkspaceSelector
-              workspaces={workspaces}
-              selectedWorkspace={selectedWorkspace}
-              onWorkspaceChange={handleWorkspaceChange}
-              onAddWorkspace={handleAddWorkspace}
-              onWorkspaceSettings={handleWorkspaceSettings}
-            />
+            {selectedWorkspace && (
+              <WorkspaceSelector
+                workspaces={workspaces}
+                selectedWorkspace={selectedWorkspace}
+                onWorkspaceChange={handleWorkspaceChange}
+                onAddWorkspace={handleAddWorkspace}
+                onWorkspaceSettings={handleWorkspaceSettings}
+              />
+            )}
           </div>
           <Button
             variant="ghost"
@@ -362,7 +572,7 @@ export function Chat() {
             onChange={setInput}
             onSend={handleSend}
             disabled={isLoading}
-            selectedLLMConnectionId={workspaceSettings[selectedWorkspace.id]?.llmConnectionId}
+            selectedLLMConnectionId={selectedWorkspace ? workspaceSettings[selectedWorkspace.id]?.llmConnectionId : undefined}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
             toolsEnabled={toolsEnabled}
@@ -376,13 +586,15 @@ export function Chat() {
       <Settings open={settingsOpen} onOpenChange={setSettingsOpen} />
 
       {/* Workspace Settings Dialog */}
-      <WorkspaceSettingsDialog
-        open={workspaceSettingsOpen}
-        onOpenChange={setWorkspaceSettingsOpen}
-        workspace={selectedWorkspace}
-        settings={workspaceSettings[selectedWorkspace.id]}
-        onSave={handleSaveWorkspaceSettings}
-      />
+      {selectedWorkspace && (
+        <WorkspaceSettingsDialog
+          open={workspaceSettingsOpen}
+          onOpenChange={setWorkspaceSettingsOpen}
+          workspace={selectedWorkspace}
+          settings={workspaceSettings[selectedWorkspace.id]}
+          onSave={handleSaveWorkspaceSettings}
+        />
+      )}
     </div>
   );
 }

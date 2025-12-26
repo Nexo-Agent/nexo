@@ -1,6 +1,18 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import type { LLMConnection, LLMModel } from "@/components/settings/LLMConnections";
 import type { MCPServerConnection } from "@/components/settings/MCPServerConnections";
+import {
+  getLLMConnections as getLLMConnectionsFromDb,
+  getMCPServerConnections as getMCPServerConnectionsFromDb,
+  type LLMConnection as DbLLMConnection,
+  type MCPServerConnection as DbMCPServerConnection,
+} from "@/lib/db-api";
 
 export type { LLMModel };
 
@@ -9,31 +21,92 @@ interface ConnectionsContextType {
   mcpConnections: MCPServerConnection[];
   setLLMConnections: (connections: LLMConnection[]) => void;
   setMCPConnections: (connections: MCPServerConnection[]) => void;
+  refreshConnections: () => Promise<void>;
 }
 
 const ConnectionsContext = createContext<ConnectionsContextType | undefined>(
   undefined
 );
 
+// Convert database LLMConnection to frontend LLMConnection
+function dbToFrontendLLMConnection(
+  dbConn: DbLLMConnection
+): LLMConnection {
+  let models: LLMModel[] | undefined;
+  if (dbConn.models_json) {
+    try {
+      models = JSON.parse(dbConn.models_json);
+    } catch (e) {
+      console.error("Error parsing models_json:", e);
+      models = undefined;
+    }
+  }
+
+  return {
+    id: dbConn.id,
+    name: dbConn.name,
+    baseUrl: dbConn.base_url,
+    provider: dbConn.provider,
+    apiKey: dbConn.api_key,
+    models,
+  };
+}
+
+// Convert database MCPServerConnection to frontend MCPServerConnection
+function dbToFrontendMCPServerConnection(
+  dbConn: DbMCPServerConnection
+): MCPServerConnection {
+  return {
+    id: dbConn.id,
+    name: dbConn.name,
+    url: dbConn.url,
+    type: dbConn.type as "sse" | "stdio" | "http-streamable",
+    headers: dbConn.headers || undefined,
+  };
+}
+
 export function ConnectionsProvider({ children }: { children: ReactNode }) {
-  const [llmConnections, setLLMConnections] = useState<LLMConnection[]>([
-    {
-      id: "1",
-      name: "OpenAI Default",
-      baseUrl: "https://api.openai.com/v1",
-      provider: "openai",
-      apiKey: "",
-    },
-  ]);
-  const [mcpConnections, setMCPConnections] = useState<MCPServerConnection[]>([
-    {
-      id: "1",
-      name: "MCP Server 1",
-      url: "http://localhost:3000/mcp",
-      type: "sse",
-      headers: '{"Authorization": "Bearer token"}',
-    },
-  ]);
+  const [llmConnections, setLLMConnectionsState] = useState<LLMConnection[]>([]);
+  const [mcpConnections, setMCPConnectionsState] = useState<MCPServerConnection[]>([]);
+
+  const loadConnections = async () => {
+    try {
+      // Load LLM connections
+      const dbLLMConnections = await getLLMConnectionsFromDb();
+      const frontendLLMConnections = dbLLMConnections.map(
+        dbToFrontendLLMConnection
+      );
+      setLLMConnectionsState(frontendLLMConnections);
+
+      // Load MCP connections
+      const dbMCPConnections = await getMCPServerConnectionsFromDb();
+      const frontendMCPConnections = dbMCPConnections.map(
+        dbToFrontendMCPServerConnection
+      );
+      setMCPConnectionsState(frontendMCPConnections);
+    } catch (error) {
+      console.error("Error loading connections:", error);
+      // Set empty arrays on error
+      setLLMConnectionsState([]);
+      setMCPConnectionsState([]);
+    }
+  };
+
+  useEffect(() => {
+    loadConnections();
+  }, []);
+
+  const setLLMConnections = (connections: LLMConnection[]) => {
+    setLLMConnectionsState(connections);
+  };
+
+  const setMCPConnections = (connections: MCPServerConnection[]) => {
+    setMCPConnectionsState(connections);
+  };
+
+  const refreshConnections = async () => {
+    await loadConnections();
+  };
 
   return (
     <ConnectionsContext.Provider
@@ -42,6 +115,7 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
         mcpConnections,
         setLLMConnections,
         setMCPConnections,
+        refreshConnections,
       }}
     >
       {children}

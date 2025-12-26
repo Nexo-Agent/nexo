@@ -22,6 +22,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useConnections } from "@/contexts/ConnectionsContext";
 import { testConnectionAndFetchModels } from "@/lib/llm-api";
 import { cn } from "@/lib/utils";
+import {
+  createLLMConnection,
+  updateLLMConnection,
+  deleteLLMConnection,
+} from "@/lib/db-api";
 
 export interface LLMModel {
   id: string;
@@ -40,7 +45,7 @@ export interface LLMConnection {
 }
 
 export function LLMConnections() {
-  const { llmConnections, setLLMConnections } = useConnections();
+  const { llmConnections, setLLMConnections, refreshConnections } = useConnections();
   const [editingConnection, setEditingConnection] = useState<LLMConnection | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -54,28 +59,52 @@ export function LLMConnections() {
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setLLMConnections(llmConnections.filter((conn) => conn.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteLLMConnection(id);
+      // Refresh connections from database
+      await refreshConnections();
+    } catch (error) {
+      console.error("Error deleting LLM connection:", error);
+      alert("Không thể xóa connection");
+    }
   };
 
-  const handleSave = (connection: Omit<LLMConnection, "id">) => {
-    if (editingConnection) {
-      setLLMConnections(
-        llmConnections.map((conn) =>
-          conn.id === editingConnection.id
-            ? { ...connection, id: editingConnection.id }
-            : conn
-        )
-      );
-    } else {
-      const newConnection: LLMConnection = {
-        ...connection,
-        id: Date.now().toString(),
-      };
-      setLLMConnections([...llmConnections, newConnection]);
+  const handleSave = async (connection: Omit<LLMConnection, "id">) => {
+    try {
+      const modelsJson = connection.models
+        ? JSON.stringify(connection.models)
+        : null;
+
+      if (editingConnection) {
+        // Update existing connection
+        await updateLLMConnection(editingConnection.id, {
+          name: connection.name,
+          baseUrl: connection.baseUrl,
+          provider: connection.provider,
+          apiKey: connection.apiKey,
+          modelsJson: modelsJson,
+        });
+      } else {
+        // Create new connection
+        const id = Date.now().toString();
+        await createLLMConnection(
+          id,
+          connection.name,
+          connection.baseUrl,
+          connection.provider,
+          connection.apiKey,
+          modelsJson
+        );
+      }
+      // Refresh connections from database
+      await refreshConnections();
+      setDialogOpen(false);
+      setEditingConnection(null);
+    } catch (error) {
+      console.error("Error saving LLM connection:", error);
+      alert("Không thể lưu connection");
     }
-    setDialogOpen(false);
-    setEditingConnection(null);
   };
 
   return (
