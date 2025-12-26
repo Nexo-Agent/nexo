@@ -523,7 +523,7 @@ export function Chat() {
         {/* Sidebar */}
         <div
           className={cn(
-            "relative overflow-hidden transition-all duration-300 ease-in-out",
+            "relative flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out",
             isSidebarCollapsed ? "w-0" : "w-64"
           )}
         >
@@ -562,7 +562,7 @@ export function Chat() {
         </button>
 
         {/* Chat Area */}
-        <div className="flex flex-1 flex-col bg-background">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
           {/* Messages Area */}
           <ChatMessages messages={messages} isLoading={isLoading} />
 
