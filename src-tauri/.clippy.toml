@@ -1,0 +1,16 @@
+[lints.clippy]
+# Pedantic lints for better code quality
+pedantic = "warn"
+# Nursery lints (experimental)
+nursery = "warn"
+
+# Allow some pedantic lints that are too strict
+too_many_lines = "allow"
+must_use_candidate = "allow"
+module_name_repetitions = "allow"
+
+[lints.rust]
+# Rust specific lints
+unsafe_code = "warn"
+unused_mut = "warn"
+dead_code = "warn"

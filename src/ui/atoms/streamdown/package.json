@@ -1,0 +1,79 @@
+{
+  "name": "streamdown",
+  "version": "1.6.10",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "homepage": "https://streamdown.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vercel/streamdown.git",
+    "directory": "packages/streamdown"
+  },
+  "scripts": {
+    "build": "tsup",
+    "postbuild": "node scripts/postbuild.js",
+    "test": "vitest run",
+    "test:ui": "vitest --ui run",
+    "test:coverage": "vitest --coverage run",
+    "bench": "vitest bench --run > results.txt",
+    "bench:ui": "vitest bench --ui --run"
+  },
+  "author": "Hayden Bleasel <hayden.bleasel@vercel.com>",
+  "license": "Apache-2.0",
+  "description": "A drop-in replacement for react-markdown, designed for AI-powered streaming.",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/hast": "^3.0.4",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/coverage-v8": "^4.0.15",
+    "jsdom": "^27.3.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-markdown": "^10.1.0",
+    "tsup": "^8.5.1",
+    "vitest": "^4.0.15"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "hast": "^1.0.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "html-url-attributes": "^3.0.1",
+    "lucide-react": "^0.560.0",
+    "marked": "^17.0.1",
+    "mermaid": "^11.12.2",
+    "rehype-harden": "^1.1.7",
+    "rehype-katex": "^7.0.1",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-cjk-friendly": "^1.2.3",
+    "remark-cjk-friendly-gfm-strikethrough": "^1.2.3",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "remend": "workspace:*",
+    "shiki": "^3.19.0",
+    "tailwind-merge": "^3.4.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0"
+  }
+}

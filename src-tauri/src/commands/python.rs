@@ -1,0 +1,58 @@
+use crate::services::{IndexConfigService, PythonRuntime};
+use tauri::{command, AppHandle, State};
+
+#[derive(serde::Serialize)]
+pub struct PythonRuntimeStatus {
+    pub version: String,
+    pub installed: bool,
+    pub path: Option<String>,
+}
+
+#[command]
+pub async fn get_python_runtimes_status(
+    app: AppHandle,
+    config_service: State<'_, IndexConfigService>,
+) -> Result<Vec<PythonRuntimeStatus>, String> {
+    // Get configured versions from IndexConfigService
+    let config = config_service.get_config().await;
+
+    let statuses = config
+        .addons
+        .python
+        .versions
+        .iter()
+        .map(|full_version| PythonRuntimeStatus {
+            version: full_version.clone(),
+            installed: PythonRuntime::is_installed(&app, full_version),
+            path: PythonRuntime::detect(&app, full_version)
+                .ok()
+                .map(|rt| rt.python_path.to_string_lossy().to_string()),
+        })
+        .collect();
+
+    Ok(statuses)
+}
+
+#[command]
+pub async fn install_python_runtime(
+    app: AppHandle,
+    version: String,
+    config_service: State<'_, IndexConfigService>,
+) -> Result<(), String> {
+    // Get config to lookup uv version
+    let config = config_service.get_config().await;
+
+    // Verify version exists in config
+    if !config.addons.python.versions.contains(&version) {
+        return Err(format!("Version {} not found in config", version));
+    }
+
+    let uv_version = &config.addons.python.uv.version;
+
+    PythonRuntime::install(&app, &version, uv_version).await
+}
+
+#[command]
+pub fn uninstall_python_runtime(app: AppHandle, version: String) -> Result<(), String> {
+    PythonRuntime::uninstall(&app, &version)
+}

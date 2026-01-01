@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "llm-client",
+  "productName": "Nexo",
   "version": "0.1.0",
-  "identifier": "com.llm-client.app",
+  "identifier": "com.nexo.app",
   "build": {
     "beforeDevCommand": "yarn dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "llm-client",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Nexo",
+        "width": 1366,
+        "height": 768,
+        "decorations": false
       }
     ],
     "security": {

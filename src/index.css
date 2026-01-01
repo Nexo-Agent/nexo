@@ -1,5 +1,9 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@xyflow/react/dist/style.css';
+
+/* Streamdown styles */
+@source "../node_modules/streamdown/dist/*.js";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -26,6 +30,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -61,6 +66,7 @@
   --accent: oklch(0.967 0.003 264.542);
   --accent-foreground: oklch(0.21 0.034 264.665);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0.002 247.839);
   --border: oklch(0.928 0.006 264.531);
   --input: oklch(0.928 0.006 264.531);
   --ring: oklch(0.707 0.022 261.325);
@@ -95,6 +101,7 @@
   --accent: oklch(0.278 0.033 256.848);
   --accent-foreground: oklch(0.985 0.002 247.839);
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0.002 247.839);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.551 0.027 264.364);
@@ -117,8 +124,43 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground select-none;
+  }
+
+  input,
+  textarea {
+    @apply select-text;
+  }
+
+  /* Ensure buttons and clickable elements have pointer cursor */
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  a,
+  label[for] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role='button']:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Specific overrides for common focus states */
+  button:focus,
+  button:focus-visible,
+  input:focus,
+  input:focus-visible,
+  textarea:focus,
+  textarea:focus-visible,
+  select:focus,
+  select:focus-visible,
+  a:focus,
+  a:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: inherit !important;
   }
 }
 
@@ -166,7 +208,8 @@
   @apply border border-border px-2 py-1;
   word-break: break-word;
   overflow-wrap: break-word;
-  min-width: 50px; /* Minimum width for cells */
+  min-width: 50px;
+  /* Minimum width for cells */
 }
 
 /* Code blocks - prevent breaking layout */
@@ -197,4 +240,74 @@
   word-break: break-word;
   overflow-wrap: break-word;
   display: block;
+}
+
+.markdown-content div[aria-label='Mermaid chart'] svg {
+  width: 100%;
+}
+
+/* Addon Settings */
+.addon-settings {
+  @apply p-6 max-w-4xl mx-auto;
+}
+
+.settings-section-title {
+  @apply text-2xl font-bold mb-6;
+}
+
+.addon-section {
+  @apply bg-card rounded-lg p-6 mb-6 border border-border;
+}
+
+.addon-subtitle {
+  @apply text-lg font-semibold mb-2;
+}
+
+.addon-description {
+  @apply text-sm text-muted-foreground mb-6;
+}
+
+.python-runtimes-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+}
+
+.python-runtime-card {
+  @apply bg-secondary/20 rounded-lg p-4 border border-border hover:border-primary/50 transition-all;
+}
+
+.runtime-header {
+  @apply flex flex-col gap-2 mb-4;
+}
+
+.runtime-version {
+  @apply text-base font-semibold;
+}
+
+.runtime-status {
+  @apply text-xs font-medium px-2 py-1 rounded-full w-fit;
+}
+
+.runtime-status.installed {
+  @apply bg-green-500/20 text-green-600 dark:text-green-400;
+}
+
+.runtime-status.not-installed {
+  @apply bg-muted text-muted-foreground;
+}
+
+.runtime-actions {
+  @apply flex gap-2;
+}
+
+.btn-install,
+.btn-uninstall {
+  @apply px-4 py-2 rounded-md text-sm font-medium transition-colors w-full;
+}
+
+.btn-install {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-uninstall {
+  @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed;
 }
