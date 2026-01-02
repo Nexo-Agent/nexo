@@ -12,7 +12,6 @@ import type { Message } from '@/store/types';
 import { ToolCallItem } from './toolcall-item';
 import { ThinkingItem } from './thinking-item';
 import { MessageItem } from './message-item';
-import { throttle } from '@/lib/utils';
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -44,185 +43,85 @@ export function ChatMessages({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState<string>('');
 
-  // Track last message count, ID, and content to optimize scroll
-  const lastMessageCountRef = useRef(messages.length);
-  const lastMessageIdRef = useRef(
-    messages.length > 0 ? messages[messages.length - 1].id : null
-  );
-  const lastMessageContentRef = useRef(
-    messages.length > 0 ? messages[messages.length - 1].content : ''
-  );
+  // Track if user is at the bottom of the chat to handle auto-scrolling
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const lastSelectedChatIdRef = useRef<string | null>(selectedChatId);
-  const isUserScrolledUpRef = useRef(false);
-  const lastScrollTimeRef = useRef(0);
-
-  // Check if user is scrolled near bottom (within 150px threshold)
-  const isNearBottom = useCallback(() => {
-    const scrollArea = scrollAreaRef.current;
-    if (scrollArea) {
-      const viewport = scrollArea.querySelector(
-        '[data-slot="scroll-area-viewport"]'
-      ) as HTMLElement;
-      if (viewport) {
-        const { scrollTop, scrollHeight, clientHeight } = viewport;
-        return scrollHeight - scrollTop - clientHeight < 150;
-      }
-    }
-    return true;
-  }, []);
 
   const scrollToBottom = useCallback((instant = false) => {
-    if (messagesEndRef.current) {
-      // Find the viewport element inside ScrollArea
-      const scrollArea = scrollAreaRef.current;
-      if (scrollArea) {
-        const viewport = scrollArea.querySelector(
-          '[data-slot="scroll-area-viewport"]'
-        ) as HTMLElement;
-        if (viewport && messagesEndRef.current) {
-          viewport.scrollTo({
-            top: viewport.scrollHeight,
-            behavior: instant ? 'auto' : 'smooth',
-          });
-          isUserScrolledUpRef.current = false;
-          return;
-        }
+    if (messagesEndRef.current && scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector(
+        '[data-slot="scroll-area-viewport"]'
+      ) as HTMLElement;
+
+      if (viewport) {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: instant ? 'auto' : 'smooth',
+        });
+        return;
       }
-      // Fallback to scrollIntoView
+
       messagesEndRef.current.scrollIntoView({
         behavior: instant ? 'auto' : 'smooth',
       });
-      isUserScrolledUpRef.current = false;
     }
   }, []);
 
-  // Throttled scroll for streaming - max once per 100ms
-
-  const throttledScrollToBottom = useMemo(
-    () =>
-      throttle(() => {
-        const now = Date.now();
-        // Only scroll if user is near bottom & hasn't manually scrolled up
-        if (!isUserScrolledUpRef.current && isNearBottom()) {
-          const scrollArea = scrollAreaRef.current;
-          if (scrollArea) {
-            const viewport = scrollArea.querySelector(
-              '[data-slot="scroll-area-viewport"]'
-            ) as HTMLElement;
-            if (viewport) {
-              // Use instant scroll during streaming to prevent janky animations
-              viewport.scrollTop = viewport.scrollHeight;
-              lastScrollTimeRef.current = now;
-            }
-          }
-        }
-      }, 100),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  // Track user scroll events to detect manual scrolling
+  // Intersection Observer to detect if user is at bottom
   useEffect(() => {
     const scrollArea = scrollAreaRef.current;
     if (!scrollArea) return;
 
     const viewport = scrollArea.querySelector(
       '[data-slot="scroll-area-viewport"]'
-    ) as HTMLElement;
-    if (!viewport) return;
+    );
 
-    const handleScroll = () => {
-      const now = Date.now();
-      // If scroll happened recently by auto-scroll, ignore
-      if (now - lastScrollTimeRef.current < 200) return;
+    if (!viewport || !messagesEndRef.current) return;
 
-      // User manually scrolled - check if they scrolled up
-      isUserScrolledUpRef.current = !isNearBottom();
-    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsAtBottom(entry.isIntersecting);
+      },
+      {
+        root: viewport,
+        threshold: 0,
+        rootMargin: '100px', // Allow 100px tolerance
+      }
+    );
 
-    viewport.addEventListener('scroll', handleScroll, { passive: true });
-    return () => viewport.removeEventListener('scroll', handleScroll);
-  }, [isNearBottom]);
+    observer.observe(messagesEndRef.current);
 
-  // Scroll to bottom when chat changes (chat opened)
+    return () => observer.disconnect();
+  }, []);
+
+  // Auto-scroll logic
   useEffect(() => {
-    // Check if chat has changed
+    // 1. Handle Chat Switch
     if (
       selectedChatId !== lastSelectedChatIdRef.current &&
       selectedChatId !== null
     ) {
       lastSelectedChatIdRef.current = selectedChatId;
-
-      // Reset message tracking refs when switching chats
-      lastMessageCountRef.current = messages.length;
-      lastMessageIdRef.current =
-        messages.length > 0 ? messages[messages.length - 1].id : null;
-      lastMessageContentRef.current =
-        messages.length > 0 ? messages[messages.length - 1].content : '';
-
-      // Scroll to bottom when opening a chat
-      // Use requestAnimationFrame + setTimeout to ensure DOM is ready after chat switch
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          const viewport = scrollAreaRef.current?.querySelector(
-            '[data-slot="scroll-area-viewport"]'
-          ) as HTMLElement;
-          if (viewport) {
-            viewport.scrollTop = viewport.scrollHeight;
-          } else {
-            scrollToBottom(true); // Instant scroll when opening chat
-          }
-        }, 100); // Delay to ensure messages are loaded and rendered
-      });
+      // Force instant scroll when switching chats
+      // Small timeout to ensure content renders
+      setTimeout(() => scrollToBottom(true), 50);
+      return;
     }
-  }, [selectedChatId, scrollToBottom, messages]);
 
-  // Scroll to bottom when messages change, content updates, or loading state changes
-  useEffect(() => {
-    const currentMessageCount = messages.length;
-    const currentLastMessageId =
-      messages.length > 0 ? messages[messages.length - 1].id : null;
-    const currentLastMessageContent =
-      messages.length > 0 ? messages[messages.length - 1].content : '';
+    // 2. Handle Messages Update / Streaming
+    const lastMessage = messages[messages.length - 1];
 
-    const hasNewMessage =
-      currentMessageCount > lastMessageCountRef.current ||
-      (currentLastMessageId !== null &&
-        currentLastMessageId !== lastMessageIdRef.current);
-
-    const hasContentUpdate =
-      currentLastMessageId !== null &&
-      currentLastMessageId === lastMessageIdRef.current &&
-      currentLastMessageContent !== lastMessageContentRef.current;
-
-    // Also scroll if there are new pending permissions
-    const hasNewPermissionRequest = Object.keys(pendingRequests).length > 0;
-
-    // Update refs
-    lastMessageCountRef.current = currentMessageCount;
-    lastMessageIdRef.current = currentLastMessageId;
-    lastMessageContentRef.current = currentLastMessageContent;
-
-    // For new messages, always scroll (user expects to see new content)
-    if (hasNewMessage || hasNewPermissionRequest) {
-      // Reset user scroll state for new messages
-      isUserScrolledUpRef.current = false;
-      requestAnimationFrame(() => {
-        scrollToBottom(true);
-      });
+    // If I sent the message, always scroll
+    if (lastMessage?.role === 'user') {
+      scrollToBottom();
+      return;
     }
-    // For content updates during streaming, use throttled scroll
-    else if (hasContentUpdate || isLoading) {
-      // Use throttled scroll to reduce re-renders and layout shifts
-      throttledScrollToBottom();
+
+    // If streaming or receiving new message, scroll only if sticky at bottom
+    if (isAtBottom) {
+      scrollToBottom(true); // Instant scroll prevents jitter during streaming
     }
-  }, [
-    messages,
-    isLoading,
-    scrollToBottom,
-    throttledScrollToBottom,
-    pendingRequests,
-  ]);
+  }, [messages, selectedChatId, isAtBottom, scrollToBottom]);
 
   const handleCopy = useCallback(async (content: string, messageId: string) => {
     try {
