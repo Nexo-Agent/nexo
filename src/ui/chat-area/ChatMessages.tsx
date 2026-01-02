@@ -425,6 +425,7 @@ export function ChatMessages({
                 isExpanded={expandedToolCalls[message.id] || false}
                 onToggle={toggleToolCall}
                 t={t}
+                userMode={userMode}
               />
             );
           }
@@ -484,6 +485,7 @@ export function ChatMessages({
                     onRespond={(allow) =>
                       handlePermissionRespond(message.id, tc.id, tc.name, allow)
                     }
+                    userMode={userMode}
                   />
                 ))}
             </div>

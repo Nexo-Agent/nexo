@@ -28,6 +28,7 @@ export interface ToolCallItemProps {
   onToggle: (id: string) => void;
   t: (key: string) => string;
   onRespond?: (allow: boolean) => void;
+  userMode?: 'normal' | 'developer';
 }
 
 export const ToolCallItem = memo(
@@ -38,17 +39,26 @@ export const ToolCallItem = memo(
     onToggle,
     t,
     onRespond,
+    userMode = 'normal',
   }: ToolCallItemProps) {
-    const toolCallData = useMemo(() => {
-      if (data) return data;
+    const { toolCallData, parseError } = useMemo(() => {
+      if (data) return { toolCallData: data, parseError: null };
       if (message) {
         try {
-          return JSON.parse(message.content);
-        } catch {
-          return null;
+          const parsed = JSON.parse(message.content);
+          return { toolCallData: parsed, parseError: null };
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          console.error(
+            'Failed to parse tool call data:',
+            error,
+            message.content
+          );
+          return { toolCallData: null, parseError: errorMessage };
         }
       }
-      return null;
+      return { toolCallData: null, parseError: null };
     }, [message, data]);
 
     const id = message?.id || data?.id;
@@ -67,7 +77,37 @@ export const ToolCallItem = memo(
       [onRespond]
     );
 
-    if (!toolCallData) return null;
+    if (!toolCallData) {
+      if (parseError) {
+        return (
+          <div className="flex min-w-0 w-full justify-start">
+            <div className="flex min-w-0 w-full flex-col gap-2">
+              <div className="rounded-lg border border-destructive bg-destructive/10 p-3">
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="font-medium text-sm">Tool Call Error</span>
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground break-all">
+                  Failed to parse tool call data: {parseError}
+                </div>
+                {/* Developer mode: show raw content */}
+                {userMode === 'developer' && message?.content && (
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-xs font-medium hover:underline">
+                      Raw content
+                    </summary>
+                    <pre className="mt-1 text-xs bg-muted p-2 rounded overflow-x-auto whitespace-pre-wrap break-all">
+                      {message.content}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+      return null;
+    }
 
     // Check for both "executing" (from Rust backend) and "calling" (legacy)
     const isExecuting =
@@ -220,7 +260,8 @@ export const ToolCallItem = memo(
     return (
       prevId === nextId &&
       prevDataStr === nextDataStr &&
-      prevProps.isExpanded === nextProps.isExpanded
+      prevProps.isExpanded === nextProps.isExpanded &&
+      prevProps.userMode === nextProps.userMode
     );
   }
 );
