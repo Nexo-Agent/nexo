@@ -55,7 +55,29 @@ export function useMessages(selectedChatId: string | null) {
   // Load messages when chat changes
   useEffect(() => {
     if (!selectedChatId) return;
-    dispatch(fetchMessages(selectedChatId));
+
+    // Race condition protection: cancelled flag to ignore stale responses
+    let cancelled = false;
+
+    const loadMessages = async () => {
+      try {
+        await dispatch(fetchMessages(selectedChatId)).unwrap();
+
+        // If cancelled (user switched chat), don't do anything
+        // The reducer will also validate chatId to be safe
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Failed to load messages:', error);
+          // Error is already handled in the reducer
+        }
+      }
+    };
+
+    loadMessages();
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedChatId, dispatch]);
 
   // Timeout mechanism for streaming

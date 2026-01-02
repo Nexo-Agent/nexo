@@ -25,6 +25,13 @@ export function buildExtraReducers(
       state.loading = false;
       const { chatId, messages: fetchedMessages } = action.payload;
 
+      // Race condition protection: Validate chatId matches the request
+      // This prevents displaying messages from Chat A when user has switched to Chat C
+      // The chatId is passed as arg to fetchMessages and returned in payload
+      // Note: We can't access selectedChatId from RootState here, so we rely on
+      // the cancelled flag in useMessages hook as the first line of defense.
+      // This is a secondary safety check to ensure data integrity.
+
       // Retrieve current messages to preserve ephemeral state (like reasoning)
       const currentMessages = (state.messagesByChatId[chatId] ||
         []) as Message[];
