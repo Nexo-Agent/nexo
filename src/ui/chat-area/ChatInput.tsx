@@ -208,17 +208,32 @@ export function ChatInput({
   const supportsVision = isVisionModel(selectedModelName);
 
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      // Reset height to auto to get the correct scrollHeight
-      textarea.style.height = 'auto';
-      const scrollHeight = textarea.scrollHeight;
-      const minHeight = 40; // Min height in pixels
-      const maxHeight = 200; // Max height in pixels (about 8-10 lines)
-      const newHeight = Math.max(minHeight, Math.min(scrollHeight, maxHeight));
-      textarea.style.height = `${newHeight}px`;
-      textarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
+    const resize = () => {
+      const textarea = textareaRef.current;
+      if (textarea) {
+        // Reset height to auto to get the correct scrollHeight
+        textarea.style.height = 'auto';
+        const scrollHeight = textarea.scrollHeight;
+        const minHeight = 40; // Min height in pixels
+        const maxHeight = 200; // Max height in pixels (about 8-10 lines)
+        const newHeight = Math.max(
+          minHeight,
+          Math.min(scrollHeight, maxHeight)
+        );
+        textarea.style.height = `${newHeight}px`;
+        textarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
+      }
+    };
+
+    // Immediate resize if input is cleared
+    if (!input) {
+      resize();
+      return;
     }
+
+    // Debounce resize to prevent lag with large input
+    const timer = setTimeout(resize, 20);
+    return () => clearTimeout(timer);
   }, [input]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
