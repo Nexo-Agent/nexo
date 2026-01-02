@@ -50,15 +50,52 @@ export const MessageItem = memo(
     onSaveEdit,
     t,
   }: MessageItemProps) {
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [isCollapsed, setIsCollapsed] = useState(isStreaming ? false : true);
-
     // Determine if message is long (more than 500 characters or more than 10 lines)
     const isLongMessage =
       message.content.length > 500 || message.content.split('\n').length > 10;
-
     // Disable collapse/expand for streaming messages
     const canCollapse = isLongMessage && !isStreaming;
+
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [isCollapsed, setIsCollapsed] = useState(!isStreaming);
+
+    // Initial height state
+    const [contentHeight, setContentHeight] = useState<string | number>(
+      canCollapse && !isStreaming ? 300 : 'auto'
+    );
+
+    // Smooth collapse animation effect
+    useEffect(() => {
+      // If cannot collapse, reset to auto
+      if (!canCollapse) {
+        // Use requestAnimationFrame to prevent synchronous state update warning
+        // and ensure this runs after the current render cycle
+        requestAnimationFrame(() => setContentHeight('auto'));
+        return;
+      }
+
+      const ele = contentRef.current;
+      if (!ele) return;
+
+      if (isCollapsed) {
+        // Animate to 300px
+        // First set explicit height if currently auto to enable transition
+        // We use scrollHeight to transition FROM
+        setContentHeight(ele.scrollHeight);
+
+        // Double RAF ensures the brower paints the start height before transitioning to 300
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setContentHeight(300));
+        });
+      } else {
+        // Animate to full height
+        setContentHeight(ele.scrollHeight);
+        // Reset to auto after transition finishes to allow resizing
+        const timer = setTimeout(() => setContentHeight('auto'), 300);
+        return () => clearTimeout(timer);
+      }
+    }, [isCollapsed, canCollapse]);
     const handleCopy = useCallback(() => {
       onCopy(message.content, message.id);
     }, [message.content, message.id, onCopy]);
@@ -169,10 +206,9 @@ export const MessageItem = memo(
             >
               <div className="relative">
                 <div
-                  className={cn(
-                    'overflow-hidden transition-all duration-300',
-                    canCollapse && isCollapsed ? 'max-h-[300px]' : ''
-                  )}
+                  ref={contentRef}
+                  style={{ height: contentHeight }}
+                  className="overflow-hidden transition-[height] duration-300 ease-in-out"
                 >
                   {message.role === 'assistant' ? (
                     <>
