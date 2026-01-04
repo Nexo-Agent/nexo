@@ -33,6 +33,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": ["binaries/uv"]
+    "resources": ["binaries/uv", "binaries/fnm"]
   }
 }

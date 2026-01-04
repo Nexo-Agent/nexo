@@ -104,11 +104,6 @@ impl PythonRuntime {
         ))
     }
 
-    /// Check if specific Python version is installed
-    pub fn is_installed(app: &AppHandle, full_version: &str) -> bool {
-        Self::get_installed_python(app, full_version).is_ok()
-    }
-
     /// Install Python runtime using bundled UV
     pub async fn install(
         app: &AppHandle,

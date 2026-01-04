@@ -1,83 +1,177 @@
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+use std::process::Command;
 
 fn main() {
     tauri_build::build();
 
-    // Download UV binary for current platform and bundle as sidecar
+    println!("cargo:rerun-if-changed=build.rs");
+
+    // Setup configurations
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let binaries_dir = manifest_dir.join("binaries");
 
-    // Create binaries directory if it doesn't exist
+    // Ensure binaries setup
     fs::create_dir_all(&binaries_dir).expect("Failed to create binaries directory");
 
-    // UV version to bundle
-    let uv_version = "0.9.21";
-
-    // Determine current platform and UV binary details
-    let (target_triple, url, binary_name) = if cfg!(all(
-        target_os = "macos",
-        target_arch = "aarch64"
-    )) {
-        (
-            "aarch64-apple-darwin",
-            format!("https://github.com/astral-sh/uv/releases/download/{}/uv-aarch64-apple-darwin.tar.gz", uv_version),
-            "uv",
-        )
-    } else if cfg!(all(target_os = "macos", target_arch = "x86_64")) {
-        (
-            "x86_64-apple-darwin",
-            format!("https://github.com/astral-sh/uv/releases/download/{}/uv-x86_64-apple-darwin.tar.gz", uv_version),
-            "uv",
-        )
-    } else if cfg!(target_os = "windows") {
-        (
-            "x86_64-pc-windows-msvc",
-            format!("https://github.com/astral-sh/uv/releases/download/{}/uv-x86_64-pc-windows-msvc.zip", uv_version),
-            "uv.exe",
-        )
-    } else {
-        (
-            "x86_64-unknown-linux-gnu",
-            format!("https://github.com/astral-sh/uv/releases/download/{}/uv-x86_64-unknown-linux-gnu.tar.gz", uv_version),
-            "uv",
-        )
+    // Define Tools
+    let uv = SidecarTool {
+        name: "uv",
+        version: "0.9.21",
+        url_generator: get_uv_url,
     };
 
-    println!("cargo:rerun-if-changed=build.rs");
+    let fnm = SidecarTool {
+        name: "fnm",
+        version: "1.35.1",
+        url_generator: get_fnm_url,
+    };
 
-    let output_path = binaries_dir.join(binary_name);
+    // Install Tools
+    uv.install(&out_dir, &binaries_dir);
+    fnm.install(&out_dir, &binaries_dir);
+}
 
-    // Skip if binary already exists
-    if output_path.exists() {
-        println!("UV binary already exists at: {}", output_path.display());
-        return;
+// --- Tool Definitions ---
+
+struct SidecarTool {
+    name: &'static str,
+    version: &'static str,
+    url_generator: fn(&str, &str) -> Option<(String, String)>, // (url, binary_name_in_archive)
+}
+
+impl SidecarTool {
+    fn install(&self, out_dir: &PathBuf, binaries_dir: &PathBuf) {
+        let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+        let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+        let target_triple = format!("{}-{}", target_os, target_arch); // Simplified identifier
+
+        // Resolve URL and Binary Name
+        let (url, _) = match (self.url_generator)(self.version, &target_os) {
+            Some(u) => u,
+            None => {
+                println!(
+                    "Skipping {} for unsupported platform: {} {}",
+                    self.name, target_os, target_arch
+                );
+                return;
+            }
+        };
+
+        // Determine final binary name (tauri sidecar convention is specific,
+        // but here we use generic names as we are using 'resources' in tauri.conf.json)
+        let binary_name = if target_os == "windows" {
+            format!("{}.exe", self.name)
+        } else {
+            self.name.to_string()
+        };
+
+        let output_path = binaries_dir.join(&binary_name);
+
+        if output_path.exists() {
+            println!(
+                "{} binary already exists at: {}",
+                self.name,
+                output_path.display()
+            );
+            return;
+        }
+
+        println!("Setting up {} version {}...", self.name, self.version);
+        download_and_extract(
+            self.name,
+            &url,
+            &binary_name,
+            &target_triple,
+            out_dir,
+            &output_path,
+        );
     }
+}
 
-    println!("Downloading UV {} for {}", uv_version, target_triple);
+// --- URL Generators ---
 
-    // Use curl to download (cross-platform)
-    let temp_file = out_dir.join(format!("uv-{}.tmp", target_triple));
+fn get_uv_url(version: &str, target_os: &str) -> Option<(String, String)> {
+    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
 
-    let status = std::process::Command::new("curl")
-        .args(&["-L", "-o", temp_file.to_str().unwrap(), &url])
+    match (target_os, arch.as_str()) {
+        ("macos", "aarch64") => Some((
+            format!("https://github.com/astral-sh/uv/releases/download/{}/uv-aarch64-apple-darwin.tar.gz", version),
+            "uv".to_string()
+        )),
+        ("macos", "x86_64") => Some((
+            format!("https://github.com/astral-sh/uv/releases/download/{}/uv-x86_64-apple-darwin.tar.gz", version),
+            "uv".to_string()
+        )),
+        ("windows", _) => Some((
+            format!("https://github.com/astral-sh/uv/releases/download/{}/uv-x86_64-pc-windows-msvc.zip", version),
+            "uv.exe".to_string()
+        )),
+        ("linux", "x86_64") => Some((
+            format!("https://github.com/astral-sh/uv/releases/download/{}/uv-x86_64-unknown-linux-gnu.tar.gz", version),
+            "uv".to_string()
+        )),
+        _ => None,
+    }
+}
+
+fn get_fnm_url(version: &str, target_os: &str) -> Option<(String, String)> {
+    // FNM release names are simpler
+    match target_os {
+        "macos" => Some((
+            format!(
+                "https://github.com/Schniz/fnm/releases/download/v{}/fnm-macos.zip",
+                version
+            ),
+            "fnm".to_string(),
+        )),
+        "windows" => Some((
+            format!(
+                "https://github.com/Schniz/fnm/releases/download/v{}/fnm-windows.zip",
+                version
+            ),
+            "fnm.exe".to_string(),
+        )),
+        "linux" => Some((
+            format!(
+                "https://github.com/Schniz/fnm/releases/download/v{}/fnm-linux.zip",
+                version
+            ),
+            "fnm".to_string(),
+        )),
+        _ => None,
+    }
+}
+
+// --- Core Logic: Download & Extract ---
+
+fn download_and_extract(
+    tool_name: &str,
+    url: &str,
+    binary_name: &str,
+    target_triple: &str,
+    out_dir: &PathBuf,
+    final_output_path: &PathBuf,
+) {
+    let temp_file = out_dir.join(format!("{}-{}.tmp", tool_name, target_triple));
+
+    println!("Downloading {} from {}", tool_name, url);
+    let status = Command::new("curl")
+        .args(&["-L", "-o", temp_file.to_str().unwrap(), url])
         .status()
         .expect("Failed to execute curl");
 
     if !status.success() {
-        eprintln!("Failed to download UV for {}", target_triple);
-        return;
+        panic!("Failed to download package for {}", tool_name);
     }
 
-    // Extract the binary
-    if url.ends_with(".tar.gz") {
-        // Extract tar.gz
-        let extract_dir = out_dir.join(format!("uv-extract-{}", target_triple));
-        fs::create_dir_all(&extract_dir).expect("Failed to create extract directory");
+    let extract_dir = out_dir.join(format!("{}-extract-{}", tool_name, target_triple));
+    fs::create_dir_all(&extract_dir).expect("Failed to create extract dir");
 
-        let status = std::process::Command::new("tar")
+    let extracted = if url.ends_with(".tar.gz") {
+        let s = Command::new("tar")
             .args(&[
                 "xzf",
                 temp_file.to_str().unwrap(),
@@ -85,72 +179,77 @@ fn main() {
                 extract_dir.to_str().unwrap(),
             ])
             .status()
-            .expect("Failed to extract tar.gz");
-
-        if status.success() {
-            // Find the uv binary in the extracted directory
-            let source = find_file(&extract_dir, binary_name)
-                .expect(&format!("UV binary not found for {}", target_triple));
-
-            fs::copy(&source, &output_path).expect("Failed to copy UV binary");
-
-            // Set executable permissions on Unix platforms
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                let metadata = fs::metadata(&output_path).expect("Failed to get metadata");
-                let mut permissions = metadata.permissions();
-                permissions.set_mode(0o755);
-                fs::set_permissions(&output_path, permissions).expect("Failed to set permissions");
-            }
-
-            println!("UV binary installed at: {}", output_path.display());
-        }
+            .expect("Failed to run tar");
+        s.success()
     } else if url.ends_with(".zip") {
-        // Extract zip (Windows)
-        let extract_dir = out_dir.join(format!("uv-extract-{}", target_triple));
-        fs::create_dir_all(&extract_dir).expect("Failed to create extract directory");
-
-        // Use PowerShell to extract on Windows
         #[cfg(target_os = "windows")]
         {
-            let status = std::process::Command::new("powershell")
+            let s = Command::new("powershell")
                 .args(&[
                     "-Command",
                     &format!(
-                        "Expand-Archive -Path '{}' -DestinationPath '{}'",
+                        "Expand-Archive -Path '{}' -DestinationPath '{}' -Force",
                         temp_file.display(),
                         extract_dir.display()
                     ),
                 ])
                 .status()
-                .expect("Failed to extract zip");
-
-            if status.success() {
-                let source = find_file(&extract_dir, binary_name)
-                    .expect(&format!("UV binary not found for {}", target_triple));
-                fs::copy(&source, &output_path).expect("Failed to copy UV binary");
-                println!("UV binary installed at: {}", output_path.display());
-            }
+                .expect("Failed to run powershell");
+            s.success()
         }
-
-        // On non-Windows hosts
         #[cfg(not(target_os = "windows"))]
         {
-            eprintln!("Cannot extract Windows zip on non-Windows host");
+            let s = Command::new("unzip")
+                .args(&[
+                    "-o",
+                    temp_file.to_str().unwrap(),
+                    "-d",
+                    extract_dir.to_str().unwrap(),
+                ])
+                .status();
+            match s {
+                Ok(status) => status.success(),
+                Err(_) => {
+                    println!("Warning: 'unzip' not found. Ensure it is installed.");
+                    false
+                }
+            }
         }
-    }
+    } else {
+        false
+    };
 
-    // Clean up temp files
+    if extracted {
+        if let Some(source_path) = find_file(&extract_dir, binary_name) {
+            fs::copy(&source_path, final_output_path).expect("Failed to copy binary to final dest");
+
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                if let Ok(metadata) = fs::metadata(&final_output_path) {
+                    let mut perms = metadata.permissions();
+                    perms.set_mode(0o755);
+                    let _ = fs::set_permissions(&final_output_path, perms);
+                }
+            }
+            println!("Installed {} to {}", tool_name, final_output_path.display());
+        } else {
+            panic!(
+                "Binary '{}' not found inside extracted archive",
+                binary_name
+            );
+        }
+    } else {
+        panic!("Failed to extract archive for {}", tool_name);
+    }
     let _ = fs::remove_file(&temp_file);
 }
 
-// Helper function to recursively find a file by name
 fn find_file(dir: &PathBuf, filename: &str) -> Option<PathBuf> {
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries.flatten() {
             let path = entry.path();
-            if path.is_file() && path.file_name().unwrap() == filename {
+            if path.is_file() && path.file_name()?.to_str()? == filename {
                 return Some(path);
             } else if path.is_dir() {
                 if let Some(found) = find_file(&path, filename) {

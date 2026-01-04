@@ -55,10 +55,6 @@ impl Default for AddonIndex {
     }
 }
 
-// URL templates for Node.js downloads
-pub const NODEJS_DOWNLOAD_TEMPLATE: &str =
-    "https://nodejs.org/dist/v{version}/node-v{version}-{platform}.{ext}";
-
 // Remote config URL (you should host this somewhere)
 pub const REMOTE_INDEX_URL: &str =
     "https://raw.githubusercontent.com/your-repo/nexo-addons/main/index.yaml";

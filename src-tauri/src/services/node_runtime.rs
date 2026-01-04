@@ -1,28 +1,48 @@
-use crate::models::addon_config::NODEJS_DOWNLOAD_TEMPLATE;
 use std::path::PathBuf;
+use std::process::Command;
 use tauri::{AppHandle, Manager};
 
-/// Get download URL for Node.js given full version
-fn get_node_download_url(full_version: &str) -> String {
-    let (platform, ext) = if cfg!(target_os = "macos") {
-        if cfg!(target_arch = "aarch64") {
-            ("darwin-arm64", "tar.gz")
-        } else {
-            ("darwin-x64", "tar.gz")
+/// Get the path to bundled FNM binary
+fn get_bundled_fnm_path(app: &AppHandle) -> Result<PathBuf, String> {
+    let fnm_name = if cfg!(windows) { "fnm.exe" } else { "fnm" };
+
+    // Try production bundle path first (in resource_dir)
+    if let Ok(resource_path) = app.path().resource_dir() {
+        let fnm_path = resource_path.join("binaries").join(fnm_name);
+        if fnm_path.exists() {
+            return Ok(fnm_path);
         }
-    } else if cfg!(target_os = "windows") {
-        ("win-x64", "zip")
-    } else {
-        ("linux-x64", "tar.gz")
-    };
+    }
 
-    let url = NODEJS_DOWNLOAD_TEMPLATE
-        .replace("{version}", full_version)
-        .replace("{platform}", platform)
-        .replace("{ext}", ext);
+    // In dev mode
+    if let Ok(app_dir) = app.path().app_config_dir() {
+        if let Some(parent) = app_dir.parent() {
+            if let Some(parent) = parent.parent() {
+                let dev_fnm_path = parent.join("src-tauri").join("binaries").join(fnm_name);
+                if dev_fnm_path.exists() {
+                    return Ok(dev_fnm_path);
+                }
+            }
+        }
+    }
 
-    println!("Node Download URL: {}", url);
-    url
+    // Try relative to executable
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            if let Some(target_dir) = exe_dir.parent() {
+                if let Some(project_root) = target_dir.parent() {
+                    let dev_fnm_path = project_root.join("binaries").join(fnm_name);
+                    if dev_fnm_path.exists() {
+                        return Ok(dev_fnm_path);
+                    }
+                }
+            }
+        }
+    }
+
+    Err(format!(
+        "Bundled FNM not found. Please ensure FNM binary is bundled."
+    ))
 }
 
 pub struct NodeRuntime {
@@ -33,7 +53,6 @@ impl NodeRuntime {
     /// Detect installed Node runtime
     pub fn detect(app: &AppHandle, full_version: &str) -> Result<Self, String> {
         let node_path = Self::get_installed_node(app, full_version)?;
-
         Ok(Self { node_path })
     }
 
@@ -41,66 +60,45 @@ impl NodeRuntime {
     fn get_installed_node(app: &AppHandle, full_version: &str) -> Result<PathBuf, String> {
         let app_data = app.path().app_data_dir().map_err(|e| e.to_string())?;
 
-        let node_root = app_data.join("node-runtimes").join(full_version);
+        // FNM directory structure:
+        // FNM_DIR/node-versions/v<version>/installation/
+        let fnm_dir = app_data.join("node-runtimes");
+        // full_version usually comes as "20.18.1". FNM stores as "v20.18.1".
+        let version_dir = if full_version.starts_with('v') {
+            full_version.to_string()
+        } else {
+            format!("v{}", full_version)
+        };
 
-        // Node directory structure usually contains a folder named like the tarball (e.g., node-v20.18.1-darwin-arm64)
-        // But we will extract it such that we can predict the path, or find the single directory inside.
-        // Actually, tar extraction usually preserves the top folder.
-        // We will implement a finder logic or simply strip the component on extraction?
-        // Python extraction stripped it? Let's check PythonRuntime extraction logic.
-        // PythonRuntime extraction: `archive.unpack(&python_dir)`.
-        // It seems Python downloads from a specific build that might have a predictable structure or they rely on `python/bin/python3`.
+        let installation_dir = fnm_dir
+            .join("node-versions")
+            .join(&version_dir)
+            .join("installation");
 
-        // For Node, it typically extracts key `node-vX.Y.Z-platform-arch/bin/node`.
-        // Let's assume we extract it into `node-runtimes/<version>/` and the internal folder is there.
-        // To make it easier, we can check if there is a single directory and go inside.
-
-        let mut binding =
-            std::fs::read_dir(&node_root).map_err(|e| format!("Node not installed: {}", e))?;
-        let entry = binding.next();
-
-        if let Some(Ok(entry)) = entry {
-            let path = entry.path();
-            if path.is_dir() {
-                let node_executable = if cfg!(windows) {
-                    path.join("node.exe")
-                } else {
-                    path.join("bin").join("node")
-                };
-
-                if node_executable.exists() {
-                    return Ok(node_executable);
-                }
-            }
+        if !installation_dir.exists() {
+            return Err(format!(
+                "Node {} not installed (dir not found)",
+                full_version
+            ));
         }
 
-        Err(format!("Node {} executable not found", full_version))
-    }
+        let node_executable = if cfg!(windows) {
+            installation_dir.join("node.exe")
+        } else {
+            installation_dir.join("bin").join("node")
+        };
 
-    fn get_installed_npm(app: &AppHandle, full_version: &str) -> Result<PathBuf, String> {
-        let app_data = app.path().app_data_dir().map_err(|e| e.to_string())?;
-        let node_root = app_data.join("node-runtimes").join(full_version);
-
-        let mut binding =
-            std::fs::read_dir(&node_root).map_err(|e| format!("Node not installed: {}", e))?;
-        let entry = binding.next();
-
-        if let Some(Ok(entry)) = entry {
-            let path = entry.path();
-            if path.is_dir() {
-                let npm_executable = if cfg!(windows) {
-                    path.join("npm.cmd")
-                } else {
-                    path.join("bin").join("npm")
-                };
-
-                if npm_executable.exists() {
-                    return Ok(npm_executable);
-                }
-            }
+        if node_executable.exists() {
+            Ok(node_executable)
+        } else {
+            // Sometimes it might just be the version dir if structure changes,
+            // but standard fnm is .../installation/...
+            Err(format!(
+                "Node {} executable not found at {}",
+                full_version,
+                node_executable.display()
+            ))
         }
-
-        Err(format!("npm for Node {} not found", full_version))
     }
 
     /// Check if specific Node version is installed
@@ -108,77 +106,43 @@ impl NodeRuntime {
         Self::get_installed_node(app, full_version).is_ok()
     }
 
-    /// Download and install Node runtime
+    /// Download and install Node runtime using fnm
     pub async fn install(app: &AppHandle, full_version: &str) -> Result<(), String> {
+        let fnm_path = get_bundled_fnm_path(app)?;
         let app_data = app.path().app_data_dir().map_err(|e| e.to_string())?;
+        let fnm_dir = app_data.join("node-runtimes");
 
-        let node_dir = app_data.join("node-runtimes").join(full_version);
-        if node_dir.exists() {
-            std::fs::remove_dir_all(&node_dir).map_err(|e| e.to_string())?;
-        }
-        std::fs::create_dir_all(&node_dir).map_err(|e| e.to_string())?;
+        std::fs::create_dir_all(&fnm_dir).map_err(|e| e.to_string())?;
 
-        // Download Node
-        let download_url = get_node_download_url(full_version);
+        // Command: fnm install <version>
+        // Env: FNM_DIR = ...
+        // FNM usually requires shell setup or defined env var.
+        // We set FNM_DIR to point to our custom location.
 
-        let ext = if cfg!(windows) { "zip" } else { "tar.gz" };
-        let archive_path = node_dir.join(format!("node.{}", ext));
+        let arch = std::env::consts::ARCH;
+        let fnm_arch = match arch {
+            "aarch64" => "arm64",
+            "x86_64" => "x64",
+            _ => arch,
+        };
 
-        let response = reqwest::get(&download_url)
-            .await
-            .map_err(|e| format!("Download failed: {}", e))?;
+        let output = Command::new(&fnm_path)
+            .arg("install")
+            .arg(full_version)
+            .arg("--arch")
+            .arg(fnm_arch)
+            .env("FNM_DIR", &fnm_dir)
+            // FNM might try to use XDG env vars or home, but FNM_DIR should override.
+            .output()
+            .map_err(|e| format!("Failed to execute fnm: {}", e))?;
 
-        if !response.status().is_success() {
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let stdout = String::from_utf8_lossy(&output.stdout);
             return Err(format!(
-                "Download failed with status: {}",
-                response.status()
+                "FNM install failed: {}\nOutput: {}",
+                stderr, stdout
             ));
-        }
-
-        let bytes = response
-            .bytes()
-            .await
-            .map_err(|e| format!("Failed to read response: {}", e))?;
-
-        std::fs::write(&archive_path, bytes).map_err(|e| e.to_string())?;
-
-        // Extract
-        if cfg!(windows) {
-            // ZIP extraction
-            use std::fs::File;
-            let file = File::open(&archive_path).map_err(|e| e.to_string())?;
-            let mut archive = zip::ZipArchive::new(file).map_err(|e| e.to_string())?;
-            archive.extract(&node_dir).map_err(|e| e.to_string())?;
-        } else {
-            // Tar.gz extraction
-            let tar_gz = std::fs::File::open(&archive_path).map_err(|e| e.to_string())?;
-            let tar = flate2::read::GzDecoder::new(tar_gz);
-            let mut archive = tar::Archive::new(tar);
-            archive.unpack(&node_dir).map_err(|e| e.to_string())?;
-        }
-
-        // Clean up archive
-        std::fs::remove_file(&archive_path).ok();
-
-        // Set executable permissions on Unix
-        #[cfg(unix)]
-        {
-            if let Ok(node_path) = Self::get_installed_node(app, full_version) {
-                use std::os::unix::fs::PermissionsExt;
-                let mut perms = std::fs::metadata(&node_path)
-                    .map_err(|e| e.to_string())?
-                    .permissions();
-                perms.set_mode(0o755);
-                std::fs::set_permissions(&node_path, perms).ok();
-            }
-            if let Ok(npm_path) = Self::get_installed_npm(app, full_version) {
-                use std::os::unix::fs::PermissionsExt;
-                let mut perms = std::fs::metadata(&npm_path)
-                    .map_err(|e| e.to_string())?
-                    .permissions();
-                perms.set_mode(0o755);
-                std::fs::set_permissions(&npm_path, perms).ok();
-            }
         }
 
         Ok(())
@@ -186,12 +150,20 @@ impl NodeRuntime {
 
     /// Uninstall Node runtime
     pub fn uninstall(app: &AppHandle, full_version: &str) -> Result<(), String> {
+        let fnm_path = get_bundled_fnm_path(app)?;
         let app_data = app.path().app_data_dir().map_err(|e| e.to_string())?;
+        let fnm_dir = app_data.join("node-runtimes");
 
-        let node_dir = app_data.join("node-runtimes").join(full_version);
+        let output = Command::new(&fnm_path)
+            .arg("uninstall")
+            .arg(full_version)
+            .env("FNM_DIR", &fnm_dir)
+            .output()
+            .map_err(|e| format!("Failed to execute fnm: {}", e))?;
 
-        if node_dir.exists() {
-            std::fs::remove_dir_all(&node_dir).map_err(|e| e.to_string())?;
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("FNM uninstall failed: {}", stderr));
         }
 
         Ok(())
