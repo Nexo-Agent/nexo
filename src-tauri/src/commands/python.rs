@@ -16,17 +16,21 @@ pub async fn get_python_runtimes_status(
     // Get configured versions from IndexConfigService
     let config = config_service.get_config().await;
 
+    // Fetch all installed pythons in one go
+    let installed_pythons = PythonRuntime::list_installed(&app)?;
+
     let statuses = config
         .addons
         .python
         .versions
         .iter()
-        .map(|full_version| PythonRuntimeStatus {
-            version: full_version.clone(),
-            installed: PythonRuntime::is_installed(&app, full_version),
-            path: PythonRuntime::detect(&app, full_version)
-                .ok()
-                .map(|rt| rt.python_path.to_string_lossy().to_string()),
+        .map(|full_version| {
+            let path = installed_pythons.get(full_version).cloned();
+            PythonRuntimeStatus {
+                version: full_version.clone(),
+                installed: path.is_some(),
+                path: path.map(|p| p.to_string_lossy().to_string()),
+            }
         })
         .collect();
 

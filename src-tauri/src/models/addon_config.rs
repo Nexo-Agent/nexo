@@ -55,18 +55,10 @@ impl Default for AddonIndex {
     }
 }
 
-// URL templates as constants
-pub const PYTHON_RELEASE_DATE: &str = "20251217";
-
-pub const PYTHON_DOWNLOAD_TEMPLATE: &str = 
-    "https://github.com/astral-sh/python-build-standalone/releases/download/{release_date}/cpython-{version}+{release_date}-{platform}-install_only.tar.gz";
-
-pub const UV_DOWNLOAD_TEMPLATE: &str = 
-    "https://github.com/astral-sh/uv/releases/download/{version}/uv-{platform}.{ext}";
-
-pub const NODEJS_DOWNLOAD_TEMPLATE: &str = 
+// URL templates for Node.js downloads
+pub const NODEJS_DOWNLOAD_TEMPLATE: &str =
     "https://nodejs.org/dist/v{version}/node-v{version}-{platform}.{ext}";
 
 // Remote config URL (you should host this somewhere)
-pub const REMOTE_INDEX_URL: &str = 
+pub const REMOTE_INDEX_URL: &str =
     "https://raw.githubusercontent.com/your-repo/nexo-addons/main/index.yaml";

@@ -1,41 +1,53 @@
-use crate::models::addon_config::{
-    PYTHON_DOWNLOAD_TEMPLATE, PYTHON_RELEASE_DATE, UV_DOWNLOAD_TEMPLATE,
-};
 use std::path::PathBuf;
+use std::process::Command;
 use tauri::{AppHandle, Manager};
 
-/// Generate download URL for given full version
-fn get_python_download_url(full_version: &str) -> String {
-    let platform = get_platform_string();
+/// Get the path to bundled UV binary (sidecar)
+fn get_bundled_uv_path(app: &AppHandle) -> Result<PathBuf, String> {
+    let uv_name = if cfg!(windows) { "uv.exe" } else { "uv" };
 
-    PYTHON_DOWNLOAD_TEMPLATE
-        .replace("{release_date}", PYTHON_RELEASE_DATE)
-        .replace("{version}", full_version)
-        .replace("{platform}", platform)
-}
-
-fn get_platform_string() -> &'static str {
-    if cfg!(target_os = "macos") {
-        if cfg!(target_arch = "aarch64") {
-            "aarch64-apple-darwin"
-        } else {
-            "x86_64-apple-darwin"
+    // Try production bundle path first (in resource_dir)
+    if let Ok(resource_path) = app.path().resource_dir() {
+        let uv_path = resource_path.join("binaries").join(uv_name);
+        if uv_path.exists() {
+            return Ok(uv_path);
         }
-    } else if cfg!(target_os = "windows") {
-        "x86_64-pc-windows-msvc"
-    } else {
-        "x86_64-unknown-linux-gnu"
     }
-}
 
-fn get_uv_download_url(uv_version: &str) -> String {
-    let platform = get_platform_string();
-    let ext = if cfg!(windows) { "zip" } else { "tar.gz" };
+    // In dev mode, try to find UV in source directory
+    // The binary should be in src-tauri/binaries/ directory
+    if let Ok(app_dir) = app.path().app_config_dir() {
+        // Go up from config dir to find project root
+        if let Some(parent) = app_dir.parent() {
+            if let Some(parent) = parent.parent() {
+                let dev_uv_path = parent.join("src-tauri").join("binaries").join(uv_name);
+                if dev_uv_path.exists() {
+                    return Ok(dev_uv_path);
+                }
+            }
+        }
+    }
 
-    UV_DOWNLOAD_TEMPLATE
-        .replace("{version}", uv_version)
-        .replace("{platform}", platform)
-        .replace("{ext}", ext)
+    // Try relative to executable (dev mode with target/debug)
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            // From target/debug or target/release, go up to project root
+            if let Some(target_dir) = exe_dir.parent() {
+                if let Some(project_root) = target_dir.parent() {
+                    let dev_uv_path = project_root.join("binaries").join(uv_name);
+                    if dev_uv_path.exists() {
+                        return Ok(dev_uv_path);
+                    }
+                }
+            }
+        }
+    }
+
+    Err(format!(
+        "Bundled UV not found. Please ensure UV binary is downloaded.\n\
+         Run: cd src-tauri && cargo build\n\
+         This will trigger build.rs to download UV binaries."
+    ))
 }
 
 pub struct PythonRuntime {
@@ -47,7 +59,7 @@ impl PythonRuntime {
     /// Detect installed Python runtime
     pub fn detect(app: &AppHandle, full_version: &str) -> Result<Self, String> {
         let python_path = Self::get_installed_python(app, full_version)?;
-        let uv_path = Self::get_installed_uv(app, full_version)?;
+        let uv_path = get_bundled_uv_path(app)?;
 
         Ok(Self {
             python_path,
@@ -57,123 +69,89 @@ impl PythonRuntime {
 
     fn get_installed_python(app: &AppHandle, full_version: &str) -> Result<PathBuf, String> {
         let app_data = app.path().app_data_dir().map_err(|e| e.to_string())?;
+        // We manage Python installations in AppData/python-runtimes/<version>
         let python_dir = app_data.join("python-runtimes").join(full_version);
 
-        let python_name = if cfg!(windows) {
-            "python.exe"
-        } else {
-            "bin/python3"
-        };
-
-        let python_path = python_dir.join("python").join(python_name);
-
-        if !python_path.exists() {
-            return Err(format!("Python {} not installed", full_version));
+        if !python_dir.exists() {
+            return Err(format!("Python {} directory not found", full_version));
         }
 
-        Ok(python_path)
-    }
+        // UV installs into a nested directory like <install_dir>/cpython-3.12.1-.../
+        // We look for the first subdirectory.
+        let entries = std::fs::read_dir(&python_dir).map_err(|e| e.to_string())?;
+        for entry in entries.flatten() {
+            if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+                let install_root = entry.path();
 
-    fn get_installed_uv(app: &AppHandle, full_version: &str) -> Result<PathBuf, String> {
-        let app_data = app.path().app_data_dir().map_err(|e| e.to_string())?;
-        let python_dir = app_data.join("python-runtimes").join(full_version);
+                // On Unix: <dir>/bin/python3
+                // On Windows: <dir>/python.exe
+                let python_path = if cfg!(windows) {
+                    install_root.join("python.exe")
+                } else {
+                    install_root.join("bin").join("python3")
+                };
 
-        let uv_name = if cfg!(windows) { "uv.exe" } else { "uv" };
-        let uv_path = python_dir.join(uv_name);
-
-        if !uv_path.exists() {
-            return Err(format!("uv for Python {} not installed", full_version));
+                if python_path.exists() {
+                    return Ok(python_path);
+                }
+            }
         }
 
-        Ok(uv_path)
+        Err(format!(
+            "Python {} binary not found in {}",
+            full_version,
+            python_dir.display()
+        ))
     }
 
     /// Check if specific Python version is installed
     pub fn is_installed(app: &AppHandle, full_version: &str) -> bool {
         Self::get_installed_python(app, full_version).is_ok()
-            && Self::get_installed_uv(app, full_version).is_ok()
     }
 
-    /// Download and install Python runtime + uv
+    /// Install Python runtime using bundled UV
     pub async fn install(
         app: &AppHandle,
         full_version: &str,
-        uv_version: &str,
+        _uv_version: &str, // No longer needed, UV is bundled
     ) -> Result<(), String> {
+        // Get bundled UV path
+        let uv_path = get_bundled_uv_path(app)?;
+
+        // Set up UV cache directory
+        let cache_dir = app
+            .path()
+            .app_cache_dir()
+            .map_err(|e| format!("Failed to get cache dir: {}", e))?;
+        let uv_cache = cache_dir.join("uv_cache");
+        std::fs::create_dir_all(&uv_cache).map_err(|e| e.to_string())?;
+
+        // Set up target directory in AppData
         let app_data = app.path().app_data_dir().map_err(|e| e.to_string())?;
         let python_dir = app_data.join("python-runtimes").join(full_version);
+
+        // If directory already exists, uv might fail or skip.
+        // We clean it up to ensure a fresh install.
+        if python_dir.exists() {
+            let _ = std::fs::remove_dir_all(&python_dir);
+        }
         std::fs::create_dir_all(&python_dir).map_err(|e| e.to_string())?;
 
-        // 1. Download Python
-        let python_url = get_python_download_url(full_version);
-        let python_tar = python_dir.join("python.tar.gz");
+        // Use UV to install Python into our specific directory
+        // Command: uv python install <version> --install-dir <dir>
+        let output = Command::new(&uv_path)
+            .arg("python")
+            .arg("install")
+            .arg(full_version)
+            .arg("--install-dir")
+            .arg(&python_dir)
+            .env("UV_CACHE_DIR", &uv_cache)
+            .output()
+            .map_err(|e| format!("Failed to execute uv: {}", e))?;
 
-        let response = reqwest::get(&python_url)
-            .await
-            .map_err(|e| format!("Python download failed: {}", e))?;
-
-        if !response.status().is_success() {
-            return Err(format!("Python download failed: {}", response.status()));
-        }
-
-        let bytes = response
-            .bytes()
-            .await
-            .map_err(|e| format!("Failed to read Python: {}", e))?;
-        std::fs::write(&python_tar, bytes).map_err(|e| e.to_string())?;
-
-        // Extract Python
-        let tar_gz = std::fs::File::open(&python_tar).map_err(|e| e.to_string())?;
-        let tar = flate2::read::GzDecoder::new(tar_gz);
-        let mut archive = tar::Archive::new(tar);
-        archive.unpack(&python_dir).map_err(|e| e.to_string())?;
-        std::fs::remove_file(&python_tar).ok();
-
-        // 2. Download uv
-        let uv_url = get_uv_download_url(uv_version);
-        let uv_archive = python_dir.join(if cfg!(windows) { "uv.zip" } else { "uv.tar.gz" });
-
-        let response = reqwest::get(&uv_url)
-            .await
-            .map_err(|e| format!("uv download failed: {}", e))?;
-
-        if !response.status().is_success() {
-            return Err(format!("uv download failed: {}", response.status()));
-        }
-
-        let bytes = response
-            .bytes()
-            .await
-            .map_err(|e| format!("Failed to read uv: {}", e))?;
-        std::fs::write(&uv_archive, bytes).map_err(|e| e.to_string())?;
-
-        // Extract uv
-        if cfg!(windows) {
-            extract_zip(&uv_archive, &python_dir)?;
-        } else {
-            extract_tar_gz_uv(&uv_archive, &python_dir)?;
-        }
-        std::fs::remove_file(&uv_archive).ok();
-
-        // 3. Set executable permissions on Unix
-        #[cfg(unix)]
-        {
-            use std::fs;
-            use std::os::unix::fs::PermissionsExt;
-
-            let python_path = Self::get_installed_python(app, full_version)?;
-            let mut perms = fs::metadata(&python_path)
-                .map_err(|e| e.to_string())?
-                .permissions();
-            perms.set_mode(0o755);
-            fs::set_permissions(&python_path, perms).map_err(|e| e.to_string())?;
-
-            let uv_path = Self::get_installed_uv(app, full_version)?;
-            let mut perms = fs::metadata(&uv_path)
-                .map_err(|e| e.to_string())?
-                .permissions();
-            perms.set_mode(0o755);
-            fs::set_permissions(&uv_path, perms).map_err(|e| e.to_string())?;
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("UV python install failed: {}", stderr));
         }
 
         Ok(())
@@ -189,57 +167,29 @@ impl PythonRuntime {
 
         Ok(())
     }
-}
 
-fn extract_tar_gz_uv(archive_path: &PathBuf, dest: &PathBuf) -> Result<(), String> {
-    let tar_gz = std::fs::File::open(archive_path).map_err(|e| e.to_string())?;
-    let tar = flate2::read::GzDecoder::new(tar_gz);
-    let mut archive = tar::Archive::new(tar);
+    pub fn list_installed(
+        app: &AppHandle,
+    ) -> Result<std::collections::HashMap<String, PathBuf>, String> {
+        let mut installed = std::collections::HashMap::new();
 
-    // Extract and strip first component
-    for entry in archive.entries().map_err(|e| e.to_string())? {
-        let mut entry = entry.map_err(|e| e.to_string())?;
-        let path = entry.path().map_err(|e| e.to_string())?;
+        let app_data = app.path().app_data_dir().map_err(|e| e.to_string())?;
+        let runtimes_dir = app_data.join("python-runtimes");
 
-        // Skip first component (uv-x.x.x/)
-        let components: Vec<_> = path.components().collect();
-        if components.len() > 1 {
-            let new_path = dest.join(components[1..].iter().collect::<PathBuf>());
-
-            if let Some(parent) = new_path.parent() {
-                std::fs::create_dir_all(parent).ok();
+        if let Ok(entries) = std::fs::read_dir(runtimes_dir) {
+            for entry in entries.flatten() {
+                if let (Ok(file_type), Some(version)) =
+                    (entry.file_type(), entry.file_name().to_str())
+                {
+                    if file_type.is_dir() {
+                        if let Ok(path) = Self::get_installed_python(app, version) {
+                            installed.insert(version.to_string(), path);
+                        }
+                    }
+                }
             }
-
-            entry.unpack(&new_path).map_err(|e| e.to_string())?;
         }
+
+        Ok(installed)
     }
-
-    Ok(())
-}
-
-fn extract_zip(archive_path: &PathBuf, dest: &PathBuf) -> Result<(), String> {
-    use std::io::Cursor;
-    use zip::ZipArchive;
-
-    let bytes = std::fs::read(archive_path).map_err(|e| e.to_string())?;
-    let reader = Cursor::new(bytes);
-    let mut archive = ZipArchive::new(reader).map_err(|e| e.to_string())?;
-
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
-        let outpath = dest.join(file.name());
-
-        if file.is_dir() {
-            std::fs::create_dir_all(&outpath).ok();
-        } else {
-            if let Some(parent) = outpath.parent() {
-                std::fs::create_dir_all(parent).ok();
-            }
-
-            let mut outfile = std::fs::File::create(&outpath).map_err(|e| e.to_string())?;
-            std::io::copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
-        }
-    }
-
-    Ok(())
 }

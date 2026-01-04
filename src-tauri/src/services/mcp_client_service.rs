@@ -136,10 +136,13 @@ impl MCPClientService {
                         // For uv, keep 'uv' as command but set UV_PYTHON
                         // Try to find bundled uv first
                         let config = AddonIndex::default();
+                        let installed = PythonRuntime::list_installed(app).unwrap_or_default();
                         for full_version in config.addons.python.versions.iter().rev() {
-                            if let Ok(rt) = PythonRuntime::detect(app, full_version) {
-                                command = rt.uv_path.to_string_lossy().to_string();
-                                break;
+                            if installed.contains_key(full_version) {
+                                if let Ok(rt) = PythonRuntime::detect(app, full_version) {
+                                    command = rt.uv_path.to_string_lossy().to_string();
+                                    break;
+                                }
                             }
                         }
 
@@ -171,10 +174,13 @@ impl MCPClientService {
                 let config = AddonIndex::default();
 
                 let mut runtime = None;
+                let installed = PythonRuntime::list_installed(app).unwrap_or_default();
                 for full_version in config.addons.python.versions.iter().rev() {
-                    if let Ok(rt) = PythonRuntime::detect(app, full_version) {
-                        runtime = Some(rt);
-                        break;
+                    if installed.contains_key(full_version) {
+                        if let Ok(rt) = PythonRuntime::detect(app, full_version) {
+                            runtime = Some(rt);
+                            break;
+                        }
                     }
                 }
 
