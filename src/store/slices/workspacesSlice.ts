@@ -27,13 +27,19 @@ const initialState: WorkspacesState = {
 export const fetchWorkspaces = createAsyncThunk(
   'workspaces/fetchWorkspaces',
   async () => {
-    const dbWorkspaces = await invokeCommand<DbWorkspace[]>(
-      TauriCommands.GET_WORKSPACES
-    );
-    return dbWorkspaces.map((w) => ({
-      id: w.id,
-      name: w.name,
-    }));
+    const [dbWorkspaces, lastWorkspaceId] = await Promise.all([
+      invokeCommand<DbWorkspace[]>(TauriCommands.GET_WORKSPACES),
+      invokeCommand<string | null>(TauriCommands.GET_APP_SETTING, {
+        key: 'lastWorkspaceId',
+      }),
+    ]);
+    return {
+      workspaces: dbWorkspaces.map((w) => ({
+        id: w.id,
+        name: w.name,
+      })),
+      lastWorkspaceId,
+    };
   }
 );
 
@@ -75,6 +81,14 @@ const workspacesSlice = createSlice({
     },
     setSelectedWorkspace: (state, action: PayloadAction<string | null>) => {
       state.selectedWorkspaceId = action.payload;
+      if (action.payload) {
+        invokeCommand(TauriCommands.SAVE_APP_SETTING, {
+          key: 'lastWorkspaceId',
+          value: action.payload,
+        }).catch((error) => {
+          console.error('Failed to save lastWorkspaceId:', error);
+        });
+      }
     },
     addWorkspace: (state, action: PayloadAction<Workspace>) => {
       state.workspaces.push(action.payload);
@@ -97,10 +111,21 @@ const workspacesSlice = createSlice({
       })
       .addCase(fetchWorkspaces.fulfilled, (state, action) => {
         state.loading = false;
-        state.workspaces = action.payload;
-        // Auto-select first workspace if none selected
-        if (!state.selectedWorkspaceId && action.payload.length > 0) {
-          state.selectedWorkspaceId = action.payload[0].id;
+        state.workspaces = action.payload.workspaces;
+
+        // Restore last selected workspace if it exists and is still valid
+        if (
+          action.payload.lastWorkspaceId &&
+          action.payload.workspaces.some(
+            (w) => w.id === action.payload.lastWorkspaceId
+          )
+        ) {
+          state.selectedWorkspaceId = action.payload.lastWorkspaceId;
+        } else if (
+          !state.selectedWorkspaceId &&
+          action.payload.workspaces.length > 0
+        ) {
+          state.selectedWorkspaceId = action.payload.workspaces[0].id;
         }
       })
       .addCase(fetchWorkspaces.rejected, (state, action) => {
@@ -111,6 +136,14 @@ const workspacesSlice = createSlice({
       .addCase(createWorkspace.fulfilled, (state, action) => {
         state.workspaces.push(action.payload);
         state.selectedWorkspaceId = action.payload.id;
+
+        // Save as last workspace
+        invokeCommand(TauriCommands.SAVE_APP_SETTING, {
+          key: 'lastWorkspaceId',
+          value: action.payload.id,
+        }).catch((error) => {
+          console.error('Failed to save lastWorkspaceId:', error);
+        });
       })
       // Update workspace name
       .addCase(updateWorkspaceName.fulfilled, (state, action) => {
@@ -128,8 +161,18 @@ const workspacesSlice = createSlice({
 
         // If the deleted workspace was selected, select the first available workspace
         if (state.selectedWorkspaceId === deletedId) {
-          state.selectedWorkspaceId =
+          const newSelectedId =
             state.workspaces.length > 0 ? state.workspaces[0].id : null;
+          state.selectedWorkspaceId = newSelectedId;
+
+          if (newSelectedId) {
+            invokeCommand(TauriCommands.SAVE_APP_SETTING, {
+              key: 'lastWorkspaceId',
+              value: newSelectedId,
+            }).catch((error) => {
+              console.error('Failed to save lastWorkspaceId:', error);
+            });
+          }
         }
       });
   },

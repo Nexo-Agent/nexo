@@ -30,9 +30,14 @@ const initialState: ChatsState = {
 export const fetchChats = createAsyncThunk(
   'chats/fetchChats',
   async (workspaceId: string) => {
-    const dbChats = await invokeCommand<Chat[]>(TauriCommands.GET_CHATS, {
-      workspaceId,
-    });
+    const [dbChats, lastChatId] = await Promise.all([
+      invokeCommand<Chat[]>(TauriCommands.GET_CHATS, {
+        workspaceId,
+      }),
+      invokeCommand<string | null>(TauriCommands.GET_APP_SETTING, {
+        key: 'lastChatId',
+      }),
+    ]);
     return {
       workspaceId,
       chats: dbChats.map((c) => ({
@@ -41,6 +46,7 @@ export const fetchChats = createAsyncThunk(
         lastMessage: c.last_message || undefined,
         timestamp: c.updated_at * 1000, // Convert to milliseconds
       })),
+      lastChatId,
     };
   }
 );
@@ -54,6 +60,15 @@ export const createChat = createAsyncThunk(
       workspaceId,
       title,
     });
+
+    // Save as last chat
+    invokeCommand(TauriCommands.SAVE_APP_SETTING, {
+      key: 'lastChatId',
+      value: id,
+    }).catch((error) => {
+      console.error('Failed to save lastChatId:', error);
+    });
+
     return {
       id,
       title,
@@ -117,6 +132,14 @@ const chatsSlice = createSlice({
     },
     setSelectedChat: (state, action: PayloadAction<string | null>) => {
       state.selectedChatId = action.payload;
+      if (action.payload) {
+        invokeCommand(TauriCommands.SAVE_APP_SETTING, {
+          key: 'lastChatId',
+          value: action.payload,
+        }).catch((error) => {
+          console.error('Failed to save lastChatId:', error);
+        });
+      }
     },
     addChat: (
       state,
@@ -170,8 +193,15 @@ const chatsSlice = createSlice({
         state.loading = false;
         state.chatsByWorkspaceId[action.payload.workspaceId] =
           action.payload.chats;
-        // Auto-select first chat if none selected
-        if (!state.selectedChatId && action.payload.chats.length > 0) {
+
+        // Restore last selected chat if it exists and is in this workspace
+        if (
+          action.payload.lastChatId &&
+          action.payload.chats.some((c) => c.id === action.payload.lastChatId)
+        ) {
+          state.selectedChatId = action.payload.lastChatId;
+        } else if (!state.selectedChatId && action.payload.chats.length > 0) {
+          // Auto-select first chat if none selected
           state.selectedChatId = action.payload.chats[0].id;
         }
       })
@@ -232,8 +262,13 @@ const chatsSlice = createSlice({
         const workspaceId = action.payload;
         state.chatsByWorkspaceId[workspaceId] = [];
         // Clear selected chat if it was in this workspace
-        const chats = state.chatsByWorkspaceId[workspaceId];
-        if (chats.length === 0) {
+        if (
+          state.selectedChatId &&
+          !state.chatsByWorkspaceId[workspaceId].some(
+            (c) => c.id === state.selectedChatId
+          )
+        ) {
+          // This is a bit tricky, but usually clearAllChats is for the current workspace
           state.selectedChatId = null;
         }
       });
