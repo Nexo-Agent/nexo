@@ -16,45 +16,41 @@ export const ThinkingItem = memo(function ThinkingItem({
   if (!content) return null;
 
   return (
-    <div className="flex min-w-0 w-full justify-start">
-      <div className="flex min-w-0 w-full flex-col gap-2">
-        <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-          <button
-            className="flex w-full items-center justify-between gap-2 text-left"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              {isStreaming ? (
-                <Loader2 className="h-4 w-4 shrink-0 text-muted-foreground animate-spin" />
-              ) : (
-                <Brain className="h-4 w-4 shrink-0 text-muted-foreground" />
-              )}
-              <span className="font-medium truncate text-muted-foreground">
-                Thinking Process
-              </span>
-            </div>
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-            )}
-          </button>
+    <div className="w-full">
+      <button
+        className="flex items-center gap-2 text-left group select-none py-1"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors group-hover:bg-muted/50 group-hover:text-foreground">
+          {isStreaming ? (
+            <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
+          ) : (
+            <Brain className="h-3 w-3 shrink-0" />
+          )}
+          <span>Thinking Process</span>
+          {isExpanded ? (
+            <ChevronUp className="h-3 w-3 shrink-0 opacity-50" />
+          ) : (
+            <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
+          )}
+        </div>
+      </button>
+      <div
+        className={cn(
+          'grid transition-[grid-template-rows] duration-200 ease-out',
+          isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        )}
+      >
+        <div className="overflow-hidden">
           <div
             className={cn(
-              'grid transition-[grid-template-rows] duration-300 ease-in-out',
-              isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+              'ml-3 mt-2 border-l-2 border-muted pl-4 text-sm text-muted-foreground transition-all duration-300',
+              isExpanded
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 -translate-y-2'
             )}
           >
-            <div className="overflow-hidden">
-              <div
-                className={cn(
-                  'pt-2 transition-opacity duration-300 whitespace-pre-wrap text-muted-foreground',
-                  isExpanded ? 'opacity-100' : 'opacity-0'
-                )}
-              >
-                {content}
-              </div>
-            </div>
+            {content}
           </div>
         </div>
       </div>

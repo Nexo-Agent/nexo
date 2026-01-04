@@ -18,9 +18,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -589,7 +587,7 @@ export function ChatInput({
                           </span>
                         </div>
                         {activeTools.length > 0 ? (
-                          <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                          <div className="space-y-1.5 max-h-60 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                             {activeTools.map((tool, index) => (
                               <div
                                 key={`${tool.name}-${index}`}
@@ -641,22 +639,22 @@ export function ChatInput({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-56">
                     <DropdownMenuLabel>Thinking Mode</DropdownMenuLabel>
-                    <DropdownMenuCheckboxItem
-                      checked={isThinkingEnabled}
-                      onCheckedChange={handleThinkingToggle}
-                    >
-                      Enable Thinking
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>Reasoning Effort</DropdownMenuLabel>
                     <DropdownMenuRadioGroup
-                      value={reasoningEffort}
-                      onValueChange={(val) =>
-                        handleReasoningEffortChange(
-                          val as 'low' | 'medium' | 'high'
-                        )
-                      }
+                      value={isThinkingEnabled ? reasoningEffort : 'none'}
+                      onValueChange={(val) => {
+                        if (val === 'none') {
+                          if (isThinkingEnabled) handleThinkingToggle();
+                        } else {
+                          if (!isThinkingEnabled) handleThinkingToggle();
+                          handleReasoningEffortChange(
+                            val as 'low' | 'medium' | 'high'
+                          );
+                        }
+                      }}
                     >
+                      <DropdownMenuRadioItem value="none">
+                        None
+                      </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem value="low">
                         Low
                       </DropdownMenuRadioItem>
