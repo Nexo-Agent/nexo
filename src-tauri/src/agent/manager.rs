@@ -6,6 +6,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 // use tauri::AppHandle; // If we need to emit events
 
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct InstalledAgent {
+    pub manifest: common::Manifest,
+    pub version_ref: String,
+    pub path: PathBuf,
+}
+
 pub struct AgentManager {
     base_dir: PathBuf,
     uv_path: PathBuf,
@@ -139,6 +146,45 @@ impl AgentManager {
         // Here we don't know the context of source_dir fully, so leave it to caller or let OS clean tmp)
 
         Ok(agent_id.clone())
+    }
+
+    pub fn list_installed(&self) -> Result<Vec<InstalledAgent>> {
+        let mut agents = Vec::new();
+        let agents_dir = self.agents_dir();
+
+        if !agents_dir.exists() {
+            return Ok(agents);
+        }
+
+        for entry in fs::read_dir(agents_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                // Check for "current" symlink or directory
+                let current_link = path.join("current");
+                if current_link.exists() {
+                    // It's a valid agent dir
+                    // Read manifest
+                    if let Ok(manifest) = common::verify_agent_directory(&current_link) {
+                        // Resolve real path to get version
+                        let real_path =
+                            fs::read_link(&current_link).unwrap_or(current_link.clone());
+                        let version_ref = real_path
+                            .file_name()
+                            .unwrap_or_default()
+                            .to_string_lossy()
+                            .to_string();
+
+                        agents.push(InstalledAgent {
+                            manifest,
+                            version_ref,
+                            path: current_link,
+                        });
+                    }
+                }
+            }
+        }
+        Ok(agents)
     }
 
     fn copy_dir_recursive(&self, src: &Path, dst: &Path) -> Result<()> {

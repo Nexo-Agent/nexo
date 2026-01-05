@@ -117,7 +117,8 @@ pub fn run() {
             commands::usage::get_usage_chart,
             commands::usage::get_usage_logs,
             // Agent commands
-            agent::commands::install_agent
+            agent::commands::install_agent,
+            agent::commands::get_installed_agents,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

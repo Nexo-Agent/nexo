@@ -7,6 +7,7 @@ import {
   Package,
   BarChart,
   ArrowLeft,
+  Bot,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
@@ -22,6 +23,7 @@ import { AppSettings } from '@/ui/settings/AppSettings';
 import { PromptManagement } from '@/ui/settings/PromptManagement';
 import AddonSettings from '@/ui/settings/AddonSettings';
 import { UsagePage } from '@/ui/settings/usage/UsagePage';
+import { AgentSettings } from '@/ui/settings/AgentSettings';
 
 export function SettingsPage() {
   const { t } = useTranslation(['settings', 'common']);
@@ -51,6 +53,11 @@ export function SettingsPage() {
       icon: <FileText className="size-4" />,
     },
     {
+      id: 'agent',
+      label: 'Agent',
+      icon: <Bot className="size-4" />,
+    },
+    {
       id: 'addon',
       label: 'Addon',
       icon: <Package className="size-4" />,
@@ -77,6 +84,8 @@ export function SettingsPage() {
         return <MCPServerConnections />;
       case 'prompts':
         return <PromptManagement />;
+      case 'agent':
+        return <AgentSettings />;
       case 'addon':
         return <AddonSettings />;
       case 'usage':

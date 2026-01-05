@@ -3,6 +3,7 @@ import {
   PanelLeftOpen,
   Settings as SettingsIcon,
   Info,
+  Bot,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
@@ -17,6 +18,7 @@ import {
   toggleSidebar,
   setAboutOpen,
   navigateToSettings,
+  setSettingsSection,
 } from '@/store/slices/uiSlice';
 
 // Pages
@@ -32,6 +34,7 @@ export function AppLayout() {
     (state) => state.ui.isSidebarCollapsed
   );
   const activePage = useAppSelector((state) => state.ui.activePage);
+  const settingsSection = useAppSelector((state) => state.ui.settingsSection);
   const aboutOpen = useAppSelector((state) => state.ui.aboutOpen);
 
   const handleSettingsClick = () => {
@@ -92,10 +95,26 @@ export function AppLayout() {
             <Button
               variant="ghost"
               size="icon"
+              onClick={() => {
+                dispatch(navigateToSettings());
+                dispatch(setSettingsSection('agent'));
+              }}
+              aria-label="Agents"
+              className={
+                activePage === 'settings' && settingsSection === 'agent'
+                  ? 'bg-accent text-accent-foreground h-7 w-7'
+                  : 'h-7 w-7'
+              }
+            >
+              <Bot className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleSettingsClick}
               aria-label={t('settings', { ns: 'common' })}
               className={
-                activePage === 'settings'
+                activePage === 'settings' && settingsSection !== 'agent'
                   ? 'bg-accent text-accent-foreground h-7 w-7'
                   : 'h-7 w-7'
               }

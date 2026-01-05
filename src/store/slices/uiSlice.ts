@@ -16,6 +16,7 @@ interface UIState {
     | 'prompts'
     | 'addon'
     | 'usage'
+    | 'agent'
     | 'about';
   language: 'vi' | 'en';
   userMode: 'normal' | 'developer';
@@ -212,7 +213,14 @@ const uiSlice = createSlice({
     setSettingsSection: (
       state,
       action: PayloadAction<
-        'general' | 'llm' | 'mcp' | 'prompts' | 'addon' | 'usage' | 'about'
+        | 'general'
+        | 'llm'
+        | 'mcp'
+        | 'prompts'
+        | 'agent'
+        | 'addon'
+        | 'usage'
+        | 'about'
       >
     ) => {
       state.settingsSection = action.payload;

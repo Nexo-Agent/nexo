@@ -48,3 +48,13 @@ pub async fn install_agent(
         _ => Err(format!("Unsupported source type: {}", payload.source_type)),
     }
 }
+
+#[tauri::command]
+pub async fn get_installed_agents(
+    state: State<'_, AppState>,
+) -> Result<Vec<crate::agent::manager::InstalledAgent>, String> {
+    state
+        .agent_manager
+        .list_installed()
+        .map_err(|e| e.to_string())
+}

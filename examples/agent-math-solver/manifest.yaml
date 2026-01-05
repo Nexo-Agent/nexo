@@ -1,0 +1,6 @@
+schema_version: 1
+id: com.nexo.agents.math_solver
+name: Math Solver
+description: A simple agent that solves mathematical expressions using Python.
+author: Nexo Team
+license: MIT
