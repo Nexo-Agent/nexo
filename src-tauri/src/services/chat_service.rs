@@ -786,9 +786,31 @@ impl ChatService {
                         .await?;
 
                     // Handle tool calls
-                    let tool_results = self
+                    // Use match instead of ? to prevent agent loop from stopping on error
+                    let tool_results = match self
                         .handle_tool_calls(&chat_id, &assistant_message_id, &allowed_tools, &app)
-                        .await?;
+                        .await
+                    {
+                        Ok(results) => results,
+                        Err(e) => {
+                            // Log error but continue with empty results
+                            eprintln!(
+                                "Tool execution failed in agent loop (chat_id: {}): {}",
+                                chat_id, e
+                            );
+                            // Emit error event to notify frontend
+                            let tool_emitter = ToolEmitter::new(app.clone());
+                            let _ = tool_emitter.emit_tool_execution_error(
+                                chat_id.clone(),
+                                assistant_message_id.clone(),
+                                "agent_loop_error".to_string(),
+                                "tool_execution".to_string(),
+                                format!("Tool execution failed: {}", e),
+                            );
+                            // Return empty results to continue agent loop
+                            Vec::new()
+                        }
+                    };
 
                     // Add assistant message with tool calls to conversation
                     let assistant_msg_with_tools = ChatMessage::Assistant {
@@ -1017,6 +1039,12 @@ impl ChatService {
                 None,
                 None,
             )?;
+            
+            // Log tool execution start for debugging
+            eprintln!(
+                "Starting tool execution: tool={}, chat_id={}, tool_call_id={}",
+                tool_call.function.name, chat_id, tool_call.id
+            );
 
             // Find connection for this tool
             // Execute tool logic
@@ -1040,19 +1068,37 @@ impl ChatService {
                     arguments: arguments_map,
                 };
 
-                // Call tool on agent client
-                match client.call_tool(params).await {
-                    Ok(res) => {
+                // Call tool on agent client with timeout (300 seconds, same as LLM timeout)
+                let tool_call_future = client.call_tool(params);
+                match tokio::time::timeout(
+                    tokio::time::Duration::from_secs(300),
+                    tool_call_future,
+                )
+                .await
+                {
+                    Ok(Ok(res)) => {
                         // Serialize content to match expected generic JSON
                         match serde_json::to_string(&res.content) {
                             Ok(s) => match serde_json::from_str(&s) {
                                 Ok(v) => Ok(v),
-                                Err(e) => Err(AppError::Generic(e.to_string())),
+                                Err(e) => Err(AppError::Generic(format!(
+                                    "Failed to parse tool response JSON: {}",
+                                    e
+                                ))),
                             },
-                            Err(e) => Err(AppError::Generic(e.to_string())),
+                            Err(e) => Err(AppError::Generic(format!(
+                                "Failed to serialize tool response: {}",
+                                e
+                            ))),
                         }
                     }
-                    Err(e) => Err(AppError::Generic(e.to_string())),
+                    Ok(Err(e)) => Err(AppError::Generic(format!(
+                        "Tool execution failed: {}",
+                        e
+                    ))),
+                    Err(_) => Err(AppError::Generic(
+                        "Tool execution timed out after 300 seconds".to_string(),
+                    )),
                 }
             } else {
                 // Standard Execution
@@ -1110,12 +1156,24 @@ impl ChatService {
                         Some(result.clone()),
                         None,
                     )?;
+                    
+                    // Log successful tool execution
+                    eprintln!(
+                        "Tool execution completed: tool={}, chat_id={}, tool_call_id={}",
+                        tool_call.function.name, chat_id, tool_call.id
+                    );
 
                     result
                 }
                 Err(e) => {
                     failed_count += 1;
                     let error_msg = e.to_string();
+                    
+                    // Log error for debugging
+                    eprintln!(
+                        "Tool execution failed: tool={}, chat_id={}, error={}",
+                        tool_call.function.name, chat_id, error_msg
+                    );
 
                     // Update tool_call message with error
                     let error_data = serde_json::json!({

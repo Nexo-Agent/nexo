@@ -70,7 +70,6 @@ export function MessageList({
   onViewAgentDetails,
   userMode,
   t,
-  isLoading = false,
 }: MessageListProps) {
   // Internal state management (if not controlled from parent)
   const [internalMarkdownEnabled, setInternalMarkdownEnabled] = useState<
@@ -120,9 +119,11 @@ export function MessageList({
 
   const toggleMarkdown = useCallback(
     (messageId: string) => {
+      // If undefined, treat as true (markdown enabled by default)
+      const currentValue = markdownEnabled[messageId] ?? true;
       const newValue = {
         ...markdownEnabled,
-        [messageId]: !markdownEnabled[messageId],
+        [messageId]: !currentValue,
       };
       if (onMarkdownEnabledChange) {
         onMarkdownEnabledChange(newValue);
@@ -300,20 +301,6 @@ export function MessageList({
           </div>
         );
       })}
-
-      {isLoading && !streamingMessageId && (
-        <div className="mb-6 flex justify-start w-full">
-          <div className="flex min-w-0 w-full flex-col gap-2">
-            <div className="min-w-0 wrap-break-words rounded-2xl bg-muted px-4 py-3">
-              <div className="flex gap-1">
-                <span className="size-2 animate-pulse rounded-full bg-foreground/50" />
-                <span className="size-2 animate-pulse rounded-full bg-foreground/50 [animation-delay:0.2s]" />
-                <span className="size-2 animate-pulse rounded-full bg-foreground/50 [animation-delay:0.4s]" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
