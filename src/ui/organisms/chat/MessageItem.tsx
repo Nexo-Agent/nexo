@@ -259,8 +259,8 @@ export const MessageItem = memo(
                       className={cn(
                         'absolute bottom-0 left-0 right-0 h-16 pointer-events-none',
                         message.role === 'user'
-                          ? 'bg-gradient-to-t from-primary to-transparent'
-                          : 'bg-gradient-to-t from-muted to-transparent'
+                          ? 'bg-linear-to-t from-primary to-transparent'
+                          : 'bg-linear-to-t from-muted to-transparent'
                       )}
                     />
                   )}
