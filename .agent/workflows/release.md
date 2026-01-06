@@ -15,6 +15,17 @@ Follow these steps to release a new version of Nexo:
    - `src-tauri/Cargo.toml` (`[package] version = "..."`)
    - `package.json` (`"version": "..."`)
    - `src-tauri/tauri.conf.json` (`"version": "..."`)
+   - `src-tauri/tauri.conf.json` (`bundle.windows.wix.version = "..."`) - **Windows MSI only**
+
+   **IMPORTANT**: Windows MSI requires a numeric-only version. Use this mapping:
+   | Release Version | Windows MSI Version |
+   |----------------|---------------------|
+   | `0.1.0-alpha.X` | `0.1.X` |
+   | `0.1.0-beta.X` | `0.1.10X` |
+   | `0.1.0-rc.X` | `0.1.20X` |
+   | `0.1.0` (stable) | `0.1.0` |
+
+   Example: `0.1.0-alpha.8` → MSI version: `0.1.8`
 
 3. **Update Cargo.lock**
    Run the following command in `src-tauri` to sync the version in `Cargo.lock`:
