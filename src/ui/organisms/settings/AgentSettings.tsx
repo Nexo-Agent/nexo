@@ -13,7 +13,14 @@ import { Input } from '@/ui/atoms/input';
 import { Label } from '@/ui/atoms/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/atoms/tabs';
 import { toast } from 'sonner';
-import { Loader2, Plus, Download, GitBranch } from 'lucide-react';
+import {
+  Loader2,
+  Plus,
+  Download,
+  GitBranch,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 
 interface Manifest {
   id: string;
@@ -38,6 +45,7 @@ export function AgentSettings() {
   const [gitUrl, setGitUrl] = useState('');
   const [gitRevision, setGitRevision] = useState('');
   const [gitSubpath, setGitSubpath] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const fetchAgents = async () => {
     setLoading(true);
@@ -100,8 +108,8 @@ export function AgentSettings() {
         payload: {
           source_type: 'git',
           url: gitUrl,
-          revision: gitRevision || null,
-          sub_path: gitSubpath || null,
+          revision: gitRevision.trim() || 'main',
+          sub_path: gitSubpath.trim() || '/',
         },
       });
 
@@ -109,6 +117,7 @@ export function AgentSettings() {
       setGitUrl('');
       setGitRevision('');
       setGitSubpath('');
+      setShowAdvanced(false);
       fetchAgents();
     } catch (error) {
       toast.error('Installation failed: ' + error);
@@ -188,7 +197,12 @@ export function AgentSettings() {
                   Install an agent from a .zip file on your computer.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col min-h-[200px]">
+                <div className="flex-1 flex items-center justify-center py-4">
+                  <div className="text-center space-y-2">
+                    <Download className="h-12 w-12 mx-auto text-muted-foreground/50" />
+                  </div>
+                </div>
                 <Button
                   onClick={handleInstallLocal}
                   disabled={installing}
@@ -212,11 +226,12 @@ export function AgentSettings() {
                   <GitBranch className="h-4 w-4" /> Install from Git
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Clone and install directly from a repository.
+                  Clone and install directly from a repository. Defaults to main
+                  branch and root path.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleInstallGit} className="space-y-4">
+                <form onSubmit={handleInstallGit} className="space-y-3">
                   <div className="space-y-2">
                     <Label htmlFor="git-url" className="text-xs">
                       Repository URL
@@ -231,32 +246,60 @@ export function AgentSettings() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="git-rev" className="text-xs">
-                        Revision
-                      </Label>
-                      <Input
-                        id="git-rev"
-                        placeholder="main"
-                        value={gitRevision}
-                        onChange={(e) => setGitRevision(e.target.value)}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="git-sub" className="text-xs">
-                        Subpath
-                      </Label>
-                      <Input
-                        id="git-sub"
-                        placeholder="agents/bot"
-                        value={gitSubpath}
-                        onChange={(e) => setGitSubpath(e.target.value)}
-                        className="h-8 text-sm"
-                      />
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      showAdvanced
+                        ? 'max-h-48 opacity-100'
+                        : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="space-y-2 pt-2 border-t">
+                      <div className="space-y-2">
+                        <Label htmlFor="git-rev" className="text-xs">
+                          Revision
+                        </Label>
+                        <Input
+                          id="git-rev"
+                          placeholder="main"
+                          value={gitRevision}
+                          onChange={(e) => setGitRevision(e.target.value)}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="git-sub" className="text-xs">
+                          Subpath
+                        </Label>
+                        <Input
+                          id="git-sub"
+                          placeholder="/"
+                          value={gitSubpath}
+                          onChange={(e) => setGitSubpath(e.target.value)}
+                          className="h-8 text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="text-xs h-7 px-2 w-full justify-start"
+                  >
+                    {showAdvanced ? (
+                      <>
+                        <ChevronUp className="mr-1 h-3 w-3" />
+                        Hide advanced options
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="mr-1 h-3 w-3" />
+                        Show advanced options
+                      </>
+                    )}
+                  </Button>
 
                   <Button
                     type="submit"
