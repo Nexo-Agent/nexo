@@ -14,15 +14,15 @@ jobs:
       matrix:
         include:
           - platform: 'macos-latest' # for Arm based macs (M1 and above).
-            args: '--target aarch64-apple-darwin'
+            args: '--target aarch64-apple-darwin --debug'
           - platform: 'macos-latest' # for Intel based macs.
-            args: '--target x86_64-apple-darwin'
+            args: '--target x86_64-apple-darwin --debug'
           - platform: 'ubuntu-22.04'
-            args: ''
+            args: '--debug'
           # - platform: 'ubuntu-22.04-arm' # Only available in public repos.
           #   args: ''
           - platform: 'windows-latest'
-            args: ''
+            args: '--debug'
 
     runs-on: ${{ matrix.platform }}
     steps:

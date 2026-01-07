@@ -18,6 +18,8 @@ mod lib {
 
 use std::sync::Arc;
 use tauri::Manager;
+#[cfg(target_os = "macos")]
+use tauri::Position;
 
 /// Initialize Sentry for error tracking and performance monitoring
 /// DSN is embedded at compile time via build.rs
@@ -68,6 +70,26 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
+            // Maximize the main window on startup and ensure it's at the top
+            if let Some(window) = app.get_webview_window("main") {
+                // Maximize first
+                if let Err(e) = window.maximize() {
+                    eprintln!("Failed to maximize window: {}", e);
+                }
+                // On macOS, ensure window is at position (0, 0) to remove any gap
+                #[cfg(target_os = "macos")]
+                {
+                    // Set position to (0, 0) after a short delay to ensure maximize completes
+                    let window_clone = window.clone();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_millis(100));
+                        if let Err(e) = window_clone.set_position(Position::Physical(tauri::PhysicalPosition { x: 0, y: 0 })) {
+                            eprintln!("Failed to set window position: {}", e);
+                        }
+                    });
+                }
+            }
+
             // Initialize AppState
             let app_handle = Arc::new(app.handle().clone());
             let app_state = state::AppState::new(app_handle).map_err(|e| {
