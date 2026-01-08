@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Loader2 } from 'lucide-react';
+import { useStickToBottom } from 'use-stick-to-bottom';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,46 @@ export function AgentChatHistoryDialog({
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [agentName, setAgentName] = useState<string | null>(null);
+
+  // Setup auto scroll hook
+  const { scrollRef, contentRef, scrollToBottom } = useStickToBottom({
+    resize: 'smooth',
+    initial: 'instant', // Start at the bottom immediately
+    damping: 0.7,
+    stiffness: 0.05,
+    mass: 1.25,
+  });
+
+  // Refs for ScrollArea
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Attach scrollRef to ScrollArea viewport
+  const attachScroll = useCallback(() => {
+    if (scrollAreaRef.current && typeof scrollRef === 'function') {
+      const viewport = scrollAreaRef.current.querySelector(
+        '[data-slot="scroll-area-viewport"]'
+      ) as HTMLElement;
+      if (viewport) {
+        scrollRef(viewport);
+      }
+    }
+  }, [scrollRef]);
+
+  // Ensure viewport is attached when ScrollArea is ready (on every render)
+  useEffect(() => {
+    attachScroll();
+  });
+
+  // Force scroll to bottom when messages are loaded
+  useEffect(() => {
+    if (open && messages.length > 0 && !loading) {
+      // Use a small delay to ensure DOM is updated and ScrollArea is attached
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [open, messages.length, loading, scrollToBottom]);
 
   // Fetch agent name when agentId changes
   useEffect(() => {
@@ -171,8 +212,8 @@ export function AgentChatHistoryDialog({
               <p className="text-sm">No messages in this chat</p>
             </div>
           ) : (
-            <ScrollArea className="h-full">
-              <div className="px-6 py-4">
+            <ScrollArea ref={scrollAreaRef} className="h-full">
+              <div ref={contentRef} className="px-6 py-4">
                 <div className="mx-auto flex flex-col gap-4">
                   <MessageList
                     messages={displayMessages}
