@@ -20,8 +20,9 @@ type Theme =
   | 'github-light'
   | 'github-dark'
   | 'gruvbox'
-  | 'midnight'
-  | 'dracula';
+  | 'dracula'
+  | 'solarized-light'
+  | 'solarized-dark';
 
 export function AppSettings() {
   const { t } = useTranslation(['settings', 'common']);
@@ -90,8 +91,13 @@ export function AppSettings() {
                 {t('githubDarkTheme')}
               </SelectItem>
               <SelectItem value="gruvbox">{t('gruvboxTheme')}</SelectItem>
-              <SelectItem value="midnight">{t('midnightTheme')}</SelectItem>
               <SelectItem value="dracula">{t('draculaTheme')}</SelectItem>
+              <SelectItem value="solarized-light">
+                {t('solarizedLightTheme')}
+              </SelectItem>
+              <SelectItem value="solarized-dark">
+                {t('solarizedDarkTheme')}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

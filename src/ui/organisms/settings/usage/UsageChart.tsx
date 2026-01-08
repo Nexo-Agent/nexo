@@ -34,7 +34,7 @@ export function UsageChart({ data, loading }: UsageChartProps) {
 
       <CardHeader className="relative z-10 pb-2">
         <CardTitle className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm shadow-indigo-500/20">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-chart-indigo to-chart-violet shadow-sm shadow-chart-indigo/20">
             <TrendingUp className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col gap-1">
@@ -117,7 +117,7 @@ export function UsageChart({ data, loading }: UsageChartProps) {
                 <Bar
                   dataKey="input_tokens"
                   name="Input Tokens"
-                  fill="#10b981"
+                  fill="var(--chart-emerald)"
                   radius={[6, 6, 0, 0]}
                   maxBarSize={40}
                   animationDuration={1500}
@@ -125,7 +125,7 @@ export function UsageChart({ data, loading }: UsageChartProps) {
                 <Bar
                   dataKey="output_tokens"
                   name="Output Tokens"
-                  fill="#6366f1"
+                  fill="var(--chart-indigo)"
                   radius={[6, 6, 0, 0]}
                   maxBarSize={40}
                   animationDuration={1500}
@@ -134,8 +134,8 @@ export function UsageChart({ data, loading }: UsageChartProps) {
             </ResponsiveContainer>
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-3">
-              <div className="p-4 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20">
-                <TrendingUp className="h-8 w-8 text-indigo-500" />
+              <div className="p-4 rounded-full bg-chart-indigo/10 dark:bg-chart-indigo/20">
+                <TrendingUp className="h-8 w-8 text-chart-indigo" />
               </div>
               <p className="text-sm font-medium text-muted-foreground">
                 No data available

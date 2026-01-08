@@ -27,8 +27,9 @@ interface UIState {
     | 'github-light'
     | 'github-dark'
     | 'gruvbox'
-    | 'midnight'
-    | 'dracula';
+    | 'dracula'
+    | 'solarized-light'
+    | 'solarized-dark';
 
   loading: boolean;
   agentChatHistoryDrawerOpen: boolean;
@@ -87,8 +88,9 @@ export const loadAppSettings = createAsyncThunk(
         'github-light',
         'github-dark',
         'gruvbox',
-        'midnight',
         'dracula',
+        'solarized-light',
+        'solarized-dark',
       ];
 
       if (theme && validThemes.includes(theme)) {

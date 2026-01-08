@@ -13,8 +13,9 @@ type Theme =
   | 'github-light'
   | 'github-dark'
   | 'gruvbox'
-  | 'midnight'
-  | 'dracula';
+  | 'dracula'
+  | 'solarized-light'
+  | 'solarized-dark';
 
 /**
  * Hook to access and manage app settings (language, userMode, and theme)

@@ -54,10 +54,10 @@ export function UsageLogs({
 }: UsageLogsProps) {
   return (
     <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-chart-blue/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
       <CardHeader className="relative z-10 pb-4">
         <CardTitle className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 shadow-sm shadow-blue-500/20">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-chart-blue to-chart-cyan shadow-sm shadow-chart-blue/20">
             <Database className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col gap-1">
@@ -114,10 +114,10 @@ export function UsageLogs({
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5 font-mono text-xs tabular-nums">
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        <span className="text-chart-emerald font-medium">
                           ↓ {log.input_tokens.toLocaleString()}
                         </span>
-                        <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+                        <span className="text-chart-indigo font-medium">
                           ↑ {log.output_tokens.toLocaleString()}
                         </span>
                       </div>

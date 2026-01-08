@@ -35,12 +35,12 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-amber-500/20 transition-colors" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-chart-amber/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-amber/20 transition-colors" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Total Cost
           </CardTitle>
-          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform duration-300">
+          <div className="p-2 rounded-lg bg-chart-amber/10 text-chart-amber group-hover:scale-110 transition-transform duration-300">
             <Coins className="h-4 w-4" />
           </div>
         </CardHeader>
@@ -56,12 +56,12 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
       </Card>
 
       <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-violet-500/20 transition-colors" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-chart-violet/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-violet/20 transition-colors" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Total Tokens
           </CardTitle>
-          <div className="p-2 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 group-hover:scale-110 transition-transform duration-300">
+          <div className="p-2 rounded-lg bg-chart-violet/10 text-chart-violet group-hover:scale-110 transition-transform duration-300">
             <Zap className="h-4 w-4" />
           </div>
         </CardHeader>
@@ -72,11 +72,11 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
             ).toLocaleString()}
           </div>
           <p className="text-xs font-medium text-muted-foreground mt-2 flex gap-3">
-            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+            <span className="flex items-center gap-1 text-chart-emerald font-medium">
               <span className="text-[10px]">IN</span>
               {summary.total_input_tokens.toLocaleString()}
             </span>
-            <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
+            <span className="flex items-center gap-1 text-chart-indigo font-medium">
               <span className="text-[10px]">OUT</span>
               {summary.total_output_tokens.toLocaleString()}
             </span>
@@ -85,12 +85,12 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
       </Card>
 
       <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-blue-500/20 transition-colors" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-chart-blue/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-blue/20 transition-colors" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Total Requests
           </CardTitle>
-          <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
+          <div className="p-2 rounded-lg bg-chart-blue/10 text-chart-blue group-hover:scale-110 transition-transform duration-300">
             <MessageSquare className="h-4 w-4" />
           </div>
         </CardHeader>
@@ -102,12 +102,12 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
       </Card>
 
       <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-emerald-500/20 transition-colors" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-chart-emerald/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-emerald/20 transition-colors" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Avg Latency
           </CardTitle>
-          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+          <div className="p-2 rounded-lg bg-chart-emerald/10 text-chart-emerald group-hover:scale-110 transition-transform duration-300">
             <Activity className="h-4 w-4" />
           </div>
         </CardHeader>

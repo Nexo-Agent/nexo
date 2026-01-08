@@ -509,7 +509,7 @@ export function ChatInput({
         <div className="mx-auto max-w-3xl px-4 py-3">
           <div
             className={cn(
-              'rounded-2xl border border-border bg-background shadow-sm p-3 relative transition-colors',
+              'rounded-2xl border border-border bg-muted/20 shadow-sm p-3 relative transition-colors',
               isDragging && 'border-primary ring-2 ring-primary/20 bg-muted/50'
             )}
             onDragOver={handleDragOver}
@@ -573,7 +573,7 @@ export function ChatInput({
                 onPaste={handlePaste}
                 placeholder={t('enterMessage')}
                 disabled={disabled}
-                className="w-full min-h-[40px] max-h-[200px] resize-none leading-relaxed text-base py-0 px-2 border-0 rounded-lg outline-none flex content-center ring-0 shadow-none focus:ring-0 focus:shadow-none"
+                className="w-full min-h-[40px] max-h-[200px] resize-none leading-relaxed text-base py-0 px-2 border-0 rounded-lg outline-none flex content-center ring-0 shadow-none focus:ring-0 focus:shadow-none bg-transparent dark:bg-transparent"
                 rows={1}
               />
               {/* Slash Command Dropdown */}
@@ -763,7 +763,7 @@ export function ChatInput({
                     disabled
                   }
                 >
-                  <SelectTrigger className="h-7 w-auto min-w-[120px] text-sm border-none bg-background hover:bg-muted/50 shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                  <SelectTrigger className="h-7 w-auto min-w-[120px] text-sm border-none bg-transparent dark:bg-transparent hover:bg-muted/50 shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                     <SelectValue
                       placeholder={t('selectModel', { ns: 'settings' })}
                     >

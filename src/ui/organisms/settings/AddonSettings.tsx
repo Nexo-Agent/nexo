@@ -166,7 +166,7 @@ export default function AddonSettings() {
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-[#3776AB]">
+        <div className="flex items-center gap-2 text-brand-python">
           <PythonIcon className="size-4" />
           <h4 className="font-medium">{t('pythonRuntime')}</h4>
         </div>
@@ -187,8 +187,8 @@ export default function AddonSettings() {
               className="flex flex-col rounded-lg border p-4 hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="size-10 rounded-full bg-[#3776AB]/10 flex items-center justify-center shrink-0">
-                  <PythonIcon className="size-5 text-[#3776AB]" />
+                <div className="size-10 rounded-full bg-brand-python/10 flex items-center justify-center shrink-0">
+                  <PythonIcon className="size-5 text-brand-python" />
                 </div>
                 <div className="min-w-0">
                   {runtime.installed && runtime.path ? (
@@ -234,7 +234,7 @@ export default function AddonSettings() {
                     onClick={() => handleInstall(runtime.version)}
                     disabled={installing !== null}
                     size="sm"
-                    className="w-full h-9 bg-[#3776AB] hover:bg-[#3776AB]/90 text-white"
+                    className="w-full h-9 bg-brand-python hover:bg-brand-python/90 text-white"
                   >
                     {installing === runtime.version ? (
                       <>
@@ -267,7 +267,7 @@ export default function AddonSettings() {
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-[#339933]">
+        <div className="flex items-center gap-2 text-brand-node">
           <NodeIcon className="size-4" />
           <h4 className="font-medium">{t('nodeRuntime')}</h4>
         </div>
@@ -283,8 +283,8 @@ export default function AddonSettings() {
               className="flex flex-col rounded-lg border p-4 hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="size-10 rounded-full bg-[#339933]/10 flex items-center justify-center shrink-0">
-                  <NodeIcon className="size-5 text-[#339933]" />
+                <div className="size-10 rounded-full bg-brand-node/10 flex items-center justify-center shrink-0">
+                  <NodeIcon className="size-5 text-brand-node" />
                 </div>
                 <div className="min-w-0">
                   {runtime.installed && runtime.path ? (
@@ -330,7 +330,7 @@ export default function AddonSettings() {
                     onClick={() => handleNodeInstall(runtime.version)}
                     disabled={installingNode !== null}
                     size="sm"
-                    className="w-full h-9 bg-[#339933] hover:bg-[#339933]/90 text-white"
+                    className="w-full h-9 bg-brand-node hover:bg-brand-node/90 text-white"
                   >
                     {installingNode === runtime.version ? (
                       <>

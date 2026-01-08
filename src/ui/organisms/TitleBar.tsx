@@ -172,27 +172,27 @@ export function TitleBar({ leftContent, rightContent }: TitleBarProps = {}) {
             <button
               onClick={handleClose}
               onMouseDown={(e) => e.stopPropagation()}
-              className="group flex h-3 w-3 items-center justify-center rounded-full bg-[#ff5f57] transition-colors hover:bg-[#ff3b30]"
+              className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-close transition-colors hover:bg-window-close-hover"
               aria-label="Close"
             >
               <span className="opacity-0 group-hover:opacity-100">
-                <X className="h-2 w-2 text-[#740000]" />
+                <X className="h-2 w-2 text-window-close-icon" />
               </span>
             </button>
             <button
               onClick={handleMinimize}
               onMouseDown={(e) => e.stopPropagation()}
-              className="group flex h-3 w-3 items-center justify-center rounded-full bg-[#ffbd2e] transition-colors hover:bg-[#ff9500]"
+              className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-minimize transition-colors hover:bg-window-minimize-hover"
               aria-label="Minimize"
             >
               <span className="opacity-0 group-hover:opacity-100">
-                <Minus className="h-2 w-2 text-[#995700]" />
+                <Minus className="h-2 w-2 text-window-minimize-icon" />
               </span>
             </button>
             <button
               onClick={handleMaximize}
               onMouseDown={(e) => e.stopPropagation()}
-              className="group flex h-3 w-3 items-center justify-center rounded-full bg-[#28c840] transition-colors hover:bg-[#20d246]"
+              className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-maximize transition-colors hover:bg-window-maximize-hover"
               aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
               title={
                 isFullscreen
@@ -202,9 +202,9 @@ export function TitleBar({ leftContent, rightContent }: TitleBarProps = {}) {
             >
               <span className="opacity-0 group-hover:opacity-100">
                 {isFullscreen ? (
-                  <Maximize2 className="h-2 w-2 text-[#006500]" />
+                  <Maximize2 className="h-2 w-2 text-window-maximize-icon" />
                 ) : (
-                  <Square className="h-2 w-2 text-[#006500]" />
+                  <Square className="h-2 w-2 text-window-maximize-icon" />
                 )}
               </span>
             </button>
