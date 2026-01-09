@@ -100,7 +100,7 @@ export function ChatMessages({
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
-      const TIMEOUT_MS = 5000; // 60s
+      const TIMEOUT_MS = 60 * 1000; // 60s
 
       if (pendingRequests) {
         const newTimeLeft: Record<string, number> = {};
