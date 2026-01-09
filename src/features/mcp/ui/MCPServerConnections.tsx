@@ -28,7 +28,7 @@ import {
   DialogTitle,
 } from '@/ui/atoms/dialog/component';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
-import { HeadersEditor } from '@/ui/organisms/settings/HeadersEditor';
+import { HeadersEditor } from '@/features/settings';
 import { useAppDispatch } from '@/store/hooks';
 import {
   useGetMCPConnectionsQuery,

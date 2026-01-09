@@ -1,4 +1,4 @@
-import { baseApi } from './baseApi';
+import { baseApi } from '@/store/api/baseApi';
 import { TauriCommands } from '@/bindings/commands';
 
 export const appSettingsApi = baseApi.injectEndpoints({

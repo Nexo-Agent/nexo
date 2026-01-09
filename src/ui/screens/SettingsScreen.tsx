@@ -17,10 +17,9 @@ import { SettingsLayout } from '@/ui/layouts/SettingsLayout';
 // Section Components
 import { LLMConnections } from '@/features/llm';
 import { MCPServerConnections } from '@/features/mcp';
-import { AppSettings } from '@/ui/organisms/settings/AppSettings';
-import { PromptManagement } from '@/ui/organisms/settings/PromptManagement';
-import AddonSettings from '@/ui/organisms/settings/AddonSettings';
-import { UsagePage } from '@/ui/organisms/settings/usage/UsagePage';
+import { AppSettings, PromptManagement } from '@/features/settings';
+import { AddonSettings } from '@/features/addon';
+import { UsagePage } from '@/features/usage';
 import { AgentSettings } from '@/features/agent';
 
 export function SettingsScreen() {

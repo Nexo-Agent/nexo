@@ -1,39 +1,9 @@
-import { invoke } from '@tauri-apps/api/core';
-import { handleCommandError } from '@/lib/tauri';
-import { useEffect, useState } from 'react';
-import { showSuccess } from '@/store/slices/notificationSlice';
-import { useAppDispatch } from '@/store/hooks';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { Download, Trash2, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip } from '@/ui/atoms/tooltip';
-
-interface PythonRuntimeStatus {
-  version: string;
-  installed: boolean;
-  path: string | null;
-}
-
-interface NodeRuntimeStatus {
-  version: string;
-  installed: boolean;
-  path: string | null;
-}
-
-interface AddonConfig {
-  addons: {
-    python: {
-      versions: string[];
-      uv: {
-        version: string;
-      };
-    };
-    nodejs: {
-      versions: string[];
-    };
-  };
-}
+import { useAddons } from '../hooks/useAddons';
 
 const PythonIcon = ({ className }: { className?: string }) => (
   <svg
@@ -62,100 +32,14 @@ const NodeIcon = ({ className }: { className?: string }) => (
 export default function AddonSettings() {
   const { t } = useTranslation('settings');
 
-  const [addonConfig, setAddonConfig] = useState<AddonConfig | null>(null);
-  const [pythonRuntimes, setPythonRuntimes] = useState<PythonRuntimeStatus[]>(
-    []
-  );
-  const [nodeRuntimes, setNodeRuntimes] = useState<NodeRuntimeStatus[]>([]);
-  const [installing, setInstalling] = useState<string | null>(null);
-  const [installingNode, setInstallingNode] = useState<string | null>(null);
-  const dispatch = useAppDispatch();
-
-  // Fetch addon config from backend
-  const loadAddonConfig = async () => {
-    try {
-      const config = await invoke<AddonConfig>('get_addon_config');
-      setAddonConfig(config);
-    } catch (error) {
-      console.error('Failed to load addon config:', error);
-      // Fallback to empty if fetch fails - backend has defaults
-    }
-  };
-
-  const loadPythonStatus = async () => {
-    try {
-      const status = await invoke<PythonRuntimeStatus[]>(
-        'get_python_runtimes_status'
-      );
-      setPythonRuntimes(status);
-    } catch (error) {
-      handleCommandError(dispatch, error);
-    }
-  };
-
-  const loadNodeStatus = async () => {
-    try {
-      const status = await invoke<NodeRuntimeStatus[]>(
-        'get_node_runtimes_status'
-      );
-      setNodeRuntimes(status);
-    } catch (error) {
-      handleCommandError(dispatch, error);
-    }
-  };
-
-  useEffect(() => {
-    loadAddonConfig();
-    loadPythonStatus();
-    loadNodeStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleInstall = async (version: string) => {
-    setInstalling(version);
-    try {
-      await invoke('install_python_runtime', { version });
-      dispatch(showSuccess(t('pythonInstalled', { version })));
-      await loadPythonStatus();
-    } catch (error) {
-      handleCommandError(dispatch, error);
-    } finally {
-      setInstalling(null);
-    }
-  };
-
-  const handleUninstall = async (version: string) => {
-    try {
-      await invoke('uninstall_python_runtime', { version });
-      dispatch(showSuccess(t('pythonUninstalled', { version })));
-      await loadPythonStatus();
-    } catch (error) {
-      handleCommandError(dispatch, error);
-    }
-  };
-
-  const handleNodeInstall = async (version: string) => {
-    setInstallingNode(version);
-    try {
-      await invoke('install_node_runtime', { version });
-      dispatch(showSuccess(t('nodeInstalled', { version })));
-      await loadNodeStatus();
-    } catch (error) {
-      handleCommandError(dispatch, error);
-    } finally {
-      setInstallingNode(null);
-    }
-  };
-
-  const handleNodeUninstall = async (version: string) => {
-    try {
-      await invoke('uninstall_node_runtime', { version });
-      dispatch(showSuccess(t('nodeUninstalled', { version })));
-      await loadNodeStatus();
-    } catch (error) {
-      handleCommandError(dispatch, error);
-    }
-  };
+  const {
+    addonConfig,
+    pythonRuntimes,
+    nodeRuntimes,
+    installingPython,
+    installingNode,
+    actions,
+  } = useAddons();
 
   return (
     <div className="space-y-6">
@@ -231,12 +115,12 @@ export default function AddonSettings() {
               <div className="mt-auto pt-2">
                 {!runtime.installed ? (
                   <Button
-                    onClick={() => handleInstall(runtime.version)}
-                    disabled={installing !== null}
+                    onClick={() => actions.installPython(runtime.version)}
+                    disabled={installingPython !== null}
                     size="sm"
                     className="w-full h-9 bg-brand-python hover:bg-brand-python/90 text-white"
                   >
-                    {installing === runtime.version ? (
+                    {installingPython === runtime.version ? (
                       <>
                         <RefreshCw className="mr-2 size-4 animate-spin" />
                         {t('installing')}
@@ -250,8 +134,8 @@ export default function AddonSettings() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => handleUninstall(runtime.version)}
-                    disabled={installing !== null}
+                    onClick={() => actions.uninstallPython(runtime.version)}
+                    disabled={installingPython !== null}
                     variant="outline"
                     size="sm"
                     className="w-full h-9 text-destructive hover:bg-destructive/10 hover:text-destructive border-transparent hover:border-destructive/20"
@@ -327,7 +211,7 @@ export default function AddonSettings() {
               <div className="mt-auto pt-2">
                 {!runtime.installed ? (
                   <Button
-                    onClick={() => handleNodeInstall(runtime.version)}
+                    onClick={() => actions.installNode(runtime.version)}
                     disabled={installingNode !== null}
                     size="sm"
                     className="w-full h-9 bg-brand-node hover:bg-brand-node/90 text-white"
@@ -346,7 +230,7 @@ export default function AddonSettings() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => handleNodeUninstall(runtime.version)}
+                    onClick={() => actions.uninstallNode(runtime.version)}
                     disabled={installingNode !== null}
                     variant="outline"
                     size="sm"

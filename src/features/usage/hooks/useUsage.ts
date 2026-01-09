@@ -1,20 +1,31 @@
-import { useState, useEffect, useCallback } from 'react';
-import { UsageHeader } from './UsageHeader';
-import { UsageOverview } from './UsageOverview';
-import { UsageChart } from './UsageChart';
-import { UsageLogs } from './UsageLogs';
-import {
-  UsageFilter,
-  UsageSummary,
-  UsageChartPoint,
-  UsageStat,
-} from '@/models/usage';
+import { useState, useCallback, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-
 import { useAppDispatch } from '@/store/hooks';
 import { showSuccess, showError } from '@/store/slices/notificationSlice';
+import {
+  type UsageFilter,
+  type UsageSummary,
+  type UsageChartPoint,
+  type UsageStat,
+} from '@/models/usage';
 
-export function UsagePage() {
+export interface UseUsageReturn {
+  filter: UsageFilter;
+  setFilter: (filter: UsageFilter) => void;
+  summary: UsageSummary | null;
+  chartData: UsageChartPoint[];
+  logs: UsageStat[];
+  loading: boolean;
+  interval: string;
+  setInterval: (interval: string) => void;
+  page: number;
+  setPage: (page: number) => void;
+  LIMIT: number;
+  handleClearUsage: () => Promise<void>;
+  refresh: () => void;
+}
+
+export function useUsage(): UseUsageReturn {
   const dispatch = useAppDispatch();
   const [filter, setFilter] = useState<UsageFilter>({});
   const [summary, setSummary] = useState<UsageSummary | null>(null);
@@ -25,7 +36,6 @@ export function UsagePage() {
   const [page, setPage] = useState(1);
   const LIMIT = 20;
 
-  // Function to refresh data
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -61,7 +71,6 @@ export function UsagePage() {
     try {
       await invoke('clear_usage');
       dispatch(showSuccess('Usage data cleared successfully'));
-      // Refresh data
       fetchData();
     } catch (error) {
       console.error('Failed to clear usage data:', error);
@@ -69,34 +78,19 @@ export function UsagePage() {
     }
   };
 
-  return (
-    <div className="space-y-8">
-      <UsageHeader
-        filter={filter}
-        onFilterChange={setFilter}
-        interval={interval}
-        onIntervalChange={setInterval}
-        onClearUsage={handleClearUsage}
-      />
-
-      <div
-        className={`space-y-6 transition-opacity duration-300 ${
-          loading ? 'opacity-50' : 'opacity-100'
-        }`}
-      >
-        {summary && <UsageOverview summary={summary} loading={loading} />}
-
-        <UsageChart data={chartData} loading={loading} />
-
-        <UsageLogs
-          logs={logs}
-          page={page}
-          limit={LIMIT}
-          onPageChange={setPage}
-          hasMore={logs.length === LIMIT}
-          loading={loading}
-        />
-      </div>
-    </div>
-  );
+  return {
+    filter,
+    setFilter,
+    summary,
+    chartData,
+    logs,
+    loading,
+    interval,
+    setInterval,
+    page,
+    setPage,
+    LIMIT,
+    handleClearUsage,
+    refresh: fetchData,
+  };
 }
