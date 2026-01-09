@@ -6,6 +6,7 @@ import { EmptyState } from '@/ui/atoms/empty-state';
 import { Input } from '@/ui/atoms/input';
 import { Label } from '@/ui/atoms/label';
 import { Textarea } from '@/ui/atoms/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/atoms/tabs';
 import {
   Dialog,
   DialogBody,
@@ -22,6 +23,9 @@ import {
   showError,
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
+import { CommunityPromptsSection } from '@/features/prompt/ui/CommunityPromptsSection';
+import { InstallPromptDialog } from '@/features/prompt/ui/InstallPromptDialog';
+import type { HubPrompt } from '@/features/prompt/types';
 
 // Types matching Rust structs
 interface Prompt {
@@ -41,6 +45,10 @@ export function PromptManagement() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [promptToDelete, setPromptToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [installDialogOpen, setInstallDialogOpen] = useState(false);
+  const [promptToInstall, setPromptToInstall] = useState<HubPrompt | null>(
+    null
+  );
 
   useEffect(() => {
     loadPrompts();
@@ -119,44 +127,77 @@ export function PromptManagement() {
     }
   };
 
+  const handleInstallClick = (prompt: HubPrompt) => {
+    setPromptToInstall(prompt);
+    setInstallDialogOpen(true);
+  };
+
+  const handleInstalled = () => {
+    loadPrompts();
+  };
+
+  const installedPromptIds = prompts.map((p) => p.id);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{t('managePrompts')}</p>
-        <Button onClick={handleAdd} size="sm">
-          <Plus className="mr-2 size-4" />
-          {t('addPrompt')}
-        </Button>
-      </div>
+      <Tabs defaultValue="installed" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="installed">
+            {t('installedPrompts', { defaultValue: 'Installed Prompts' })}
+          </TabsTrigger>
+          <TabsTrigger value="community">
+            {t('communityPrompts', { defaultValue: 'Community Prompts' })}
+          </TabsTrigger>
+        </TabsList>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <p className="text-sm text-muted-foreground">{t('loading')}</p>
-        </div>
-      ) : prompts.length === 0 ? (
-        <EmptyState icon={FileText} title={t('noPrompts')} />
-      ) : (
-        <ScrollArea className="h-full [&_[data-slot='scroll-area-scrollbar']]:hidden">
-          <div className="space-y-2">
-            {prompts.map((prompt) => (
-              <div
-                key={prompt.id}
-                onClick={() => handleEdit(prompt)}
-                className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent/50 transition-colors cursor-pointer"
-              >
-                <div className="flex-1 space-y-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{prompt.name}</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {prompt.content}
-                  </p>
-                </div>
-              </div>
-            ))}
+        <TabsContent value="installed" className="mt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {t('managePrompts')}
+            </p>
+            <Button onClick={handleAdd} size="sm">
+              <Plus className="mr-2 size-4" />
+              {t('addPrompt')}
+            </Button>
           </div>
-        </ScrollArea>
-      )}
+
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-sm text-muted-foreground">{t('loading')}</p>
+            </div>
+          ) : prompts.length === 0 ? (
+            <EmptyState icon={FileText} title={t('noPrompts')} />
+          ) : (
+            <ScrollArea className="h-full [&_[data-slot='scroll-area-scrollbar']]:hidden">
+              <div className="space-y-2">
+                {prompts.map((prompt) => (
+                  <div
+                    key={prompt.id}
+                    onClick={() => handleEdit(prompt)}
+                    className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex-1 space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">{prompt.name}</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {prompt.content}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </TabsContent>
+
+        <TabsContent value="community" className="mt-6 space-y-4">
+          <CommunityPromptsSection
+            installedPromptIds={installedPromptIds}
+            onInstall={handleInstallClick}
+          />
+        </TabsContent>
+      </Tabs>
 
       <PromptDialog
         open={dialogOpen}
@@ -179,6 +220,13 @@ export function PromptManagement() {
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
         promptName={prompts.find((p) => p.id === promptToDelete)?.name}
+      />
+
+      <InstallPromptDialog
+        open={installDialogOpen}
+        onOpenChange={setInstallDialogOpen}
+        prompt={promptToInstall}
+        onInstalled={handleInstalled}
       />
     </div>
   );

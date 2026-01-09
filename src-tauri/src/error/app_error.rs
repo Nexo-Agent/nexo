@@ -46,6 +46,12 @@ pub enum AppError {
     #[error("[Prompt] {0}")]
     Prompt(String),
 
+    #[error("[Hub] {0}")]
+    Hub(String),
+
+    #[error("[PromptTemplate] {0}")]
+    PromptTemplate(String),
+
     #[error("[Cancelled] Operation cancelled by user")]
     Cancelled,
 

@@ -192,5 +192,20 @@
   "nodeUninstalled": "Node.js {{version}} uninstalled successfully",
   "failedToLoadNodeStatus": "Failed to load Node.js status",
   "failedToInstallNode": "Failed to install Node.js {{version}}",
-  "failedToUninstallNode": "Failed to uninstall Node.js {{version}}"
+  "failedToUninstallNode": "Failed to uninstall Node.js {{version}}",
+  "installedPrompts": "Installed Prompts",
+  "communityPrompts": "Community Prompts",
+  "loadingHubPrompts": "Loading prompts...",
+  "noHubPrompts": "No prompts available",
+  "noHubPromptsDescription": "No prompt templates found in the hub.",
+  "installPrompt": "Install Prompt",
+  "loadingTemplate": "Loading template...",
+  "fillVariables": "Fill in the variables",
+  "preview": "Preview",
+  "promptContent": "Prompt Content",
+  "failedToLoadTemplate": "Failed to load template",
+  "installing": "Installing...",
+  "promptInstalled": "Prompt installed successfully",
+  "promptInstalledDescription": "The prompt has been added to your collection",
+  "variablesWillBeFilledInChat": "Variables ({{variables}}) will be filled when using this prompt in chat."
 }

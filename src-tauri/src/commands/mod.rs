@@ -1,5 +1,6 @@
 pub mod addon;
 pub mod chat;
+pub mod hub;
 pub mod llm_connection;
 pub mod mcp_connection;
 pub mod mcp_tool;

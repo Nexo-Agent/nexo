@@ -180,6 +180,10 @@ pub fn run() {
             commands::prompt::get_prompts,
             commands::prompt::update_prompt,
             commands::prompt::delete_prompt,
+            // Hub commands
+            commands::hub::fetch_hub_prompts,
+            commands::hub::fetch_prompt_template,
+            commands::hub::install_prompt_from_hub,
             // MCP Tools commands
             commands::mcp_tool::test_mcp_connection_and_fetch_tools,
             commands::mcp_tool::connect_mcp_server_and_fetch_tools,
