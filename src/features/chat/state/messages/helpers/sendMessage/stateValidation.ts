@@ -21,8 +21,17 @@ export function validateAndExtractState(
 
   const workspaceSettings =
     state.workspaceSettings.settingsByWorkspaceId[selectedWorkspaceId];
-  if (!workspaceSettings?.llmConnectionId) {
-    throw new Error('No LLM connection configured for workspace');
+  let llmConnectionId = workspaceSettings?.llmConnectionId;
+  let selectedModel = state.chatInput.selectedModel;
+
+  if (selectedModel?.includes('::')) {
+    const [connId, ...modelIdParts] = selectedModel.split('::');
+    llmConnectionId = connId;
+    selectedModel = modelIdParts.join('::');
+  }
+
+  if (!llmConnectionId) {
+    throw new Error('No LLM connection configured');
   }
 
   // Use RTK Query selectors
@@ -31,13 +40,12 @@ export function validateAndExtractState(
   const llmConnections = (llmConnectionsResult.data || []) as LLMConnection[];
 
   const llmConnection = llmConnections.find(
-    (conn) => conn.id === workspaceSettings.llmConnectionId
+    (conn) => conn.id === llmConnectionId
   );
   if (!llmConnection) {
     throw new Error('LLM connection not found');
   }
 
-  const selectedModel = state.chatInput.selectedModel;
   if (!selectedModel) {
     throw new Error('No model selected');
   }

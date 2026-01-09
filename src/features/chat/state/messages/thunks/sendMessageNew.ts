@@ -52,6 +52,7 @@ export function createSendMessageThunkNew(_actions: {
           content,
           selectedModel: context.selectedModel,
           reasoningEffort: isThinkingEnabled ? reasoningEffort : undefined,
+          llmConnectionId: context.llmConnection.id,
         }
       );
 

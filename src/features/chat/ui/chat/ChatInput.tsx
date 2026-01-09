@@ -14,6 +14,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
+  SelectSeparator,
 } from '@/ui/atoms/select';
 import {
   DropdownMenu,
@@ -234,15 +237,34 @@ export function ChatInput({
     setPromptVariables({});
   };
 
-  const selectedConnection = selectedLLMConnectionId
-    ? llmConnections.find((conn) => conn.id === selectedLLMConnectionId)
-    : null;
-  const availableModels = selectedConnection?.models || [];
-  const selectedModelName = selectedModel
-    ? availableModels.find((m) => m.id === selectedModel)?.name
-    : null;
+  // Find current connection and model name
+  const { currentConnection, currentModelName } = (() => {
+    if (!selectedModel) {
+      const conn = selectedLLMConnectionId
+        ? llmConnections.find((conn) => conn.id === selectedLLMConnectionId)
+        : null;
+      return { currentConnection: conn, currentModelName: null };
+    }
 
-  const supportsVision = isVisionModel(selectedModelName);
+    let connId = selectedLLMConnectionId;
+    let modelId = selectedModel;
+
+    if (selectedModel.includes('::')) {
+      const [parsedConnId, ...modelIdParts] = selectedModel.split('::');
+      connId = parsedConnId;
+      modelId = modelIdParts.join('::');
+    }
+
+    const conn = llmConnections.find((c) => c.id === connId);
+    const model = conn?.models?.find((m) => m.id === modelId);
+
+    return {
+      currentConnection: conn,
+      currentModelName: model?.name || modelId,
+    };
+  })();
+
+  const supportsVision = isVisionModel(currentModelName);
 
   useEffect(() => {
     // Note: We use JS resize + debounce instead of CSS `field-sizing: content`
@@ -757,15 +779,17 @@ export function ChatInput({
 
                 {/* Model Selector */}
                 <Select
-                  value={selectedModel || ''}
+                  value={
+                    selectedModel
+                      ? selectedModel.includes('::')
+                        ? selectedModel
+                        : `${selectedLLMConnectionId}::${selectedModel}`
+                      : ''
+                  }
                   onValueChange={(val) => {
                     handleModelChange(val || undefined);
                   }}
-                  disabled={
-                    !selectedLLMConnectionId ||
-                    availableModels.length === 0 ||
-                    disabled
-                  }
+                  disabled={llmConnections.length === 0 || disabled}
                 >
                   <SelectTrigger
                     className="h-7 w-auto min-w-[120px] text-sm border-none bg-transparent dark:bg-transparent hover:bg-muted/50 shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -774,23 +798,54 @@ export function ChatInput({
                     <SelectValue
                       placeholder={t('selectModel', { ns: 'settings' })}
                     >
-                      {selectedModelName ||
-                        t('selectModel', { ns: 'settings' })}
+                      {currentModelName ? (
+                        <div className="flex items-center gap-2">
+                          {currentConnection && (
+                            <span className="text-muted-foreground font-medium opacity-70">
+                              {currentConnection.name}:
+                            </span>
+                          )}
+                          <span>{currentModelName}</span>
+                        </div>
+                      ) : (
+                        t('selectModel', { ns: 'settings' })
+                      )}
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
-                    {availableModels.length === 0 ? (
+                  <SelectContent className="max-h-[min(400px,var(--radix-select-content-available-height))]">
+                    {llmConnections.length === 0 ? (
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        {!selectedLLMConnectionId
-                          ? t('pleaseSelectLLMConnection', { ns: 'settings' })
-                          : t('noModels', { ns: 'chat' })}
+                        {t('pleaseSelectLLMConnection', { ns: 'settings' })}
                       </div>
                     ) : (
-                      availableModels.map((model) => (
-                        <SelectItem key={model.id} value={model.id}>
-                          {model.name}
-                        </SelectItem>
-                      ))
+                      llmConnections.map((conn, index) => {
+                        if (
+                          !conn.models ||
+                          !Array.isArray(conn.models) ||
+                          conn.models.length === 0
+                        ) {
+                          return null;
+                        }
+
+                        return (
+                          <div key={conn.id}>
+                            {index > 0 && <SelectSeparator className="my-1" />}
+                            <SelectGroup>
+                              <SelectLabel className="px-3 py-2 text-[10px] uppercase tracking-widest font-extrabold text-foreground bg-muted/40 border-y border-border/50 mt-1 mb-1 first:mt-0">
+                                {conn.name} ({conn.provider})
+                              </SelectLabel>
+                              {conn.models.map((model) => (
+                                <SelectItem
+                                  key={`${conn.id}::${model.id}`}
+                                  value={`${conn.id}::${model.id}`}
+                                >
+                                  {model.name || model.id}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </div>
+                        );
+                      })
                     )}
                   </SelectContent>
                 </Select>

@@ -82,7 +82,14 @@ export function ChatArea() {
     }
 
     const workspaceSetting = workspaceSettings[selectedWorkspace.id];
-    const llmConnectionId = workspaceSetting?.llmConnectionId;
+    let llmConnectionId = workspaceSetting?.llmConnectionId;
+    let modelId = selectedModel;
+
+    if (selectedModel?.includes('::')) {
+      const [connId, ...modelIdParts] = selectedModel.split('::');
+      llmConnectionId = connId;
+      modelId = modelIdParts.join('::');
+    }
 
     if (!llmConnectionId) {
       dispatch(showError(t('pleaseSelectLLMConnection', { ns: 'settings' })));
@@ -97,7 +104,7 @@ export function ChatArea() {
       return;
     }
 
-    if (!selectedModel) {
+    if (!modelId) {
       dispatch(showError(t('pleaseSelectModel', { ns: 'settings' })));
       return;
     }
@@ -110,7 +117,7 @@ export function ChatArea() {
       input.trim().length,
       attachedFiles.length > 0
     );
-    setLLMContext(llmConnection.provider, selectedModel);
+    setLLMContext(llmConnection.provider, modelId);
     setChatContext(selectedChatId);
 
     // Log attached files for debugging

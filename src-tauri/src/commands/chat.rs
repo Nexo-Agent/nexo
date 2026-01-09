@@ -80,16 +80,23 @@ pub async fn send_message(
     content: String,
     selected_model: Option<String>,
     reasoning_effort: Option<String>,
+    llm_connection_id: Option<String>,
     app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<SendMessageResult, AppError> {
     let result = state
         .chat_service
-        .send_message(chat_id.clone(), content.clone(), selected_model, reasoning_effort, app)
+        .send_message(
+            chat_id.clone(),
+            content.clone(),
+            selected_model,
+            reasoning_effort,
+            llm_connection_id,
+            app,
+        )
         .await;
 
-    let (assistant_message_id, _) = result
-        .map_err(|e| AppError::Generic(e.to_string()))?;
+    let (assistant_message_id, _) = result.map_err(|e| AppError::Generic(e.to_string()))?;
 
     Ok(SendMessageResult {
         assistant_message_id,
@@ -103,6 +110,7 @@ pub async fn edit_and_resend_message(
     new_content: String,
     selected_model: Option<String>,
     reasoning_effort: Option<String>,
+    llm_connection_id: Option<String>,
     app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<SendMessageResult, AppError> {
@@ -114,6 +122,7 @@ pub async fn edit_and_resend_message(
             new_content,
             selected_model,
             reasoning_effort,
+            llm_connection_id,
             app,
         )
         .await

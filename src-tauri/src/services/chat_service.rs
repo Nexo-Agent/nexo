@@ -180,7 +180,14 @@ impl ChatService {
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<String, AppError>> + Send>> {
         Box::pin(async move {
             let result = self
-                .send_message(chat_id.clone(), prompt.clone(), None, None, app.clone())
+                .send_message(
+                    chat_id.clone(),
+                    prompt.clone(),
+                    None,
+                    None,
+                    None,
+                    app.clone(),
+                )
                 .await;
             result.map(|(_, content)| content)
         })
@@ -193,6 +200,7 @@ impl ChatService {
         content: String,
         selected_model: Option<String>,
         reasoning_effort: Option<String>,
+        llm_connection_id_override: Option<String>,
         app: AppHandle,
     ) -> Result<(String, String), AppError> {
         // Track chat message operation
@@ -219,9 +227,8 @@ impl ChatService {
             .get_by_workspace_id(&workspace_id)?
             .ok_or_else(|| AppError::Validation("Workspace settings not found".to_string()))?;
 
-        let llm_connection_id = workspace_settings
-            .llm_connection_id
-            .clone()
+        let llm_connection_id = llm_connection_id_override
+            .or(workspace_settings.llm_connection_id.clone())
             .ok_or_else(|| {
                 AppError::Validation("LLM connection not configured for workspace".to_string())
             })?;
@@ -584,6 +591,7 @@ impl ChatService {
                         app,
                         tools,
                         system_prompt_override,
+                        Some(llm_connection_id.clone()), // Pass the effective connection ID
                     )
                     .await;
             }
@@ -600,6 +608,7 @@ impl ChatService {
         new_content: String,
         selected_model: Option<String>,
         reasoning_effort: Option<String>,
+        llm_connection_id: Option<String>,
         app: AppHandle,
     ) -> Result<(String, String), AppError> {
         // 1. Get the message to find its timestamp before deleting
@@ -612,7 +621,14 @@ impl ChatService {
                     .delete_messages_after(chat_id.clone(), message_id.clone())?;
                 // Send message with new content (this will create a new user message and trigger agent loop with tool calls)
                 return self
-                    .send_message(chat_id, new_content, selected_model, reasoning_effort, app)
+                    .send_message(
+                        chat_id,
+                        new_content,
+                        selected_model,
+                        reasoning_effort,
+                        llm_connection_id,
+                        app,
+                    )
                     .await;
             };
 
@@ -628,8 +644,15 @@ impl ChatService {
         }
 
         // 4. Send message with new content (this will create a new user message and trigger agent loop with tool calls)
-        self.send_message(chat_id, new_content, selected_model, reasoning_effort, app)
-            .await
+        self.send_message(
+            chat_id,
+            new_content,
+            selected_model,
+            reasoning_effort,
+            llm_connection_id,
+            app,
+        )
+        .await
     }
 
     /// Send message with agent loop - handles tool calls and continues conversation
@@ -645,6 +668,7 @@ impl ChatService {
         app: AppHandle,
         active_tools: Option<Vec<ChatCompletionTool>>,
         system_prompt_override: Option<String>,
+        llm_connection_id_override: Option<String>,
     ) -> Result<(String, String), AppError> {
         // Get workspace settings
         let chat = self
@@ -660,9 +684,8 @@ impl ChatService {
 
         let max_iterations = workspace_settings.max_agent_iterations.unwrap_or(25) as usize;
 
-        let llm_connection_id = workspace_settings
-            .llm_connection_id
-            .clone()
+        let llm_connection_id = llm_connection_id_override
+            .or(workspace_settings.llm_connection_id.clone())
             .ok_or_else(|| {
                 AppError::Validation("LLM connection not configured for workspace".to_string())
             })?;

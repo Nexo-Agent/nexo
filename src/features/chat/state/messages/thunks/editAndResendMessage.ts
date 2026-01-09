@@ -104,6 +104,7 @@ export function createEditAndResendMessageThunk(actions: {
           newContent,
           selectedModel: context.selectedModel,
           reasoningEffort: isThinkingEnabled ? reasoningEffort : undefined,
+          llmConnectionId: context.llmConnection.id,
         }
       );
 
