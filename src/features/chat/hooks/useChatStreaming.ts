@@ -384,6 +384,17 @@ export function useChatStreaming() {
             { type: 'Message', id: `LIST_${payload.chat_id}` },
           ])
         );
+
+        // Clear streaming state when tool execution fails
+        // This ensures UI updates and cancel button works
+        dispatch(
+          setStreamingByChatId({
+            chatId: payload.chat_id,
+            messageId: null,
+          })
+        );
+        dispatch(clearStreamingMessageId());
+        dispatch(clearStreamingStartTime(payload.chat_id));
       }
     );
 

@@ -16,7 +16,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["devtools"] }
+tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
@@ -47,8 +47,6 @@ shell-words = "1.1.1"
 sentry = { version = "0.34", features = ["backtrace", "contexts", "panic", "anyhow", "debug-images"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-tauri-plugin-devtools = "2.0.0"
-
 [lints.clippy]
 pedantic = "warn"
 nursery = "warn"

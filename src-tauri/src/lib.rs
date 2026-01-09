@@ -63,16 +63,7 @@ fn init_sentry() -> sentry::ClientInitGuard {
 pub fn run() {
     // Initialize Sentry
     let _sentry_guard = init_sentry();
-
-    #[cfg(debug_assertions)]
-    let devtools = tauri_plugin_devtools::init();
-
-    let mut builder = tauri::Builder::default();
-
-    #[cfg(debug_assertions)]
-    {
-        builder = builder.plugin(devtools);
-    }
+    let builder = tauri::Builder::default();
 
     builder
         .plugin(tauri_plugin_clipboard_manager::init())

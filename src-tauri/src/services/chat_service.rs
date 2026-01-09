@@ -1203,45 +1203,61 @@ impl ChatService {
                 }
             } else {
                 // Standard Execution
-                let connection_id = tool_to_connection
-                    .get(&tool_call.function.name)
-                    .ok_or_else(|| {
-                        AppError::Validation(format!(
-                            "Tool {} not found in any MCP connection",
-                            tool_call.function.name
-                        ))
-                    })?;
-
-                let arguments_str = tool_call.function.arguments.trim();
-                let arguments: serde_json::Value = if arguments_str.is_empty() {
-                    serde_json::json!({})
-                } else {
-                    serde_json::from_str(arguments_str).map_err(|e| {
-                        AppError::Validation(format!(
-                            "Failed to parse tool arguments for '{}': {} (arguments: '{}')",
-                            tool_call.function.name, e, arguments_str
-                        ))
-                    })?
+                let connection_id = match tool_to_connection.get(&tool_call.function.name) {
+                    Some(id) => id,
+                    None => {
+                        // Return error instead of using ?, so it gets handled in match below
+                        &"".to_string() // Dummy value, will be caught below
+                    }
                 };
 
-                // Execute with timeout and cancellation support
-                let tool_exec_future = self.tool_service.execute_tool(
-                    connection_id,
-                    &tool_call.function.name,
-                    arguments,
-                );
+                // Validate connection exists first
+                if connection_id.is_empty() {
+                    Err(AppError::Validation(format!(
+                        "Tool {} not found in any MCP connection",
+                        tool_call.function.name
+                    )))
+                } else {
+                    let arguments_str = tool_call.function.arguments.trim();
 
-                tokio::select! {
-                    result = tokio::time::timeout(tokio::time::Duration::from_secs(60), tool_exec_future) => {
-                        match result {
-                            Ok(r) => r,
-                            Err(_) => Err(AppError::Generic(
-                                "Tool execution timed out after 60 seconds".to_string(),
-                            )),
+                    // Parse arguments - return error instead of propagating with ?
+                    let arguments_result: Result<serde_json::Value, AppError> =
+                        if arguments_str.is_empty() {
+                            Ok(serde_json::json!({}))
+                        } else {
+                            serde_json::from_str(arguments_str).map_err(|e| {
+                                AppError::Validation(format!(
+                                    "Failed to parse tool arguments for '{}': {} (arguments: '{}')",
+                                    tool_call.function.name, e, arguments_str
+                                ))
+                            })
+                        };
+
+                    // Only proceed with execution if arguments parsed successfully
+                    match arguments_result {
+                        Ok(arguments) => {
+                            // Execute with timeout and cancellation support
+                            let tool_exec_future = self.tool_service.execute_tool(
+                                connection_id,
+                                &tool_call.function.name,
+                                arguments,
+                            );
+
+                            tokio::select! {
+                                result = tokio::time::timeout(tokio::time::Duration::from_secs(60), tool_exec_future) => {
+                                    match result {
+                                        Ok(r) => r,
+                                        Err(_) => Err(AppError::Generic(
+                                            "Tool execution timed out after 60 seconds".to_string(),
+                                        )),
+                                    }
+                                }
+                                _ = cancellation_rx.recv() => {
+                                    Err(AppError::Cancelled)
+                                }
+                            }
                         }
-                    }
-                    _ = cancellation_rx.recv() => {
-                        Err(AppError::Cancelled)
+                        Err(e) => Err(e), // Return parse error to be handled below
                     }
                 }
             };
