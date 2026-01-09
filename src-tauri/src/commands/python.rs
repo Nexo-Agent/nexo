@@ -64,3 +64,12 @@ pub async fn install_python_runtime(
 pub fn uninstall_python_runtime(app: AppHandle, version: String) -> Result<(), AppError> {
     PythonRuntime::uninstall(&app, &version)
 }
+
+#[command]
+pub async fn execute_python_code(
+    app: AppHandle,
+    code: String,
+    version: Option<String>,
+) -> Result<crate::services::python_runtime::ExecutionResult, AppError> {
+    PythonRuntime::execute_script(&app, version, &code)
+}

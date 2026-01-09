@@ -16,7 +16,6 @@ import {
   SelectValue,
   SelectGroup,
   SelectLabel,
-  SelectSeparator,
 } from '@/ui/atoms/select';
 import {
   DropdownMenu,
@@ -818,7 +817,7 @@ export function ChatInput({
                         {t('pleaseSelectLLMConnection', { ns: 'settings' })}
                       </div>
                     ) : (
-                      llmConnections.map((conn, index) => {
+                      llmConnections.map((conn) => {
                         if (
                           !conn.models ||
                           !Array.isArray(conn.models) ||
@@ -829,7 +828,6 @@ export function ChatInput({
 
                         return (
                           <div key={conn.id}>
-                            {index > 0 && <SelectSeparator className="my-1" />}
                             <SelectGroup>
                               <SelectLabel className="px-3 py-2 text-[10px] uppercase tracking-widest font-extrabold text-foreground bg-muted/40 border-y border-border/50 mt-1 mb-1 first:mt-0">
                                 {conn.name} ({conn.provider})

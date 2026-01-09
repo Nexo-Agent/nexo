@@ -3,65 +3,30 @@ import { Play, Loader2, AlertCircle, Copy, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { cn } from '@/lib/utils';
-import type { PyodideInterface } from 'pyodide';
-import { loadPyodide, getPyodideState } from '@/lib/pyodide-loader';
+import { invokeCommand, TauriCommands } from '@/lib/tauri';
 
 interface PythonExecutorProps {
   code: string;
   className?: string;
+  version?: string; // Optional python version
 }
 
-export function PythonExecutor({ code, className }: PythonExecutorProps) {
+interface ExecutionResult {
+  stdout: string;
+  stderr: string;
+}
+
+export function PythonExecutor({
+  code,
+  className,
+  version,
+}: PythonExecutorProps) {
   const { t } = useTranslation('common');
   const [output, setOutput] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isRunning, setIsRunning] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
-  const pyodideRef = useRef<PyodideInterface | null>(null);
   const outputRef = useRef<HTMLDivElement>(null);
-
-  // Load Pyodide using shared loader (cached)
-  useEffect(() => {
-    let mounted = true;
-
-    const initializePyodide = async () => {
-      try {
-        // Check if already loaded
-        const state = getPyodideState();
-        if (state.pyodide) {
-          if (mounted) {
-            pyodideRef.current = state.pyodide;
-            setIsLoaded(true);
-          }
-          return;
-        }
-
-        // Load Pyodide (will use cache if already loading)
-        const pyodide = await loadPyodide();
-
-        if (mounted) {
-          pyodideRef.current = pyodide;
-          setIsLoaded(true);
-        }
-      } catch (err: unknown) {
-        console.error('Error loading Pyodide:', err);
-        if (mounted) {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError(String(err));
-          }
-        }
-      }
-    };
-
-    initializePyodide();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   // Scroll to output when it updates
   useEffect(() => {
@@ -74,45 +39,28 @@ export function PythonExecutor({ code, className }: PythonExecutorProps) {
   }, [output, error]);
 
   const handleRun = async () => {
-    if (!pyodideRef.current || !code.trim()) return;
+    if (!code.trim()) return;
 
     setIsRunning(true);
     setOutput('');
     setError('');
 
     try {
-      // Capture stdout
-      let stdout = '';
-      pyodideRef.current.setStdout({
-        batched: (text: string) => {
-          stdout += text;
-        },
-      });
+      const result = await invokeCommand<ExecutionResult>(
+        TauriCommands.EXECUTE_PYTHON_CODE,
+        {
+          code,
+          version: version || null,
+        }
+      );
 
-      // Capture stderr
-      let stderr = '';
-      pyodideRef.current.setStderr({
-        batched: (text: string) => {
-          stderr += text;
-        },
-      });
-
-      // Run the code
-      const result = await pyodideRef.current.runPythonAsync(code);
-
-      // Combine output
-      let finalOutput = stdout;
-      if (result !== undefined && result !== null) {
-        if (finalOutput) finalOutput += '\n';
-        finalOutput += String(result);
-      }
-
-      setOutput(finalOutput || '(Không có output)');
-      if (stderr) {
-        setError(stderr);
+      setOutput(result.stdout || '(No output)');
+      if (result.stderr) {
+        setError(result.stderr);
       }
     } catch (err: unknown) {
       console.error('Python execution error:', err);
+      // Backend errors usually come in a specific format but invokeCommand might throw
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -159,7 +107,7 @@ export function PythonExecutor({ code, className }: PythonExecutorProps) {
             size="sm"
             className="bg-primary text-primary-foreground"
             onClick={handleRun}
-            disabled={!isLoaded || isRunning || !code.trim()}
+            disabled={isRunning || !code.trim()}
             title={t('runPythonCode')}
           >
             {isRunning ? (
@@ -202,12 +150,6 @@ export function PythonExecutor({ code, className }: PythonExecutorProps) {
               </pre>
             </div>
           )}
-        </div>
-      )}
-
-      {!isLoaded && !error && (
-        <div className="mt-2 text-xs text-muted-foreground">
-          {t('loadingPythonRuntime')}
         </div>
       )}
     </div>

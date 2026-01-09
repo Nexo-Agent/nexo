@@ -1,7 +1,14 @@
 use crate::error::AppError;
+use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use tauri::{AppHandle, Manager};
+
+#[derive(Debug, serde::Serialize)]
+pub struct ExecutionResult {
+    pub stdout: String,
+    pub stderr: String,
+}
 
 /// Get the path to bundled UV binary (sidecar)
 pub fn get_bundled_uv_path(app: &AppHandle) -> Result<PathBuf, AppError> {
@@ -235,5 +242,53 @@ impl PythonRuntime {
         }
 
         Ok(installed)
+    }
+
+    /// Execute python script using the installed runtime
+    pub fn execute_script(
+        app: &AppHandle,
+        version: Option<String>,
+        script: &str,
+    ) -> Result<ExecutionResult, AppError> {
+        let python_path = if let Some(v) = version {
+            Self::get_installed_python(app, &v)?
+        } else {
+            // Find a default installed version
+            let installed = Self::list_installed(app)?;
+            // Sort to get the latest version ideally, or just pick one
+            let mut versions: Vec<_> = installed.keys().cloned().collect();
+            versions.sort(); // Lexicographical sort might not be perfect for semantic versioning but works for now
+
+            if let Some(latest) = versions.last() {
+                installed.get(latest).unwrap().clone()
+            } else {
+                return Err(AppError::Python("No Python runtime installed".to_string()));
+            }
+        };
+
+        // Create a temporary file for the script
+        let mut temp_file = tempfile::Builder::new().suffix(".py").tempfile()?;
+
+        write!(temp_file, "{}", script)?;
+
+        // Ensure the file is flushed
+        temp_file.flush()?;
+
+        let temp_path = temp_file.path();
+
+        // Run the script
+        // We set the parent of the temp file as current directory so it can import other files if needed,
+        // though strictly they might want project root.
+        // For now let's just run it.
+        // To support UTF-8 on Windows, we might need to set PYTHONUTF8=1 env var
+        let output = Command::new(&python_path)
+            .arg(temp_path)
+            .env("PYTHONUTF8", "1")
+            .output()?;
+
+        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+
+        Ok(ExecutionResult { stdout, stderr })
     }
 }

@@ -199,6 +199,7 @@ pub fn run() {
             commands::python::get_python_runtimes_status,
             commands::python::install_python_runtime,
             commands::python::uninstall_python_runtime,
+            commands::python::execute_python_code,
             // Addon config commands
             commands::addon::get_addon_config,
             commands::addon::refresh_addon_config,

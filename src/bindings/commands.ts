@@ -82,6 +82,7 @@ export const TauriCommands = {
   GET_PYTHON_RUNTIMES_STATUS: 'get_python_runtimes_status',
   INSTALL_PYTHON_RUNTIME: 'install_python_runtime',
   UNINSTALL_PYTHON_RUNTIME: 'uninstall_python_runtime',
+  EXECUTE_PYTHON_CODE: 'execute_python_code',
 
   // Addon config commands
   GET_ADDON_CONFIG: 'get_addon_config',
