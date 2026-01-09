@@ -132,6 +132,7 @@ export function SettingsScreen() {
         <button
           key={section.id}
           onClick={() => dispatch(setSettingsSection(section.id))}
+          data-tour={section.id === 'llm' ? 'settings-llm-tab' : undefined}
           className={cn(
             'mb-2 w-full flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all',
             'hover:bg-accent hover:text-accent-foreground',

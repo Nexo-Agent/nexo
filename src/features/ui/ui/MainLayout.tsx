@@ -106,6 +106,7 @@ export function MainLayout() {
               size="icon"
               onClick={handleSettingsClick}
               aria-label={t('settings', { ns: 'common' })}
+              data-tour="settings-nav"
               className={
                 activePage === 'settings' && settingsSection !== 'agent'
                   ? 'bg-accent text-accent-foreground h-7 w-7'

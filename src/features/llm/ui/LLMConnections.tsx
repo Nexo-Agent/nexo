@@ -126,7 +126,7 @@ export function LLMConnections() {
         <p className="text-sm text-muted-foreground">
           {t('manageLLMConnections')}
         </p>
-        <Button onClick={handleAdd} size="sm">
+        <Button onClick={handleAdd} size="sm" data-tour="llm-add-btn">
           <Plus className="mr-2 size-4" />
           {t('addConnection')}
         </Button>
@@ -411,6 +411,7 @@ function LLMConnectionDialog({
                     placeholder={t('connectionNamePlaceholder')}
                     className="w-full"
                     required
+                    data-tour="llm-name-input"
                   />
                 </div>
                 <div className="space-y-2 w-full">
@@ -424,7 +425,10 @@ function LLMConnectionDialog({
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger
+                      className="w-full"
+                      data-tour="llm-provider-select"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -466,6 +470,7 @@ function LLMConnectionDialog({
                         : t('enterApiKey')
                     }
                     className="w-full"
+                    data-tour="llm-api-key-input"
                   />
                 </div>
 
@@ -548,6 +553,7 @@ function LLMConnectionDialog({
               type="submit"
               disabled={!name.trim() || !baseUrl.trim()}
               className="flex-1"
+              data-tour="llm-save-btn"
             >
               {connection
                 ? t('save', { ns: 'common' })

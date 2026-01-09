@@ -62,6 +62,7 @@ export function AddWorkspaceDialog({
                 placeholder={t('enterWorkspaceName')}
                 className="w-full"
                 autoFocus
+                data-tour="workspace-name-input"
               />
             </div>
           </DialogBody>
@@ -77,7 +78,12 @@ export function AddWorkspaceDialog({
             >
               {t('cancel', { ns: 'common' })}
             </Button>
-            <Button type="submit" disabled={!name.trim()} className="flex-1">
+            <Button
+              type="submit"
+              disabled={!name.trim()}
+              className="flex-1"
+              data-tour="workspace-add-btn"
+            >
               {t('add', { ns: 'common' })}
             </Button>
           </DialogFooter>

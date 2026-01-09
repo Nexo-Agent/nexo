@@ -52,6 +52,7 @@ export function WorkspaceSelector({
             buttonVariants({ variant: 'ghost' }),
             'h-auto gap-1.5 px-2 py-1 hover:bg-accent'
           )}
+          data-tour="workspace-selector"
         >
           <div className="flex items-center gap-1.5">
             <div className="flex size-5 items-center justify-center rounded bg-primary text-[10px] font-medium text-primary-foreground">

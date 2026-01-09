@@ -4,6 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
 import { setStepIndex, stopTour, completeTour } from '../onboardingSlice';
 import { ONBOARDING_STEPS } from '../config';
+import {
+  navigateToSettings,
+  setSettingsSection,
+  navigateToChat,
+} from '@/features/ui/state/uiSlice';
 
 const OnboardingGuide: React.FC = () => {
   const dispatch = useDispatch();
@@ -11,11 +16,13 @@ const OnboardingGuide: React.FC = () => {
     (state: RootState) => state.onboarding
   );
 
+  const steps = activeTour ? ONBOARDING_STEPS[activeTour] : [];
+
   // Define theme colors using CSS variables
   // Note: Joyride accepts inline styles object, so we use var() to hook into existing theme system
   const joyrideStyles = {
     options: {
-      zIndex: 10000,
+      zIndex: 10000, // Maximize z-index to stay above all dialogs
       primaryColor: '#8b5cf6', // A purple accent fallback
       textColor: '#e5e7eb', // Text color fallback (dark mode friendly)
       backgroundColor: '#1f2937', // Background fallback
@@ -50,24 +57,64 @@ const OnboardingGuide: React.FC = () => {
     },
   };
 
-  if (!activeTour) return null;
-
-  const steps = ONBOARDING_STEPS[activeTour] || [];
-
   const handleCallback = (data: CallBackProps) => {
-    const { status, type, index, action } = data;
+    const { action, index, status, type } = data;
 
-    // Controlled wrapper to sync state with Redux
-    if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
-      // Handle next/prev
+    if (type === EVENTS.STEP_AFTER) {
       const newIndex = index + (action === ACTIONS.PREV ? -1 : 1);
+
+      // Handle custom actions defined in step data when moving forward
+      if (action === ACTIONS.NEXT) {
+        const currentStep = steps[index];
+        const onNextAction = currentStep?.data?.onNextAction;
+
+        if (onNextAction) {
+          // Perform the UI action
+          if (onNextAction === 'OPEN_SETTINGS') {
+            dispatch(navigateToSettings());
+          } else if (onNextAction === 'OPEN_LLM_TAB') {
+            dispatch(setSettingsSection('llm'));
+          } else if (onNextAction === 'CLOSE_SETTINGS') {
+            dispatch(navigateToChat());
+          } else if (onNextAction === 'CLICK_ADD_CONNECTION') {
+            (
+              document.querySelector(
+                '[data-tour="llm-add-btn"]'
+              ) as HTMLElement | null
+            )?.click();
+          } else if (onNextAction === 'CLICK_SAVE_CONNECTION') {
+            (
+              document.querySelector(
+                '[data-tour="llm-save-btn"]'
+              ) as HTMLElement | null
+            )?.click();
+          } else if (onNextAction === 'CLICK_WORKSPACE_ADD') {
+            (
+              document.querySelector(
+                '[data-tour="workspace-add-btn"]'
+              ) as HTMLElement | null
+            )?.click();
+          }
+
+          // Delay the step transition to allow UI to render (Settings page transition)
+          setTimeout(() => {
+            if (onNextAction === 'CLICK_SAVE_CONNECTION') {
+              dispatch(navigateToSettings());
+            }
+            dispatch(setStepIndex(newIndex));
+          }, 1000);
+          return; // Skip immediate transition
+        }
+      }
+
+      // Default immediate transition
       if (action === ACTIONS.NEXT || action === ACTIONS.PREV) {
         dispatch(setStepIndex(newIndex));
       }
     }
 
     if (([STATUS.FINISHED, STATUS.SKIPPED] as string[]).includes(status)) {
-      dispatch(completeTour(activeTour));
+      if (activeTour) dispatch(completeTour(activeTour));
     } else if (action === ACTIONS.CLOSE) {
       dispatch(stopTour());
     }

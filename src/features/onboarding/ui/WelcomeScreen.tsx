@@ -8,11 +8,11 @@ import {
   Zap,
   GitBranch,
   Database,
+  PlayCircle,
 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from '@/ui/atoms/dialog/component';
 import { Button } from '@/ui/atoms/button/button';
@@ -24,6 +24,7 @@ import {
   navigateToWorkspaceSettings,
 } from '@/features/ui/state/uiSlice';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
+import { useOnboarding } from '@/features/onboarding/hooks/useOnboarding';
 
 interface WelcomeProps {
   open: boolean;
@@ -78,6 +79,7 @@ const features = [
 export function WelcomeScreen({ open, onOpenChange }: WelcomeProps) {
   const { t } = useTranslation('common');
   const dispatch = useAppDispatch();
+  const { startTour } = useOnboarding();
 
   const handleGetStarted = async () => {
     // Always save that user has seen welcome screen
@@ -87,6 +89,14 @@ export function WelcomeScreen({ open, onOpenChange }: WelcomeProps) {
     });
     dispatch(setWelcomeOpen(false));
     onOpenChange(false);
+  };
+
+  const handleStartTour = async () => {
+    await handleGetStarted();
+    // Small delay to allow modal to close completely
+    setTimeout(() => {
+      startTour('welcomeFlow');
+    }, 300);
   };
 
   const handleFeatureClick = async (
@@ -131,26 +141,31 @@ export function WelcomeScreen({ open, onOpenChange }: WelcomeProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-5xl lg:max-w-6xl max-h-[95vh] overflow-y-auto p-6 sm:p-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 border-none shadow-2xl bg-card"
         showCloseButton={false}
       >
-        <DialogHeader className="text-center px-0">
-          <div className="flex justify-center mb-4">
-            <div className="rounded-full bg-primary/10 p-4">
-              <Sparkles className="size-8 text-primary" />
-            </div>
+        {/* Header Section */}
+        <div className="bg-muted/30 p-6 pb-4 border-b text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+            <Sparkles className="w-32 h-32 text-primary" />
           </div>
-          <DialogTitle className="text-2xl">{t('welcomeTitle')}</DialogTitle>
-          <p className="text-base mt-2 text-muted-foreground">
-            {t('welcomeDescription')}
-          </p>
-        </DialogHeader>
 
-        <div className="mt-6">
-          <h3 className="text-base font-semibold mb-4 text-center">
-            {t('welcomeFeaturesTitle')}
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="rounded-full bg-primary/10 p-3 mb-3 ring-1 ring-primary/20">
+              <Sparkles className="size-6 text-primary" />
+            </div>
+            <DialogTitle className="text-xl font-bold tracking-tight mb-1">
+              {t('welcomeTitle')}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              {t('welcomeDescription')}
+            </p>
+          </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6 [&::-webkit-scrollbar]:hidden">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {features.map((feature) => {
               const Icon = feature.icon;
               const isComingSoon = feature.comingSoon;
@@ -161,25 +176,32 @@ export function WelcomeScreen({ open, onOpenChange }: WelcomeProps) {
                     handleFeatureClick(feature.navigateTo, isComingSoon)
                   }
                   disabled={isComingSoon}
-                  className={`flex flex-col items-start gap-2 p-3 rounded-lg border bg-card transition-colors text-left w-full relative ${
+                  className={`group flex items-start gap-3 p-3 rounded-lg border bg-background/50 transition-all text-left w-full relative ${
                     isComingSoon
-                      ? 'opacity-60 cursor-not-allowed'
-                      : 'hover:bg-accent/50 cursor-pointer'
+                      ? 'opacity-60 cursor-not-allowed border-dashed'
+                      : 'hover:bg-accent/50 hover:border-primary/20 cursor-pointer shadow-sm hover:shadow-md'
                   }`}
                 >
-                  {isComingSoon && (
-                    <span className="absolute top-2 right-2 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border">
-                      {t('comingSoon')}
-                    </span>
-                  )}
-                  <div className="rounded-md bg-primary/10 p-2 flex-shrink-0">
-                    <Icon className="size-4 text-primary" />
+                  <div
+                    className={`rounded-md p-2 flex-shrink-0 transition-colors ${isComingSoon ? 'bg-muted' : 'bg-primary/5 group-hover:bg-primary/10'}`}
+                  >
+                    <Icon
+                      className={`size-4 ${isComingSoon ? 'text-muted-foreground' : 'text-primary'}`}
+                    />
                   </div>
-                  <div className="flex-1 min-w-0 w-full">
-                    <p className="text-sm font-semibold leading-tight">
-                      {t(`${feature.key}Title`)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <p className="text-sm font-semibold leading-none">
+                        {t(`${feature.key}Title`)}
+                      </p>
+                      {isComingSoon && (
+                        <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground">
+                          Soon
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-xs text-muted-foreground line-clamp-2">
                       {t(`${feature.key}Description`)}
                     </p>
                   </div>
@@ -189,10 +211,29 @@ export function WelcomeScreen({ open, onOpenChange }: WelcomeProps) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 mt-6">
-          <Button onClick={handleGetStarted} className="w-full" size="lg">
-            {t('getStarted')}
-          </Button>
+        {/* Footer Actions */}
+        <div className="p-4 bg-muted/30 border-t mt-auto flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="text-xs text-muted-foreground hidden sm:block">
+            {t('readyToStart', {
+              defaultValue: 'Ready to boost your productivity?',
+            })}
+          </div>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <Button
+              onClick={handleStartTour}
+              variant="outline"
+              className="flex-1 sm:flex-none border-primary/20 hover:bg-primary/5 text-primary"
+            >
+              <PlayCircle className="mr-2 size-4" />
+              {t('takeTheTour', { defaultValue: 'Take a Tour' })}
+            </Button>
+            <Button
+              onClick={handleGetStarted}
+              className="flex-1 sm:flex-none min-w-[120px]"
+            >
+              {t('getStarted')}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -578,6 +578,7 @@ export function ChatInput({
                 disabled={disabled}
                 className="w-full min-h-[40px] max-h-[200px] resize-none leading-relaxed text-base py-0 px-2 border-0 rounded-lg outline-none flex content-center ring-0 shadow-none focus:ring-0 focus:shadow-none bg-transparent dark:bg-transparent"
                 rows={1}
+                data-tour="chat-input-textarea"
               />
               {/* Slash Command Dropdown */}
               {slashCommand.isActive &&
@@ -766,7 +767,10 @@ export function ChatInput({
                     disabled
                   }
                 >
-                  <SelectTrigger className="h-7 w-auto min-w-[120px] text-sm border-none bg-transparent dark:bg-transparent hover:bg-muted/50 shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                  <SelectTrigger
+                    className="h-7 w-auto min-w-[120px] text-sm border-none bg-transparent dark:bg-transparent hover:bg-muted/50 shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    data-tour="model-selector"
+                  >
                     <SelectValue
                       placeholder={t('selectModel', { ns: 'settings' })}
                     >
@@ -798,32 +802,28 @@ export function ChatInput({
                       ? onSend
                       : effectiveIsStreaming
                         ? handleStopStreaming
-                        : onSend
+                        : undefined
                   }
                   disabled={
-                    input.trim()
-                      ? disabled || input.length > MAX_MESSAGE_LENGTH
-                      : !effectiveIsStreaming
+                    disabled || (!input.trim() && !effectiveIsStreaming)
                   }
                   size="icon"
-                  variant={
-                    effectiveIsStreaming && !input.trim()
-                      ? 'destructive'
-                      : 'ghost'
-                  }
                   className={cn(
-                    'h-7 w-7 shrink-0',
-                    effectiveIsStreaming && !input.trim()
-                      ? 'hover:bg-destructive/90'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    'h-8 w-8 rounded-full transition-all shadow-sm',
+                    input.trim()
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105'
+                      : effectiveIsStreaming
+                        ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   )}
+                  data-tour="send-message-btn"
                   aria-label={
                     effectiveIsStreaming && !input.trim()
                       ? t('stopStreaming', { ns: 'chat' })
                       : t('sendMessage', { ns: 'common' })
                   }
                 >
-                  {effectiveIsStreaming && !input.trim() ? (
+                  {effectiveIsStreaming ? (
                     <Square className="size-4" />
                   ) : (
                     <Send className="size-4" />
