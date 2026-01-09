@@ -8,6 +8,10 @@ pub struct LLMModel {
     pub created: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub owned_by: Option<String>,
+    #[serde(default, rename = "supportsTools")]
+    pub supports_tools: bool,
+    #[serde(default, rename = "supportsThinking")]
+    pub supports_thinking: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -3,6 +3,8 @@ export interface LLMModel {
   name: string;
   created?: number;
   owned_by?: string;
+  supportsTools: boolean;
+  supportsThinking: boolean;
 }
 
 export interface LLMConnection {

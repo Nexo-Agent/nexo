@@ -266,16 +266,26 @@ export function ChatInput({
   })();
 
   const supportsVision = isVisionModel(currentModelName);
-  const supportsThinking = currentModelName
-    ? currentModelName.toLowerCase().includes('gpt-oss') ||
-      currentModelName.toLowerCase().includes('gemini')
-    : false;
 
-  const supportsToolCalling = currentModelName
-    ? currentModelName.toLowerCase().includes('qwen') ||
-      currentModelName.toLowerCase().includes('gemini') ||
-      currentModelName.toLowerCase().includes('gpt-oss')
-    : false;
+  // Use backend capabilities as single source of truth
+  const currentModel = (() => {
+    if (!selectedModel) return null;
+
+    let connId = selectedLLMConnectionId;
+    let modelId = selectedModel;
+
+    if (selectedModel.includes('::')) {
+      const [parsedConnId, ...modelIdParts] = selectedModel.split('::');
+      connId = parsedConnId;
+      modelId = modelIdParts.join('::');
+    }
+
+    const conn = llmConnections.find((c) => c.id === connId);
+    return conn?.models?.find((m) => m.id === modelId);
+  })();
+
+  const supportsToolCalling = currentModel?.supportsTools ?? false;
+  const supportsThinking = currentModel?.supportsThinking ?? false;
 
   const [modelSearchTerm, setModelSearchTerm] = useState('');
 

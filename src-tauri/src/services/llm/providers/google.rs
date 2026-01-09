@@ -20,6 +20,27 @@ impl GoogleProvider {
         Self { client }
     }
 
+    fn check_model_capabilities(model_id: &str) -> (bool, bool) {
+        let model_lower = model_id.to_lowercase();
+
+        // All Gemini models support tools
+        let supports_tools = model_lower.contains("gemini");
+
+        // Only Gemini 2.5+ and Gemini 3+ support thinking
+        // Gemini 2.0 does NOT support thinking
+        let supports_thinking = if model_lower.contains("gemini") {
+            // Check for Gemini 2.5 or higher
+            model_lower.contains("gemini-2.5")
+                || model_lower.contains("gemini-3")
+                || model_lower.contains("gemini_2.5")
+                || model_lower.contains("gemini_3")
+        } else {
+            false
+        };
+
+        (supports_tools, supports_thinking)
+    }
+
     fn get_fallback_models() -> Vec<LLMModel> {
         vec![
             LLMModel {
@@ -27,18 +48,24 @@ impl GoogleProvider {
                 name: "Gemini 1.5 Pro".to_string(),
                 created: None,
                 owned_by: Some("Google".to_string()),
+                supports_tools: true,
+                supports_thinking: false, // Gemini 1.5 doesn't support thinking
             },
             LLMModel {
                 id: "gemini-1.5-flash".to_string(),
                 name: "Gemini 1.5 Flash".to_string(),
                 created: None,
                 owned_by: Some("Google".to_string()),
+                supports_tools: true,
+                supports_thinking: false, // Gemini 1.5 doesn't support thinking
             },
             LLMModel {
                 id: "gemini-pro".to_string(),
                 name: "Gemini Pro".to_string(),
                 created: None,
                 owned_by: Some("Google".to_string()),
+                supports_tools: true,
+                supports_thinking: false, // Gemini Pro (old) doesn't support thinking
             },
         ]
     }
@@ -458,11 +485,17 @@ impl LLMProvider for GoogleProvider {
                                     let clean_id =
                                         id.strip_prefix("models/").unwrap_or(&id).to_string();
 
+                                    // Check model capabilities
+                                    let (supports_tools, supports_thinking) =
+                                        Self::check_model_capabilities(&clean_id);
+
                                     Some(LLMModel {
                                         id: clean_id,
                                         name,
                                         created: None,
                                         owned_by: Some("Google".to_string()),
+                                        supports_tools,
+                                        supports_thinking,
                                     })
                                 })
                                 .collect();

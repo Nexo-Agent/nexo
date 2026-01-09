@@ -17,6 +17,25 @@ impl OpenAIProvider {
         Self { client }
     }
 
+    fn check_model_capabilities(model_id: &str) -> (bool, bool) {
+        // Remove provider prefix if exists (e.g., "openai/gpt-4" -> "gpt-4")
+        let clean_id = model_id.split('/').last().unwrap_or(model_id);
+        let model_lower = clean_id.to_lowercase();
+
+        // OpenAI-compatible models that support tools
+        let supports_tools = model_lower.contains("gpt") || model_lower.contains("qwen");
+
+        // Models that support thinking/reasoning:
+        // - GPT-o1 series (gpt-o1, gpt-o1-mini, etc.)
+        // - GPT-oss series (custom thinking models)
+        let supports_thinking = model_lower.contains("gpt-o1")
+            || model_lower.contains("gpt_o1")
+            || model_lower.contains("gpt-oss")
+            || model_lower.contains("gpt_oss");
+
+        (supports_tools, supports_thinking)
+    }
+
     async fn handle_streaming(
         &self,
         req_builder: reqwest::RequestBuilder,
@@ -495,6 +514,9 @@ impl LLMProvider for OpenAIProvider {
 
             // Both id and name are required
             if let (Some(id), Some(name)) = (id_opt, name_opt) {
+                // Check model capabilities
+                let (supports_tools, supports_thinking) = Self::check_model_capabilities(&id);
+
                 Some(LLMModel {
                     id,
                     name,
@@ -504,6 +526,8 @@ impl LLMProvider for OpenAIProvider {
                         .or_else(|| item.get("ownedBy"))
                         .and_then(|v| v.as_str())
                         .map(|s| s.to_string()),
+                    supports_tools,
+                    supports_thinking,
                 })
             } else {
                 None
