@@ -24,7 +24,7 @@ import {
   DropdownMenuRadioItem,
 } from '@/ui/atoms/dropdown-menu';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
-import { useGetMCPConnectionsQuery } from '@/store/api/mcpConnectionsApi';
+import { useGetMCPConnectionsQuery } from '@/features/mcp';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { cn, formatFileSize } from '@/lib/utils';
 import { showError } from '@/store/slices/notificationSlice';

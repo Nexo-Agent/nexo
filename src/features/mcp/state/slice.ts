@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
-import type { MCPServerConnection } from '../types';
-import type { MCPToolType } from '@/lib/mcp/types';
+import type { MCPServerConnection, MCPToolType } from '../types';
 
 // Types matching Rust structs
 interface DbMCPServerConnection {

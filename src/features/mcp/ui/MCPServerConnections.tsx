@@ -37,10 +37,10 @@ import {
   useDisconnectMCPConnectionMutation,
   useUpdateMCPConnectionMutation,
   useRemoveMCPConnectionMutation,
-} from '@/store/api/mcpConnectionsApi';
+} from '../hooks/useMCPConnections';
 import { navigateToChat } from '@/store/slices/uiSlice';
 import { showError, showSuccess } from '@/store/slices/notificationSlice';
-import type { MCPToolType, MCPServerConnection } from '@/lib/mcp/types';
+import type { MCPToolType, MCPServerConnection } from '../types';
 
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 

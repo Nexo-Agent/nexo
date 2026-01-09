@@ -29,7 +29,7 @@ import {
   useSaveAppSettingMutation,
 } from '@/store/api/appSettingsApi';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
-import { useGetMCPConnectionsQuery } from '@/store/api/mcpConnectionsApi';
+import { useGetMCPConnectionsQuery } from '@/features/mcp';
 
 /**
  * Hook to access and manage workspaces

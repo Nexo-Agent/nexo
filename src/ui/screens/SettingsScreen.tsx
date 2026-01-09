@@ -16,7 +16,7 @@ import { SettingsLayout } from '@/ui/layouts/SettingsLayout';
 
 // Section Components
 import { LLMConnections } from '@/features/llm';
-import { MCPServerConnections } from '@/ui/organisms/settings/MCPServerConnections';
+import { MCPServerConnections } from '@/features/mcp';
 import { AppSettings } from '@/ui/organisms/settings/AppSettings';
 import { PromptManagement } from '@/ui/organisms/settings/PromptManagement';
 import AddonSettings from '@/ui/organisms/settings/AddonSettings';

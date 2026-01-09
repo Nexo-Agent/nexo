@@ -6,7 +6,7 @@ export type { LLMModel, LLMConnection } from '@/features/llm/types';
 export type {
   MCPToolType as MCPTool,
   MCPServerConnection,
-} from '@/lib/mcp/types';
+} from '@/features/mcp/types';
 
 export interface Workspace {
   id: string;

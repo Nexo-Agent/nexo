@@ -1,7 +1,6 @@
-import { baseApi } from './baseApi';
+import { baseApi } from '@/store/api/baseApi';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
-import type { MCPServerConnection } from '@/store/types';
-import type { MCPToolType } from '@/lib/mcp/types';
+import type { MCPServerConnection, MCPToolType } from '../types';
 
 // Types matching Rust structs
 interface DbMCPServerConnection {

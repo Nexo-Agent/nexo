@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { llmConnectionsReducer } from '@/features/llm';
-import mcpConnectionsReducer from './slices/mcpConnectionsSlice';
+import { mcpConnectionsReducer } from '@/features/mcp';
 import workspacesReducer from './slices/workspacesSlice';
 import chatsReducer from './slices/chatsSlice';
 import messagesReducer from './slices/messages';
