@@ -1,5 +1,6 @@
-import { useRef, useEffect, useState } from 'react';
-import { Send, Paperclip, Square, Wrench, Brain } from 'lucide-react';
+import { useRef, useEffect, useState, useMemo } from 'react';
+import { Send, Paperclip, Square, Wrench, Brain, Search } from 'lucide-react';
+import { Input } from '@/ui/atoms/input';
 import {
   MAX_MESSAGE_LENGTH,
   MAX_FILE_SIZE,
@@ -28,6 +29,7 @@ import {
 import { useGetLLMConnectionsQuery } from '@/features/llm';
 import { useGetMCPConnectionsQuery } from '@/features/mcp';
 import { useAppSelector, useAppDispatch } from '@/app/hooks';
+import type { LLMConnection } from '@/features/llm/types';
 import { cn, formatFileSize } from '@/lib/utils';
 import { showError } from '@/features/notifications/state/notificationSlice';
 import { isVisionModel } from '@/features/llm/lib/model-utils';
@@ -274,6 +276,23 @@ export function ChatInput({
       currentModelName.toLowerCase().includes('gemini') ||
       currentModelName.toLowerCase().includes('gpt-oss')
     : false;
+
+  const [modelSearchTerm, setModelSearchTerm] = useState('');
+
+  const filteredLLMConnections = useMemo(() => {
+    if (!modelSearchTerm) return llmConnections;
+
+    return llmConnections
+      .map((conn: LLMConnection) => ({
+        ...conn,
+        models: (conn.models || []).filter(
+          (m) =>
+            m.name?.toLowerCase().includes(modelSearchTerm.toLowerCase()) ||
+            m.id.toLowerCase().includes(modelSearchTerm.toLowerCase())
+        ),
+      }))
+      .filter((conn) => conn.models && conn.models.length > 0);
+  }, [llmConnections, modelSearchTerm]);
 
   useEffect(() => {
     // Note: We use JS resize + debounce instead of CSS `field-sizing: content`
@@ -806,11 +825,17 @@ export function ChatInput({
                   onValueChange={(val) => {
                     handleModelChange(val || undefined);
                   }}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setModelSearchTerm('');
+                    }
+                  }}
                   disabled={llmConnections.length === 0 || disabled}
                 >
                   <SelectTrigger
                     className="h-7 w-auto min-w-[120px] text-sm border-none bg-transparent dark:bg-transparent hover:bg-muted/50 shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                     data-tour="model-selector"
+                    hideIcon={true}
                   >
                     <SelectValue
                       placeholder={t('selectModel', { ns: 'settings' })}
@@ -829,13 +854,54 @@ export function ChatInput({
                       )}
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="max-h-[min(400px,var(--radix-select-content-available-height))]">
+                  <SelectContent
+                    className="max-h-[min(400px,var(--radix-select-content-available-height))]"
+                    hideScrollButtons={true}
+                    position="popper"
+                    sideOffset={5}
+                    header={
+                      llmConnections.length > 0 ? (
+                        <div
+                          className="p-2 bg-popover border-b"
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="relative">
+                            <Search className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
+                            <Input
+                              placeholder={t('searchModels', {
+                                ns: 'settings',
+                              })}
+                              value={modelSearchTerm}
+                              onChange={(e) =>
+                                setModelSearchTerm(e.target.value)
+                              }
+                              className="pl-8 h-9 border-none shadow-none focus-visible:ring-0"
+                              onKeyDown={(e) => {
+                                // Prevent Radix Select from intercepting key events
+                                e.stopPropagation();
+                              }}
+                              autoFocus
+                            />
+                          </div>
+                        </div>
+                      ) : null
+                    }
+                  >
                     {llmConnections.length === 0 ? (
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
                         {t('pleaseSelectLLMConnection', { ns: 'settings' })}
                       </div>
+                    ) : filteredLLMConnections.length === 0 ? (
+                      <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                        {t('noModelsFound', {
+                          ns: 'settings',
+                          defaultValue: 'No models found',
+                        })}
+                      </div>
                     ) : (
-                      llmConnections.map((conn) => {
+                      filteredLLMConnections.map((conn: LLMConnection) => {
                         if (
                           !conn.models ||
                           !Array.isArray(conn.models) ||

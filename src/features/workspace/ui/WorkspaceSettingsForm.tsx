@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ChevronDown,
   ChevronUp,
@@ -6,6 +6,7 @@ import {
   Loader2,
   XCircle,
   Trash2,
+  Search,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
@@ -113,6 +114,23 @@ export function WorkspaceSettingsForm({
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isClearingChats, setIsClearingChats] = useState(false);
+
+  const [modelSearchTerm, setModelSearchTerm] = useState('');
+
+  const filteredLLMConnections = useMemo(() => {
+    if (!modelSearchTerm) return llmConnections;
+
+    return llmConnections
+      .map((conn) => ({
+        ...conn,
+        models: (conn.models || []).filter(
+          (m) =>
+            m.name?.toLowerCase().includes(modelSearchTerm.toLowerCase()) ||
+            m.id.toLowerCase().includes(modelSearchTerm.toLowerCase())
+        ),
+      }))
+      .filter((conn) => conn.models && conn.models.length > 0);
+  }, [llmConnections, modelSearchTerm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,7 +296,7 @@ export function WorkspaceSettingsForm({
                       onKeyDown={handleKeyDown}
                       placeholder={t('enterSystemMessage')}
                       className="w-full min-h-32"
-                      rows={6}
+                      rows={12}
                     />
                     {/* Slash Command Dropdown */}
                     {slashCommand.isActive &&
@@ -319,8 +337,17 @@ export function WorkspaceSettingsForm({
                         setDefaultModel(modelId);
                       }
                     }}
+                    onOpenChange={(open) => {
+                      if (!open) {
+                        setModelSearchTerm('');
+                      }
+                    }}
                   >
-                    <SelectTrigger id="default-model" className="w-full">
+                    <SelectTrigger
+                      id="default-model"
+                      className="w-full"
+                      hideIcon={true}
+                    >
                       <SelectValue placeholder={t('selectDefaultModel')}>
                         {(() => {
                           if (!llmConnectionId || !defaultModel) {
@@ -344,41 +371,87 @@ export function WorkspaceSettingsForm({
                         })()}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent
+                      hideScrollButtons={true}
+                      position="popper"
+                      sideOffset={5}
+                      className="max-h-[min(400px,var(--radix-select-content-available-height))]"
+                      header={
+                        llmConnections.length > 0 ? (
+                          <div
+                            className="p-2 bg-popover border-b"
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="relative">
+                              <Search className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
+                              <Input
+                                placeholder={t('searchModels', {
+                                  ns: 'settings',
+                                })}
+                                value={modelSearchTerm}
+                                onChange={(e) =>
+                                  setModelSearchTerm(e.target.value)
+                                }
+                                className="pl-8 h-9 border-none shadow-none focus-visible:ring-0"
+                                onKeyDown={(e: React.KeyboardEvent) => {
+                                  // Prevent Radix Select from intercepting key events
+                                  e.stopPropagation();
+                                }}
+                                autoFocus
+                              />
+                            </div>
+                          </div>
+                        ) : null
+                      }
+                    >
                       <SelectItem value="__none__">
                         {t('noDefaultModel')}
                       </SelectItem>
-                      {llmConnections.map((conn, index) => {
-                        if (
-                          !conn.models ||
-                          !Array.isArray(conn.models) ||
-                          conn.models.length === 0
-                        ) {
-                          return null;
-                        }
+                      {filteredLLMConnections.length === 0 &&
+                      llmConnections.length > 0 ? (
+                        <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                          {t('noModelsFound', {
+                            ns: 'settings',
+                            defaultValue: 'No models found',
+                          })}
+                        </div>
+                      ) : (
+                        filteredLLMConnections.map((conn, index) => {
+                          if (
+                            !conn.models ||
+                            !Array.isArray(conn.models) ||
+                            conn.models.length === 0
+                          ) {
+                            return null;
+                          }
 
-                        return (
-                          <React.Fragment key={conn.id}>
-                            {index > 0 && <SelectSeparator className="my-1" />}
-                            <SelectGroup>
-                              <SelectLabel className="px-3 py-2 text-[10px] uppercase tracking-widest font-extrabold text-foreground bg-muted/40 border-y border-border/50 mt-1 mb-1 first:mt-0">
-                                {conn.name} ({conn.provider})
-                              </SelectLabel>
-                              {conn.models.map((model) => {
-                                if (!model || !model.id) return null;
-                                return (
-                                  <SelectItem
-                                    key={`${conn.id}::${model.id}`}
-                                    value={`${conn.id}::${model.id}`}
-                                  >
-                                    {model.name || model.id}
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectGroup>
-                          </React.Fragment>
-                        );
-                      })}
+                          return (
+                            <React.Fragment key={conn.id}>
+                              {index > 0 && (
+                                <SelectSeparator className="my-1" />
+                              )}
+                              <SelectGroup>
+                                <SelectLabel className="px-3 py-2 text-[10px] uppercase tracking-widest font-extrabold text-foreground bg-muted/40 border-y border-border/50 mt-1 mb-1 first:mt-0">
+                                  {conn.name} ({conn.provider})
+                                </SelectLabel>
+                                {conn.models.map((model) => {
+                                  if (!model || !model.id) return null;
+                                  return (
+                                    <SelectItem
+                                      key={`${conn.id}::${model.id}`}
+                                      value={`${conn.id}::${model.id}`}
+                                    >
+                                      {model.name || model.id}
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectGroup>
+                            </React.Fragment>
+                          );
+                        })
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

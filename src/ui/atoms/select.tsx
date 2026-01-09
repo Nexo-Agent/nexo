@@ -25,10 +25,12 @@ function SelectValue({
 function SelectTrigger({
   className,
   size = 'default',
+  hideIcon = false,
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: 'sm' | 'default';
+  hideIcon?: boolean;
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -41,9 +43,11 @@ function SelectTrigger({
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-4 opacity-50" />
-      </SelectPrimitive.Icon>
+      {!hideIcon && (
+        <SelectPrimitive.Icon asChild>
+          <ChevronDownIcon className="size-4 opacity-50" />
+        </SelectPrimitive.Icon>
+      )}
     </SelectPrimitive.Trigger>
   );
 }
@@ -53,8 +57,15 @@ function SelectContent({
   children,
   position = 'item-aligned',
   align = 'center',
+  hideScrollButtons = false,
+  header,
+  footer,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Content>) {
+}: React.ComponentProps<typeof SelectPrimitive.Content> & {
+  hideScrollButtons?: boolean;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -69,7 +80,8 @@ function SelectContent({
         align={align}
         {...props}
       >
-        <SelectScrollUpButton />
+        {!hideScrollButtons && <SelectScrollUpButton />}
+        {header && <div className="sticky top-0 z-20">{header}</div>}
         <SelectPrimitive.Viewport
           className={cn(
             'p-1',
@@ -79,7 +91,8 @@ function SelectContent({
         >
           {children}
         </SelectPrimitive.Viewport>
-        <SelectScrollDownButton />
+        {footer && <div className="sticky bottom-0 z-20">{footer}</div>}
+        {!hideScrollButtons && <SelectScrollDownButton />}
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
   );
