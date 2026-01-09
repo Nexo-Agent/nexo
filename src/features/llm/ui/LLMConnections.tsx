@@ -401,6 +401,8 @@ function LLMConnectionForm({
     together: 'https://api.together.xyz/v1',
     deepinfra: 'https://api.deepinfra.com/v1/openai',
     google: 'https://generativelanguage.googleapis.com/v1beta',
+    anthropic: 'https://api.anthropic.com',
+    deepseek: 'https://api.deepseek.com',
   };
 
   const providerOptions: { value: LLMConnection['provider']; label: string }[] =
@@ -415,6 +417,8 @@ function LLMConnectionForm({
       { value: 'groq', label: 'Groq' },
       { value: 'together', label: 'Together AI' },
       { value: 'deepinfra', label: 'DeepInfra' },
+      { value: 'anthropic', label: 'Anthropic Claude' },
+      { value: 'deepseek', label: 'DeepSeek' },
     ];
 
   return (

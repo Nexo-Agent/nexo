@@ -30,6 +30,10 @@ impl LLMService {
             "openai" => Box::new(OpenAIProvider::new(self.client.clone())),
             "google" | "gemini" => Box::new(GoogleProvider::new(self.client.clone())),
             "anthropic" | "claude" => Box::new(AnthropicProvider::new(self.client.clone())),
+            // Explicitly map known OpenAI-compatible providers for clarity
+            "deepseek" | "groq" | "ollama" | "perplexity" | "mistral" | "openrouter"
+            | "lmstudio" | "localai" => Box::new(OpenAICompatProvider::new(self.client.clone())),
+            // Default fallback to OpenAI compatible for any custom/unknown provider
             _ => Box::new(OpenAICompatProvider::new(self.client.clone())),
         }
     }

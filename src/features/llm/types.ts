@@ -21,7 +21,9 @@ export interface LLMConnection {
     | 'groq'
     | 'together'
     | 'deepinfra'
-    | 'google';
+    | 'google'
+    | 'anthropic'
+    | 'deepseek';
   apiKey: string;
   models?: LLMModel[];
 }

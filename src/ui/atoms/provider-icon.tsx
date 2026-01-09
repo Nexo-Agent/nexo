@@ -2,7 +2,9 @@ import { Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Import provider icons
+import anthropicIcon from '@/assets/provider-icons/anthropic.png';
 import deepInfraIcon from '@/assets/provider-icons/deepinfra.svg';
+import deepseekIcon from '@/assets/provider-icons/deepseek.png';
 import fireworksIcon from '@/assets/provider-icons/fireworks.svg';
 import googleIcon from '@/assets/provider-icons/google.svg';
 import groqIcon from '@/assets/provider-icons/groq.svg';
@@ -34,6 +36,8 @@ export function ProviderIcon({ provider, className }: ProviderIconProps) {
     openrouter: openrouterIcon,
     deepinfra: deepInfraIcon,
     groq: groqIcon,
+    anthropic: anthropicIcon,
+    deepseek: deepseekIcon,
   };
 
   // Providers that use monochrome icons (likely black by default)
