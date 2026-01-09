@@ -63,16 +63,20 @@ export function ChatArea() {
     handleRetryStreaming,
   } = useMessages(selectedChatId);
 
-  const handleSend = async () => {
-    if (!input.trim() || !selectedWorkspace || !selectedChatId) {
+  const handleSend = async (overrideContent?: string) => {
+    // If overrideContent is provided, use it. Otherwise use state input.
+    const contentToSend =
+      overrideContent !== undefined ? overrideContent : input;
+
+    if (!contentToSend.trim() || !selectedWorkspace || !selectedChatId) {
       return;
     }
 
-    if (input.length > MAX_MESSAGE_LENGTH) {
+    if (contentToSend.length > MAX_MESSAGE_LENGTH) {
       dispatch(
         showError(
           t('messageTooLong', {
-            length: input.length,
+            length: contentToSend.length,
             max: MAX_MESSAGE_LENGTH,
             ns: 'chat',
           })
@@ -114,7 +118,7 @@ export function ChatArea() {
       await import('@/lib/sentry-utils');
     trackMessageSend(
       selectedChatId,
-      input.trim().length,
+      contentToSend.trim().length,
       attachedFiles.length > 0
     );
     setLLMContext(llmConnection.provider, modelId);
@@ -124,7 +128,7 @@ export function ChatArea() {
     if (attachedFiles.length > 0) {
     }
 
-    const userInput = input.trim();
+    const userInput = contentToSend.trim();
 
     // Clear input immediately for better UX
     dispatch(clearInput());

@@ -28,6 +28,7 @@ import {
 } from '@/ui/atoms/dropdown-menu';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
 import { useGetMCPConnectionsQuery } from '@/features/mcp';
+import { useGetInstalledAgentsQuery } from '@/features/agent';
 import { useAppSelector, useAppDispatch } from '@/app/hooks';
 import type { LLMConnection } from '@/features/llm/types';
 import { cn, formatFileSize } from '@/lib/utils';
@@ -41,6 +42,9 @@ import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { SlashCommandDropdown } from '@/ui/molecules/SlashCommandDropdown';
 import { AgentMentionDropdown } from '@/features/agent';
 import { VariableInputDialog } from '@/ui/molecules/VariableInputDialog';
+import { PromptPanel } from './PromptPanel';
+import { AgentMentionChips } from './AgentBadgeOverlay';
+
 import {
   parsePromptVariables,
   renderPrompt,
@@ -51,7 +55,7 @@ interface ChatInputProps {
   selectedWorkspaceId: string | null;
   selectedChatId: string | null;
   selectedLLMConnectionId?: string;
-  onSend: () => void;
+  onSend: (content?: string) => void;
   disabled?: boolean;
   dropdownDirection?: 'up' | 'down';
   timeLeft?: number | null;
@@ -81,6 +85,7 @@ export function ChatInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const { data: llmConnections = [] } = useGetLLMConnectionsQuery();
+  const { data: installedAgents = [] } = useGetInstalledAgentsQuery();
 
   // State for variable input dialog
   const [variableDialogOpen, setVariableDialogOpen] = useState(false);
@@ -88,6 +93,15 @@ export function ChatInput({
   const [promptVariables, setPromptVariables] = useState<
     Record<string, string>
   >({});
+
+  // State for inserted prompt (to show prompt panel)
+  const [insertedPrompt, setInsertedPrompt] = useState<{
+    name: string;
+    content: string;
+  } | null>(null);
+
+  // State for selected agents (to show as chips)
+  const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
 
   // Use chat input hook
   const {
@@ -147,28 +161,23 @@ export function ChatInput({
   const effectiveIsStreaming = isStreaming && !isAgentStreaming;
 
   // Insert prompt content into input, replacing the slash command
-  const insertPromptContent = (content: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  const insertPromptContent = (content: string, promptName?: string) => {
+    // Instead of inserting into textarea, set the inserted prompt state
+    // This will show the prompt panel above textarea
+    if (promptName) {
+      setInsertedPrompt({
+        name: promptName,
+        content: content,
+      });
+    }
 
-    // Only replace if input starts with "/"
-    if (!input.startsWith('/')) return;
+    // Clear the slash command from input
+    handleInputChange('');
 
-    // Get text after the slash command (if any)
-    const afterSlash = input.substring(1);
-    const spaceIndex = afterSlash.indexOf(' ');
-    const additionalText =
-      spaceIndex === -1 ? '' : afterSlash.substring(spaceIndex + 1);
-
-    // Replace slash command with prompt content
-    const newInput = content + (additionalText ? ' ' + additionalText : '');
-    handleInputChange(newInput);
-
-    // Set cursor position to end
+    // Focus textarea
     setTimeout(() => {
-      if (textarea) {
-        textarea.focus();
-        textarea.setSelectionRange(newInput.length, newInput.length);
+      if (textareaRef.current) {
+        textareaRef.current.focus();
       }
     }, 0);
   };
@@ -190,7 +199,7 @@ export function ChatInput({
       slashCommand.close();
       // Use setTimeout to ensure close() state is set before input changes
       setTimeout(() => {
-        insertPromptContent(prompt.content);
+        insertPromptContent(prompt.content, prompt.name);
       }, 0);
     }
   };
@@ -201,20 +210,20 @@ export function ChatInput({
   });
 
   const handleSelectAgent = (agent: InstalledAgent) => {
-    // query is what user typed after @
+    // Add agent to selected list if not already there
+    if (!selectedAgentIds.includes(agent.manifest.id)) {
+      setSelectedAgentIds([...selectedAgentIds, agent.manifest.id]);
+    }
+
+    // Remove the @ mention text from input
     const queryLength = agentMention.query.length;
-
-    const suffix = input.substring(1 + queryLength);
-    // Add space after ID
-    const newInput = `@${agent.manifest.id} ${suffix.trimStart()}`;
-
+    const newInput = input.substring(1 + queryLength).trimStart();
     handleInputChange(newInput);
 
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
-        const pos = agent.manifest.id.length + 2; // @ + id + space
-        textareaRef.current.setSelectionRange(pos, pos);
+        textareaRef.current.setSelectionRange(0, 0);
       }
     }, 0);
 
@@ -232,10 +241,57 @@ export function ChatInput({
       selectedPrompt.content,
       promptVariables
     );
-    insertPromptContent(renderedContent);
+    insertPromptContent(renderedContent, selectedPrompt.name);
     setVariableDialogOpen(false);
     setSelectedPrompt(null);
     setPromptVariables({});
+  };
+
+  const handleRemovePrompt = () => {
+    setInsertedPrompt(null);
+  };
+
+  // Wrap onSend to combine prompt content with input
+  const handleSendWithPrompt = () => {
+    // Construct the prefix for agents
+    const agentPrefix =
+      selectedAgentIds.length > 0
+        ? selectedAgentIds.map((id) => `@${id}`).join(' ') + ' '
+        : '';
+
+    // Construct prompt content
+    const promptContent = insertedPrompt ? insertedPrompt.content : '';
+
+    let combinedInput = '';
+
+    // 1. Add agents
+    if (agentPrefix) {
+      combinedInput += agentPrefix;
+    }
+
+    // 2. Add prompt
+    if (promptContent) {
+      combinedInput += promptContent;
+    }
+
+    // 3. Add user input
+    if (input) {
+      if (combinedInput && !combinedInput.endsWith('\n')) {
+        combinedInput += '\n\n';
+      }
+      combinedInput += input;
+    }
+
+    // Only proceed if we have something to send
+    if (combinedInput.trim()) {
+      // Clear states
+      setInsertedPrompt(null);
+      setSelectedAgentIds([]);
+
+      // Send the combined content directly
+      // This avoids the race condition of updating state -> re-rendering -> reading state in child
+      onSend(combinedInput);
+    }
   };
 
   // Find current connection and model name
@@ -372,7 +428,7 @@ export function ChatInput({
         return;
       }
       e.preventDefault();
-      onSend();
+      handleSendWithPrompt();
     }
   };
 
@@ -615,6 +671,27 @@ export function ChatInput({
                 ))}
               </div>
             )}
+
+            {/* Inserted Prompt Panel */}
+            {insertedPrompt && (
+              <PromptPanel
+                promptName={insertedPrompt.name}
+                promptContent={insertedPrompt.content}
+                onRemove={handleRemovePrompt}
+              />
+            )}
+
+            {/* Agent Mention Chips */}
+            <AgentMentionChips
+              agentIds={selectedAgentIds}
+              agents={installedAgents}
+              onRemoveAgent={(agentId) => {
+                // Remove agent from selected list
+                setSelectedAgentIds(
+                  selectedAgentIds.filter((id) => id !== agentId)
+                );
+              }}
+            />
 
             <input
               ref={fileInputRef}
@@ -945,14 +1022,20 @@ export function ChatInput({
                 {/* Send/Stop Button */}
                 <Button
                   onClick={
-                    input.trim()
-                      ? onSend
+                    input.trim() ||
+                    insertedPrompt ||
+                    selectedAgentIds.length > 0
+                      ? handleSendWithPrompt
                       : effectiveIsStreaming
                         ? handleStopStreaming
                         : undefined
                   }
                   disabled={
-                    disabled || (!input.trim() && !effectiveIsStreaming)
+                    disabled ||
+                    (!input.trim() &&
+                      !insertedPrompt &&
+                      selectedAgentIds.length === 0 &&
+                      !effectiveIsStreaming)
                   }
                   size="icon"
                   className={cn(
