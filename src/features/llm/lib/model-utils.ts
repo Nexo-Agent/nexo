@@ -52,6 +52,8 @@ export function isVisionModel(modelName: string | undefined | null): boolean {
       name.includes('1.5') ||
       name.includes('1.0') ||
       name.includes('2.0') ||
+      name.includes('2.5') ||
+      name.includes('3') ||
       name.includes('flash'))
   ) {
     return true;
