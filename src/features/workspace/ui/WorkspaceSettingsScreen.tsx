@@ -1,7 +1,6 @@
-import { ArrowLeft } from 'lucide-react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
-import { Button } from '@/ui/atoms/button/button';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { navigateToChat } from '@/features/ui/state/uiSlice';
 
@@ -36,6 +35,18 @@ export function WorkspaceSettingsScreen() {
     handleSaveWorkspaceSettings,
     handleDeleteWorkspace,
   } = useWorkspaces();
+
+  // Handle ESC key to navigate back to chat
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        dispatch(navigateToChat());
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [dispatch]);
 
   const { data: llmConnections = [] } = useGetLLMConnectionsQuery();
   const { data: allMcpConnections = [] } = useGetMCPConnectionsQuery();
@@ -89,45 +100,29 @@ export function WorkspaceSettingsScreen() {
   };
 
   return (
-    <div className="flex h-screen bg-background text-foreground">
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-border flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => dispatch(navigateToChat())}
-            className="h-8 w-8"
-          >
-            <ArrowLeft className="size-4" />
-          </Button>
-          <h1 className="text-xl font-semibold">{t('workspaceSettings')}</h1>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Content */}
+      <ScrollArea className="flex-1">
+        <div className="p-6 max-w-4xl mx-auto w-full">
+          {selectedWorkspace ? (
+            <WorkspaceSettingsForm
+              workspace={selectedWorkspace}
+              initialSettings={workspaceSettings[selectedWorkspace.id]}
+              llmConnections={llmConnections}
+              allMcpConnections={allMcpConnections}
+              hasChats={chats.length > 0}
+              onOpenChange={() => {}} // Not needed in page view
+              onSave={onSaveWorkspaceSettings}
+              onDeleteWorkspace={onDeleteWorkspace}
+              onClearAllChats={handleClearAllChats}
+            />
+          ) : (
+            <div className="text-center text-muted-foreground py-12">
+              {t('common:noWorkspaceSelected')}
+            </div>
+          )}
         </div>
-
-        {/* Content */}
-        <ScrollArea className="flex-1">
-          <div className="p-4 max-w-4xl mx-auto w-full">
-            {selectedWorkspace ? (
-              <WorkspaceSettingsForm
-                workspace={selectedWorkspace}
-                initialSettings={workspaceSettings[selectedWorkspace.id]}
-                llmConnections={llmConnections}
-                allMcpConnections={allMcpConnections}
-                hasChats={chats.length > 0}
-                onOpenChange={() => {}} // Not needed in page view
-                onSave={onSaveWorkspaceSettings}
-                onDeleteWorkspace={onDeleteWorkspace}
-                onClearAllChats={handleClearAllChats}
-              />
-            ) : (
-              <div className="text-center text-muted-foreground py-12">
-                {t('common:noWorkspaceSelected')}
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

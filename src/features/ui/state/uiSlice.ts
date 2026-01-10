@@ -6,6 +6,7 @@ export type Page = 'chat' | 'settings' | 'workspaceSettings';
 interface UIState {
   activePage: Page;
   isSidebarCollapsed: boolean;
+  titleBarText: string | null;
   welcomeOpen: boolean;
   aboutOpen: boolean;
   keyboardShortcutsOpen: boolean;
@@ -198,6 +199,7 @@ export const loadLanguage = createAsyncThunk('ui/loadLanguage', async () => {
 const initialState: UIState = {
   activePage: 'chat',
   isSidebarCollapsed: false,
+  titleBarText: null,
   welcomeOpen: false,
   aboutOpen: false,
   keyboardShortcutsOpen: false,
@@ -219,12 +221,18 @@ const uiSlice = createSlice({
   reducers: {
     navigateToChat: (state) => {
       state.activePage = 'chat';
+      state.titleBarText = null;
     },
     navigateToSettings: (state) => {
       state.activePage = 'settings';
+      state.titleBarText = 'title'; // Translation key for "Settings"
     },
     navigateToWorkspaceSettings: (state) => {
       state.activePage = 'workspaceSettings';
+      state.titleBarText = 'workspaceSettings'; // Translation key
+    },
+    setTitleBarText: (state, action: PayloadAction<string | null>) => {
+      state.titleBarText = action.payload;
     },
     toggleSidebar: (state) => {
       state.isSidebarCollapsed = !state.isSidebarCollapsed;
@@ -356,6 +364,7 @@ export const {
   navigateToChat,
   navigateToSettings,
   navigateToWorkspaceSettings,
+  setTitleBarText,
   toggleSidebar,
   setSidebarCollapsed,
   setSettingsSection,

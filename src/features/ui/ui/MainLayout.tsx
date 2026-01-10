@@ -4,6 +4,7 @@ import {
   Settings as SettingsIcon,
   Info,
   Bot,
+  ArrowLeft,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
@@ -19,6 +20,7 @@ import {
   setAboutOpen,
   navigateToSettings,
   setSettingsSection,
+  navigateToChat,
 } from '@/features/ui/state/uiSlice';
 
 // Screens
@@ -34,6 +36,7 @@ export function MainLayout() {
     (state) => state.ui.isSidebarCollapsed
   );
   const activePage = useAppSelector((state) => state.ui.activePage);
+  const titleBarText = useAppSelector((state) => state.ui.titleBarText);
   const settingsSection = useAppSelector((state) => state.ui.settingsSection);
   const aboutOpen = useAppSelector((state) => state.ui.aboutOpen);
 
@@ -68,12 +71,24 @@ export function MainLayout() {
               </Button>
               <WorkspaceSelector />
             </>
-          ) : (
+          ) : titleBarText ? (
             <div className="flex items-center gap-2">
-              {/* Optional: Breadcrumbs or Title */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => dispatch(navigateToChat())}
+                aria-label={t('back', { ns: 'common' })}
+                className="h-7 w-7"
+              >
+                <ArrowLeft className="size-4" />
+              </Button>
+              <span className="text-sm font-medium text-foreground">
+                {t(titleBarText, { ns: 'settings' })}
+              </span>
             </div>
-          )
+          ) : null
         }
+        onClose={titleBarText ? () => dispatch(navigateToChat()) : undefined}
         rightContent={
           <>
             <Button

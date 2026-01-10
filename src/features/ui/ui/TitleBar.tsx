@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 interface TitleBarProps {
   leftContent?: ReactNode;
   rightContent?: ReactNode;
+  onClose?: () => void;
 }
 
 function detectPlatform() {
@@ -24,7 +25,11 @@ function detectPlatform() {
  * Supports macOS (traffic lights on left) and Windows/Linux (controls on right)
  * Can integrate with app content to save vertical space
  */
-export function TitleBar({ leftContent, rightContent }: TitleBarProps = {}) {
+export function TitleBar({
+  leftContent,
+  rightContent,
+  onClose,
+}: TitleBarProps = {}) {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -111,6 +116,12 @@ export function TitleBar({ leftContent, rightContent }: TitleBarProps = {}) {
   };
 
   const handleClose = async () => {
+    // If custom onClose handler is provided, use it instead of closing the window
+    if (onClose) {
+      onClose();
+      return;
+    }
+
     try {
       const appWindow = getCurrentWindow();
       await appWindow.close();

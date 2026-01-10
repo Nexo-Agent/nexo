@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   Settings as SettingsIcon,
   Network,
@@ -14,8 +15,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { setSettingsSection } from '@/features/ui/state/uiSlice';
-import { SettingsLayout } from '@/features/settings/ui/SettingsLayout';
+import {
+  setSettingsSection,
+  navigateToChat,
+} from '@/features/ui/state/uiSlice';
 import { Separator } from '@/ui/atoms/separator';
 import { Button } from '@/ui/atoms/button/button';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
@@ -33,6 +36,18 @@ export function SettingsScreen() {
   const { t } = useTranslation(['settings', 'common']);
   const dispatch = useAppDispatch();
   const selectedSection = useAppSelector((state) => state.ui.settingsSection);
+
+  // Handle ESC key to navigate back to chat
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        dispatch(navigateToChat());
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [dispatch]);
 
   // Section Navigation
   const sections = [
@@ -214,53 +229,55 @@ export function SettingsScreen() {
     );
   }
 
-  const sidebar = (
-    <div className="p-3">
-      {sections.map((section) => (
-        <button
-          key={section.id}
-          onClick={() => dispatch(setSettingsSection(section.id))}
-          data-tour={section.id === 'llm' ? 'settings-llm-tab' : undefined}
-          className={cn(
-            'mb-2 w-full flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all',
-            'hover:bg-accent hover:text-accent-foreground',
-            selectedSection === section.id
-              ? 'bg-accent text-accent-foreground shadow-sm'
-              : 'text-muted-foreground'
-          )}
-        >
-          <span
-            className={cn(
-              'transition-transform',
-              selectedSection === section.id && 'scale-110'
-            )}
-          >
-            {section.icon}
-          </span>
-          <span>{section.label}</span>
-        </button>
-      ))}
-    </div>
-  );
-
-  const content = (
-    <div className="h-full flex flex-col">
-      <ScrollArea className="flex-1">
-        <div className="p-6 max-w-4xl mx-auto w-full space-y-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">
-              {sections.find((s) => s.id === selectedSection)?.label}
-            </h1>
-          </div>
-          {renderContent()}
-        </div>
-      </ScrollArea>
-    </div>
-  );
-
   return (
-    <SettingsLayout sidebar={sidebar} title={t('title')}>
-      {content}
-    </SettingsLayout>
+    <div className="flex h-full bg-background text-foreground">
+      {/* Sidebar */}
+      <div className="w-64 border-r border-sidebar-border bg-sidebar flex flex-col shrink-0">
+        <ScrollArea className="flex-1">
+          <div className="p-3">
+            {sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => dispatch(setSettingsSection(section.id))}
+                data-tour={
+                  section.id === 'llm' ? 'settings-llm-tab' : undefined
+                }
+                className={cn(
+                  'mb-2 w-full flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all',
+                  'hover:bg-accent hover:text-accent-foreground',
+                  selectedSection === section.id
+                    ? 'bg-accent text-accent-foreground shadow-sm'
+                    : 'text-muted-foreground'
+                )}
+              >
+                <span
+                  className={cn(
+                    'transition-transform',
+                    selectedSection === section.id && 'scale-110'
+                  )}
+                >
+                  {section.icon}
+                </span>
+                <span>{section.label}</span>
+              </button>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        <ScrollArea className="flex-1">
+          <div className="p-6 max-w-4xl mx-auto w-full space-y-6">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold">
+                {sections.find((s) => s.id === selectedSection)?.label}
+              </h1>
+            </div>
+            {renderContent()}
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
   );
 }
