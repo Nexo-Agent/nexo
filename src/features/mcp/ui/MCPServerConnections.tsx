@@ -414,28 +414,34 @@ export function MCPServerConnections() {
                         </p>
                       </div>
 
-                      {/* Tools list */}
-                      {connection.tools && connection.tools.length > 0 && (
-                        <div className="flex items-center gap-1.5 overflow-hidden">
-                          <div className="flex gap-1.5 overflow-hidden">
-                            {connection.tools
-                              .slice(0, 3)
-                              .map((tool: MCPToolType, index: number) => (
-                                <span
-                                  key={index}
-                                  className="inline-flex items-center rounded-md bg-muted/60 px-2 py-1 text-xs text-foreground/80 group-hover:bg-muted transition-colors whitespace-nowrap"
-                                >
-                                  {tool.name}
-                                </span>
-                              ))}
-                          </div>
-                          {connection.tools.length > 3 && (
-                            <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs text-primary font-medium whitespace-nowrap shrink-0">
-                              +{connection.tools.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      {/* Tools list - Fixed height to prevent layout shift */}
+                      <div className="flex items-center gap-1.5 overflow-hidden min-h-[28px]">
+                        {connection.tools && connection.tools.length > 0 ? (
+                          <>
+                            <div className="flex gap-1.5 overflow-hidden">
+                              {connection.tools
+                                .slice(0, 3)
+                                .map((tool: MCPToolType, index: number) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center rounded-md bg-muted/60 px-2 py-1 text-xs text-foreground/80 group-hover:bg-muted transition-colors whitespace-nowrap"
+                                  >
+                                    {tool.name}
+                                  </span>
+                                ))}
+                            </div>
+                            {connection.tools.length > 3 && (
+                              <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs text-primary font-medium whitespace-nowrap shrink-0">
+                                +{connection.tools.length - 3}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="inline-flex items-center rounded-md bg-muted/40 px-2 py-1 text-xs text-muted-foreground/60 whitespace-nowrap">
+                            {t('noTools', { defaultValue: 'No tools' })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
