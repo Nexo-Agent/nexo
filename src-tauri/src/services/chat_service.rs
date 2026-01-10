@@ -554,6 +554,15 @@ impl ChatService {
             None,
         )?;
 
+        // Update metadata with token usage
+        if let Some(usage) = &llm_response.usage {
+            let metadata = serde_json::json!({
+                "tokenUsage": usage
+            });
+            self.message_service
+                .update_metadata(assistant_message_id.clone(), Some(metadata.to_string()))?;
+        }
+
         // 14. Emit tool calls event if detected
         if let Some(tool_calls) = &llm_response.tool_calls {
             if !tool_calls.is_empty() {

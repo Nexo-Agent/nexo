@@ -25,6 +25,23 @@ export const messagesApi = baseApi.injectEndpoints({
       transformResponse: (response: DbMessage[]) => {
         return response.map((m) => {
           const codeBlocks = extractCodeBlocks(m.content);
+          let tokenUsage;
+          if (m.metadata) {
+            try {
+              const parsed = JSON.parse(m.metadata);
+              if (parsed.tokenUsage) {
+                const tu = parsed.tokenUsage;
+                tokenUsage = {
+                  promptTokens: tu.prompt_tokens,
+                  completionTokens: tu.completion_tokens,
+                  totalTokens: tu.total_tokens,
+                };
+              }
+            } catch {
+              // Ignore parse error
+            }
+          }
+
           return {
             id: m.id,
             role: m.role as 'user' | 'assistant' | 'tool' | 'tool_call',
@@ -34,18 +51,7 @@ export const messagesApi = baseApi.injectEndpoints({
             codeBlocks: codeBlocks.length > 0 ? codeBlocks : undefined,
             reasoning: m.reasoning ?? undefined,
             metadata: m.metadata ?? undefined,
-            // Missing toolCallId, toolCalls?
-            // DbMessage struct in thunk:
-            //   tool_call_id: string | null;
-            //   (no toolCalls field?)
-            //   In 'fetchMessages.ts': it didn't map toolCalls or toolCallId either?
-            //   Wait, checking 'fetchMessages.ts' again.
-            //   It returned:
-            //     id, role, content, timestamp, assistantMessageId, codeBlocks, reasoning, metadata.
-            //     It did NOT return toolCallId or toolCalls.
-            //   Message type in src/store/types.ts HAS toolCalls, toolCallId.
-            //   So fetchMessages previously ignored them or DbMessage didn't have them populated?
-            //   Let's stick to what fetchMessages did.
+            tokenUsage,
             toolCallId: m.tool_call_id ?? undefined,
           };
         });
