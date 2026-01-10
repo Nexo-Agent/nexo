@@ -55,18 +55,18 @@ impl ChatService {
         }
     }
 
-    /// Save a base64 image to disk and return the file path.
-    fn save_image_to_disk(&self, app: &AppHandle, image_data: &str) -> Result<String, AppError> {
+    /// Save a base64 file to disk and return the file path.
+    fn save_file_to_disk(&self, app: &AppHandle, file_data: &str) -> Result<String, AppError> {
         // 1. Check if it's likely already a path or url (doesn't start with data:)
-        if !image_data.starts_with("data:") {
-            return Ok(image_data.to_string());
+        if !file_data.starts_with("data:") {
+            return Ok(file_data.to_string());
         }
 
         // 2. Parse data URL
-        let parts: Vec<&str> = image_data.split(',').collect();
+        let parts: Vec<&str> = file_data.split(',').collect();
         if parts.len() != 2 {
             return Err(AppError::Validation(
-                "Invalid image data URL format".to_string(),
+                "Invalid file data URL format".to_string(),
             ));
         }
 
@@ -78,48 +78,67 @@ impl ChatService {
             .split(';')
             .next()
             .and_then(|part| part.split(':').nth(1))
-            .unwrap_or("image/png");
+            .unwrap_or("application/octet-stream");
 
-        let ext = mime_type.split('/').nth(1).unwrap_or("png");
+        // Get extension from mime type
+        let ext = match mime_type {
+            "image/jpeg" | "image/jpg" => "jpg",
+            "image/png" => "png",
+            "image/gif" => "gif",
+            "image/webp" => "webp",
+            "application/pdf" => "pdf",
+            "text/plain" => "txt",
+            "text/markdown" => "md",
+            "text/csv" => "csv",
+            "audio/mpeg" | "audio/mp3" => "mp3",
+            "audio/wav" => "wav",
+            "audio/ogg" => "ogg",
+            "audio/webm" => "weba",
+            "video/mp4" => "mp4",
+            "video/mpeg" => "mpeg",
+            "video/webm" => "webm",
+            "video/quicktime" => "mov",
+            _ => mime_type.split('/').nth(1).unwrap_or("bin"),
+        };
 
         // 3. Decode base64
         let bytes = general_purpose::STANDARD
             .decode(data)
-            .map_err(|e| AppError::Validation(format!("Failed to decode base64 image: {}", e)))?;
+            .map_err(|e| AppError::Validation(format!("Failed to decode base64 file: {}", e)))?;
 
         // 4. Determine path
         let app_data_dir = app
             .path()
             .app_data_dir()
             .map_err(|e| AppError::Generic(e.to_string()))?;
-        let images_dir = app_data_dir.join("images");
+        let files_dir = app_data_dir.join("files");
 
-        if !images_dir.exists() {
-            fs::create_dir_all(&images_dir).map_err(|e| {
-                AppError::Generic(format!("Failed to create images directory: {}", e))
+        if !files_dir.exists() {
+            fs::create_dir_all(&files_dir).map_err(|e| {
+                AppError::Generic(format!("Failed to create files directory: {}", e))
             })?;
         }
 
         let filename = format!("{}.{}", uuid::Uuid::new_v4(), ext);
-        let file_path = images_dir.join(filename);
+        let file_path = files_dir.join(filename);
 
         // 5. Write to disk
         fs::write(&file_path, bytes)
-            .map_err(|e| AppError::Generic(format!("Failed to write image file: {}", e)))?;
+            .map_err(|e| AppError::Generic(format!("Failed to write file: {}", e)))?;
 
         Ok(file_path.to_string_lossy().to_string())
     }
 
-    /// Process a list of images: save base64 strings to disk and return paths.
-    fn process_incoming_images(
+    /// Process a list of files: save base64 strings to disk and return paths.
+    fn process_incoming_files(
         &self,
         app: &AppHandle,
-        images: Option<Vec<String>>,
+        files: Option<Vec<String>>,
     ) -> Result<Option<Vec<String>>, AppError> {
-        if let Some(imgs) = images {
+        if let Some(file_list) = files {
             let mut paths = Vec::new();
-            for img in imgs {
-                let path = self.save_image_to_disk(app, &img)?;
+            for file_data in file_list {
+                let path = self.save_file_to_disk(app, &file_data)?;
                 paths.push(path);
             }
             Ok(Some(paths))
@@ -128,31 +147,55 @@ impl ChatService {
         }
     }
 
-    /// Load an image from a path and convert to base64 data URL.
-    fn load_image_content(&self, path_or_data: &str) -> Result<String, AppError> {
+    /// Load a file from a path and convert to base64 data URL with mime type.
+    fn load_file_content(&self, path_or_data: &str) -> Result<(String, String), AppError> {
         if path_or_data.starts_with("data:") {
-            Ok(path_or_data.to_string())
+            // Extract mime type from data URL
+            let mime_type = path_or_data
+                .split(',')
+                .next()
+                .and_then(|header| header.split(';').next())
+                .and_then(|part| part.split(':').nth(1))
+                .unwrap_or("application/octet-stream")
+                .to_string();
+            Ok((path_or_data.to_string(), mime_type))
         } else {
             let path = PathBuf::from(path_or_data);
             if path.exists() {
                 let bytes = fs::read(&path)
-                    .map_err(|e| AppError::Generic(format!("Failed to read image file: {}", e)))?;
+                    .map_err(|e| AppError::Generic(format!("Failed to read file: {}", e)))?;
                 let encoded = general_purpose::STANDARD.encode(&bytes);
 
                 // Guess mime type from extension
-                let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("png");
+                let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
                 let mime = match ext.to_lowercase().as_str() {
+                    // Images
                     "jpg" | "jpeg" => "image/jpeg",
                     "png" => "image/png",
                     "webp" => "image/webp",
                     "gif" => "image/gif",
                     "bmp" => "image/bmp",
                     "svg" => "image/svg+xml",
-                    _ => "image/png",
+                    // Documents
+                    "pdf" => "application/pdf",
+                    "txt" => "text/plain",
+                    "md" => "text/markdown",
+                    "csv" => "text/csv",
+                    // Audio
+                    "mp3" => "audio/mpeg",
+                    "wav" => "audio/wav",
+                    "ogg" => "audio/ogg",
+                    "weba" => "audio/webm",
+                    // Video
+                    "mp4" => "video/mp4",
+                    "mpeg" => "video/mpeg",
+                    "webm" => "video/webm",
+                    "mov" => "video/quicktime",
+                    _ => "application/octet-stream",
                 };
-                Ok(format!("data:{};base64,{}", mime, encoded))
+                Ok((format!("data:{};base64,{}", mime, encoded), mime.to_string()))
             } else {
-                Ok(path_or_data.to_string())
+                Ok((path_or_data.to_string(), "application/octet-stream".to_string()))
             }
         }
     }
@@ -304,7 +347,7 @@ impl ChatService {
         &self,
         chat_id: String,
         content: String,
-        images: Option<Vec<String>>,
+        files: Option<Vec<String>>,
         selected_model: Option<String>,
         reasoning_effort: Option<String>,
         llm_connection_id_override: Option<String>,
@@ -317,8 +360,8 @@ impl ChatService {
             sentry::Level::Info,
         );
 
-        // Process images: Save incoming base64 images to disk and get paths
-        let processed_images = self.process_incoming_images(&app, images.clone())?;
+        // Process files: Save incoming base64 files to disk and get paths with mime types
+        let processed_files = self.process_incoming_files(&app, files.clone())?;
 
         // 1. Get chat to find workspace_id
         let chat = self
@@ -368,9 +411,9 @@ impl ChatService {
             .as_secs() as i64;
         let user_message_id = uuid::Uuid::new_v4().to_string();
 
-        let metadata = if let Some(imgs) = &processed_images {
-            if !imgs.is_empty() {
-                Some(serde_json::json!({ "images": imgs }).to_string())
+        let metadata = if let Some(file_list) = &processed_files {
+            if !file_list.is_empty() {
+                Some(serde_json::json!({ "files": file_list }).to_string())
             } else {
                 None
             }
@@ -584,7 +627,7 @@ impl ChatService {
             &existing_messages,
             &workspace_settings,
             &content,
-            processed_images.as_deref(),
+            processed_files.as_deref(),
             system_prompt_override.clone(),
         )?;
 
@@ -744,14 +787,14 @@ impl ChatService {
         chat_id: String,
         message_id: String,
         new_content: String,
-        new_images: Option<Vec<String>>,
+        new_files: Option<Vec<String>>,
         selected_model: Option<String>,
         reasoning_effort: Option<String>,
         llm_connection_id: Option<String>,
         app: AppHandle,
     ) -> Result<(String, String), AppError> {
-        // Process new images
-        let processed_new_images = self.process_incoming_images(&app, new_images)?;
+        // Process new files
+        let processed_new_files = self.process_incoming_files(&app, new_files)?;
 
         // 1. Get the message to find its timestamp before deleting
         let message_timestamp =
@@ -766,7 +809,7 @@ impl ChatService {
                     .send_message(
                         chat_id,
                         new_content,
-                        processed_new_images,
+                        processed_new_files,
                         selected_model,
                         reasoning_effort,
                         llm_connection_id,
@@ -790,7 +833,7 @@ impl ChatService {
         self.send_message(
             chat_id,
             new_content,
-            processed_new_images,
+            processed_new_files,
             selected_model,
             reasoning_effort,
             llm_connection_id,
@@ -1591,7 +1634,7 @@ impl ChatService {
         existing_messages: &[Message],
         workspace_settings: &crate::models::WorkspaceSettings,
         user_content: &str,
-        user_images: Option<&[String]>,
+        user_files: Option<&[String]>,
         system_prompt_override: Option<String>,
     ) -> Result<Vec<ChatMessage>, AppError> {
         let mut api_messages: Vec<ChatMessage> = Vec::new();
@@ -1617,10 +1660,20 @@ impl ChatService {
 
             let chat_msg = match msg.role.as_str() {
                 "user" => {
-                    // Check for images in metadata
-                    let images = if let Some(metadata) = &msg.metadata {
+                    // Check for files in metadata (new format) or images (old format for backward compatibility)
+                    let files = if let Some(metadata) = &msg.metadata {
                         if let Ok(meta_json) = serde_json::from_str::<serde_json::Value>(metadata) {
-                            if let Some(imgs) = meta_json.get("images").and_then(|i| i.as_array()) {
+                            // Try new format first (files array)
+                            if let Some(file_array) = meta_json.get("files").and_then(|f| f.as_array()) {
+                                Some(
+                                    file_array
+                                        .iter()
+                                        .filter_map(|f| f.as_str().map(|s| s.to_string()))
+                                        .collect::<Vec<String>>(),
+                                )
+                            }
+                            // Fallback to old format (images only)
+                            else if let Some(imgs) = meta_json.get("images").and_then(|i| i.as_array()) {
                                 Some(
                                     imgs.iter()
                                         .filter_map(|i| i.as_str().map(|s| s.to_string()))
@@ -1636,8 +1689,8 @@ impl ChatService {
                         None
                     };
 
-                    let content = if let Some(images) = images {
-                        if images.is_empty() {
+                    let content = if let Some(file_list) = files {
+                        if file_list.is_empty() {
                             UserContent::Text(msg.content.clone())
                         } else {
                             let mut parts = Vec::new();
@@ -1647,12 +1700,25 @@ impl ChatService {
                                     text: msg.content.clone(),
                                 });
                             }
-                            // Image parts
-                            for img in images {
-                                let img_content = self.load_image_content(&img).unwrap_or(img);
-                                parts.push(ContentPart::ImageUrl {
-                                    image_url: ImageUrl { url: img_content },
-                                });
+                            // File parts
+                            for file_path in file_list {
+                                let (file_content, actual_mime) = self
+                                    .load_file_content(&file_path)
+                                    .unwrap_or((file_path.clone(), "application/octet-stream".to_string()));
+                                
+                                // Check if it's an image to maintain backward compatibility
+                                if actual_mime.starts_with("image/") {
+                                    parts.push(ContentPart::ImageUrl {
+                                        image_url: ImageUrl { url: file_content },
+                                    });
+                                } else {
+                                    parts.push(ContentPart::FileUrl {
+                                        file_url: FileUrl {
+                                            url: file_content,
+                                            mime_type: actual_mime,
+                                        },
+                                    });
+                                }
                             }
                             UserContent::Parts(parts)
                         }
@@ -1689,8 +1755,8 @@ impl ChatService {
         }
 
         // Add current user message
-        let content = if let Some(images) = user_images {
-            if images.is_empty() {
+        let content = if let Some(file_list) = user_files {
+            if file_list.is_empty() {
                 UserContent::Text(user_content.to_string())
             } else {
                 let mut parts = Vec::new();
@@ -1700,12 +1766,25 @@ impl ChatService {
                         text: user_content.to_string(),
                     });
                 }
-                // Image parts
-                for img in images {
-                    let img_content = self.load_image_content(img).unwrap_or(img.to_string());
-                    parts.push(ContentPart::ImageUrl {
-                        image_url: ImageUrl { url: img_content },
-                    });
+                // File parts
+                for file_path in file_list {
+                    let (file_content, actual_mime) = self
+                        .load_file_content(file_path)
+                        .unwrap_or((file_path.to_string(), "application/octet-stream".to_string()));
+                    
+                    // Check if it's an image
+                    if actual_mime.starts_with("image/") {
+                        parts.push(ContentPart::ImageUrl {
+                            image_url: ImageUrl { url: file_content },
+                        });
+                    } else {
+                        parts.push(ContentPart::FileUrl {
+                            file_url: FileUrl {
+                                url: file_content,
+                                mime_type: actual_mime,
+                            },
+                        });
+                    }
                 }
                 UserContent::Parts(parts)
             }

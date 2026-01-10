@@ -62,11 +62,19 @@ pub enum ContentPart {
     Text { text: String },
     #[serde(rename = "image_url")]
     ImageUrl { image_url: ImageUrl },
+    #[serde(rename = "file_url")]
+    FileUrl { file_url: FileUrl },
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImageUrl {
     pub url: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct FileUrl {
+    pub url: String,
+    pub mime_type: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

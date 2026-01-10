@@ -11,6 +11,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { MessageImage } from './MessageImage';
+import { MessageFile } from './MessageFile';
 import { Button } from '@/ui/atoms/button/button';
 import { Textarea } from '@/ui/atoms/textarea';
 import { cn } from '@/lib/utils';
@@ -231,26 +232,79 @@ export const MessageItem = memo(
                         : 'max-h-[9999px]'
                     )}
                   >
-                    {/* Check for Images in metadata */}
+                    {/* Check for Files/Images in metadata */}
                     {message.metadata &&
                       (() => {
                         try {
                           const parsed = JSON.parse(message.metadata);
+
+                          // Try new format first (files array)
+                          let fileList: Array<
+                            string | { path: string; mimeType: string }
+                          > = [];
                           if (
+                            parsed &&
+                            Array.isArray(parsed.files) &&
+                            parsed.files.length > 0
+                          ) {
+                            fileList = parsed.files;
+                          }
+                          // Fallback to old format (images array)
+                          else if (
                             parsed &&
                             Array.isArray(parsed.images) &&
                             parsed.images.length > 0
                           ) {
-                            return (
-                              <div className="mb-3 flex flex-wrap gap-2">
-                                {parsed.images.map(
-                                  (imgSrc: string, index: number) => (
+                            fileList = parsed.images;
+                          }
+
+                          if (fileList.length === 0) {
+                            return null;
+                          }
+
+                          return (
+                            <div className="mb-3 flex flex-col gap-2">
+                              {fileList.map((fileData, index) => {
+                                // Parse file data
+                                let filePath: string;
+                                let mimeType: string | undefined;
+
+                                if (typeof fileData === 'string') {
+                                  filePath = fileData;
+                                  // Try to guess mime type from data URL or extension
+                                  if (fileData.startsWith('data:')) {
+                                    const match = fileData.match(/data:(.*?);/);
+                                    mimeType = match ? match[1] : undefined;
+                                  }
+                                } else if (
+                                  typeof fileData === 'object' &&
+                                  fileData.path
+                                ) {
+                                  filePath = fileData.path;
+                                  mimeType = fileData.mimeType;
+                                } else {
+                                  return null;
+                                }
+
+                                // Determine if it's an image
+                                const isImage =
+                                  mimeType?.startsWith('image/') ||
+                                  (!mimeType &&
+                                    (filePath.match(
+                                      /\.(jpg|jpeg|png|gif|webp)$/i
+                                    ) ||
+                                      (filePath.startsWith('data:') &&
+                                        filePath.includes('image/'))));
+
+                                if (isImage) {
+                                  // Render image with preview
+                                  return (
                                     <div
                                       key={index}
                                       className="relative w-fit max-w-[400px] overflow-hidden rounded-lg border border-border/50 bg-background/50 cursor-pointer hover:opacity-90 transition-opacity"
                                     >
                                       <MessageImage
-                                        src={imgSrc}
+                                        src={filePath}
                                         alt={`Attached image ${index + 1}`}
                                         className="max-h-[300px] w-auto h-auto object-contain"
                                         onClick={(url) =>
@@ -263,15 +317,24 @@ export const MessageItem = memo(
                                         }
                                       />
                                     </div>
-                                  )
-                                )}
-                              </div>
-                            );
-                          }
+                                  );
+                                } else {
+                                  // Render file card
+                                  return (
+                                    <MessageFile
+                                      key={index}
+                                      src={filePath}
+                                      mimeType={mimeType}
+                                      className="max-w-[400px]"
+                                    />
+                                  );
+                                }
+                              })}
+                            </div>
+                          );
                         } catch (_) {
                           return null;
                         }
-                        return null;
                       })()}
 
                     {message.role === 'assistant' ? (

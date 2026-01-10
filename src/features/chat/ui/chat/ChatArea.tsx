@@ -86,25 +86,27 @@ export function ChatArea() {
       setEditingMessageId(messageId);
       dispatch(setInput(message.content));
 
-      // Restore images if available
+      // Restore files if available (supports both old 'images' format and new 'files' format)
       try {
         if (message.metadata) {
           const parsed = JSON.parse(message.metadata);
-          if (Array.isArray(parsed.images) && parsed.images.length > 0) {
-            const promises = parsed.images.map(
-              async (dataUrlOrPath: string, index: number) => {
+          // Try new format first, fallback to old format
+          const fileList = parsed.files || parsed.images;
+          if (Array.isArray(fileList) && fileList.length > 0) {
+            const promises = fileList.map(
+              async (filePath: string, index: number) => {
                 try {
                   let blob: Blob;
-                  let mimeType = 'image/png';
-                  let extension = 'png';
+                  let mimeType = 'application/octet-stream';
+                  let extension = 'bin';
 
-                  if (dataUrlOrPath.startsWith('data:')) {
+                  if (filePath.startsWith('data:')) {
                     // Handle data URL (Legacy)
-                    const mimeMatch = dataUrlOrPath.match(/data:(.*?);/);
-                    mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
-                    extension = mimeType.split('/')[1] || 'png';
+                    const mimeMatch = filePath.match(/data:(.*?);/);
+                    mimeType = mimeMatch ? mimeMatch[1] : mimeType;
+                    extension = mimeType.split('/')[1] || extension;
 
-                    const byteString = atob(dataUrlOrPath.split(',')[1]);
+                    const byteString = atob(filePath.split(',')[1]);
                     const ab = new ArrayBuffer(byteString.length);
                     const ia = new Uint8Array(ab);
                     for (let i = 0; i < byteString.length; i++) {
@@ -114,36 +116,64 @@ export function ChatArea() {
                   } else {
                     // Handle file path (New)
                     const { readFile } = await import('@tauri-apps/plugin-fs');
-                    const bytes = await readFile(dataUrlOrPath);
+                    const bytes = await readFile(filePath);
 
                     const ext =
-                      dataUrlOrPath.split('.').pop()?.toLowerCase() || 'png';
-                    mimeType = (() => {
-                      switch (ext) {
-                        case 'jpg':
-                        case 'jpeg':
-                          return 'image/jpeg';
-                        case 'png':
-                          return 'image/png';
-                        case 'webp':
-                          return 'image/webp';
-                        case 'gif':
-                          return 'image/gif';
-                        case 'svg':
-                          return 'image/svg+xml';
-                        default:
-                          return 'image/png';
-                      }
-                    })();
+                      filePath.split('.').pop()?.toLowerCase() || 'bin';
+
+                    // If mimeType not provided from metadata, guess from extension
+                    if (mimeType === 'application/octet-stream') {
+                      mimeType = (() => {
+                        switch (ext) {
+                          // Images
+                          case 'jpg':
+                          case 'jpeg':
+                            return 'image/jpeg';
+                          case 'png':
+                            return 'image/png';
+                          case 'webp':
+                            return 'image/webp';
+                          case 'gif':
+                            return 'image/gif';
+                          case 'svg':
+                            return 'image/svg+xml';
+                          // Documents
+                          case 'pdf':
+                            return 'application/pdf';
+                          case 'txt':
+                            return 'text/plain';
+                          case 'md':
+                            return 'text/markdown';
+                          case 'csv':
+                            return 'text/csv';
+                          // Audio
+                          case 'mp3':
+                            return 'audio/mpeg';
+                          case 'wav':
+                            return 'audio/wav';
+                          case 'ogg':
+                            return 'audio/ogg';
+                          // Video
+                          case 'mp4':
+                            return 'video/mp4';
+                          case 'webm':
+                            return 'video/webm';
+                          case 'mov':
+                            return 'video/quicktime';
+                          default:
+                            return 'application/octet-stream';
+                        }
+                      })();
+                    }
                     extension = ext;
                     blob = new Blob([bytes], { type: mimeType });
                   }
 
-                  return new File([blob], `image-${index}.${extension}`, {
+                  return new File([blob], `file-${index}.${extension}`, {
                     type: mimeType,
                   });
                 } catch (e) {
-                  console.error('Failed to restore image', e);
+                  console.error('Failed to restore file', e);
                   return null;
                 }
               }
@@ -170,15 +200,15 @@ export function ChatArea() {
     }
   };
 
-  const handleSend = async (overrideContent?: string, images?: string[]) => {
+  const handleSend = async (overrideContent?: string, files?: string[]) => {
     // If overrideContent is provided, use it. Otherwise use state input.
     const contentToSend =
       overrideContent !== undefined ? overrideContent : input;
 
-    const hasImages = images && images.length > 0;
+    const hasFiles = files && files.length > 0;
 
     if (
-      (!contentToSend.trim() && !hasImages) ||
+      (!contentToSend.trim() && !hasFiles) ||
       !selectedWorkspace ||
       !selectedChatId
     ) {
@@ -232,7 +262,7 @@ export function ChatArea() {
     trackMessageSend(
       selectedChatId,
       contentToSend.trim().length,
-      hasImages || attachedFiles.length > 0
+      hasFiles || attachedFiles.length > 0
     );
     setLLMContext(llmConnection.provider, modelId);
     setChatContext(selectedChatId);
@@ -254,7 +284,7 @@ export function ChatArea() {
                 chatId: selectedChatId,
                 messageId: editingMessageId,
                 newContent: userInput,
-                images, // Pass updated images
+                files, // Pass updated files
               })
             ).unwrap();
           } else if (message.role === 'assistant') {
@@ -277,7 +307,7 @@ export function ChatArea() {
           sendMessage({
             chatId: selectedChatId,
             content: userInput,
-            images,
+            files,
           })
         ).unwrap();
       }

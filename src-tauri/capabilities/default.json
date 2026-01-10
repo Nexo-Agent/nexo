@@ -22,7 +22,10 @@
           "path": "/$HOME/Downloads"
         },
         {
-          "path": "$APPDATA/file"
+          "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
         }
       ]
     },
@@ -30,6 +33,9 @@
     "dialog:default",
     "fs:default",
     "fs:allow-write-text-file",
+    "fs:allow-write-file",
+    "fs:allow-create",
+    "fs:allow-mkdir",
     "updater:allow-check",
     "updater:allow-install",
     {
@@ -37,6 +43,9 @@
       "allow": [
         {
           "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
         }
       ]
     },
@@ -45,6 +54,53 @@
       "allow": [
         {
           "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-stat",
+      "allow": [
+        {
+          "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        {
+          "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-create",
+      "allow": [
+        {
+          "path": "$APPDATA/images"
+        },
+        {
+          "path": "$APPDATA/files"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [
+        {
+          "path": "$APPDATA/images"
+        },
+        {
+          "path": "$APPDATA/files"
         }
       ]
     }

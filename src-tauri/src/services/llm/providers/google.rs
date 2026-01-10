@@ -4,6 +4,7 @@ use crate::events::{MessageEmitter, TokenUsage as EventTokenUsage};
 use crate::models::llm_types::*;
 use crate::models::llm_types::{ToolCall, ToolCallFunction};
 use async_trait::async_trait;
+use base64::Engine as _;
 use futures::StreamExt;
 use reqwest::Client;
 use serde_json::json;
@@ -18,6 +19,211 @@ pub struct GoogleProvider {
 impl GoogleProvider {
     pub fn new(client: Arc<Client>) -> Self {
         Self { client }
+    }
+
+    /// Check if a MIME type is an image type
+    fn is_image_mime_type(mime: &str) -> bool {
+        matches!(
+            mime,
+            "image/jpeg" | "image/png" | "image/gif" | "image/webp" | "image/jpg"
+        )
+    }
+
+    /// Check if a MIME type is a video type
+    fn is_video_mime_type(mime: &str) -> bool {
+        mime.starts_with("video/")
+    }
+
+    /// Upload a file to Google File API
+    async fn upload_file_to_google(
+        client: &Client,
+        api_key: &str,
+        base_url: &str,
+        data: &str, // base64 data
+        mime_type: &str,
+    ) -> Result<(String, String), AppError> {
+        // Step 1: Decode base64 data
+        let file_data = base64::engine::general_purpose::STANDARD
+            .decode(data)
+            .map_err(|e| AppError::Generic(format!("Failed to decode base64: {e}")))?;
+
+        let num_bytes = file_data.len();
+        
+        // Construct proper upload URL
+        // If base_url contains /v1beta, replace it with /upload/v1beta
+        // Otherwise just use the host and append /upload/v1beta/files
+        let upload_url = if base_url.contains("/v1beta") {
+            base_url.replace("/v1beta", "/upload/v1beta")
+        } else {
+            format!("{}/upload/v1beta", base_url.trim_end_matches('/'))
+        };
+        let upload_url = format!("{}/files", upload_url.trim_end_matches('/'));
+
+        eprintln!("Uploading file to Google File API: {} (size: {} bytes, mime: {})", upload_url, num_bytes, mime_type);
+
+        // Step 2: Initial resumable request
+        let initial_response = client
+            .post(&upload_url)
+            .query(&[("key", api_key)])
+            .header("X-Goog-Upload-Protocol", "resumable")
+            .header("X-Goog-Upload-Command", "start")
+            .header("X-Goog-Upload-Header-Content-Length", num_bytes.to_string())
+            .header("X-Goog-Upload-Header-Content-Type", mime_type)
+            .header("Content-Type", "application/json")
+            .json(&json!({
+                "file": {
+                    "display_name": format!("upload_{}", uuid::Uuid::new_v4())
+                }
+            }))
+            .send()
+            .await
+            .map_err(|e| {
+                let err_msg = format!("Failed to initiate upload: {e}");
+                eprintln!("{}", err_msg);
+                AppError::Generic(err_msg)
+            })?;
+
+        let status = initial_response.status();
+        if !status.is_success() {
+            let error_text = initial_response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error".to_string());
+            let err_msg = format!(
+                "Failed to initiate upload (status {}): {}",
+                status, error_text
+            );
+            eprintln!("{}", err_msg);
+            return Err(AppError::Generic(err_msg));
+        }
+
+        // Get upload URL from response headers
+        let upload_session_url = initial_response
+            .headers()
+            .get("x-goog-upload-url")
+            .and_then(|h| h.to_str().ok())
+            .ok_or_else(|| {
+                let err_msg = "No upload URL in response headers".to_string();
+                eprintln!("{}", err_msg);
+                AppError::Generic(err_msg)
+            })?
+            .to_string();
+
+        eprintln!("Got upload session URL: {}", upload_session_url);
+
+        // Step 3: Upload the actual bytes
+        let upload_response = client
+            .put(&upload_session_url)
+            .header("Content-Length", num_bytes.to_string())
+            .header("X-Goog-Upload-Offset", "0")
+            .header("X-Goog-Upload-Command", "upload, finalize")
+            .body(file_data)
+            .send()
+            .await
+            .map_err(|e| {
+                let err_msg = format!("Failed to upload file bytes: {e}");
+                eprintln!("{}", err_msg);
+                AppError::Generic(err_msg)
+            })?;
+
+        let status = upload_response.status();
+        if !status.is_success() {
+            let error_text = upload_response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error".to_string());
+            let err_msg = format!(
+                "Failed to upload file bytes (status {}): {}",
+                status, error_text
+            );
+            eprintln!("{}", err_msg);
+            return Err(AppError::Generic(err_msg));
+        }
+
+        // Parse response to get file URI and name
+        let response_json: serde_json::Value = upload_response
+            .json()
+            .await
+            .map_err(|e| {
+                let err_msg = format!("Failed to parse upload response: {e}");
+                eprintln!("{}", err_msg);
+                AppError::Generic(err_msg)
+            })?;
+
+        eprintln!("Upload response: {}", serde_json::to_string_pretty(&response_json).unwrap_or_else(|_| "{}".to_string()));
+
+        let file_uri = response_json
+            .get("file")
+            .and_then(|f| f.get("uri"))
+            .and_then(|u| u.as_str())
+            .ok_or_else(|| {
+                let err_msg = format!("No file URI in response: {:?}", response_json);
+                eprintln!("{}", err_msg);
+                AppError::Generic(err_msg)
+            })?
+            .to_string();
+
+        let file_name = response_json
+            .get("file")
+            .and_then(|f| f.get("name"))
+            .and_then(|n| n.as_str())
+            .ok_or_else(|| {
+                let err_msg = format!("No file name in response: {:?}", response_json);
+                eprintln!("{}", err_msg);
+                AppError::Generic(err_msg)
+            })?
+            .to_string();
+
+        eprintln!("Successfully uploaded file: {} (URI: {})", file_name, file_uri);
+        Ok((file_uri, file_name))
+    }
+
+    /// Wait for a video file to be processed (state becomes ACTIVE)
+    async fn wait_for_file_active(
+        client: &Client,
+        api_key: &str,
+        base_url: &str,
+        file_name: &str,
+    ) -> Result<(), AppError> {
+        let get_url = format!(
+            "{}/v1beta/{}",
+            base_url.trim_end_matches('/'),
+            file_name
+        );
+
+        // Poll up to 60 times with 5 second intervals (5 minutes total)
+        for _ in 0..60 {
+            let response = client
+                .get(&get_url)
+                .query(&[("key", api_key)])
+                .send()
+                .await
+                .map_err(|e| AppError::Generic(format!("Failed to check file status: {e}")))?;
+
+            if response.status().is_success() {
+                let json: serde_json::Value = response
+                    .json()
+                    .await
+                    .map_err(|e| AppError::Generic(format!("Failed to parse status: {e}")))?;
+
+                if let Some(state) = json.get("state").and_then(|s| s.as_str()) {
+                    match state {
+                        "ACTIVE" => return Ok(()),
+                        "FAILED" => {
+                            return Err(AppError::Generic("File processing failed".to_string()))
+                        }
+                        _ => {
+                            // Still processing, wait and retry
+                            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                        }
+                    }
+                }
+            }
+        }
+
+        Err(AppError::Generic(
+            "Timeout waiting for file to be processed".to_string(),
+        ))
     }
 
     fn check_model_capabilities(model_id: &str) -> (bool, bool) {
@@ -554,8 +760,71 @@ impl LLMProvider for GoogleProvider {
                                     ContentPart::Text { text } => {
                                         google_parts.push(json!({ "text": text }));
                                     }
+                                    ContentPart::FileUrl { file_url } => {
+                                        // FileUrl has explicit mime_type, simplifying the logic
+                                        if let Some(comma_pos) = file_url.url.find(',') {
+                                            let data = &file_url.url[comma_pos + 1..];
+                                            let mime_type = file_url.mime_type.as_str();
+
+                                            // Check if this is an image that can be sent inline
+                                            if Self::is_image_mime_type(mime_type) {
+                                                // Images can be sent inline
+                                                google_parts.push(json!({
+                                                    "inline_data": {
+                                                        "mime_type": mime_type,
+                                                        "data": data
+                                                    }
+                                                }));
+                                            } else {
+                                                // Non-image files must be uploaded via File API
+                                                match Self::upload_file_to_google(
+                                                    &self.client,
+                                                    api_key.unwrap_or(""),
+                                                    base_url,
+                                                    data,
+                                                    mime_type,
+                                                )
+                                                .await
+                                                {
+                                                    Ok((file_uri, file_name)) => {
+                                                        // If it's a video, wait for processing
+                                                        if Self::is_video_mime_type(mime_type) {
+                                                            if let Err(e) =
+                                                                Self::wait_for_file_active(
+                                                                    &self.client,
+                                                                    api_key.unwrap_or(""),
+                                                                    base_url,
+                                                                    &file_name,
+                                                                )
+                                                                .await
+                                                            {
+                                                                eprintln!(
+                                                                    "Warning: Failed to wait for video processing: {e}"
+                                                                );
+                                                                // Continue anyway, might work
+                                                            }
+                                                        }
+
+                                                        // Add file_data part
+                                                        google_parts.push(json!({
+                                                            "file_data": {
+                                                                "mime_type": mime_type,
+                                                                "file_uri": file_uri
+                                                            }
+                                                        }));
+                                                    }
+                                                    Err(e) => {
+                                                        eprintln!(
+                                                            "Warning: Failed to upload file: {e}"
+                                                        );
+                                                        // Skip this file
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                     ContentPart::ImageUrl { image_url } => {
-                                        // Parse data URL: data:image/jpeg;base64,...
+                                        // Parse data URL: data:mime/type;base64,...
                                         if let Some(comma_pos) = image_url.url.find(',') {
                                             let meta = &image_url.url[..comma_pos];
                                             let data = &image_url.url[comma_pos + 1..];
@@ -563,22 +832,107 @@ impl LLMProvider for GoogleProvider {
                                             // Extract mime type
                                             let mime_type = if meta.contains("image/png") {
                                                 "image/png"
-                                            } else if meta.contains("image/jpeg") {
+                                            } else if meta.contains("image/jpeg")
+                                                || meta.contains("image/jpg")
+                                            {
                                                 "image/jpeg"
                                             } else if meta.contains("image/webp") {
                                                 "image/webp"
                                             } else if meta.contains("image/gif") {
                                                 "image/gif"
+                                            } else if meta.contains("video/") {
+                                                // Extract video mime type
+                                                if meta.contains("video/mp4") {
+                                                    "video/mp4"
+                                                } else if meta.contains("video/mpeg") {
+                                                    "video/mpeg"
+                                                } else if meta.contains("video/mov") {
+                                                    "video/mov"
+                                                } else if meta.contains("video/avi") {
+                                                    "video/avi"
+                                                } else if meta.contains("video/webm") {
+                                                    "video/webm"
+                                                } else {
+                                                    "video/mp4" // Fallback
+                                                }
+                                            } else if meta.contains("audio/") {
+                                                // Extract audio mime type
+                                                if meta.contains("audio/mpeg")
+                                                    || meta.contains("audio/mp3")
+                                                {
+                                                    "audio/mpeg"
+                                                } else if meta.contains("audio/wav") {
+                                                    "audio/wav"
+                                                } else if meta.contains("audio/ogg") {
+                                                    "audio/ogg"
+                                                } else if meta.contains("audio/webm") {
+                                                    "audio/webm"
+                                                } else {
+                                                    "audio/mpeg" // Fallback
+                                                }
+                                            } else if meta.contains("application/pdf") {
+                                                "application/pdf"
+                                            } else if meta.contains("text/plain") {
+                                                "text/plain"
                                             } else {
-                                                "image/jpeg" // Fallback
+                                                "application/octet-stream" // Generic fallback
                                             };
 
-                                            google_parts.push(json!({
-                                                "inline_data": {
-                                                    "mime_type": mime_type,
-                                                    "data": data
+                                            // Check if this is an image that can be sent inline
+                                            if Self::is_image_mime_type(mime_type) {
+                                                // Images can be sent inline
+                                                google_parts.push(json!({
+                                                    "inline_data": {
+                                                        "mime_type": mime_type,
+                                                        "data": data
+                                                    }
+                                                }));
+                                            } else {
+                                                // Non-image files must be uploaded via File API
+                                                match Self::upload_file_to_google(
+                                                    &self.client,
+                                                    api_key.unwrap_or(""),
+                                                    base_url,
+                                                    data,
+                                                    mime_type,
+                                                )
+                                                .await
+                                                {
+                                                    Ok((file_uri, file_name)) => {
+                                                        // If it's a video, wait for processing
+                                                        if Self::is_video_mime_type(mime_type) {
+                                                            if let Err(e) =
+                                                                Self::wait_for_file_active(
+                                                                    &self.client,
+                                                                    api_key.unwrap_or(""),
+                                                                    base_url,
+                                                                    &file_name,
+                                                                )
+                                                                .await
+                                                            {
+                                                                eprintln!(
+                                                                    "Warning: Failed to wait for video processing: {e}"
+                                                                );
+                                                                // Continue anyway, might work
+                                                            }
+                                                        }
+
+                                                        // Add file_data part
+                                                        google_parts.push(json!({
+                                                            "file_data": {
+                                                                "mime_type": mime_type,
+                                                                "file_uri": file_uri
+                                                            }
+                                                        }));
+                                                    }
+                                                    Err(e) => {
+                                                        eprintln!(
+                                                            "Warning: Failed to upload file: {e}"
+                                                        );
+                                                        // Skip this file
+                                                    }
                                                 }
-                                            }));
+                                            }
                                         }
                                     }
                                 }

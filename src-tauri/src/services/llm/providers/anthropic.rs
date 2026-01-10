@@ -579,6 +579,33 @@ impl LLMProvider for AnthropicProvider {
                                     ContentPart::Text { text } => {
                                         blocks.push(AnthropicContentBlock::Text { text });
                                     }
+                                    ContentPart::FileUrl { file_url } => {
+                                        // Anthropic only supports images
+                                        // For non-image files, add a text placeholder
+                                        if file_url.mime_type.starts_with("image/") {
+                                            if let Some(comma_pos) = file_url.url.find(',') {
+                                                let data = &file_url.url[comma_pos + 1..];
+                                                let media_type = &file_url.mime_type;
+
+                                                blocks.push(AnthropicContentBlock::Image {
+                                                    source: AnthropicImageSource {
+                                                        r#type: "base64".to_string(),
+                                                        media_type: media_type.to_string(),
+                                                        data: data.to_string(),
+                                                    },
+                                                });
+                                            }
+                                        } else {
+                                            // Non-image files not supported by Anthropic
+                                            // Add a text placeholder
+                                            blocks.push(AnthropicContentBlock::Text {
+                                                text: format!(
+                                                    "[File attachment: {} - Not supported by this model]",
+                                                    file_url.mime_type
+                                                ),
+                                            });
+                                        }
+                                    }
                                     ContentPart::ImageUrl { image_url } => {
                                         // Parse data URL: data:image/jpeg;base64,...
                                         if let Some(comma_pos) = image_url.url.find(',') {

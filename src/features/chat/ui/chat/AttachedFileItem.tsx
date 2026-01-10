@@ -1,6 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAppDispatch } from '@/app/hooks';
 import { setImagePreviewOpen } from '@/features/ui/state/uiSlice';
+import {
+  FileText,
+  FileVideo,
+  FileAudio,
+  FileImage,
+  File as FileIcon,
+} from 'lucide-react';
+import { formatFileSize } from '@/lib/utils';
 
 interface AttachedFileItemProps {
   file: File;
@@ -32,6 +40,32 @@ export const AttachedFileItem = ({
     };
   }, [file]);
 
+  const fileInfo = useMemo(() => {
+    const mimeType = file.type;
+
+    let Icon;
+    let typeLabel;
+
+    if (mimeType.startsWith('image/')) {
+      Icon = FileImage;
+      typeLabel = 'Image';
+    } else if (mimeType.startsWith('video/')) {
+      Icon = FileVideo;
+      typeLabel = 'Video';
+    } else if (mimeType.startsWith('audio/')) {
+      Icon = FileAudio;
+      typeLabel = 'Audio';
+    } else if (mimeType === 'application/pdf' || mimeType.startsWith('text/')) {
+      Icon = FileText;
+      typeLabel = mimeType === 'application/pdf' ? 'PDF' : 'Text';
+    } else {
+      Icon = FileIcon;
+      typeLabel = 'File';
+    }
+
+    return { Icon, typeLabel };
+  }, [file.type]);
+
   return (
     <div className="relative group">
       {file.type.startsWith('image/') && objectUrl ? (
@@ -49,8 +83,14 @@ export const AttachedFileItem = ({
           />
         </div>
       ) : (
-        <div className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs h-8">
-          <span className="truncate max-w-[150px]">{file.name}</span>
+        <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-xs min-w-[180px] max-w-[220px]">
+          <fileInfo.Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <span className="truncate font-medium">{file.name}</span>
+            <span className="text-[10px] text-muted-foreground">
+              {fileInfo.typeLabel} • {formatFileSize(file.size)}
+            </span>
+          </div>
         </div>
       )}
       <button
