@@ -208,7 +208,6 @@ export const MessageItem = memo(
               <div
                 className={cn(
                   'relative min-w-0 wrap-break-words rounded-lg px-3 py-2 text-sm leading-relaxed select-text',
-
                   isStreaming && 'will-change-contents',
                   message.role === 'user'
                     ? 'bg-primary text-primary-foreground'
@@ -336,20 +335,68 @@ export const MessageItem = memo(
                 )}
               </div>
 
-              {/* Footer: Tokens + Actions */}
+              {/* Control buttons - positioned at bottom right corner, overlapping 50% into message */}
               <div
                 className={cn(
-                  'flex items-center mt-1 gap-2',
-                  message.role === 'user'
-                    ? 'justify-start pl-2'
-                    : 'justify-between pr-2' // Spread content for assistant
+                  'absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2',
+                  'flex items-center gap-0.5',
+                  'rounded-md backdrop-blur-md',
+                  'bg-background/95 border border-border shadow-lg',
+                  'p-0.5',
+                  'opacity-0 group-hover:opacity-100 transition-opacity duration-150'
                 )}
               >
-                {/* Token usage info for developer mode */}
-                {userMode === 'developer' &&
+                {message.role === 'user' && (
+                  <button
+                    className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors group/btn"
+                    onClick={handleEdit}
+                    title={t('edit') || 'Edit'}
+                  >
+                    <Pencil className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
+                  </button>
+                )}
+                {message.role === 'assistant' && (
+                  <>
+                    <button
+                      className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors group/btn"
+                      onClick={handleEdit}
+                      title={t('edit') || 'Edit'}
+                    >
+                      <Pencil className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
+                    </button>
+                    <button
+                      className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors group/btn"
+                      onClick={handleToggleMarkdown}
+                      title={
+                        markdownEnabled ? t('showRawText') : t('showMarkdown')
+                      }
+                    >
+                      {markdownEnabled ? (
+                        <FileText className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
+                      ) : (
+                        <Code className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
+                      )}
+                    </button>
+                  </>
+                )}
+                <button
+                  className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors group/btn"
+                  onClick={handleCopy}
+                  title={t('copy')}
+                >
+                  {isCopied ? (
+                    <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
+                  )}
+                </button>
+              </div>
+
+              {/* Footer: Only show token usage for developer mode */}
+              {userMode === 'developer' &&
                 message.role === 'assistant' &&
-                message.tokenUsage ? (
-                  <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-1 select-text">
+                message.tokenUsage && (
+                  <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-1 select-text mt-1 pl-2">
                     {message.tokenUsage.promptTokens !== undefined && (
                       <span>
                         {t('promptTokens')}:{' '}
@@ -375,63 +422,7 @@ export const MessageItem = memo(
                       </span>
                     )}
                   </div>
-                ) : (
-                  <div /> // Spacer
                 )}
-
-                {/* Action buttons */}
-                <div
-                  className={cn(
-                    'flex items-center gap-1',
-                    'opacity-0 group-hover:opacity-100 transition-opacity duration-150'
-                  )}
-                >
-                  {message.role === 'user' && (
-                    <button
-                      className="p-1.5 rounded-md hover:bg-muted transition-colors group/btn"
-                      onClick={handleEdit}
-                      title={t('edit') || 'Edit'}
-                    >
-                      <Pencil className="h-3.5 w-3.5 opacity-50 group-hover/btn:opacity-100 transition-opacity" />
-                    </button>
-                  )}
-                  {message.role === 'assistant' && (
-                    <>
-                      <button
-                        className="p-1.5 rounded-md hover:bg-muted transition-colors group/btn"
-                        onClick={handleEdit}
-                        title={t('edit') || 'Edit'}
-                      >
-                        <Pencil className="h-3.5 w-3.5 opacity-50 group-hover/btn:opacity-100 transition-opacity" />
-                      </button>
-                      <button
-                        className="p-1.5 rounded-md hover:bg-muted transition-colors group/btn"
-                        onClick={handleToggleMarkdown}
-                        title={
-                          markdownEnabled ? t('showRawText') : t('showMarkdown')
-                        }
-                      >
-                        {markdownEnabled ? (
-                          <FileText className="h-3.5 w-3.5 opacity-50 group-hover/btn:opacity-100 transition-opacity" />
-                        ) : (
-                          <Code className="h-3.5 w-3.5 opacity-50 group-hover/btn:opacity-100 transition-opacity" />
-                        )}
-                      </button>
-                    </>
-                  )}
-                  <button
-                    className="p-1.5 rounded-md hover:bg-muted transition-colors group/btn"
-                    onClick={handleCopy}
-                    title={t('copy')}
-                  >
-                    {isCopied ? (
-                      <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5 opacity-50 group-hover/btn:opacity-100 transition-opacity" />
-                    )}
-                  </button>
-                </div>
-              </div>
             </div>
           )}
         </div>
