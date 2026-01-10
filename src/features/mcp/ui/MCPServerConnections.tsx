@@ -647,7 +647,10 @@ function MCPServerConnectionDialog({
             {t('configureMCPConnection')}
           </p>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 min-h-0 overflow-hidden"
+        >
           <DialogBody className="[&>div]:px-0 [&>div]:py-0">
             <div className="space-y-4 px-4 py-2">
               <div className="space-y-2 w-full">
