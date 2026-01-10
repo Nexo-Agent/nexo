@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { Download, Trash2, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Tooltip } from '@/ui/atoms/tooltip';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/ui/atoms/tooltip';
 import { useAddons } from '../hooks/useAddons';
 
 const PythonIcon = ({ className }: { className?: string }) => (
@@ -76,10 +76,13 @@ export default function AddonSettings() {
                 </div>
                 <div className="min-w-0">
                   {runtime.installed && runtime.path ? (
-                    <Tooltip content={runtime.path}>
-                      <h5 className="font-medium cursor-help">
-                        Python {runtime.version}
-                      </h5>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <h5 className="font-medium cursor-help">
+                          Python {runtime.version}
+                        </h5>
+                      </TooltipTrigger>
+                      <TooltipContent>{runtime.path}</TooltipContent>
                     </Tooltip>
                   ) : (
                     <h5 className="font-medium">Python {runtime.version}</h5>
@@ -172,10 +175,13 @@ export default function AddonSettings() {
                 </div>
                 <div className="min-w-0">
                   {runtime.installed && runtime.path ? (
-                    <Tooltip content={runtime.path}>
-                      <h5 className="font-medium cursor-help">
-                        Node.js {runtime.version}
-                      </h5>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <h5 className="font-medium cursor-help">
+                          Node.js {runtime.version}
+                        </h5>
+                      </TooltipTrigger>
+                      <TooltipContent>{runtime.path}</TooltipContent>
                     </Tooltip>
                   ) : (
                     <h5 className="font-medium">Node.js {runtime.version}</h5>

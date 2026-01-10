@@ -7,6 +7,7 @@ import {
   XCircle,
   Trash2,
   Search,
+  Info,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
@@ -27,7 +28,7 @@ import {
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { Switch } from '@/ui/atoms/switch';
 import { Separator } from '@/ui/atoms/separator';
-import { Tooltip } from '@/ui/atoms/tooltip';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/ui/atoms/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -285,7 +286,14 @@ export function WorkspaceSettingsForm({
                 <div className="space-y-2 w-full">
                   <div className="flex items-center gap-1.5">
                     <Label htmlFor="system-message">{t('systemMessage')}</Label>
-                    <Tooltip content={t('systemMessageDescription')} />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="size-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t('systemMessageDescription')}
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                   <div className="relative">
                     <Textarea
@@ -317,7 +325,14 @@ export function WorkspaceSettingsForm({
                 <div className="space-y-2 w-full">
                   <div className="flex items-center gap-1.5">
                     <Label htmlFor="default-model">{t('defaultModel')}</Label>
-                    <Tooltip content={t('defaultModelDescription')} />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="size-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t('defaultModelDescription')}
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                   <Select
                     value={
@@ -459,7 +474,14 @@ export function WorkspaceSettingsForm({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Label>{t('mcpServerConnectionsLabel')}</Label>
-                      <Tooltip content={t('mcpConnectionsDescription')} />
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="size-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {t('mcpConnectionsDescription')}
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     {allMcpConnections.length > 0 && (
                       <Button
@@ -815,11 +837,16 @@ export function WorkspaceSettingsForm({
                       <Label htmlFor="stream-enabled">
                         {t('streamMode', { ns: 'chat' })}
                       </Label>
-                      <Tooltip
-                        content={t('streamModeDescription', {
-                          ns: 'settings',
-                        })}
-                      />
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="size-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {t('streamModeDescription', {
+                            ns: 'settings',
+                          })}
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <Switch
                       id="stream-enabled"
@@ -836,7 +863,15 @@ export function WorkspaceSettingsForm({
                         <Label htmlFor="max-iterations">
                           Agent Max Iterations
                         </Label>
-                        <Tooltip content="Số lần tối đa Agent có thể lặp (gọi Tool) trong một yêu cầu." />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="size-4 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Số lần tối đa Agent có thể lặp (gọi Tool) trong một
+                            yêu cầu.
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                       <p className="text-[10px] text-muted-foreground">
                         Giá trị mặc định là 25. Tăng giá trị này nếu Agent cần

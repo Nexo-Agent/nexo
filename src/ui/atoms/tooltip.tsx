@@ -1,74 +1,59 @@
 import * as React from 'react';
-import { Info } from 'lucide-react';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+
 import { cn } from '@/lib/utils';
 
-interface TooltipProps {
-  content: string;
-  children?: React.ReactNode;
-  className?: string;
-  iconClassName?: string;
-  side?: 'top' | 'bottom' | 'left' | 'right';
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-}
-
-export function Tooltip({
-  content,
-  children,
-  className,
-  iconClassName,
-  side = 'top',
-  maxWidth = 'md',
-}: TooltipProps) {
-  const maxWidthClass = {
-    xs: 'max-w-xs',
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-  }[maxWidth];
-
-  const sideClasses = {
-    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-    left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-    right: 'left-full top-1/2 -translate-y-1/2 ml-2',
-  }[side];
-
-  const arrowClasses = {
-    top: 'top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-popover',
-    bottom:
-      'bottom-full left-1/2 -translate-x-1/2 -mb-px border-4 border-transparent border-b-popover',
-    left: 'left-full top-1/2 -translate-y-1/2 -ml-px border-4 border-transparent border-l-popover',
-    right:
-      'right-full top-1/2 -translate-y-1/2 -mr-px border-4 border-transparent border-r-popover',
-  }[side];
-
+function TooltipProvider({
+  delayDuration = 0,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
   return (
-    <div className={cn('group relative inline-flex', className)}>
-      {children || (
-        <Info
-          className={cn(
-            'size-3.5 text-muted-foreground cursor-help hover:text-foreground transition-colors',
-            iconClassName
-          )}
-        />
-      )}
-      <div
-        className={cn(
-          'absolute opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50',
-          sideClasses
-        )}
-      >
-        <div
-          className={cn(
-            'bg-popover text-popover-foreground text-xs rounded-md border shadow-lg px-3 py-2 whitespace-normal',
-            maxWidthClass
-          )}
-        >
-          {content}
-          <div className={cn('absolute', arrowClasses)}></div>
-        </div>
-      </div>
-    </div>
+    <TooltipPrimitive.Provider
+      data-slot="tooltip-provider"
+      delayDuration={delayDuration}
+      {...props}
+    />
   );
 }
+
+function Tooltip({
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+  return (
+    <TooltipProvider>
+      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+    </TooltipProvider>
+  );
+}
+
+function TooltipTrigger({
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+}
+
+function TooltipContent({
+  className,
+  sideOffset = 0,
+  children,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+  return (
+    <TooltipPrimitive.Portal>
+      <TooltipPrimitive.Content
+        data-slot="tooltip-content"
+        sideOffset={sideOffset}
+        className={cn(
+          'bg-foreground text-background animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-md px-3 py-1.5 text-xs text-balance',
+          className
+        )}
+        {...props}
+      >
+        {children}
+        <TooltipPrimitive.Arrow className="bg-foreground fill-foreground z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]" />
+      </TooltipPrimitive.Content>
+    </TooltipPrimitive.Portal>
+  );
+}
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };

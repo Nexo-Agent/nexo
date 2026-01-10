@@ -62,7 +62,7 @@ jobs:
           echo "VITE_SENTRY_DSN=${{ vars.SENTRY_DSN }}" >> $GITHUB_ENV
           echo "RUST_SENTRY_DSN=${{ vars.SENTRY_DSN }}" >> $GITHUB_ENV
 
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Sentry DSN - embedded at build time
