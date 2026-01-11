@@ -117,7 +117,7 @@ impl AnthropicProvider {
         Self { client }
     }
 
-    fn check_model_capabilities(model_id: &str) -> (bool, bool) {
+    fn check_model_capabilities(model_id: &str) -> (bool, bool, bool) {
         let clean_id = model_id.split('/').last().unwrap_or(model_id);
         let model_lower = clean_id.to_lowercase();
 
@@ -126,7 +126,7 @@ impl AnthropicProvider {
         let supports_thinking =
             model_lower.contains("claude-3-5-sonnet") || model_lower.contains("claude-3-7");
 
-        (supports_tools, supports_thinking)
+        (supports_tools, supports_thinking, false)
     }
 
     async fn handle_streaming(
@@ -511,7 +511,8 @@ impl LLMProvider for AnthropicProvider {
         if let Some(data) = json.get("data").and_then(|d| d.as_array()) {
             for item in data {
                 if let Some(id) = item.get("id").and_then(|s| s.as_str()) {
-                    let (supports_tools, supports_thinking) = Self::check_model_capabilities(id);
+                    let (supports_tools, supports_thinking, supports_image_generation) =
+                        Self::check_model_capabilities(id);
                     models.push(LLMModel {
                         id: id.to_string(),
                         name: item
@@ -523,7 +524,7 @@ impl LLMProvider for AnthropicProvider {
                         owned_by: Some("anthropic".to_string()),
                         supports_tools,
                         supports_thinking,
-                        supports_image_generation: false,
+                        supports_image_generation,
                     });
                 }
             }
@@ -552,7 +553,7 @@ impl LLMProvider for AnthropicProvider {
         req_builder = req_builder.header("Content-Type", "application/json");
 
         // Use helper to check capabilities for dynamic request construction
-        let (_, supports_thinking) = Self::check_model_capabilities(&request.model);
+        let (_, supports_thinking, _) = Self::check_model_capabilities(&request.model);
 
         // Convert messages
         let mut messages = Vec::new();

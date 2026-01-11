@@ -80,7 +80,9 @@ export function useUpdate() {
       console.error('Failed to install update:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
       setStatus('error');
-      toast.error('Failed to install update');
+      toast.error(
+        `Failed to install update: ${err instanceof Error ? err.message : 'Unknown error'}`
+      );
     }
   }, [update]);
 

@@ -5,7 +5,7 @@
       "endpoints": [
         "https://raw.githubusercontent.com/Nexo-Agent/nexo-releases/refs/heads/main/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFGODM0MDg5RTFDNDg0QkYKUldTL2hNVGhpVUNESDRYRUhXOW5Sc2VmSDV2VDVCM2RtbGNNYkJ2ZVNpa1AwTy9sQ0V5dUlKSmkK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNDNTU0RjU5OTZBQUVDMzMKUldRejdLcVdXVTlWUEVZaUNqU0VncjFJT1NORDM2RFh5ZnlGQmpMeVREeXFBYVVuLzZzMmViL3IK"
     }
   },
   "productName": "Nexo",

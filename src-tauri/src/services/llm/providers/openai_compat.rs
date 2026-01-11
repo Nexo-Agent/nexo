@@ -17,7 +17,7 @@ impl OpenAICompatProvider {
         Self { client }
     }
 
-    fn check_model_capabilities(model_id: &str) -> (bool, bool) {
+    fn check_model_capabilities(model_id: &str) -> (bool, bool, bool) {
         // Remove provider prefix if exists (e.g., "openai/gpt-4" -> "gpt-4")
         let clean_id = model_id.split('/').last().unwrap_or(model_id);
         let model_lower = clean_id.to_lowercase();
@@ -26,14 +26,16 @@ impl OpenAICompatProvider {
         let supports_tools = model_lower.contains("gpt") || model_lower.contains("qwen");
 
         // Models that support thinking/reasoning:
-        // - GPT-o1 series (gpt-o1, gpt-o1-mini, etc.)
-        // - GPT-oss series (custom thinking models)
-        let supports_thinking = model_lower.contains("gpt-o1")
-            || model_lower.contains("gpt_o1")
+        // - GPT-o1 series
+        // - GPT-oss series
+        // - DeepSeek V3 and R1
+        let supports_thinking = model_lower.contains("o1")
             || model_lower.contains("gpt-oss")
-            || model_lower.contains("gpt_oss");
+            || model_lower.contains("gpt_oss")
+            || model_lower.contains("deepseek-v3")
+            || model_lower.contains("deepseek-r1");
 
-        (supports_tools, supports_thinking)
+        (supports_tools, supports_thinking, false)
     }
 
     async fn handle_streaming(
@@ -517,7 +519,8 @@ impl LLMProvider for OpenAICompatProvider {
             // Both id and name are required
             if let (Some(id), Some(name)) = (id_opt, name_opt) {
                 // Check model capabilities
-                let (supports_tools, supports_thinking) = Self::check_model_capabilities(&id);
+                let (supports_tools, supports_thinking, supports_image_generation) =
+                    Self::check_model_capabilities(&id);
 
                 Some(LLMModel {
                     id,
@@ -530,7 +533,7 @@ impl LLMProvider for OpenAICompatProvider {
                         .map(|s| s.to_string()),
                     supports_tools,
                     supports_thinking,
-                    supports_image_generation: false,
+                    supports_image_generation,
                 })
             } else {
                 None

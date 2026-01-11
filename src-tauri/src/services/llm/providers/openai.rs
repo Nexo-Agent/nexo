@@ -17,28 +17,43 @@ impl OpenAIProvider {
         Self { client }
     }
 
-    fn check_model_capabilities(model_id: &str) -> (bool, bool) {
+    fn check_model_capabilities(model_id: &str) -> (bool, bool, bool) {
         // Remove provider prefix if exists (e.g., "openai/gpt-4" -> "gpt-4")
         let clean_id = model_id.split('/').last().unwrap_or(model_id);
         let model_lower = clean_id.to_lowercase();
+
+        // Image Generation Support:
+        // - DALL-E series
+        let supports_image_generation = model_lower.contains("dall-e");
+
+        // Image generation models don't support tools or thinking in a chat context
+        if supports_image_generation {
+            return (false, false, true);
+        }
 
         // Tool Calling Support:
         // - GPT-3.5-turbo and all variants (from June 2023)
         // - All GPT-4 variants (from June 2023)
         // - GPT-4o and variants (from May 2024)
         // - O1 series (from Dec 2024)
+        // - O3 series (from Feb 2025)
         // - GPT-5 series (future)
-        let supports_tools = model_lower.starts_with("gpt-3.5-turbo")
-            || model_lower.starts_with("gpt-4")
+        let supports_tools = (model_lower.starts_with("gpt-4")
+            && !model_lower.starts_with("gpt-4o"))
+            || model_lower.starts_with("gpt-3.5")
             || model_lower.starts_with("gpt-5")
-            || model_lower.starts_with("o1");
+            || model_lower.starts_with("o1")
+            || model_lower.starts_with("o3");
 
         // Thinking/Reasoning Support:
         // - O1 series: specialized reasoning models with chain-of-thought
+        // - O3 series: next-gen reasoning models
         // - GPT-5 series: improved reasoning capabilities
-        let supports_thinking = model_lower.starts_with("o1") || model_lower.starts_with("gpt-5");
+        let supports_thinking = model_lower.starts_with("o1")
+            || model_lower.starts_with("o3")
+            || model_lower.starts_with("gpt-5");
 
-        (supports_tools, supports_thinking)
+        (supports_tools, supports_thinking, supports_image_generation)
     }
 
     async fn handle_streaming(
@@ -555,7 +570,8 @@ impl LLMProvider for OpenAIProvider {
             let name = item.get("id")?.as_str()?.to_string();
 
             // Check model capabilities
-            let (supports_tools, supports_thinking) = Self::check_model_capabilities(&id);
+            let (supports_tools, supports_thinking, supports_image_generation) =
+                Self::check_model_capabilities(&id);
 
             Some(LLMModel {
                 id,
@@ -567,7 +583,7 @@ impl LLMProvider for OpenAIProvider {
                     .map(|s| s.to_string()),
                 supports_tools,
                 supports_thinking,
-                supports_image_generation: false,
+                supports_image_generation,
             })
         };
 
