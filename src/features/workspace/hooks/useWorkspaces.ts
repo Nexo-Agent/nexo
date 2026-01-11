@@ -121,17 +121,8 @@ export function useWorkspaces() {
         workspacesData.some((w) => w.id === lastWorkspaceId)
       ) {
         dispatch(setSelectedWorkspace(lastWorkspaceId));
-      } else {
-        // Fallback to first
-        dispatch(setSelectedWorkspace(workspacesData[0].id));
       }
-    } else if (
-      workspacesData &&
-      workspacesData.length > 0 &&
-      !selectedWorkspaceId
-    ) {
-      // Fallback to first if no lastWorkspaceId
-      dispatch(setSelectedWorkspace(workspacesData[0].id));
+      // No fallback to first - let user choose or show onboarding if no workspaces
     }
   }, [workspacesData, lastWorkspaceId, selectedWorkspaceId, dispatch]);
 

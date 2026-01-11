@@ -24,6 +24,10 @@ export const TauriCommands = {
   EDIT_AND_RESEND_MESSAGE: 'edit_and_resend_message',
   RESPOND_TOOL_PERMISSION: 'respond_tool_permission',
 
+  // Chat Input Settings commands
+  GET_CHAT_INPUT_SETTINGS: 'get_chat_input_settings',
+  SAVE_CHAT_INPUT_SETTINGS: 'save_chat_input_settings',
+
   // Message commands
   CREATE_MESSAGE: 'create_message',
   GET_MESSAGES: 'get_messages',

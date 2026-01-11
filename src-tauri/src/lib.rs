@@ -158,6 +158,9 @@ pub fn run() {
             commands::message::update_message,
             commands::message::delete_messages_after,
             commands::message::cancel_message,
+            // Chat Input Settings commands
+            commands::chat_input_settings::get_chat_input_settings,
+            commands::chat_input_settings::save_chat_input_settings,
             // Workspace Settings commands
             commands::settings::save_workspace_settings,
             commands::settings::get_workspace_settings,

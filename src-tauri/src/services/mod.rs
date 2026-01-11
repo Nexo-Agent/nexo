@@ -1,4 +1,5 @@
 pub mod app_settings_service;
+pub mod chat_input_settings_service;
 pub mod chat_service;
 pub mod hub_service;
 pub mod index_config_service;
@@ -18,6 +19,7 @@ pub mod workspace_service;
 pub mod workspace_settings_service;
 
 pub use app_settings_service::AppSettingsService;
+pub use chat_input_settings_service::ChatInputSettingsService;
 pub use chat_service::ChatService;
 pub use hub_service::HubService;
 pub use index_config_service::IndexConfigService;

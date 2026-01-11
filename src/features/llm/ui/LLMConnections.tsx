@@ -389,7 +389,7 @@ const filterPopularModels = (
   return models;
 };
 
-function LLMConnectionForm({
+export function LLMConnectionForm({
   connection,
   onSave,
   onDelete,

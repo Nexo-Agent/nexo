@@ -17,6 +17,8 @@ import {
 } from '@/features/ui/state/uiSlice';
 import { WelcomeScreen } from '@/features/onboarding/ui/WelcomeScreen';
 import OnboardingGuide from '@/features/onboarding/ui/OnboardingGuide';
+import { OnboardingScreen } from '@/features/onboarding/ui/OnboardingScreen';
+import { useWorkspaces } from '@/features/workspace';
 import i18n from '@/i18n/config';
 
 function AppContent() {
@@ -25,6 +27,8 @@ function AppContent() {
   const theme = useAppSelector((state) => state.ui.theme);
   const welcomeOpen = useAppSelector((state) => state.ui.welcomeOpen);
   const loading = useAppSelector((state) => state.ui.loading);
+
+  const { workspaces } = useWorkspaces();
 
   // Listen for notification events
   useNotificationListener();
@@ -71,7 +75,6 @@ function AppContent() {
     root.classList.remove(...allThemes);
 
     if (theme === 'system') {
-      // Use system preference
       const prefersDark = window.matchMedia(
         '(prefers-color-scheme: dark)'
       ).matches;
@@ -81,7 +84,6 @@ function AppContent() {
         root.classList.remove('dark');
       }
 
-      // Listen for system theme changes
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = (e: MediaQueryListEvent) => {
         if (e.matches) {
@@ -95,16 +97,12 @@ function AppContent() {
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
 
-    // Handle explicit themes
     if (theme === 'light') {
       root.classList.remove('dark');
     } else if (theme === 'dark') {
       root.classList.add('dark');
     } else {
-      // Custom themes
       root.classList.add(`theme-${theme}`);
-
-      // Determine if base is dark or light
       const isDark = ['github-dark', 'gruvbox', 'midnight', 'dracula'].includes(
         theme
       );
@@ -116,9 +114,12 @@ function AppContent() {
     }
   }, [theme]);
 
+  // Show onboarding if no workspaces exist
+  const showOnboarding = workspaces.length === 0;
+
   return (
     <>
-      <MainLayout />
+      {!loading && showOnboarding ? <OnboardingScreen /> : <MainLayout />}
       <Toaster />
       <WelcomeScreen
         open={welcomeOpen}

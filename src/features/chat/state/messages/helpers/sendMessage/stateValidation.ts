@@ -50,6 +50,10 @@ export function validateAndExtractState(
     throw new Error('No model selected');
   }
 
+  if (!workspaceSettings) {
+    throw new Error('Workspace settings not found');
+  }
+
   const streamEnabled = workspaceSettings.streamEnabled ?? true;
 
   // Get existing messages

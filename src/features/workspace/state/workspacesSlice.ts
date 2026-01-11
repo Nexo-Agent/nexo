@@ -121,11 +121,10 @@ const workspacesSlice = createSlice({
           )
         ) {
           state.selectedWorkspaceId = action.payload.lastWorkspaceId;
-        } else if (
-          !state.selectedWorkspaceId &&
-          action.payload.workspaces.length > 0
-        ) {
-          state.selectedWorkspaceId = action.payload.workspaces[0].id;
+        } else {
+          // No longer fallback to first workspace automatically
+          // This allows us to handle the "empty" state for onboarding
+          state.selectedWorkspaceId = null;
         }
       })
       .addCase(fetchWorkspaces.rejected, (state, action) => {

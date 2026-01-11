@@ -1,4 +1,4 @@
-use rusqlite::{params, Connection, Result};
+use rusqlite::{Connection, Result};
 
 pub fn run_migrations(conn: &Connection) -> Result<()> {
     // Create workspaces table
@@ -243,22 +243,18 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
         [],
     )?;
 
-    // Create default workspace if none exists
-    let workspace_count: i64 = conn
-        .query_row("SELECT COUNT(*) FROM workspaces", [], |row| row.get(0))
-        .unwrap_or(0);
-
-    if workspace_count == 0 {
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_secs() as i64;
-
-        conn.execute(
-            "INSERT INTO workspaces (id, name, created_at) VALUES (?1, ?2, ?3)",
-            params!["1", "Default", now],
-        )?;
-    }
+    // Create chat_input_settings table
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS chat_input_settings (
+            workspace_id TEXT PRIMARY KEY,
+            selected_model TEXT,
+            stream_enabled INTEGER NOT NULL DEFAULT 1,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+        )",
+        [],
+    )?;
 
     // Create usage_stats table
     conn.execute(

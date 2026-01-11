@@ -54,6 +54,7 @@ export const baseApi = createApi({
     'LLMConnection',
     'MCPConnection',
     'Agent',
+    'ChatInputSettings',
   ],
   endpoints: () => ({}),
 });

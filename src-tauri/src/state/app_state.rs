@@ -22,6 +22,7 @@ pub struct AppState {
     pub chat_service: Arc<ChatService>,
     pub message_service: Arc<MessageService>,
     pub workspace_settings_service: Arc<WorkspaceSettingsService>,
+    pub chat_input_settings_service: Arc<ChatInputSettingsService>,
     pub llm_connection_service: Arc<LLMConnectionService>,
     pub mcp_connection_service: Arc<MCPConnectionService>,
     pub usage_service: Arc<UsageService>,
@@ -68,10 +69,15 @@ impl AppState {
             Arc::new(SqlitePromptRepository::new(app.clone()));
         let usage_repo: Arc<dyn UsageRepository> =
             Arc::new(SqliteUsageRepository::new(app.clone()));
+        let chat_input_settings_repo: Arc<dyn ChatInputSettingsRepository> =
+            Arc::new(SqliteChatInputSettingsRepository::new(app.clone()));
 
         // Initialize Agent Manager first as it's needed by ChatService
         let agent_manager = Arc::new(crate::agent::manager::AgentManager::new(
-            (*app).path().app_data_dir().map_err(crate::error::AppError::Tauri)?,
+            (*app)
+                .path()
+                .app_data_dir()
+                .map_err(crate::error::AppError::Tauri)?,
             crate::services::python_runtime::get_bundled_uv_path(&app)?,
         ));
 
@@ -102,6 +108,8 @@ impl AppState {
         ));
         let app_settings_service = Arc::new(AppSettingsService::new(app_settings_repo));
         let prompt_service = Arc::new(PromptService::new(prompt_repo));
+        let chat_input_settings_service =
+            Arc::new(ChatInputSettingsService::new(chat_input_settings_repo));
 
         // Create and start MCP tool refresh service
         let mcp_tool_refresh_service = Arc::new(MCPToolRefreshService::new(
@@ -118,6 +126,7 @@ impl AppState {
             chat_service,
             message_service,
             workspace_settings_service,
+            chat_input_settings_service,
             llm_connection_service,
             mcp_connection_service,
             usage_service,
