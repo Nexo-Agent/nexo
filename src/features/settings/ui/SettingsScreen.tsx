@@ -232,7 +232,7 @@ export function SettingsScreen() {
   return (
     <div className="flex h-full bg-background text-foreground">
       {/* Sidebar */}
-      <div className="w-64 border-r border-sidebar-border bg-sidebar flex flex-col shrink-0">
+      <div className="w-64 lg:w-72 xl:w-80 border-r border-sidebar-border bg-sidebar flex flex-col shrink-0">
         <ScrollArea className="flex-1">
           <div className="p-3">
             {sections.map((section) => (
@@ -268,7 +268,7 @@ export function SettingsScreen() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <ScrollArea className="flex-1">
-          <div className="p-6 max-w-4xl mx-auto w-full space-y-6">
+          <div className="p-6 max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto w-full space-y-6">
             <div className="mb-6">
               <h1 className="text-2xl font-bold">
                 {sections.find((s) => s.id === selectedSection)?.label}

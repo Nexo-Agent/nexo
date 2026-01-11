@@ -96,7 +96,7 @@ export const ToolCallItem = memo(
       if (parseError) {
         return (
           <div className="flex min-w-0 w-full justify-start">
-            <div className="rounded-lg border border-destructive bg-destructive/10 p-3 w-full">
+            <div className="rounded-lg border border-destructive bg-destructive/10 p-3 w-full select-text">
               <div className="flex items-center gap-2 text-destructive">
                 <AlertCircle className="h-4 w-4" />
                 <span className="font-medium text-sm">Tool Call Error</span>
@@ -130,11 +130,8 @@ export const ToolCallItem = memo(
     const isPending = toolCallData.status === 'pending_permission';
 
     return (
-      <div
-        className="flex min-w-0 w-full justify-start cursor-pointer"
-        onClick={handleToggle}
-      >
-        <div className="rounded-lg border bg-background/50 p-3 text-xs w-full">
+      <div className="flex min-w-0 w-full justify-start cursor-pointer">
+        <div className="rounded-lg border bg-background/50 p-3 text-xs w-full select-text">
           <button
             className="flex w-full items-center justify-between gap-2 text-left"
             type="button"
@@ -177,7 +174,7 @@ export const ToolCallItem = memo(
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" onClick={handleToggle}>
               {isPending && onRespond && (
                 <div className="flex items-center gap-1 mr-2">
                   <Button

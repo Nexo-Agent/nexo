@@ -103,7 +103,7 @@ export function WorkspaceSettingsScreen() {
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Content */}
       <ScrollArea className="flex-1">
-        <div className="p-6 max-w-4xl mx-auto w-full">
+        <div className="p-6 max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto w-full">
           {selectedWorkspace ? (
             <WorkspaceSettingsForm
               workspace={selectedWorkspace}

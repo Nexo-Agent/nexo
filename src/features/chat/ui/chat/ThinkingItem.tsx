@@ -16,7 +16,7 @@ export const ThinkingItem = memo(function ThinkingItem({
   if (!content) return null;
 
   return (
-    <div className="rounded-lg border bg-muted/30 p-3 text-sm">
+    <div className="rounded-lg border bg-muted/30 p-3 text-sm select-text">
       <button
         className="flex w-full items-center justify-between gap-2 text-left"
         onClick={() => setIsExpanded(!isExpanded)}

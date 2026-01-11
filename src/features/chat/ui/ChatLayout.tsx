@@ -18,7 +18,7 @@ export function ChatLayout({ sidebar, content }: ChatLayoutProps) {
       <div
         className={cn(
           'relative shrink-0 overflow-hidden transition-all duration-300 ease-in-out',
-          isSidebarCollapsed ? 'w-0' : 'w-64'
+          isSidebarCollapsed ? 'w-0' : 'w-64 lg:w-72 xl:w-80'
         )}
       >
         <div

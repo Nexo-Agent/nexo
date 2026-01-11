@@ -223,7 +223,7 @@ export function AgentSettings() {
               </p>
             </div>
           ) : (
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {agents.map((agent) => (
                 <Card
                   key={agent.manifest.id}
@@ -265,7 +265,7 @@ export function AgentSettings() {
         </TabsContent>
 
         <TabsContent value="store" className="mt-4 space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Local Install */}
             <Card>
               <CardHeader>
