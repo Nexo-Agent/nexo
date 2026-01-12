@@ -25,7 +25,8 @@ export function useChatInput(selectedWorkspaceId: string | null) {
   const { workspaceSettings } = useWorkspaces();
 
   // Get LLM connections to validate models
-  const { data: llmConnections = [] } = useGetLLMConnectionsQuery();
+  const { data: llmConnections = [], isLoading: isLoadingConnections } =
+    useGetLLMConnectionsQuery();
 
   // Get chat input settings from SQLite
   const { data: sqliteSettings, isSuccess: isSettingsLoaded } =
@@ -93,11 +94,12 @@ export function useChatInput(selectedWorkspaceId: string | null) {
 
   // Load chat input settings from SQLite when workspace changes or data is loaded
   useEffect(() => {
-    if (!selectedWorkspaceId || !isSettingsLoaded) return;
+    if (!selectedWorkspaceId || !isSettingsLoaded || isLoadingConnections)
+      return;
 
     isLoadingSettingsRef.current = true;
 
-    // Priority: SQLite model > default model from workspace settings
+    // Priority 1: SQLite model (User's last choice)
     let modelToUse = sqliteSettings?.selectedModel;
 
     // Validate saved model - if it doesn't exist anymore, clear it
@@ -108,7 +110,7 @@ export function useChatInput(selectedWorkspaceId: string | null) {
       modelToUse = undefined;
     }
 
-    // If no saved model, use default model from workspace settings
+    // Priority 2: Default model from workspace settings
     if (!modelToUse && currentWorkspaceSettings?.defaultModel) {
       const defaultModel = currentWorkspaceSettings.defaultModel;
       const llmConnectionId = currentWorkspaceSettings.llmConnectionId;
@@ -125,6 +127,18 @@ export function useChatInput(selectedWorkspaceId: string | null) {
           `Default model "${modelToUse}" no longer exists, clearing it`
         );
         modelToUse = undefined;
+      }
+    }
+
+    // Priority 3: First available model in the system
+    if (!modelToUse && llmConnections.length > 0) {
+      // Find the first enabled connection that has models
+      const firstAvailableConn = llmConnections.find(
+        (conn) => conn.enabled && conn.models && conn.models.length > 0
+      );
+
+      if (firstAvailableConn?.models?.[0]) {
+        modelToUse = `${firstAvailableConn.id}::${firstAvailableConn.models[0].id}`;
       }
     }
 
@@ -147,6 +161,8 @@ export function useChatInput(selectedWorkspaceId: string | null) {
   }, [
     selectedWorkspaceId,
     isSettingsLoaded,
+    isLoadingConnections,
+    llmConnections,
     sqliteSettings,
     dispatch,
     currentWorkspaceSettings?.defaultModel,
