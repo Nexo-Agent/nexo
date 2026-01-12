@@ -52,7 +52,7 @@ pub async fn install_agent(
 #[tauri::command]
 pub async fn get_installed_agents(
     state: State<'_, AppState>,
-) -> Result<Vec<crate::agent::manager::InstalledAgent>, String> {
+) -> Result<Vec<crate::features::agent::manager::InstalledAgent>, String> {
     state
         .agent_manager
         .list_installed()

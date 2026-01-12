@@ -60,7 +60,7 @@ pub struct AppState {
     pub pending_tool_permissions: Arc<Mutex<HashMap<String, oneshot::Sender<PermissionDecision>>>>,
 
     // Agent Manager
-    pub agent_manager: Arc<crate::agent::manager::AgentManager>,
+    pub agent_manager: Arc<crate::features::agent::manager::AgentManager>,
 }
 
 impl AppState {
@@ -95,7 +95,7 @@ impl AppState {
             Arc::new(SqliteChatInputSettingsRepository::new(app.clone()));
 
         // Initialize Agent Manager first as it's needed by ChatService
-        let agent_manager = Arc::new(crate::agent::manager::AgentManager::new(
+        let agent_manager = Arc::new(crate::features::agent::manager::AgentManager::new(
             (*app)
                 .path()
                 .app_data_dir()

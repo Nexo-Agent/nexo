@@ -28,7 +28,7 @@ pub struct ChatService {
     llm_connection_service: Arc<LLMConnectionService>,
     tool_service: Arc<ToolService>,
     usage_service: Arc<UsageService>,
-    agent_manager: Arc<crate::agent::manager::AgentManager>,
+    agent_manager: Arc<crate::features::agent::manager::AgentManager>,
     // Cancellation channels for each chat_id
     cancellation_senders: Arc<Mutex<HashMap<String, tokio::sync::broadcast::Sender<()>>>>,
 }
@@ -42,7 +42,7 @@ impl ChatService {
         llm_connection_service: Arc<LLMConnectionService>,
         tool_service: Arc<ToolService>,
         usage_service: Arc<UsageService>,
-        agent_manager: Arc<crate::agent::manager::AgentManager>,
+        agent_manager: Arc<crate::features::agent::manager::AgentManager>,
     ) -> Self {
         Self {
             repository,

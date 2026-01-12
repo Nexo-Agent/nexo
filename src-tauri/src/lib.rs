@@ -1,5 +1,3 @@
-mod agent;
-
 mod constants;
 mod db;
 mod error;
@@ -219,11 +217,11 @@ pub fn run() {
             features::usage::commands::get_usage_logs,
             features::usage::commands::clear_usage,
             // Agent commands
-            agent::commands::install_agent,
-            agent::commands::get_installed_agents,
-            agent::commands::delete_agent,
-            agent::commands::get_agent_info,
-            agent::commands::update_agent,
+            features::agent::commands::install_agent,
+            features::agent::commands::get_installed_agents,
+            features::agent::commands::delete_agent,
+            features::agent::commands::get_agent_info,
+            features::agent::commands::update_agent,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
