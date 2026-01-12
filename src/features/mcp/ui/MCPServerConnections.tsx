@@ -251,6 +251,9 @@ export function MCPServerConnections() {
           showSuccess(t('connectionSaved'), t('newMCPConnectionCreated'))
         );
 
+        // Switch to installed tab
+        setActiveTab('installed');
+
         // Start async connection immediately in background
         connectConnection({
           id: result.id,
@@ -271,6 +274,8 @@ export function MCPServerConnections() {
     }
   };
 
+  const [activeTab, setActiveTab] = useState('installed');
+
   const handleInstallClick = (server: HubMCPServer) => {
     setServerToInstall(server);
     setInstallDialogOpen(true);
@@ -279,6 +284,8 @@ export function MCPServerConnections() {
   const handleInstalled = () => {
     // Refetch connections to update the list immediately
     refetchConnections();
+    // Switch to installed tab
+    setActiveTab('installed');
   };
 
   const installedServerIds = mcpConnections.map((c) => c.id);
@@ -286,7 +293,8 @@ export function MCPServerConnections() {
   return (
     <div className="space-y-6 h-full flex flex-col">
       <Tabs
-        defaultValue="installed"
+        value={activeTab}
+        onValueChange={setActiveTab}
         className="w-full flex flex-col flex-1 min-h-0"
       >
         <TabsList className="grid w-full grid-cols-2 shrink-0">

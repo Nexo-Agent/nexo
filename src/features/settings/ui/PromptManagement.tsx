@@ -119,11 +119,16 @@ export function PromptManagement() {
           editingPrompt ? t('promptUpdated') : t('newPromptCreated')
         )
       );
+      if (!editingPrompt) {
+        setActiveTab('installed');
+      }
     } catch (error) {
       console.error('Error saving prompt:', error);
       dispatch(showError(t('cannotSavePrompt')));
     }
   };
+
+  const [activeTab, setActiveTab] = useState('installed');
 
   const handleInstallClick = (prompt: HubPrompt) => {
     setPromptToInstall(prompt);
@@ -132,13 +137,15 @@ export function PromptManagement() {
 
   const handleInstalled = () => {
     loadPrompts();
+    // Switch to installed tab
+    setActiveTab('installed');
   };
 
   const installedPromptIds = prompts.map((p) => p.id);
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="installed" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="installed">
             {t('installedPrompts', { defaultValue: 'Installed Prompts' })}

@@ -71,6 +71,8 @@ export function AgentSettings() {
   const [agentInstructions, setAgentInstructions] = useState<string>('');
   const [loadingAgentInfo, setLoadingAgentInfo] = useState(false);
 
+  const [activeTab, setActiveTab] = useState('installed');
+
   const handleInstallLocal = async () => {
     try {
       const selected = await open({
@@ -97,6 +99,7 @@ export function AgentSettings() {
 
       toast.success('Agent installed successfully!');
       fetchAgents();
+      setActiveTab('installed');
     } catch (error) {
       toast.error('Failed to install agent: ' + error);
     } finally {
@@ -127,6 +130,7 @@ export function AgentSettings() {
       setGitSubpath('');
       setShowAdvanced(false);
       fetchAgents();
+      setActiveTab('installed');
     } catch (error) {
       toast.error('Installation failed: ' + error);
     } finally {
@@ -209,7 +213,7 @@ export function AgentSettings() {
 
   return (
     <div className="space-y-4">
-      <Tabs defaultValue="installed" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="installed">Installed Agents</TabsTrigger>
           <TabsTrigger value="store">Install New</TabsTrigger>
@@ -400,7 +404,9 @@ export function AgentSettings() {
 
           <Separator />
 
-          <CommunityAgentsSection />
+          <CommunityAgentsSection
+            onInstalled={() => setActiveTab('installed')}
+          />
         </TabsContent>
       </Tabs>
 

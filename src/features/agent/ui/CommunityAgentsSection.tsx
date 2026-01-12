@@ -16,7 +16,11 @@ import { InstallAgentDialog } from './InstallAgentDialog';
 import type { HubAgent } from '../types';
 import { useGetInstalledAgentsQuery } from '../state/api';
 
-export function CommunityAgentsSection() {
+export function CommunityAgentsSection({
+  onInstalled,
+}: {
+  onInstalled?: () => void;
+}) {
   const { t } = useTranslation(['settings']);
   const [agents, setAgents] = useState<HubAgent[]>([]);
   const [loading, setLoading] = useState(false);
@@ -173,6 +177,7 @@ export function CommunityAgentsSection() {
         agent={selectedAgent}
         onInstalled={() => {
           // No need to manually refresh, RTK Query tags handle it
+          onInstalled?.();
         }}
       />
     </div>
