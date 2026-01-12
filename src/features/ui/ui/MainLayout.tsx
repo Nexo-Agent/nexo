@@ -88,7 +88,6 @@ export function MainLayout() {
             </div>
           ) : null
         }
-        onClose={titleBarText ? () => dispatch(navigateToChat()) : undefined}
         rightContent={
           <>
             <Button

@@ -244,5 +244,6 @@
   "workspaceSettings": "Cài đặt Workspace",
   "workspaceSettingsMenu": "Cài đặt workspace",
   "workspaceSettingsSaved": "Đã lưu cài đặt workspace",
-  "workspaceSettingsSavedDescription": "Cài đặt đã được lưu thành công"
+  "workspaceSettingsSavedDescription": "Cài đặt đã được lưu thành công",
+  "aboutDescription": "Một nền tảng toàn diện để quản lý các MCP server, kết nối LLM và các prompt trong workspace."
 }
