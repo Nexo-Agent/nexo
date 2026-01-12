@@ -69,6 +69,9 @@ export const ToolCallItem = memo(
     const id = message?.id || data?.id;
 
     const handleToggle = useCallback(() => {
+      const selection = window.getSelection();
+      if (selection && selection.toString().length > 0) return;
+
       if (id) {
         onToggle(id);
       }
@@ -130,7 +133,10 @@ export const ToolCallItem = memo(
     const isPending = toolCallData.status === 'pending_permission';
 
     return (
-      <div className="flex min-w-0 w-full justify-start cursor-pointer">
+      <div
+        className="flex min-w-0 w-full justify-start cursor-pointer"
+        onClick={handleToggle}
+      >
         <div className="rounded-lg border bg-background/50 p-3 text-xs w-full select-text">
           <button
             className="flex w-full items-center justify-between gap-2 text-left"
@@ -174,7 +180,7 @@ export const ToolCallItem = memo(
               )}
             </div>
 
-            <div className="flex items-center gap-2" onClick={handleToggle}>
+            <div className="flex items-center gap-2">
               {isPending && onRespond && (
                 <div className="flex items-center gap-1 mr-2">
                   <Button
@@ -228,6 +234,7 @@ export const ToolCallItem = memo(
               'grid transition-[grid-template-rows] duration-300 ease-in-out',
               isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
             )}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="overflow-hidden">
               <div
