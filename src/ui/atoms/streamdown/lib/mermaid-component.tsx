@@ -10,7 +10,7 @@ import { cn } from './utils';
 import { shouldShowControls, shouldShowMermaidControl } from './control-utils';
 
 const Mermaid = lazy(() =>
-  import('./mermaid').then((mod) => ({ default: mod.Mermaid }))
+  import('./mermaid').then((mod) => ({ default: mod.CachedMermaid }))
 );
 
 interface MermaidComponentProps {

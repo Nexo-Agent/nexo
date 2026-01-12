@@ -5,14 +5,18 @@ import { useDeferredRender } from '../../hooks/use-deferred-render';
 import { StreamdownContext } from '../context';
 import { cn } from '../utils';
 import { PanZoom } from './pan-zoom';
-import { initializeMermaid } from './utils';
+import { getChartHash, initializeMermaid } from './utils';
+import { withMermaidCache } from './with-cache';
 
-type MermaidProps = {
+export type MermaidProps = {
   chart: string;
   className?: string;
   config?: MermaidConfig;
   fullscreen?: boolean;
   showControls?: boolean;
+  cachedSvg?: string;
+  cachePath?: string;
+  onRender?: (svg: string) => void;
 };
 
 export const Mermaid = ({
@@ -21,11 +25,14 @@ export const Mermaid = ({
   config,
   fullscreen = false,
   showControls = true,
+  cachedSvg,
+  cachePath,
+  onRender,
 }: MermaidProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [svgContent, setSvgContent] = useState<string>('');
-  const [lastValidSvg, setLastValidSvg] = useState<string>('');
+  const [svgContent, setSvgContent] = useState<string>(cachedSvg || '');
+  const [lastValidSvg, setLastValidSvg] = useState<string>(cachedSvg || '');
   const [retryCount, setRetryCount] = useState(0);
   const { mermaid: mermaidContext } = useContext(StreamdownContext);
   const ErrorComponent = mermaidContext?.errorComponent;
@@ -37,8 +44,12 @@ export const Mermaid = ({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: "Required for Mermaid"
   useEffect(() => {
-    // Only render when shouldRender is true
-    if (!shouldRender) {
+    // Only render when shouldRender is true and we don't have cached content
+    if (!shouldRender || cachedSvg) {
+      if (cachedSvg && cachedSvg !== svgContent) {
+        setSvgContent(cachedSvg);
+        setLastValidSvg(cachedSvg);
+      }
       return;
     }
 
@@ -51,17 +62,17 @@ export const Mermaid = ({
         const mermaid = await initializeMermaid(config);
 
         // Use a stable ID based on chart content hash and timestamp to ensure uniqueness
-        const chartHash = chart.split('').reduce((acc, char) => {
-          // biome-ignore lint/suspicious/noBitwiseOperators: "Required for Mermaid"
-          return ((acc << 5) - acc + char.charCodeAt(0)) | 0;
-        }, 0);
-        const uniqueId = `mermaid-${Math.abs(chartHash)}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const chartHash = getChartHash(chart);
+        const uniqueId = `mermaid-${chartHash}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
         const { svg } = await mermaid.render(uniqueId, chart);
 
         // Update both current and last valid SVG
         setSvgContent(svg);
         setLastValidSvg(svg);
+
+        // Call onRender callback if provided
+        onRender?.(svg);
       } catch (err) {
         // Silently fail and keep the last valid SVG
         // Don't update svgContent here - just keep what we have
@@ -82,17 +93,25 @@ export const Mermaid = ({
     renderChart();
   }, [chart, config, retryCount, shouldRender]);
 
+  // Always render the SVG if we have content (either current, last valid, or cached)
+  const displaySvg = cachedSvg || svgContent || lastValidSvg;
+
   // Show placeholder when not scheduled to render
-  if (!(shouldRender || svgContent || lastValidSvg)) {
+  if (!(shouldRender || displaySvg)) {
     return (
-      <div className={cn('my-4 min-h-[200px]', className)} ref={containerRef} />
+      <div
+        className={cn('my-4 min-h-[200px]', className)}
+        data-cache-path={cachePath}
+        ref={containerRef}
+      />
     );
   }
 
-  if (isLoading && !svgContent && !lastValidSvg) {
+  if (isLoading && !displaySvg) {
     return (
       <div
         className={cn('my-4 flex justify-center p-4', className)}
+        data-cache-path={cachePath}
         ref={containerRef}
       >
         <div className="flex items-center space-x-2 text-muted-foreground">
@@ -104,13 +123,13 @@ export const Mermaid = ({
   }
 
   // Only show error if we have no valid SVG to display
-  if (error && !svgContent && !lastValidSvg) {
+  if (error && !displaySvg) {
     const retry = () => setRetryCount((count) => count + 1);
 
     // Use custom error component if provided
     if (ErrorComponent) {
       return (
-        <div ref={containerRef}>
+        <div ref={containerRef} data-cache-path={cachePath}>
           <ErrorComponent chart={chart} error={error} retry={retry} />
         </div>
       );
@@ -123,6 +142,7 @@ export const Mermaid = ({
           'rounded-lg border border-red-200 bg-red-50 p-4',
           className
         )}
+        data-cache-path={cachePath}
         ref={containerRef}
       >
         <p className="font-mono text-red-700 text-sm">Mermaid Error: {error}</p>
@@ -138,11 +158,12 @@ export const Mermaid = ({
     );
   }
 
-  // Always render the SVG if we have content (either current or last valid)
-  const displaySvg = svgContent || lastValidSvg;
-
   return (
-    <div className="size-full" ref={containerRef}>
+    <div
+      className="size-full"
+      data-cache-path={cachePath}
+      ref={containerRef}
+    >
       <PanZoom
         className={cn(
           fullscreen ? 'size-full overflow-hidden' : 'my-4 overflow-hidden',
@@ -168,3 +189,5 @@ export const Mermaid = ({
     </div>
   );
 };
+
+export const CachedMermaid = withMermaidCache(Mermaid);
