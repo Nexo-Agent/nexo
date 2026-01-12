@@ -364,7 +364,7 @@ export function ChatArea() {
             {t('chatSloganDescription', { ns: 'common' })}
           </p>
         </div>
-        <div className="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl px-4">
+        <div className="w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl px-4">
           <ChatInput
             selectedWorkspaceId={selectedWorkspaceId}
             selectedChatId={selectedChatId}

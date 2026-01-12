@@ -632,7 +632,7 @@ export function ChatInput({
           timeLeft !== null &&
           timeLeft !== undefined &&
           timeLeft > 0 && (
-            <div className="mx-auto max-w-3xl lg:max-w-4xl xl:max-w-5xl px-4 pb-0">
+            <div className="mx-auto max-w-2xl lg:max-w-3xl xl:max-w-4xl px-4 pb-0">
               <div
                 className={`rounded-lg px-3 py-1.5 text-xs border flex items-center justify-between ${
                   timeLeft <= 10
@@ -651,7 +651,7 @@ export function ChatInput({
 
         {/* Streaming error message */}
         {streamingError && (
-          <div className="mx-auto max-w-3xl lg:max-w-4xl xl:max-w-5xl px-4 pb-2">
+          <div className="mx-auto max-w-2xl lg:max-w-3xl xl:max-w-4xl px-4 pb-2">
             <div className="rounded-lg bg-destructive/10 px-3 py-2 border border-destructive/30 flex items-center justify-between">
               <span className="text-xs text-destructive font-medium">
                 {t('streamingTimeoutError')}
@@ -668,7 +668,7 @@ export function ChatInput({
           </div>
         )}
 
-        <div className="mx-auto max-w-3xl lg:max-w-4xl xl:max-w-5xl px-4 py-2">
+        <div className="mx-auto max-w-2xl lg:max-w-3xl xl:max-w-4xl px-4 py-2">
           {/* Edit Mode Bar - Above ChatInput */}
           {isEditing && (
             <div className="flex items-center justify-between rounded-t-lg bg-primary/10 px-3 py-1 border-x border-t border-primary/20">
@@ -689,7 +689,7 @@ export function ChatInput({
 
           <div
             className={cn(
-              'border border-border bg-muted/20 shadow-sm p-3 relative transition-colors',
+              'border border-border bg-muted/20 shadow-sm p-2 relative transition-colors',
               isEditing ? 'rounded-b-lg border-t-0' : 'rounded-lg',
               isDragging && 'border-primary ring-2 ring-primary/20 bg-muted/50'
             )}

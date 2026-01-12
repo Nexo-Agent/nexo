@@ -176,7 +176,7 @@ export const MessageItem = memo(
           )}
         >
           {isEditing ? (
-            <div className="flex flex-col gap-2 w-full max-w-3xl">
+            <div className="flex flex-col gap-2 w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl">
               <Textarea
                 ref={textareaRef}
                 value={editingContent}

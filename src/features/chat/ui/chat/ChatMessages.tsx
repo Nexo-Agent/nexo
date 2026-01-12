@@ -267,7 +267,7 @@ export function ChatMessages({
         userMode={userMode}
         t={t}
         isLoading={isLoading && !streamingMessageId}
-        className="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto px-4"
+        className="max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto px-4"
       />
     </ScrollArea>
   );
