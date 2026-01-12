@@ -267,7 +267,7 @@ export function ChatSidebar() {
           onClick={() => {
             dispatch(navigateToWorkspaceSettings());
           }}
-          className="w-full justify-between gap-2"
+          className="w-full justify-start gap-2"
           variant="ghost"
         >
           <Settings className="size-4" />
