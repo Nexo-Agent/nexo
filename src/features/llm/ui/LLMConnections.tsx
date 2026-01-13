@@ -380,6 +380,37 @@ const filterPopularModels = (
   return models;
 };
 
+const DEFAULT_URLS: Record<string, string> = {
+  openai: 'https://api.openai.com/v1',
+  ollama: 'http://localhost:11434/v1',
+  vllm: 'http://localhost:8000/v1',
+  litellm: 'http://0.0.0.0:4000',
+  fireworks: 'https://api.fireworks.ai/inference/v1',
+  openrouter: 'https://openrouter.ai/api/v1',
+  groq: 'https://api.groq.com/openai/v1',
+  together: 'https://api.together.xyz/v1',
+  deepinfra: 'https://api.deepinfra.com/v1/openai',
+  google: 'https://generativelanguage.googleapis.com/v1beta',
+  anthropic: 'https://api.anthropic.com',
+  deepseek: 'https://api.deepseek.com',
+};
+
+const PROVIDER_OPTIONS: { value: LLMConnection['provider']; label: string }[] =
+  [
+    { value: 'openai', label: 'OpenAI' },
+    { value: 'google', label: 'Google Gemini' },
+    { value: 'ollama', label: 'Ollama' },
+    { value: 'vllm', label: 'vLLM' },
+    { value: 'litellm', label: 'LiteLLM' },
+    { value: 'fireworks', label: 'Fireworks AI' },
+    { value: 'openrouter', label: 'OpenRouter' },
+    { value: 'groq', label: 'Groq' },
+    { value: 'together', label: 'Together AI' },
+    { value: 'deepinfra', label: 'DeepInfra' },
+    { value: 'anthropic', label: 'Anthropic Claude' },
+    { value: 'deepseek', label: 'DeepSeek' },
+  ];
+
 export function LLMConnectionForm({
   connection,
   onSave,
@@ -391,9 +422,11 @@ export function LLMConnectionForm({
   // Initialize state directly from props.
   // Since this component mounts only when Dialog opens, state is always fresh.
   const [name, setName] = useState(connection?.name || '');
-  const [baseUrl, setBaseUrl] = useState(connection?.baseUrl || '');
   const [provider, setProvider] = useState<LLMConnection['provider']>(
     connection?.provider || 'openai'
+  );
+  const [baseUrl, setBaseUrl] = useState(
+    connection?.baseUrl || DEFAULT_URLS[connection?.provider || 'openai'] || ''
   );
   const [apiKey, setApiKey] = useState(connection?.apiKey || '');
   // Filter models even when loading from existing connection
@@ -496,37 +529,6 @@ export function LLMConnectionForm({
     }
   };
 
-  const defaultUrls = {
-    openai: 'https://api.openai.com/v1',
-    ollama: 'http://localhost:11434/v1',
-    vllm: 'http://localhost:8000/v1',
-    litellm: 'http://0.0.0.0:4000',
-    fireworks: 'https://api.fireworks.ai/inference/v1',
-    openrouter: 'https://openrouter.ai/api/v1',
-    groq: 'https://api.groq.com/openai/v1',
-    together: 'https://api.together.xyz/v1',
-    deepinfra: 'https://api.deepinfra.com/v1/openai',
-    google: 'https://generativelanguage.googleapis.com/v1beta',
-    anthropic: 'https://api.anthropic.com',
-    deepseek: 'https://api.deepseek.com',
-  };
-
-  const providerOptions: { value: LLMConnection['provider']; label: string }[] =
-    [
-      { value: 'openai', label: 'OpenAI' },
-      { value: 'google', label: 'Google Gemini' },
-      { value: 'ollama', label: 'Ollama' },
-      { value: 'vllm', label: 'vLLM' },
-      { value: 'litellm', label: 'LiteLLM' },
-      { value: 'fireworks', label: 'Fireworks AI' },
-      { value: 'openrouter', label: 'OpenRouter' },
-      { value: 'groq', label: 'Groq' },
-      { value: 'together', label: 'Together AI' },
-      { value: 'deepinfra', label: 'DeepInfra' },
-      { value: 'anthropic', label: 'Anthropic Claude' },
-      { value: 'deepseek', label: 'DeepSeek' },
-    ];
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
       <DialogBody className="overflow-hidden">
@@ -550,8 +552,8 @@ export function LLMConnectionForm({
                 value={provider}
                 onValueChange={(value: LLMConnection['provider']) => {
                   setProvider(value);
-                  if (!baseUrl || baseUrl === defaultUrls[provider]) {
-                    setBaseUrl(defaultUrls[value]);
+                  if (!baseUrl || baseUrl === DEFAULT_URLS[provider]) {
+                    setBaseUrl(DEFAULT_URLS[value]);
                   }
                 }}
               >
@@ -562,7 +564,7 @@ export function LLMConnectionForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {providerOptions.map((option) => (
+                  {PROVIDER_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       <div className="flex items-center gap-2">
                         <ProviderIcon
@@ -582,7 +584,7 @@ export function LLMConnectionForm({
                 id="baseUrl"
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
-                placeholder={defaultUrls[provider]}
+                placeholder={DEFAULT_URLS[provider]}
                 className="w-full"
                 required
               />

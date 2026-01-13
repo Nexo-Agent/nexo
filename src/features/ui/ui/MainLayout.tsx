@@ -14,7 +14,6 @@ import { ChatSearchDialog } from '@/features/chat/ui/ChatSearchDialog';
 import { KeyboardShortcutsDialog } from '@/features/shortcuts/ui/KeyboardShortcutsDialog';
 import { TitleBar } from '@/features/ui/ui/TitleBar';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { cn } from '@/lib/utils';
 import {
   toggleSidebar,
   setAboutOpen,
@@ -38,7 +37,6 @@ export function MainLayout() {
   const activePage = useAppSelector((state) => state.ui.activePage);
   const titleBarText = useAppSelector((state) => state.ui.titleBarText);
   const isRightPanelOpen = useAppSelector((state) => state.ui.isRightPanelOpen);
-  const settingsSection = useAppSelector((state) => state.ui.settingsSection);
   const aboutOpen = useAppSelector((state) => state.ui.aboutOpen);
 
   const handleSettingsClick = () => {
@@ -89,25 +87,22 @@ export function MainLayout() {
         }
         rightContent={
           <>
-            <Button
-              variant="ghost"
-              onClick={handleSettingsClick}
-              aria-label={t('settings', { ns: 'common' })}
-              data-tour="settings-nav"
-              className={cn(
-                'h-7 gap-1.5 px-1.5 py-1 hover:bg-accent',
-                activePage === 'settings' &&
-                  settingsSection !== 'agent' &&
-                  'bg-accent text-accent-foreground'
-              )}
-            >
-              <div className="flex size-5 items-center justify-center rounded bg-primary text-primary-foreground">
-                <SettingsIcon className="size-3" />
-              </div>
-              <span className="text-sm font-medium">
-                {t('settings', { ns: 'common' })}
-              </span>
-            </Button>
+            {activePage !== 'settings' && (
+              <Button
+                variant="ghost"
+                onClick={handleSettingsClick}
+                aria-label={t('settings', { ns: 'common' })}
+                data-tour="settings-nav"
+                className="h-7 gap-1.5 px-1.5 py-1 hover:bg-accent"
+              >
+                <div className="flex size-5 items-center justify-center rounded bg-primary text-primary-foreground">
+                  <SettingsIcon className="size-3" />
+                </div>
+                <span className="text-sm font-medium">
+                  {t('settings', { ns: 'common' })}
+                </span>
+              </Button>
+            )}
             {activePage === 'chat' && (
               <Button
                 variant="ghost"
