@@ -46,7 +46,7 @@ export const ThinkingItem = memo(function ThinkingItem({
         <div className="overflow-hidden">
           <div
             className={cn(
-              'pt-2 transition-opacity duration-300 whitespace-pre-wrap text-muted-foreground',
+              'pt-2 transition-opacity duration-300 whitespace-pre-wrap text-muted-foreground font-mono leading-relaxed',
               isExpanded ? 'opacity-100' : 'opacity-0'
             )}
           >

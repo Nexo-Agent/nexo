@@ -247,7 +247,7 @@ export const ToolCallItem = memo(
                   <div className="text-muted-foreground mb-1">
                     {t('toolCallInput')}
                   </div>
-                  <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+                  <pre className="text-xs font-mono leading-normal bg-muted p-2 rounded overflow-x-auto">
                     {formatJSONSafety(toolCallData.arguments)}
                   </pre>
                 </div>
@@ -265,7 +265,7 @@ export const ToolCallItem = memo(
                     <div className="text-destructive mb-1">
                       {t('toolCallError')}
                     </div>
-                    <div className="text-xs text-destructive bg-destructive/10 p-2 rounded">
+                    <div className="text-xs text-destructive bg-destructive/10 p-2 rounded font-mono">
                       {toolCallData.error}
                     </div>
                   </div>
@@ -274,7 +274,7 @@ export const ToolCallItem = memo(
                     <div className="text-muted-foreground mb-1">
                       {t('toolCallOutput')}
                     </div>
-                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+                    <pre className="text-xs font-mono leading-normal bg-muted p-2 rounded overflow-x-auto">
                       {formatJSONSafety(toolCallData.result)}
                     </pre>
                   </div>
@@ -309,14 +309,20 @@ export const ToolCallItem = memo(
   }
 );
 
-function formatJSONSafety(str: any): string {
+function formatJSONSafety(str: unknown): string {
+  if (str === undefined || str === null) return '';
+
   if (typeof str === 'object') {
     return JSON.stringify(str, null, 2);
   }
 
-  try {
-    return JSON.stringify(JSON.parse(str), null, 2);
-  } catch (_) {
-    return str.toString();
+  if (typeof str === 'string') {
+    try {
+      return JSON.stringify(JSON.parse(str), null, 2);
+    } catch (_) {
+      return str;
+    }
   }
+
+  return String(str);
 }

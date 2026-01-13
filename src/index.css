@@ -161,6 +161,30 @@
   --chart-blue: #3b82f6;
   --chart-cyan: #0891b2;
   --chart-amber: #f59e0b;
+
+  /* Typography Tokens */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --font-mono:
+    'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', Menlo, Monaco,
+    Consolas, monospace;
+
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.8125rem; /* 13px */
+  --text-base: 0.875rem; /* 14px */
+  --text-lg: 1rem; /* 16px */
+  --text-xl: 1.125rem; /* 18px */
+  --text-2xl: 1.25rem; /* 20px */
+
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  --leading-loose: 1.7;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 }
 
 .dark {
@@ -238,6 +262,13 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   html,
   body {
     @apply overflow-hidden;
@@ -247,7 +278,10 @@
 
   body {
     @apply bg-background text-foreground select-none;
-    font-weight: 400; /* Enforce global regular weight */
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    font-weight: var(--font-weight-normal);
   }
 
   #root {
@@ -255,21 +289,57 @@
     width: 100%;
   }
 
-  /* Force all headings and bold elements to be regular weight */
   h1,
   h2,
   h3,
   h4,
   h5,
-  h6,
+  h6 {
+    @apply text-foreground tracking-tight;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.3;
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: var(--text-xl);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  h3 {
+    font-size: var(--text-lg);
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  h4,
+  h5,
+  h6 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-semibold);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
   b,
   strong {
-    font-weight: 400 !important;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+    font-size: 0.95em; /* Scale mono slightly down to match optical mid-height of sans */
   }
 
   input,
   textarea {
     @apply select-text;
+    font-family: inherit;
   }
 
   /* Ensure buttons and clickable elements have pointer cursor */
@@ -308,65 +378,86 @@
   max-width: 100%;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  line-height: var(--leading-relaxed);
+  font-size: var(--text-base);
+}
+
+.markdown-content p {
+  margin-bottom: 1rem;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Lists */
+.markdown-content ul,
+.markdown-content ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.markdown-content li {
+  margin-bottom: 0.35rem;
+}
+
+.markdown-content li p {
+  margin-bottom: 0.5rem;
+}
+
+/* Blockquotes */
+.markdown-content blockquote {
+  @apply border-l-4 border-muted py-1 pl-4 my-4 italic text-muted-foreground;
 }
 
 /* Images - prevent breaking layout */
 .markdown-content img {
-  @apply max-w-full h-auto rounded-lg my-2;
-  max-width: 100% !important;
-  height: auto !important;
+  @apply max-w-full h-auto rounded-lg my-4;
   display: block;
 }
 
-/* Tables - prevent breaking layout with horizontal scroll */
+/* Tables */
 .markdown-content table {
-  @apply border-collapse border border-border my-2;
+  @apply border-collapse border border-border my-4;
   width: 100%;
-  max-width: 100%;
   table-layout: auto;
-  border-spacing: 0;
-  overflow-x: auto;
-  display: table;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.markdown-content table th {
+  @apply bg-muted/50 font-semibold;
 }
 
 .markdown-content table td,
 .markdown-content table th {
-  @apply border border-border px-2 py-1;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  min-width: 50px;
+  @apply border border-border px-3 py-2 text-left;
   vertical-align: top;
 }
 
-/* Code blocks - prevent breaking layout */
+/* Code blocks */
 .markdown-content pre {
-  @apply overflow-x-auto;
-  max-width: 100%;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
+  @apply bg-secondary/30 rounded-lg p-4 my-4 overflow-x-auto border border-border/50;
+  line-height: 1.5;
 }
 
 .markdown-content code {
-  word-break: break-word;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
+  @apply bg-secondary/50 rounded px-1.5 py-0.5 text-inherit font-mono;
+  font-size: 0.9em;
 }
 
-/* Inline code should not wrap */
+.markdown-content pre code {
+  @apply bg-transparent p-0 rounded-none;
+  font-size: 0.9em;
+  display: block;
+  white-space: pre;
+}
+
+/* Inline code specifically in paragraphs/lists */
 .markdown-content p code,
 .markdown-content li code {
-  white-space: pre-wrap;
+  white-space: normal;
   word-break: break-all;
-}
-
-/* Code blocks inside pre should preserve formatting but allow wrapping */
-.markdown-content pre code {
-  white-space: pre;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  display: block;
-  max-width: 100%;
 }
 
 .markdown-content div[aria-label='Mermaid chart'] svg {
