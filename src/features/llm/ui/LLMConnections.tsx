@@ -626,7 +626,7 @@ export function LLMConnectionForm({
                 )}
               </Button>
               {testStatus === 'success' && (
-                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                <div className="flex items-center gap-2 text-sm text-success">
                   <CheckCircle2 className="size-4" />
                   <span>
                     {t('connectionSuccess', { count: models.length })}

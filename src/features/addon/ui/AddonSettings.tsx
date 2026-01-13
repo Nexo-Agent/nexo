@@ -95,32 +95,34 @@ export default function AddonSettings() {
             pythonRuntimes.map((runtime) => (
               <div
                 key={runtime.version}
-                className="flex flex-col rounded-lg border p-4 hover:bg-accent/50 transition-colors"
+                className="flex flex-col rounded-lg border bg-card/40 p-4 hover:bg-accent/10 hover:shadow-sm transition-all duration-200"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="size-10 rounded-full bg-brand-python/10 flex items-center justify-center shrink-0">
+                  <div className="size-10 rounded-full bg-brand-python/10 flex items-center justify-center shrink-0 border border-brand-python/10">
                     <PythonIcon className="size-5 text-brand-python" />
                   </div>
                   <div className="min-w-0">
                     {runtime.installed && runtime.path ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <h5 className="font-medium cursor-help">
+                          <h5 className="font-semibold text-sm cursor-help">
                             Python {runtime.version}
                           </h5>
                         </TooltipTrigger>
                         <TooltipContent>{runtime.path}</TooltipContent>
                       </Tooltip>
                     ) : (
-                      <h5 className="font-medium">Python {runtime.version}</h5>
+                      <h5 className="font-semibold text-sm">
+                        Python {runtime.version}
+                      </h5>
                     )}
                     <div className="flex items-center gap-2 mt-1">
                       <span
                         className={cn(
-                          'inline-flex items-center rounded-md px-2 py-1 text-xs',
+                          'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors',
                           runtime.installed
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-muted text-muted-foreground'
+                            ? 'bg-success/15 text-success border border-success/20'
+                            : 'bg-muted text-muted-foreground border border-border'
                         )}
                       >
                         {runtime.installed ? t('installed') : t('notInstalled')}
@@ -132,7 +134,7 @@ export default function AddonSettings() {
                 <div className="h-5 mb-4">
                   {runtime.path ? (
                     <span
-                      className="text-[10px] text-muted-foreground font-mono block truncate"
+                      className="text-[10px] text-muted-foreground font-mono block truncate opacity-80"
                       title={runtime.path}
                     >
                       {runtime.path}
@@ -148,7 +150,7 @@ export default function AddonSettings() {
                       onClick={() => actions.installPython(runtime.version)}
                       disabled={installingPython !== null}
                       size="sm"
-                      className="w-full h-9 bg-brand-python hover:bg-brand-python/90 text-white"
+                      className="w-full h-9 bg-brand-python hover:opacity-90 text-white shadow-sm"
                     >
                       {installingPython === runtime.version ? (
                         <>
@@ -201,32 +203,34 @@ export default function AddonSettings() {
             nodeRuntimes.map((runtime) => (
               <div
                 key={runtime.version}
-                className="flex flex-col rounded-lg border p-4 hover:bg-accent/50 transition-colors"
+                className="flex flex-col rounded-lg border bg-card/40 p-4 hover:bg-accent/10 hover:shadow-sm transition-all duration-200"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="size-10 rounded-full bg-brand-node/10 flex items-center justify-center shrink-0">
+                  <div className="size-10 rounded-full bg-brand-node/10 flex items-center justify-center shrink-0 border border-brand-node/10">
                     <NodeIcon className="size-5 text-brand-node" />
                   </div>
                   <div className="min-w-0">
                     {runtime.installed && runtime.path ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <h5 className="font-medium cursor-help">
+                          <h5 className="font-semibold text-sm cursor-help">
                             Node.js {runtime.version}
                           </h5>
                         </TooltipTrigger>
                         <TooltipContent>{runtime.path}</TooltipContent>
                       </Tooltip>
                     ) : (
-                      <h5 className="font-medium">Node.js {runtime.version}</h5>
+                      <h5 className="font-semibold text-sm">
+                        Node.js {runtime.version}
+                      </h5>
                     )}
                     <div className="flex items-center gap-2 mt-1">
                       <span
                         className={cn(
-                          'inline-flex items-center rounded-md px-2 py-1 text-xs',
+                          'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors',
                           runtime.installed
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-muted text-muted-foreground'
+                            ? 'bg-success/15 text-success border border-success/20'
+                            : 'bg-muted text-muted-foreground border border-border'
                         )}
                       >
                         {runtime.installed ? t('installed') : t('notInstalled')}
@@ -238,7 +242,7 @@ export default function AddonSettings() {
                 <div className="h-5 mb-4">
                   {runtime.path ? (
                     <span
-                      className="text-[10px] text-muted-foreground font-mono block truncate"
+                      className="text-[10px] text-muted-foreground font-mono block truncate opacity-80"
                       title={runtime.path}
                     >
                       {runtime.path}
@@ -254,7 +258,7 @@ export default function AddonSettings() {
                       onClick={() => actions.installNode(runtime.version)}
                       disabled={installingNode !== null}
                       size="sm"
-                      className="w-full h-9 bg-brand-node hover:bg-brand-node/90 text-white"
+                      className="w-full h-9 bg-brand-node hover:opacity-90 text-white shadow-sm"
                     >
                       {installingNode === runtime.version ? (
                         <>

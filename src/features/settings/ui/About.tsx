@@ -148,7 +148,7 @@ export function About({ open, onOpenChange }: AboutProps) {
             {/* Footer */}
             <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
               <span>{t('madeWith', { defaultValue: 'Made with' })}</span>
-              <Heart className="size-3 fill-red-500 text-red-500" />
+              <Heart className="size-3 fill-error text-error" />
               <span>{t('byTeam', { defaultValue: 'by the Nexo team' })}</span>
             </div>
           </div>

@@ -139,18 +139,18 @@ export const Mermaid = ({
     return (
       <div
         className={cn(
-          'rounded-lg border border-red-200 bg-red-50 p-4',
+          'rounded-lg border border-error/20 bg-error/5 p-4',
           className
         )}
         data-cache-path={cachePath}
         ref={containerRef}
       >
-        <p className="font-mono text-red-700 text-sm">Mermaid Error: {error}</p>
+        <p className="font-mono text-error text-sm">Mermaid Error: {error}</p>
         <details className="mt-2">
-          <summary className="cursor-pointer text-red-600 text-xs">
+          <summary className="cursor-pointer text-error/80 text-xs">
             Show Code
           </summary>
-          <pre className="mt-2 overflow-x-auto rounded bg-red-100 p-2 text-red-800 text-xs">
+          <pre className="mt-2 overflow-x-auto rounded bg-error/10 p-2 text-error/90 text-xs text-muted-foreground/90">
             {chart}
           </pre>
         </details>

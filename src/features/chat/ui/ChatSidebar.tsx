@@ -224,7 +224,7 @@ export function ChatSidebar() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="size-7 p-0 hover:bg-black/10 dark:hover:bg-white/10"
+                            className="size-7 p-0 hover:bg-accent"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();

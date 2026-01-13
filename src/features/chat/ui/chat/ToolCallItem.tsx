@@ -156,7 +156,7 @@ export const ToolCallItem = memo(
               )}
               {isPending && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-yellow-500 text-xs font-semibold">
+                  <span className="text-warning text-xs font-semibold">
                     Permission Required
                   </span>
                   {timeLeft !== undefined && timeLeft > 0 && (
@@ -186,7 +186,7 @@ export const ToolCallItem = memo(
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-6 w-6 text-green-500 hover:text-green-600 hover:bg-green-100"
+                    className="h-6 w-6 text-success hover:bg-success/10"
                     onClick={(e: MouseEvent<HTMLButtonElement>) =>
                       handleRespond(e, true)
                     }
@@ -257,7 +257,7 @@ export const ToolCallItem = memo(
                     <span>{t('toolCallExecuting')}</span>
                   </div>
                 ) : isPending ? (
-                  <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
+                  <div className="text-xs text-warning bg-warning/10 p-2 rounded">
                     Wait for approval...
                   </div>
                 ) : isError ? (

@@ -19,38 +19,39 @@ const OnboardingGuide: React.FC = () => {
   const steps = activeTour ? ONBOARDING_STEPS[activeTour] : [];
 
   // Define theme colors using CSS variables
-  // Note: Joyride accepts inline styles object, so we use var() to hook into existing theme system
   const joyrideStyles = {
     options: {
-      zIndex: 10000, // Maximize z-index to stay above all dialogs
-      primaryColor: '#8b5cf6', // A purple accent fallback
-      textColor: '#e5e7eb', // Text color fallback (dark mode friendly)
-      backgroundColor: '#1f2937', // Background fallback
-      arrowColor: '#1f2937',
-      overlayColor: 'rgba(0, 0, 0, 0.5)',
+      zIndex: 10000,
+      primaryColor: 'var(--accent-primary)',
+      textColor: 'var(--text-primary)',
+      backgroundColor: 'var(--bg-elevated)',
+      arrowColor: 'var(--bg-elevated)',
+      overlayColor: 'rgba(0, 0, 0, 0.4)',
     },
     tooltip: {
-      borderRadius: '12px',
+      borderRadius: '8px',
       fontFamily: 'inherit',
-      backgroundColor: 'var(--color-bg-secondary, #1f2937)',
-      color: 'var(--color-text-primary, #ffffff)',
-      border: '1px solid var(--color-border-primary, #374151)',
-      boxShadow:
-        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      backgroundColor: 'var(--bg-elevated)',
+      color: 'var(--text-primary)',
+      border: '1px solid var(--border-subtle)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
     },
     buttonNext: {
-      backgroundColor: 'var(--color-primary-600, #7c3aed)',
+      backgroundColor: 'var(--accent-primary)',
       color: '#fff',
       borderRadius: '6px',
       outline: 'none',
       fontWeight: 500,
+      padding: '8px 16px',
     },
     buttonBack: {
-      color: 'var(--color-text-secondary, #9ca3af)',
+      color: 'var(--text-secondary)',
       marginRight: '10px',
+      fontWeight: 400,
     },
     buttonSkip: {
-      color: 'var(--color-text-tertiary, #6b7280)',
+      color: 'var(--text-muted)',
+      fontWeight: 400,
     },
     beacon: {
       // Customize beacon if needed

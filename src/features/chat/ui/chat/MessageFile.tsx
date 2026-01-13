@@ -35,9 +35,9 @@ const getFileInfo = (src: string, mimeType?: string) => {
     return {
       Icon: FileImage,
       label: 'Image',
-      iconColor: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-50 dark:bg-blue-950/30',
-      borderColor: 'border-blue-200 dark:border-blue-800/50',
+      iconColor: 'text-info',
+      bgColor: 'bg-info/5',
+      borderColor: 'border-info/10',
     };
   }
   if (
@@ -47,45 +47,45 @@ const getFileInfo = (src: string, mimeType?: string) => {
     return {
       Icon: FileVideo,
       label: 'Video',
-      iconColor: 'text-purple-600 dark:text-purple-400',
-      bgColor: 'bg-purple-50 dark:bg-purple-950/30',
-      borderColor: 'border-purple-200 dark:border-purple-800/50',
+      iconColor: 'text-info',
+      bgColor: 'bg-info/5',
+      borderColor: 'border-info/10',
     };
   }
   if (mime?.startsWith('audio/') || ['mp3', 'wav', 'ogg'].includes(ext)) {
     return {
       Icon: FileAudio,
       label: 'Audio',
-      iconColor: 'text-green-600 dark:text-green-400',
-      bgColor: 'bg-green-50 dark:bg-green-950/30',
-      borderColor: 'border-green-200 dark:border-green-800/50',
+      iconColor: 'text-success',
+      bgColor: 'bg-success/5',
+      borderColor: 'border-success/10',
     };
   }
   if (mime === 'application/pdf' || ext === 'pdf') {
     return {
       Icon: FileText,
       label: 'PDF',
-      iconColor: 'text-red-600 dark:text-red-400',
-      bgColor: 'bg-red-50 dark:bg-red-950/30',
-      borderColor: 'border-red-200 dark:border-red-800/50',
+      iconColor: 'text-error',
+      bgColor: 'bg-error/5',
+      borderColor: 'border-error/10',
     };
   }
   if (mime?.startsWith('text/') || ['txt', 'md', 'csv'].includes(ext)) {
     return {
       Icon: FileText,
       label: 'Text',
-      iconColor: 'text-slate-600 dark:text-slate-400',
-      bgColor: 'bg-slate-50 dark:bg-slate-950/30',
-      borderColor: 'border-slate-200 dark:border-slate-800/50',
+      iconColor: 'text-muted-foreground',
+      bgColor: 'bg-muted/30',
+      borderColor: 'border-border',
     };
   }
 
   return {
     Icon: FileIcon,
     label: 'File',
-    iconColor: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-50 dark:bg-gray-950/30',
-    borderColor: 'border-gray-200 dark:border-gray-800/50',
+    iconColor: 'text-muted-foreground',
+    bgColor: 'bg-muted/30',
+    borderColor: 'border-border',
   };
 };
 
