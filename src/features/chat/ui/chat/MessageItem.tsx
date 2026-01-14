@@ -361,12 +361,11 @@ export const MessageItem = memo(
             {/* Control buttons - positioned at bottom right corner, overlapping 50% into message */}
             <div
               className={cn(
-                'absolute bottom-0 right-0 translate-x-1/2',
+                'absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2',
                 'flex items-center gap-0.5',
                 'rounded-md backdrop-blur-md',
                 'bg-background/95 border border-border shadow-lg',
-                'opacity-0 group-hover:opacity-80 transition-opacity duration-150',
-                message.role === 'user' ? 'translate-y-1/2' : 'translate-y-1/2'
+                'opacity-0 group-hover:opacity-100 transition-opacity duration-150'
               )}
             >
               {message.role === 'user' && (

@@ -188,7 +188,7 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
     }, [sortedMessages]);
 
     return (
-      <div ref={ref} className={cn('flex flex-col gap-4', className)}>
+      <div ref={ref} className={cn('flex flex-col gap-8', className)}>
         {sortedMessages.map((message) => {
           // Skip tool result messages (role="tool") - they are only used internally
           // Tool results are displayed within tool_call messages
