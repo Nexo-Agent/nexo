@@ -13,6 +13,12 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/ui/atoms/skeleton';
 import { useAddons } from '../hooks/useAddons';
 
+const middleEllipsis = (str: string, maxLength: number = 50) => {
+  if (str.length <= maxLength) return str;
+  const mid = Math.floor(maxLength / 2);
+  return str.slice(0, mid - 2) + '...' + str.slice(-(mid - 1));
+};
+
 const PythonIcon = ({ className }: { className?: string }) => (
   <svg
     role="img"
@@ -186,10 +192,10 @@ export default function AddonSettings() {
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 border border-border/40 overflow-hidden">
                   <Info className="size-3.5 text-muted-foreground shrink-0" />
                   <span
-                    className="text-[10px] font-mono text-muted-foreground truncate"
+                    className="text-[10px] font-mono text-muted-foreground"
                     title={latestPython.path}
                   >
-                    {latestPython.path}
+                    {middleEllipsis(latestPython.path)}
                   </span>
                 </div>
               )}
@@ -305,10 +311,10 @@ export default function AddonSettings() {
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 border border-border/40 overflow-hidden">
                   <Info className="size-3.5 text-muted-foreground shrink-0" />
                   <span
-                    className="text-[10px] font-mono text-muted-foreground truncate"
+                    className="text-[10px] font-mono text-muted-foreground"
                     title={latestNode.path}
                   >
-                    {latestNode.path}
+                    {middleEllipsis(latestNode.path)}
                   </span>
                 </div>
               )}
