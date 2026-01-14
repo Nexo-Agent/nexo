@@ -81,16 +81,18 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            ### Phiên bản mới v0.1.0-alpha.46 có gì mới?
+            ### Phiên bản mới v0.1.0-alpha.47 có gì mới?
 
-            🌟 **Tính năng mới:**
-            - Tự động nhận diện môi trường Node.js cho các MCP server, giúp việc chạy các công cụ dễ dàng và ổn định hơn.
+            🌟 **Tính năng & Cải tiến nổi bật:**
+            - **Tự động cấu hình LLM**: Dialog kết nối LLM hiện tự động kiểm tra và tải danh sách model khi bạn nhập thông tin, giúp quy trình thiết lập nhanh chóng và chính xác hơn.
+            - **Trung tâm Hub mới**: Hợp nhất các phần cộng đồng (Agent, MCP, Prompt) vào một Hub duy nhất với giao diện thống nhất, mượt mà và tối ưu hơn.
+            - **Quản lý Addon thông minh**: Cải thiện hiển thị đường dẫn Runtime giúp dễ đọc hơn và nâng cấp cấu trúc các card cấu hình.
+            - **Nâng cấp giao diện người dùng**:
+              - Thông tin bản cập nhật hiển thị dưới dạng Markdown rõ ràng hơn.
+              - Tối ưu hóa hệ thống thông báo (Toasts) và các điều khiển trên giao diện.
+              - Khắc phục các vấn đề về hiển thị và tương tác trong chat.
 
-            🐞 **Sửa lỗi:**
-            - Khắc phục lỗi không lưu được cấu hình (headers và biến môi trường) cho MCP server.
-
-            🛠 **Cải tiến:**
-            - Tối ưu hóa quy trình phát hành và cập nhật hướng dẫn cho các bản release tiếp theo.
+            🚀 Hãy cập nhật ngay để trải nghiệm phiên bản ổn định và thông minh hơn!
           releaseDraft: false
           prerelease: true
           args: ${{ matrix.args }}
