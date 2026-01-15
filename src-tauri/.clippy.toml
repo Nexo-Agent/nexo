@@ -1,0 +1,18 @@
+# Clippy configuration file
+# This file configures Clippy's behavior for the project
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 30
+
+# Allow some common patterns
+allow-dbg-in-tests = true
+allow-expect-in-tests = true
+allow-unwrap-in-tests = true
+allow-panic-in-tests = true
+allow-print-in-tests = true
+
+# Threshold configurations
+too-many-arguments-threshold = 7
+too-many-lines-threshold = 200
+type-complexity-threshold = 500
+single-char-binding-names-threshold = 4

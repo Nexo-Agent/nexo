@@ -3,7 +3,7 @@
 /// This module provides utilities for tracking commands, operations, and errors
 
 /// Macro to wrap Tauri commands with automatic Sentry tracking
-/// 
+///
 /// Usage:
 /// ```rust
 /// #[tauri::command]
@@ -53,10 +53,8 @@ macro_rules! track_command {
 macro_rules! track_operation {
     ($op_name:expr, $op_type:expr, $body:expr) => {{
         if cfg!(not(debug_assertions)) || std::env::var("SENTRY_ENABLED").is_ok() {
-            let span = sentry::start_transaction(sentry::TransactionContext::new(
-                $op_name,
-                $op_type,
-            ));
+            let span =
+                sentry::start_transaction(sentry::TransactionContext::new($op_name, $op_type));
 
             let result = $body;
 
@@ -120,10 +118,7 @@ pub fn track_llm_call<T>(
 
         // Capture error if failed
         if let Err(e) = result {
-            sentry::capture_message(
-                &format!("LLM call failed: {}", e),
-                sentry::Level::Error,
-            );
+            sentry::capture_message(&format!("LLM call failed: {}", e), sentry::Level::Error);
         }
     }
 }
@@ -173,7 +168,7 @@ pub fn track_chat_message(
     chat_id: &str,
     message_id: &str,
     message_type: &str, // "user" or "assistant"
-    action: &str,        // "created", "streaming", "completed"
+    action: &str,       // "created", "streaming", "completed"
 ) {
     if cfg!(not(debug_assertions)) || std::env::var("SENTRY_ENABLED").is_ok() {
         add_breadcrumb(
@@ -240,4 +235,3 @@ pub fn track_db_operation<T, E>(
         }
     }
 }
-

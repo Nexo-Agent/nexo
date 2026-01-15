@@ -126,12 +126,12 @@ impl OpenAIProvider {
                              }
                         }).collect()
                     };
-                    
+
                     let mut obj = json!({
                         "role": "assistant",
                         "content": content_arr
                     });
-                    
+
                     if let Some(tc) = tool_calls {
                         obj.as_object_mut().unwrap().insert("tool_calls".to_string(), json!(tc));
                     }
@@ -201,7 +201,7 @@ impl OpenAIProvider {
         let mut tool_calls: Vec<ToolCall> = Vec::new();
         let mut finish_reason: Option<String> = None;
         let mut final_usage: Option<TokenUsage> = None;
-        let mut tool_calls_emitted = false; 
+        let mut tool_calls_emitted = false;
 
         while let Some(item) = tokio::select! {
             next_item = stream.next() => next_item,
@@ -254,11 +254,11 @@ impl OpenAIProvider {
                         // Determine event type: check "event:" line first, then "type" field in JSON
                         let type_from_data = data.get("type").and_then(|s| s.as_str());
                         let effective_event_type = if !event_type.is_empty() {
-                             event_type.as_str()
+                            event_type.as_str()
                         } else if let Some(t) = type_from_data {
-                             t
+                            t
                         } else {
-                             "unknown"
+                            "unknown"
                         };
 
                         // Log for debugging
@@ -283,69 +283,97 @@ impl OpenAIProvider {
                                         )?;
                                     }
                                 }
-                            },
-                             "response.output_tool_call" | "response.tool_call" => {
-                                 // New tool call received
-                                 let id = data.get("tool_call_id")
-                                     .or_else(|| data.get("id"))
-                                     .and_then(|s| s.as_str())
-                                     .unwrap_or_default()
-                                     .to_string();
-                                 
-                                 let name = data.get("function")
-                                     .and_then(|f| f.get("name"))
-                                     .and_then(|s| s.as_str())
-                                     .unwrap_or_default()
-                                     .to_string();
-                                     
-                                 let args = data.get("function")
-                                     .and_then(|f| f.get("arguments"))
-                                     .and_then(|s| s.as_str())
-                                     .unwrap_or_default()
-                                     .to_string();
+                            }
+                            "response.output_tool_call" | "response.tool_call" => {
+                                // New tool call received
+                                let id = data
+                                    .get("tool_call_id")
+                                    .or_else(|| data.get("id"))
+                                    .and_then(|s| s.as_str())
+                                    .unwrap_or_default()
+                                    .to_string();
 
-                                 // Only add if we have at least a name or ID
-                                 if !id.is_empty() || !name.is_empty() {
-                                     let call = ToolCall {
-                                         id,
-                                         r#type: "function".to_string(),
-                                         function: ToolCallFunction {
-                                             name,
-                                             arguments: args,
-                                         }
-                                     };
-                                     tool_calls.push(call);
-                                 }
-                             },
-                             "response.usage" => {
-                                 if let Some(u) = data.get("usage") {
-                                      final_usage = u.as_object().map(|obj| TokenUsage {
-                                          prompt_tokens: obj.get("prompt_tokens").and_then(|v| v.as_u64()).map(|v| v as u32),
-                                          completion_tokens: obj.get("completion_tokens").and_then(|v| v.as_u64()).map(|v| v as u32),
-                                          total_tokens: obj.get("total_tokens").and_then(|v| v.as_u64()).map(|v| v as u32),
-                                      });
-                                 }
-                             },
-                             "response.completed" | "response.end" => {
-                                 if let Some(fr) = data.get("finish_reason").and_then(|v| v.as_str()) {
-                                     finish_reason = Some(fr.to_string());
-                                 }
-                                  if let Some(u) = data.get("usage") {
-                                      final_usage = u.as_object().map(|obj| TokenUsage {
-                                          prompt_tokens: obj.get("prompt_tokens").and_then(|v| v.as_u64()).map(|v| v as u32),
-                                          completion_tokens: obj.get("completion_tokens").and_then(|v| v.as_u64()).map(|v| v as u32),
-                                          total_tokens: obj.get("total_tokens").and_then(|v| v.as_u64()).map(|v| v as u32),
-                                      });
-                                 }
-                             }
+                                let name = data
+                                    .get("function")
+                                    .and_then(|f| f.get("name"))
+                                    .and_then(|s| s.as_str())
+                                    .unwrap_or_default()
+                                    .to_string();
+
+                                let args = data
+                                    .get("function")
+                                    .and_then(|f| f.get("arguments"))
+                                    .and_then(|s| s.as_str())
+                                    .unwrap_or_default()
+                                    .to_string();
+
+                                // Only add if we have at least a name or ID
+                                if !id.is_empty() || !name.is_empty() {
+                                    let call = ToolCall {
+                                        id,
+                                        r#type: "function".to_string(),
+                                        function: ToolCallFunction {
+                                            name,
+                                            arguments: args,
+                                        },
+                                    };
+                                    tool_calls.push(call);
+                                }
+                            }
+                            "response.usage" => {
+                                if let Some(u) = data.get("usage") {
+                                    final_usage = u.as_object().map(|obj| TokenUsage {
+                                        prompt_tokens: obj
+                                            .get("prompt_tokens")
+                                            .and_then(|v| v.as_u64())
+                                            .map(|v| v as u32),
+                                        completion_tokens: obj
+                                            .get("completion_tokens")
+                                            .and_then(|v| v.as_u64())
+                                            .map(|v| v as u32),
+                                        total_tokens: obj
+                                            .get("total_tokens")
+                                            .and_then(|v| v.as_u64())
+                                            .map(|v| v as u32),
+                                    });
+                                }
+                            }
+                            "response.completed" | "response.end" => {
+                                if let Some(fr) = data.get("finish_reason").and_then(|v| v.as_str())
+                                {
+                                    finish_reason = Some(fr.to_string());
+                                }
+                                if let Some(u) = data.get("usage") {
+                                    final_usage = u.as_object().map(|obj| TokenUsage {
+                                        prompt_tokens: obj
+                                            .get("prompt_tokens")
+                                            .and_then(|v| v.as_u64())
+                                            .map(|v| v as u32),
+                                        completion_tokens: obj
+                                            .get("completion_tokens")
+                                            .and_then(|v| v.as_u64())
+                                            .map(|v| v as u32),
+                                        total_tokens: obj
+                                            .get("total_tokens")
+                                            .and_then(|v| v.as_u64())
+                                            .map(|v| v as u32),
+                                    });
+                                }
+                            }
                             "response.output_text.done" | "response.content_part.done" => {
                                 // IGNORE to avoid duplication
-                            },
+                            }
                             _ => {
                                 // Fallback: Check if 'choices' exists (Legacy format mixed in?)
-                                if let Some(choices) = data.get("choices").and_then(|c| c.as_array()) {
+                                if let Some(choices) =
+                                    data.get("choices").and_then(|c| c.as_array())
+                                {
                                     for choice in choices {
-                                        if let Some(content) = choice.get("delta").and_then(|d| d.get("content")).and_then(|s| s.as_str()) {
+                                        if let Some(content) = choice
+                                            .get("delta")
+                                            .and_then(|d| d.get("content"))
+                                            .and_then(|s| s.as_str())
+                                        {
                                             full_content.push_str(content);
                                             if is_streaming_requested {
                                                 message_emitter.emit_message_chunk(
@@ -355,11 +383,13 @@ impl OpenAIProvider {
                                                 )?;
                                             }
                                         }
-                                        if let Some(reason) = choice.get("finish_reason").and_then(|s| s.as_str()) {
+                                        if let Some(reason) =
+                                            choice.get("finish_reason").and_then(|s| s.as_str())
+                                        {
                                             finish_reason = Some(reason.to_string());
                                         }
                                     }
-                                } 
+                                }
                                 // REMOVED generic fallback extracting 'text'/'content' from unknown events.
                             }
                         }
@@ -376,16 +406,20 @@ impl OpenAIProvider {
         // Final tool emission
         if !tool_calls.is_empty() && !tool_calls_emitted {
             let event_tool_calls: Vec<crate::events::ToolCall> = tool_calls
-                 .iter()
-                 .map(|tc| crate::events::ToolCall {
-                     id: tc.id.clone(),
-                     name: tc.function.name.clone(),
-                     arguments: serde_json::from_str(&tc.function.arguments)
+                .iter()
+                .map(|tc| crate::events::ToolCall {
+                    id: tc.id.clone(),
+                    name: tc.function.name.clone(),
+                    arguments: serde_json::from_str(&tc.function.arguments)
                         .unwrap_or_else(|_| serde_json::json!({})),
-                 })
-                 .collect();
-            
-            tool_emitter.emit_tool_calls_detected(chat_id.clone(), message_id.clone(), event_tool_calls)?;
+                })
+                .collect();
+
+            tool_emitter.emit_tool_calls_detected(
+                chat_id.clone(),
+                message_id.clone(),
+                event_tool_calls,
+            )?;
         }
 
         message_emitter.emit_message_complete(
@@ -402,12 +436,16 @@ impl OpenAIProvider {
         Ok(LLMChatResponse {
             content: full_content,
             finish_reason,
-            tool_calls: if tool_calls.is_empty() { None } else { Some(tool_calls) },
+            tool_calls: if tool_calls.is_empty() {
+                None
+            } else {
+                Some(tool_calls)
+            },
             usage: final_usage,
-            reasoning: None, 
+            reasoning: None,
             images: None,
         })
-    }    
+    }
 }
 
 #[async_trait]
@@ -511,12 +549,18 @@ impl LLMProvider for OpenAIProvider {
         });
 
         if let Some(temp) = request.temperature {
-            request_body.as_object_mut().unwrap().insert("temperature".to_string(), json!(temp));
+            request_body
+                .as_object_mut()
+                .unwrap()
+                .insert("temperature".to_string(), json!(temp));
         }
-        
+
         // Add tools if present
         if let Some(tools) = request.tools {
-           request_body.as_object_mut().unwrap().insert("tools".to_string(), json!(tools));
+            request_body
+                .as_object_mut()
+                .unwrap()
+                .insert("tools".to_string(), json!(tools));
         }
 
         self.handle_responses_api(
@@ -527,6 +571,7 @@ impl LLMProvider for OpenAIProvider {
             app,
             cancellation_rx,
             request.stream,
-        ).await
+        )
+        .await
     }
 }
