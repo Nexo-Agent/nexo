@@ -70,3 +70,8 @@ description: Create or update unit tests for a component or feature
 
 7.  **Final Polish**:
     - Run the full test suite or `yarn test` to ensure no regressions.
+
+Important rules:
+
+- responding must be Vietnamese
+- code and test must be English
