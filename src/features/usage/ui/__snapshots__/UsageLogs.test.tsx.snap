@@ -1,0 +1,313 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UsageLogs > matches snapshot 1`] = `
+<div>
+  <div
+    class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background via-background to-muted/20"
+  >
+    <div
+      class="absolute top-0 right-0 w-64 h-64 bg-chart-blue/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"
+    />
+    <div
+      class="flex flex-col space-y-1.5 p-4 relative z-10 pb-4"
+    >
+      <h3
+        class="text-2xl font-semibold leading-none tracking-tight flex items-center gap-3"
+      >
+        <div
+          class="p-2.5 rounded-xl bg-gradient-to-br from-chart-blue to-chart-cyan shadow-sm shadow-chart-blue/20"
+        >
+          <div
+            data-testid="database-icon"
+          />
+        </div>
+        <div
+          class="flex flex-col gap-1"
+        >
+          <span
+            class="text-lg font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent"
+          >
+            Request Logs
+          </span>
+          <span
+            class="text-xs font-medium text-muted-foreground/80"
+          >
+            Detailed history of all API requests
+          </span>
+        </div>
+      </h3>
+    </div>
+    <div
+      class="p-0"
+    >
+      <div
+        class="rounded-lg overflow-hidden border-t"
+      >
+        <div
+          class="relative w-full overflow-x-auto"
+          data-slot="table-container"
+        >
+          <table
+            class="w-full caption-bottom text-sm"
+            data-slot="table"
+          >
+            <thead
+              class="[&_tr]:border-b"
+              data-slot="table-header"
+            >
+              <tr
+                class="data-[state=selected]:bg-muted border-b transition-colors bg-muted/30 hover:bg-muted/30"
+                data-slot="table-row"
+              >
+                <th
+                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-head"
+                >
+                  Timestamp
+                </th>
+                <th
+                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-head"
+                >
+                  Model
+                </th>
+                <th
+                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-head"
+                >
+                  Tokens
+                </th>
+                <th
+                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-head"
+                >
+                  Latency
+                </th>
+                <th
+                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-head"
+                >
+                  Cost
+                </th>
+                <th
+                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-head"
+                >
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
+              data-slot="table-body"
+            >
+              <tr
+                class="data-[state=selected]:bg-muted border-b hover:bg-muted/50 transition-colors"
+                data-slot="table-row"
+              >
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-mono text-xs text-muted-foreground"
+                  data-slot="table-cell"
+                >
+                  Dec 20, 18:33:20
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-cell"
+                >
+                  <div
+                    class="flex flex-col gap-0.5"
+                  >
+                    <span
+                      class="text-sm"
+                    >
+                      gpt-4
+                    </span>
+                    <span
+                      class="text-xs text-muted-foreground"
+                    >
+                      openai
+                    </span>
+                  </div>
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-cell"
+                >
+                  <div
+                    class="flex flex-col gap-0.5 font-mono text-xs tabular-nums"
+                  >
+                    <span
+                      class="text-chart-emerald font-medium"
+                    >
+                      ↓ 
+                      100
+                    </span>
+                    <span
+                      class="text-chart-indigo font-medium"
+                    >
+                      ↑ 
+                      50
+                    </span>
+                  </div>
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-mono text-sm tabular-nums"
+                  data-slot="table-cell"
+                >
+                  500
+                  <span
+                    class="text-xs text-muted-foreground ml-0.5"
+                  >
+                     
+                    ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-mono tabular-nums"
+                  data-slot="table-cell"
+                >
+                  $
+                  0.00450
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-cell"
+                >
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-primary/10 text-primary"
+                  >
+                    success
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="data-[state=selected]:bg-muted border-b hover:bg-muted/50 transition-colors"
+                data-slot="table-row"
+              >
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-mono text-xs text-muted-foreground"
+                  data-slot="table-cell"
+                >
+                  Mar 14, 12:33:20
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-cell"
+                >
+                  <div
+                    class="flex flex-col gap-0.5"
+                  >
+                    <span
+                      class="text-sm"
+                    >
+                      claude-3
+                    </span>
+                    <span
+                      class="text-xs text-muted-foreground"
+                    >
+                      anthropic
+                    </span>
+                  </div>
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-cell"
+                >
+                  <div
+                    class="flex flex-col gap-0.5 font-mono text-xs tabular-nums"
+                  >
+                    <span
+                      class="text-chart-emerald font-medium"
+                    >
+                      ↓ 
+                      200
+                    </span>
+                    <span
+                      class="text-chart-indigo font-medium"
+                    >
+                      ↑ 
+                      80
+                    </span>
+                  </div>
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-mono text-sm tabular-nums"
+                  data-slot="table-cell"
+                >
+                  800
+                  <span
+                    class="text-xs text-muted-foreground ml-0.5"
+                  >
+                     
+                    ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] font-mono tabular-nums"
+                  data-slot="table-cell"
+                >
+                  $
+                  0.00840
+                </td>
+                <td
+                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                  data-slot="table-cell"
+                >
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-destructive/10 text-destructive"
+                  >
+                    error
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div
+        class="flex items-center justify-between px-6 py-4 border-t bg-muted/10"
+      >
+        <p
+          class="text-sm text-muted-foreground"
+        >
+          Page 
+          1
+           • 
+          2
+           
+          items
+        </p>
+        <div
+          class="flex items-center gap-2"
+        >
+          <button
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-normal transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/20 focus-visible:ring-[2px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md px-3 has-[>svg]:px-2.5 gap-1"
+            data-size="sm"
+            data-slot="button"
+            data-variant="outline"
+            disabled=""
+          >
+            <div
+              data-testid="chevron-left-icon"
+            />
+            Previous
+          </button>
+          <button
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-normal transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/20 focus-visible:ring-[2px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md px-3 has-[>svg]:px-2.5 gap-1"
+            data-size="sm"
+            data-slot="button"
+            data-variant="outline"
+            disabled=""
+          >
+            Next
+            <div
+              data-testid="chevron-right-icon"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -1,0 +1,136 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UsageHeader > matches snapshot 1`] = `
+<div>
+  <div
+    class="space-y-4"
+  >
+    <div
+      class="flex flex-wrap gap-3 items-center justify-between"
+    >
+      <div
+        class="flex gap-3"
+      >
+        <div
+          class="flex items-center gap-2 px-3 rounded-lg border bg-card"
+        >
+          <div
+            data-testid="clock-icon"
+          />
+          <select
+            data-testid="select-mock"
+          >
+            <div>
+              <span>
+                Interval
+              </span>
+            </div>
+            <option
+              value="hour"
+            >
+              Hourly
+            </option>
+            <option
+              value="day"
+            >
+              Daily
+            </option>
+            <option
+              value="month"
+            >
+              Monthly
+            </option>
+          </select>
+        </div>
+        <div
+          class="flex items-center gap-2 px-3 rounded-lg border bg-card"
+        >
+          <div
+            data-testid="calendar-icon"
+          />
+          <select
+            data-testid="select-mock"
+          >
+            <div>
+              <span>
+                Period
+              </span>
+            </div>
+            <option
+              value="24h"
+            >
+              Last 24 Hours
+            </option>
+            <option
+              value="7d"
+            >
+              Last 7 Days
+            </option>
+            <option
+              value="30d"
+            >
+              Last 30 Days
+            </option>
+            <option
+              value="all"
+            >
+              All Time
+            </option>
+          </select>
+        </div>
+      </div>
+      <div
+        data-testid="dialog-root"
+      >
+        <div>
+          <button
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-normal transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-[2px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 bg-destructive/10 text-destructive hover:bg-destructive/20"
+            data-size="sm"
+            data-slot="button"
+            data-variant="destructive"
+          >
+            <div
+              data-testid="trash-icon"
+            />
+            Clear Data
+          </button>
+        </div>
+        <div
+          data-testid="dialog-content"
+        >
+          <div>
+            <div>
+              Are you absolutely sure?
+            </div>
+            <div>
+              This action cannot be undone. This will permanently delete all usage history and statistics.
+            </div>
+          </div>
+          <div>
+            <div>
+              <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-normal transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/20 focus-visible:ring-[2px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+                data-size="default"
+                data-slot="button"
+                data-variant="outline"
+              >
+                Cancel
+              </button>
+            </div>
+            <div>
+              <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-normal transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-[2px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 h-9 px-4 py-2 has-[>svg]:px-3 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                data-size="default"
+                data-slot="button"
+                data-variant="destructive"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

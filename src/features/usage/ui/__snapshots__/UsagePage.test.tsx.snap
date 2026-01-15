@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UsagePage > matches snapshot 1`] = `
+<div>
+  <div
+    class="space-y-8"
+  >
+    <div
+      data-testid="usage-header"
+    />
+    <div
+      class="space-y-6 transition-opacity duration-300 opacity-100"
+    >
+      <div
+        data-testid="usage-overview"
+      />
+      <div
+        data-testid="usage-chart"
+      />
+      <div
+        data-testid="usage-logs"
+      />
+    </div>
+  </div>
+</div>
+`;

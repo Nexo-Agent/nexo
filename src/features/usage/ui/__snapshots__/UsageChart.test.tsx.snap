@@ -1,0 +1,82 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UsageChart > matches snapshot 1`] = `
+<div>
+  <div
+    class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-lg bg-gradient-to-b from-background via-background to-muted/30"
+  >
+    <div
+      class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"
+    />
+    <div
+      class="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none"
+    />
+    <div
+      class="flex flex-col space-y-1.5 p-4 relative z-10 pb-2"
+    >
+      <h3
+        class="text-2xl font-semibold leading-none tracking-tight flex items-center gap-3"
+      >
+        <div
+          class="p-2.5 rounded-xl bg-gradient-to-br from-chart-indigo to-chart-violet shadow-sm shadow-chart-indigo/20"
+        >
+          <div
+            data-testid="trending-up-icon"
+          />
+        </div>
+        <div
+          class="flex flex-col gap-1"
+        >
+          <span
+            class="text-lg font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent"
+          >
+            Usage Trend
+          </span>
+          <span
+            class="text-xs font-medium text-muted-foreground/80"
+          >
+            Input vs Output tokens over time
+          </span>
+        </div>
+      </h3>
+    </div>
+    <div
+      class="p-4 pt-0 pl-2 relative z-10"
+    >
+      <div
+        class="h-[350px] w-full mt-4"
+      >
+        <div
+          data-testid="responsive-container"
+        >
+          <div
+            data-testid="bar-chart"
+          >
+            <div
+              data-testid="cartesian-grid"
+            />
+            <div
+              data-testid="x-axis"
+            />
+            <div
+              data-testid="y-axis"
+            />
+            <div
+              data-testid="tooltip"
+            />
+            <div
+              data-testid="legend"
+            />
+            <div
+              data-testid="bar"
+            />
+            <div
+              data-testid="bar"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

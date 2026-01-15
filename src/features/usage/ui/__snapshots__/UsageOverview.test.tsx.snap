@@ -1,0 +1,167 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UsageOverview > matches snapshot 1`] = `
+<div>
+  <div
+    class="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+  >
+    <div
+      class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group"
+    >
+      <div
+        class="absolute top-0 right-0 w-24 h-24 bg-chart-amber/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-amber/20 transition-colors"
+      />
+      <div
+        class="p-4 flex flex-row items-center justify-between space-y-0 pb-2 relative z-10"
+      >
+        <h3
+          class="tracking-tight text-sm font-medium text-muted-foreground"
+        >
+          Total Cost
+        </h3>
+        <div
+          class="p-2 rounded-lg bg-chart-amber/10 text-chart-amber group-hover:scale-110 transition-transform duration-300"
+        >
+          <div
+            data-testid="coins-icon"
+          />
+        </div>
+      </div>
+      <div
+        class="p-4 pt-0 relative z-10"
+      >
+        <div
+          class="text-3xl tracking-tight text-foreground tabular-nums"
+        >
+          $1.2346
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group"
+    >
+      <div
+        class="absolute top-0 right-0 w-24 h-24 bg-chart-violet/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-violet/20 transition-colors"
+      />
+      <div
+        class="p-4 flex flex-row items-center justify-between space-y-0 pb-2 relative z-10"
+      >
+        <h3
+          class="tracking-tight text-sm font-medium text-muted-foreground"
+        >
+          Total Tokens
+        </h3>
+        <div
+          class="p-2 rounded-lg bg-chart-violet/10 text-chart-violet group-hover:scale-110 transition-transform duration-300"
+        >
+          <div
+            data-testid="zap-icon"
+          />
+        </div>
+      </div>
+      <div
+        class="p-4 pt-0 relative z-10"
+      >
+        <div
+          class="text-3xl tracking-tight text-foreground tabular-nums"
+        >
+          1,500
+        </div>
+        <p
+          class="text-xs font-medium text-muted-foreground mt-2 flex gap-3"
+        >
+          <span
+            class="flex items-center gap-1 text-chart-emerald font-medium"
+          >
+            <span
+              class="text-[10px]"
+            >
+              IN
+            </span>
+            1,000
+          </span>
+          <span
+            class="flex items-center gap-1 text-chart-indigo font-medium"
+          >
+            <span
+              class="text-[10px]"
+            >
+              OUT
+            </span>
+            500
+          </span>
+        </p>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group"
+    >
+      <div
+        class="absolute top-0 right-0 w-24 h-24 bg-chart-blue/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-blue/20 transition-colors"
+      />
+      <div
+        class="p-4 flex flex-row items-center justify-between space-y-0 pb-2 relative z-10"
+      >
+        <h3
+          class="tracking-tight text-sm font-medium text-muted-foreground"
+        >
+          Total Requests
+        </h3>
+        <div
+          class="p-2 rounded-lg bg-chart-blue/10 text-chart-blue group-hover:scale-110 transition-transform duration-300"
+        >
+          <div
+            data-testid="message-square-icon"
+          />
+        </div>
+      </div>
+      <div
+        class="p-4 pt-0 relative z-10"
+      >
+        <div
+          class="text-3xl tracking-tight text-foreground tabular-nums"
+        >
+          50
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group"
+    >
+      <div
+        class="absolute top-0 right-0 w-24 h-24 bg-chart-emerald/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-emerald/20 transition-colors"
+      />
+      <div
+        class="p-4 flex flex-row items-center justify-between space-y-0 pb-2 relative z-10"
+      >
+        <h3
+          class="tracking-tight text-sm font-medium text-muted-foreground"
+        >
+          Avg Latency
+        </h3>
+        <div
+          class="p-2 rounded-lg bg-chart-emerald/10 text-chart-emerald group-hover:scale-110 transition-transform duration-300"
+        >
+          <div
+            data-testid="activity-icon"
+          />
+        </div>
+      </div>
+      <div
+        class="p-4 pt-0 relative z-10"
+      >
+        <div
+          class="text-3xl tracking-tight text-foreground tabular-nums"
+        >
+          121
+          <span
+            class="text-sm font-medium text-muted-foreground ml-1"
+          >
+            ms
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
