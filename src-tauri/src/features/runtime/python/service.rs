@@ -186,7 +186,7 @@ impl PythonRuntime {
     }
 
     /// Install Python runtime using bundled UV
-    pub async fn install(
+    pub fn install(
         app: &AppHandle,
         full_version: &str,
         _uv_version: &str, // No longer needed, UV is bundled
@@ -255,9 +255,7 @@ impl PythonRuntime {
 
         if !venv_output.status.success() {
             let stderr = String::from_utf8_lossy(&venv_output.stderr);
-            eprintln!(
-                "UV venv creation failed for version {full_version}:\nSTDERR:\n{stderr}"
-            );
+            eprintln!("UV venv creation failed for version {full_version}:\nSTDERR:\n{stderr}");
             return Err(AppError::Python(format!(
                 "UV venv creation failed: {stderr}"
             )));
@@ -275,13 +273,13 @@ impl PythonRuntime {
             "matplotlib".to_string(),
         ];
 
-        Self::install_packages(app, &python_path, &default_packages).await?;
+        Self::install_packages(app, &python_path, &default_packages)?;
 
         Ok(())
     }
 
     /// Install python packages into the runtime using bundled UV
-    pub async fn install_packages(
+    pub fn install_packages(
         app: &AppHandle,
         python_path: &PathBuf,
         packages: &[String],
@@ -316,9 +314,7 @@ impl PythonRuntime {
         if !output.status.success() {
             let stdout = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);
-            eprintln!(
-                "UV pip install failed:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}"
-            );
+            eprintln!("UV pip install failed:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}");
             return Err(AppError::Python(format!(
                 "UV pip install failed. Check terminal for details. Stderr: {stderr}"
             )));

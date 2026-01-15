@@ -51,7 +51,7 @@ pub async fn install_node_runtime(
         )));
     }
 
-    NodeRuntime::install(&app, &version).await
+    NodeRuntime::install(&app, &version)
 }
 
 #[command]

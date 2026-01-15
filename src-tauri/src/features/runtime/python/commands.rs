@@ -57,7 +57,7 @@ pub async fn install_python_runtime(
 
     let uv_version = &config.addons.python.uv.version;
 
-    PythonRuntime::install(&app, &version, uv_version).await
+    PythonRuntime::install(&app, &version, uv_version)
 }
 
 #[command]
@@ -95,5 +95,5 @@ pub async fn install_python_packages(
         }
     };
 
-    PythonRuntime::install_packages(&app, &python_path, &packages).await
+    PythonRuntime::install_packages(&app, &python_path, &packages)
 }

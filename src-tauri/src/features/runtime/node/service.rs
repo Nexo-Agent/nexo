@@ -111,7 +111,7 @@ impl NodeRuntime {
     }
 
     /// Download and install Node runtime using fnm
-    pub async fn install(app: &AppHandle, full_version: &str) -> Result<(), AppError> {
+    pub fn install(app: &AppHandle, full_version: &str) -> Result<(), AppError> {
         let fnm_path = get_bundled_fnm_path(app)?;
         let app_data = app.path().app_data_dir().map_err(AppError::Tauri)?;
         let fnm_dir = app_data.join("node-runtimes");

@@ -30,7 +30,6 @@ pub async fn install_agent(
             state
                 .agent_manager
                 .install_from_zip(&path)
-                .await
                 .map_err(|e| e.to_string())
         }
         "git" => {

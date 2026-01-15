@@ -57,7 +57,7 @@ impl AgentManager {
     }
 
     /// Install an agent from a local zip file
-    pub async fn install_from_zip(&self, zip_path: &Path) -> Result<String> {
+    pub fn install_from_zip(&self, zip_path: &Path) -> Result<String> {
         // 1. Calculate SHA256 of the zip file to use as ID/Versioning base if needed,
         // or just for caching. For local zip, the Version is effectively the Hash or just a timestamp.
         // Let's use Hash for reproducibility.
@@ -72,7 +72,7 @@ impl AgentManager {
         common::extract_zip(zip_path, &extract_dir)?;
 
         // 3. Install
-        let agent_id = self.install_from_directory(&extract_dir, &hash).await?;
+        let agent_id = self.install_from_directory(&extract_dir, &hash)?;
 
         // 4. Save Install Info
         let now = std::time::SystemTime::now()
@@ -126,9 +126,7 @@ impl AgentManager {
         }
 
         // 3. Install
-        let agent_id = self
-            .install_from_directory(&target_dir, &commit_hash)
-            .await?;
+        let agent_id = self.install_from_directory(&target_dir, &commit_hash)?;
 
         // 4. Save Install Info
         // Check if existing info exists to preserve installed_at
@@ -196,7 +194,7 @@ impl AgentManager {
     }
 
     /// Core installation logic
-    async fn install_from_directory(&self, source_dir: &Path, version_ref: &str) -> Result<String> {
+    fn install_from_directory(&self, source_dir: &Path, version_ref: &str) -> Result<String> {
         // 1. Validate Manifest
         let manifest = common::verify_agent_directory(source_dir)?;
         let agent_id = &manifest.id;
