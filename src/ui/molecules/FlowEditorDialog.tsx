@@ -7,12 +7,13 @@ import {
   DialogFooter,
 } from '@/ui/atoms/dialog';
 import { Button } from '@/ui/atoms/button/button';
-import { FlowEditor } from './FlowEditor';
+import { FlowEditor, type FlowNodeType } from './FlowEditor';
 import type { FlowData } from '@/features/chat/types';
 
 interface FlowEditorDialogProps {
   open: boolean;
   initialFlow?: FlowData;
+  availableNodes?: FlowNodeType[];
   onClose: () => void;
   onSave?: (flow: FlowData) => void;
   readOnly?: boolean;
@@ -21,6 +22,7 @@ interface FlowEditorDialogProps {
 export function FlowEditorDialog({
   open,
   initialFlow,
+  availableNodes,
   onClose,
   onSave,
   readOnly = false,
@@ -50,6 +52,7 @@ export function FlowEditorDialog({
         <div className="flex-1 min-h-0">
           <FlowEditor
             initialFlow={initialFlow}
+            availableNodes={availableNodes}
             onChange={!readOnly ? setCurrentFlow : undefined}
             readOnly={readOnly}
             className="w-full h-full border border-border rounded-lg"
