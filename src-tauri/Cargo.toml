@@ -1,6 +1,6 @@
 [package]
 name = "nexo"
-version = "0.1.0-alpha.47"
+version = "0.1.0-alpha.48"
 description = "A smart AI assistant for everyone"
 authors = ["Thanh Nguyen"]
 edition = "2021"

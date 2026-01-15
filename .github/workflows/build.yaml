@@ -81,18 +81,14 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            ### Phiên bản mới v0.1.0-alpha.47 có gì mới?
+            ### Phiên bản mới v0.1.0-alpha.48 có gì mới?
 
             🌟 **Tính năng & Cải tiến nổi bật:**
-            - **Tự động cấu hình LLM**: Dialog kết nối LLM hiện tự động kiểm tra và tải danh sách model khi bạn nhập thông tin, giúp quy trình thiết lập nhanh chóng và chính xác hơn.
-            - **Trung tâm Hub mới**: Hợp nhất các phần cộng đồng (Agent, MCP, Prompt) vào một Hub duy nhất với giao diện thống nhất, mượt mà và tối ưu hơn.
-            - **Quản lý Addon thông minh**: Cải thiện hiển thị đường dẫn Runtime giúp dễ đọc hơn và nâng cấp cấu trúc các card cấu hình.
-            - **Nâng cấp giao diện người dùng**:
-              - Thông tin bản cập nhật hiển thị dưới dạng Markdown rõ ràng hơn.
-              - Tối ưu hóa hệ thống thông báo (Toasts) và các điều khiển trên giao diện.
-              - Khắc phục các vấn đề về hiển thị và tương tác trong chat.
+            - **Hệ thống Testing mạnh mẽ**: Bổ sung bộ test case toàn diện cho Workspace, Usage và Updater, nâng cao độ tin cậy của ứng dụng.
+            - **Tích hợp CI/CD**: Tự động hóa quy trình kiểm thử và báo cáo coverage qua GitHub Actions, giúp phát hiện lỗi sớm hơn.
+            - **Ổn định môi trường**: Đồng bộ múi giờ UTC cho hệ thống test, loại bỏ lỗi snapshot không đồng nhất giữa các máy phát triển.
 
-            🚀 Hãy cập nhật ngay để trải nghiệm phiên bản ổn định và thông minh hơn!
+            🚀 Hãy cập nhật ngay để trải nghiệm phiên bản ổn định và tin cậy hơn!
           releaseDraft: false
           prerelease: true
           args: ${{ matrix.args }}
