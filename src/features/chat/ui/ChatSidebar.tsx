@@ -199,6 +199,9 @@ export function ChatSidebar() {
                     }}
                     onContextMenu={(e) => handleContextMenu(e, chat.id)}
                   >
+                    {selectedChatId === chat.id && (
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-md" />
+                    )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <div
