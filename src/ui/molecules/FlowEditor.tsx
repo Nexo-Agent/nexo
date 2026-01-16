@@ -23,7 +23,13 @@ import { Textarea } from '@/ui/atoms/textarea';
 import { cn } from '@/lib/utils';
 
 import type { FlowData } from '@/features/chat/types';
-import { SimpleNode } from './flow-nodes/SimpleNode';
+import {
+  SimpleNode,
+  ProcessNode,
+  InputOutputNode,
+  DecisionNode,
+  StartEndNode,
+} from './flow-nodes';
 
 export interface FlowNodeType {
   type: string;
@@ -44,6 +50,11 @@ interface FlowEditorProps {
 
 const nodeTypes = {
   simple: SimpleNode,
+  start: StartEndNode,
+  end: StartEndNode,
+  process: ProcessNode,
+  'input-output': InputOutputNode,
+  decision: DecisionNode,
 };
 
 // --- Node Item Component ---

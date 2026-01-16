@@ -11,17 +11,45 @@ export const FLOW_NODES: FlowNodeType[] = [
     },
   },
   {
-    type: 'simple',
-    label: 'Advanced Node',
-    description: 'Node with various property types',
+    type: 'start',
+    label: 'Start',
+    description: 'Algorithm start point',
     initialData: {
-      label: 'Advanced',
-      count: 0,
-      enabled: true,
-      metadata: {
-        author: 'System',
-        version: '1.0',
-      },
+      label: 'Start',
+      nodeType: 'start',
+    },
+  },
+  {
+    type: 'end',
+    label: 'End',
+    description: 'Algorithm end point',
+    initialData: {
+      label: 'End',
+      nodeType: 'end',
+    },
+  },
+  {
+    type: 'process',
+    label: 'Process',
+    description: 'Processing step or action',
+    initialData: {
+      label: 'Process',
+    },
+  },
+  {
+    type: 'input-output',
+    label: 'Input/Output',
+    description: 'Data input or output operation',
+    initialData: {
+      label: 'Input/Output',
+    },
+  },
+  {
+    type: 'decision',
+    label: 'Decision',
+    description: 'Branching point (if/else)',
+    initialData: {
+      label: 'Decision?',
     },
   },
 ];
