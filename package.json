@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "gen:bindings": "cd src-tauri && cargo test --package nexo --lib constants::tests::generate_typescript_bindings -- --nocapture",
-    "tauri:dev": "yarn gen:bindings && tauri dev --config '{\"identifier\":\"com.nexo.app.dev-4\"}'",
+    "tauri:dev": "yarn gen:bindings && tauri dev --config '{\"identifier\":\"com.nexo.app.dev\"}'",
     "tauri:build": "yarn gen:bindings && tauri build",
     "i18n:scan": "i18next-scanner --config i18next-scanner.config.cjs",
     "i18n:extract": "i18next-scanner --config i18next-scanner.config.cjs",

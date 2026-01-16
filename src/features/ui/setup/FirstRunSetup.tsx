@@ -96,9 +96,8 @@ export function FirstRunSetup({ open }: { open: boolean }) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const startSetup = async () => {
-    setStep('installing');
-    await installRuntimes();
+  const startSetup = () => {
+    setStep('llm-setup');
   };
 
   const skipSetup = () => {
@@ -192,9 +191,9 @@ export function FirstRunSetup({ open }: { open: boolean }) {
   const installRuntimes = async () => {
     await Promise.all([installPython(), installNode()]);
 
-    // Move to next step
+    // Setup completed
     setTimeout(() => {
-      setStep('llm-setup');
+      dispatch(setSetupCompleted(true));
     }, 1000);
   };
 
@@ -236,8 +235,9 @@ export function FirstRunSetup({ open }: { open: boolean }) {
         'Failed to create LLM connection. You can configure it later in Settings.'
       );
     } finally {
-      dispatch(setSetupCompleted(true));
       setIsSubmitting(false);
+      setStep('installing');
+      installRuntimes();
     }
   };
 
@@ -497,7 +497,7 @@ export function FirstRunSetup({ open }: { open: boolean }) {
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                Connect & Finish
+                Connect & Install Environment
               </Button>
             </>
           )}
