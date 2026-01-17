@@ -61,6 +61,7 @@
     "updater:allow-install",
     "updater:allow-download-and-install",
     "process:allow-restart",
+    "log:default",
     {
       "identifier": "fs:allow-read-file",
       "allow": [

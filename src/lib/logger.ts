@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import * as Sentry from '@sentry/react';
+import { trace, debug, info, warn, error } from '@tauri-apps/plugin-log';
 
 export enum LogLevel {
   TRACE = 0,
@@ -23,19 +24,6 @@ class Logger {
   private level: LogLevel = import.meta.env.DEV
     ? LogLevel.DEBUG
     : LogLevel.INFO;
-
-  // Batch logs và gửi xuống backend
-  private logBuffer: Array<{
-    timestamp: string;
-    level: string;
-    message: string;
-    context: LogContext;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data?: any;
-  }> = [];
-  private flushTimer?: number;
-  private readonly BATCH_SIZE = 10;
-  private readonly FLUSH_INTERVAL = 5000; // 5 seconds
 
   private constructor() {}
 
@@ -75,78 +63,75 @@ class Logger {
     return data;
   }
 
+  /**
+   * Main logging method that integrates with tauri-plugin-log and Sentry
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async persistLog(logData: any) {
-    // Chỉ persist từ INFO level trở lên trong production
-    const shouldPersist = import.meta.env.PROD
-      ? logData.level !== 'TRACE' && logData.level !== 'DEBUG'
-      : true;
-
-    if (!shouldPersist) return;
-
-    this.logBuffer.push(logData);
-
-    // Flush nếu buffer đầy
-    if (this.logBuffer.length >= this.BATCH_SIZE) {
-      await this.flush();
-    } else {
-      // Schedule flush sau FLUSH_INTERVAL
-      if (this.flushTimer) {
-        window.clearTimeout(this.flushTimer);
-      }
-      this.flushTimer = window.setTimeout(
-        () => this.flush(),
-        this.FLUSH_INTERVAL
-      );
-    }
-  }
-
-  private async flush() {
-    if (this.logBuffer.length === 0) return;
-
-    const logsToSend = [...this.logBuffer];
-    this.logBuffer = [];
-
-    try {
-      // Sử dụng dynamic import để tránh lỗi SSR hoặc test env nếu không có tauri
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('write_frontend_logs', { logs: logsToSend });
-    } catch (error) {
-      // Fallback to console nếu Tauri command fails
-      if (import.meta.env.DEV) {
-        console.error('Failed to persist logs:', error);
-      }
-    }
-  }
-
-  // Expose flush method để có thể gọi manually (e.g., trước khi app close)
-  async flushLogs() {
-    await this.flush();
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private log(level: LogLevel, message: string, data?: any) {
+  private async log(level: LogLevel, message: string, data?: any) {
     if (!this.shouldLog(level)) return;
 
-    const timestamp = new Date().toISOString();
     const logData = {
-      timestamp,
       level: LogLevel[level],
       message,
       context: this.context,
       data: data ? this.sanitize(data) : undefined,
     };
 
-    // Console output
-    const consoleMethod = this.getConsoleMethod(level);
-    if (import.meta.env.DEV) {
-      consoleMethod(`[${LogLevel[level]}] ${message}`, logData);
-    } else {
-      // In prod, maybe don't log everything to console to avoid noise, but for now stick to proposal
+    // Prepare message string for tauri-plugin-log (includes context/data if present)
+    const formattedMessage = this.formatLogMessage(message, logData);
 
-      consoleMethod(JSON.stringify(logData));
+    // Console output in dev
+    if (import.meta.env.DEV) {
+      const consoleMethod = this.getConsoleMethod(level);
+      consoleMethod(`[${LogLevel[level]}] ${message}`, logData);
     }
 
+    // Tauri Plugin Log (Backend & Webview Console)
+    await this.callTauriLog(level, formattedMessage);
+
+    // Sentry integration
+    this.sendToSentry(level, message, logData);
+  }
+
+  private formatLogMessage(message: string, logData: any): string {
+    const contextStr = Object.keys(logData.context).length
+      ? ` | context: ${JSON.stringify(logData.context)}`
+      : '';
+    const dataStr = logData.data
+      ? ` | data: ${JSON.stringify(logData.data)}`
+      : '';
+    return `${message}${contextStr}${dataStr}`;
+  }
+
+  private async callTauriLog(level: LogLevel, message: string) {
+    try {
+      switch (level) {
+        case LogLevel.TRACE:
+          await trace(message);
+          break;
+        case LogLevel.DEBUG:
+          await debug(message);
+          break;
+        case LogLevel.INFO:
+          await info(message);
+          break;
+        case LogLevel.WARN:
+          await warn(message);
+          break;
+        case LogLevel.ERROR:
+          await error(message);
+          break;
+      }
+    } catch (e) {
+      // Fallback in case plugin is not available (e.g. testing)
+      if (import.meta.env.DEV) {
+        console.warn('Tauri log plugin failed:', e);
+      }
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private sendToSentry(level: LogLevel, message: string, logData: any) {
     // Sentry breadcrumb
     if (level >= LogLevel.WARN) {
       Sentry.addBreadcrumb({
@@ -163,9 +148,6 @@ class Logger {
         extra: logData,
       });
     }
-
-    // Persist to file via Tauri IPC (async, non-blocking)
-    this.persistLog(logData);
   }
 
   private getConsoleMethod(level: LogLevel) {
@@ -205,13 +187,11 @@ class Logger {
   error(message: string, data?: any) {
     this.log(LogLevel.ERROR, message, data);
   }
+
+  // No-op flushLogs for backward compatibility
+  async flushLogs() {
+    return Promise.resolve();
+  }
 }
 
 export const logger = Logger.getInstance();
-
-// Flush logs trước khi window unload
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeunload', () => {
-    logger.flushLogs();
-  });
-}

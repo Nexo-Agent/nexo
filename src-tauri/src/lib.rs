@@ -12,7 +12,6 @@ mod state;
 // Sentry helper macros and functions
 #[macro_use]
 mod lib {
-    pub mod logging;
     pub mod sentry_helpers;
 }
 
@@ -66,6 +65,23 @@ pub fn run() {
     let builder = tauri::Builder::default();
 
     builder
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .targets([
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir {
+                        file_name: Some("app".to_string()),
+                    }),
+                    tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Webview),
+                ])
+                .level(if cfg!(debug_assertions) {
+                    log::LevelFilter::Debug
+                } else {
+                    log::LevelFilter::Info
+                })
+                .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepAll)
+                .build(),
+        )
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
@@ -73,16 +89,11 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .setup(|app| {
-            // Initialize logging
-            if let Err(e) = lib::logging::init_logging(app.handle()) {
-                tracing::error!("Failed to initialize logging: {e}");
-            }
-
             // Maximize the main window on startup and ensure it's at the top
             if let Some(window) = app.get_webview_window("main") {
                 // Maximize first
                 if let Err(e) = window.maximize() {
-                    tracing::error!(error = %e, "Failed to maximize window");
+                    log::error!("Failed to maximize window: {e}");
                 }
                 // On macOS, ensure window is at position (0, 0) to remove any gap
                 #[cfg(target_os = "macos")]
@@ -97,7 +108,7 @@ pub fn run() {
                                 y: 0,
                             }))
                         {
-                            tracing::error!(error = %e, "Failed to set window position");
+                            log::error!("Failed to set window position: {e}");
                         }
                     });
                 }
@@ -230,8 +241,6 @@ pub fn run() {
             features::agent::commands::delete_agent,
             features::agent::commands::get_agent_info,
             features::agent::commands::update_agent,
-            // Logging commands
-            features::logging::commands::write_frontend_logs,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

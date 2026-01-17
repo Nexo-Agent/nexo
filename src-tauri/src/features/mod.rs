@@ -12,4 +12,3 @@ pub mod workspace;
 pub mod addon;
 pub mod agent;
 pub mod app_settings;
-pub mod logging;

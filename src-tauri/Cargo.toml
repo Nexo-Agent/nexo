@@ -44,15 +44,17 @@ regex = "1.12.2"
 sha2 = "0.10.9"
 hex = "0.4.3"
 shell-words = "1.1.1"
-sentry = { version = "0.34", features = ["backtrace", "contexts", "panic", "anyhow", "debug-images"] }
+sentry = { version = "0.34", features = ["backtrace", "contexts", "panic", "anyhow", "debug-images", "log"] }
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
-tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-log = "0.2"
 sentry-tracing = "0.34"
 tempfile = "3.24.0"
 base64 = "0.22.1"
 tauri-plugin-updater = "2.9.0"
 tauri-plugin-process = "2.3.1"
+tauri-plugin-log = "2.2.1"
+log = "0.4.29"
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }

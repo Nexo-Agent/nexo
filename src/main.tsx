@@ -4,6 +4,12 @@ import * as Sentry from '@sentry/react';
 import './index.css';
 import './i18n/config';
 import App from './App';
+import { attachConsole } from '@tauri-apps/plugin-log';
+
+// Attach console for Tauri logs
+if (typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__) {
+  attachConsole().catch(console.error);
+}
 
 // Initialize Sentry
 Sentry.init({
