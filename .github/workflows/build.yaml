@@ -81,15 +81,19 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            ### Phiên bản mới v0.1.0-alpha.51 có gì mới?
+            ### Phiên bản mới v0.1.0-alpha.52 có gì mới?
 
-            🌟 **Tính năng mới: Node Group cho Flow Editor**
-            - **Nhóm Node Linh Hoạt**: Cho phép bao bọc nhiều node lại trong một khối duy nhất để tổ chức quy trình làm việc khoa học hơn.
-            - **Tùy Chỉnh Màu Sắc & Độ Trong Suốt**: Người dùng có thể chỉnh màu viền, màu nền và độ mờ Alpha cho từng nhóm, giúp phân loại thị giác rõ ràng.
-            - **Thay Đổi Kích Thước**: Tích hợp công cụ kéo giãn cực kỳ mượt mà.
-            - **Trải Nghiệm Tương Tác Cải Tiến**: Di chuyển và làm việc với các node bên trong nhóm mà không bị cản trở nhờ công nghệ xử lý lớp (layering) và pointer-events thông minh.
+            🌍 **Hỗ trợ đa ngôn ngữ (i18n)**
+            - Flow Editor giờ đây đã hỗ trợ đa ngôn ngữ (Tiếng Anh & Tiếng Việt).
+            - Các thành phần, thuộc tính node và nhãn đều được dịch đầy đủ.
 
-            🚀 Hãy cập nhật ngay để tổ chức các quy trình Flow của bạn một cách chuyên nghiệp hơn!
+            ✨ **Cải tiến Giao diện & Trải nghiệm**
+            - **Cài đặt lần đầu (First Run Setup)**: Giao diện mới mượt mà hơn, kết nối LLM trước khi cài đặt runtime để trải nghiệm tốt hơn.
+            - **Thanh bên cài đặt**: Thêm chỉ báo active giúp dễ dàng nhận biết mục đang chọn.
+            - **Quản lý Runtime**: Cơ chế cài đặt và kiểm tra runtime thông minh hơn.
+
+            🛠 **Sửa lỗi**
+            - Sửa lỗi hiển thị thừa ký tự trong giao diện cài đặt Addon.
           releaseDraft: false
           prerelease: true
           args: ${{ matrix.args }}
