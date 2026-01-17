@@ -9,7 +9,6 @@ import { ModalStackProvider } from '@/ui/atoms/modal-stack';
 import { useNotificationListener } from '@/hooks/useNotificationListener';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useMenuEvents } from '@/hooks/useMenuEvents';
-import { useLogger } from '@/hooks/useLogger';
 import { useChatStreaming } from '@/features/chat/hooks/useChatStreaming';
 import { loadAppSettings } from '@/features/ui/state/uiSlice';
 import i18n from '@/i18n/config';
@@ -23,9 +22,6 @@ function AppContent() {
     (state) => state.ui
   );
   const { theme } = useAppSelector((state) => state.ui);
-
-  // Initialize logger context tracking
-  useLogger();
 
   // Listen for notification events
   useNotificationListener();

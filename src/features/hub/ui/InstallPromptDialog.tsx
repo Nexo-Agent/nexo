@@ -19,7 +19,7 @@ import {
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
 import type { HubPrompt, ParsedPromptTemplate } from '@/features/prompt/types';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export interface InstallPromptDialogProps {
   open: boolean;
@@ -36,7 +36,6 @@ export function InstallPromptDialog({
 }: InstallPromptDialogProps) {
   const { t } = useTranslation(['settings', 'common']);
   const dispatch = useAppDispatch();
-  const logger = useLogger();
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
   const [template, setTemplate] = useState<ParsedPromptTemplate | null>(null);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 import { open } from '@tauri-apps/plugin-dialog';
 import { Button } from '@/ui/atoms/button/button';
 import {
@@ -43,7 +43,6 @@ import { useGetInstalledAgentsQuery } from '../state/api';
 import type { InstalledAgent } from '../types';
 
 export function AgentSettings() {
-  const logger = useLogger();
   const {
     data: agents = [],
     isLoading: _loading,

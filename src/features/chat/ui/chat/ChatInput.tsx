@@ -64,7 +64,7 @@ import {
 } from '@/features/settings/lib/prompt-utils';
 import type { Prompt, InstalledAgent } from '@/app/types';
 import { useAppSettings } from '@/hooks/useAppSettings';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 interface ChatInputProps {
   selectedWorkspaceId: string | null;
@@ -99,7 +99,6 @@ export function ChatInput({
     threshold: 50,
   });
   const { t } = useTranslation(['chat', 'common', 'settings']);
-  const logger = useLogger();
   const dispatch = useAppDispatch();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

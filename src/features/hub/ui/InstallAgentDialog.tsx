@@ -17,7 +17,7 @@ import {
 } from '@/features/notifications/state/notificationSlice';
 import type { HubAgent } from '@/features/agent/types';
 import { useInstallAgentFromHubMutation } from '@/features/agent/state/api';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 // import type { InstallAgentDialogProps } from './InstallAgentDialogProps';
 // Removing the above bad import line
 
@@ -40,7 +40,6 @@ export function InstallAgentDialog({
 }: InstallAgentDialogProps) {
   const { t } = useTranslation(['settings', 'common']);
   const dispatch = useAppDispatch();
-  const logger = useLogger();
   const [installAgent, { isLoading: installing }] =
     useInstallAgentFromHubMutation();
   // Removed local installing state

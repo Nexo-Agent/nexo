@@ -44,12 +44,11 @@ import {
   showError,
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export function LLMConnections() {
   const { t } = useTranslation('settings');
   const dispatch = useAppDispatch();
-  const logger = useLogger();
 
   // Use RTK Query hooks
   const { data: llmConnections = [] } = useGetLLMConnectionsQuery();

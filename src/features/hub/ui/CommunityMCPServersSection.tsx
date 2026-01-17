@@ -18,7 +18,7 @@ import {
 } from '@/features/notifications/state/notificationSlice';
 import type { HubMCPServer } from '@/features/mcp/types';
 import { HubCommunitySection } from './HubCommunitySection';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 interface CommunityMCPServersSectionProps {
   installedServerIds: string[];
@@ -31,7 +31,6 @@ export function CommunityMCPServersSection({
 }: CommunityMCPServersSectionProps) {
   const { t } = useTranslation('settings');
   const dispatch = useAppDispatch();
-  const logger = useLogger();
   const [servers, setServers] = useState<HubMCPServer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

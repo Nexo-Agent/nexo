@@ -21,7 +21,7 @@ import {
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
 import type { HubPrompt } from '../types';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 interface CommunityPromptsSectionProps {
   installedPromptIds: string[];
@@ -34,7 +34,6 @@ export function CommunityPromptsSection({
 }: CommunityPromptsSectionProps) {
   const { t } = useTranslation('settings');
   const dispatch = useAppDispatch();
-  const logger = useLogger();
   const [prompts, setPrompts] = useState<HubPrompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

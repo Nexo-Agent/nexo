@@ -40,7 +40,7 @@ import { useWorkspaces } from '@/features/workspace';
 import { useExportChat } from '@/features/chat/hooks/useExportChat';
 import { useAppDispatch } from '@/app/hooks';
 import { navigateToWorkspaceSettings } from '@/features/ui/state/uiSlice';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export function ChatSidebar() {
   // Track render performance
@@ -63,7 +63,6 @@ export function ChatSidebar() {
     handleDeleteChat,
     handleRenameChat,
   } = useChats(selectedWorkspaceId);
-  const logger = useLogger();
   const { handleExportMarkdown, handleExportJSON } = useExportChat();
   const { t } = useTranslation(['common', 'chat', 'settings']);
   const dispatch = useAppDispatch();

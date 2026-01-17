@@ -23,12 +23,11 @@ import { setAgentChatHistoryDrawerOpen } from '@/features/ui/state/uiSlice';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { messagesApi } from '../../state/messagesApi';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export function ChatArea() {
   const { t } = useTranslation(['common', 'settings']);
   const dispatch = useAppDispatch();
-  const logger = useLogger();
 
   // Use workspaces hook to get selectedWorkspaceId and selectedLLMConnectionId
   const { selectedWorkspace, selectedWorkspaceId, workspaceSettings } =

@@ -20,7 +20,7 @@ import { InstallAgentDialog } from './InstallAgentDialog';
 import type { HubAgent } from '@/features/agent/types';
 import { useGetInstalledAgentsQuery } from '@/features/agent/state/api';
 import { HubCommunitySection } from './HubCommunitySection';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export function CommunityAgentsSection({
   onInstalled,
@@ -29,7 +29,6 @@ export function CommunityAgentsSection({
 }) {
   const { t } = useTranslation('settings');
   const dispatch = useAppDispatch();
-  const logger = useLogger();
   const [agents, setAgents] = useState<HubAgent[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,7 +51,7 @@ export function CommunityAgentsSection({
     } finally {
       setLoading(false);
     }
-  }, [dispatch, logger]);
+  }, [dispatch]);
 
   useEffect(() => {
     fetchAgents();

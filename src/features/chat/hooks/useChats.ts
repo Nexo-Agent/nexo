@@ -15,7 +15,7 @@ import {
 } from '../state/messages';
 import { showError } from '@/features/notifications/state/notificationSlice';
 import { setAttachedFiles } from '../state/chatInputSlice';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook to access and manage chats
@@ -23,7 +23,6 @@ import { useLogger } from '@/hooks/useLogger';
 export function useChats(selectedWorkspaceId: string | null) {
   const dispatch = useAppDispatch();
   const { t } = useTranslation(['common', 'settings']);
-  const logger = useLogger();
 
   // Selectors - use raw selector first
   const chatsByWorkspaceId = useAppSelector(

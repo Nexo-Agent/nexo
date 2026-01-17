@@ -2,7 +2,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Minus, Square, X, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 interface TitleBarProps {
   leftContent?: ReactNode;
@@ -33,7 +33,6 @@ export function TitleBar({
 }: TitleBarProps = {}) {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const logger = useLogger();
 
   const platform = detectPlatform();
 

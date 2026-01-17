@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'sonner';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export type UpdateStatus =
   | 'idle'
@@ -15,47 +15,43 @@ export type UpdateStatus =
   | 'error';
 
 export function useUpdate() {
-  const logger = useLogger();
   const [status, setStatus] = useState<UpdateStatus>('idle');
   const [update, setUpdate] = useState<Update | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
 
-  const checkUpdate = useCallback(
-    async (silent = false) => {
-      try {
-        setStatus('checking');
-        setError(null);
+  const checkUpdate = useCallback(async (silent = false) => {
+    try {
+      setStatus('checking');
+      setError(null);
 
-        const newUpdate = await check();
+      const newUpdate = await check();
 
-        if (newUpdate?.available) {
-          setUpdate(newUpdate);
-          setStatus('available');
-          if (!silent) {
-            toast.info(`New version ${newUpdate.version} is available!`);
-          }
-        } else {
-          setUpdate(null);
-          setStatus('up-to-date');
-          if (!silent) {
-            toast.success('You have the latest version.');
-          }
-        }
-      } catch (err) {
-        logger.error('Failed to check for updates:', err);
-        // Only show error if not silent or if it's a critical failure during manual check
+      if (newUpdate?.available) {
+        setUpdate(newUpdate);
+        setStatus('available');
         if (!silent) {
-          setError(err instanceof Error ? err.message : 'Unknown error');
-          setStatus('error');
-          toast.error('Failed to check for updates');
-        } else {
-          setStatus('idle');
+          toast.info(`New version ${newUpdate.version} is available!`);
+        }
+      } else {
+        setUpdate(null);
+        setStatus('up-to-date');
+        if (!silent) {
+          toast.success('You have the latest version.');
         }
       }
-    },
-    [logger]
-  );
+    } catch (err) {
+      logger.error('Failed to check for updates:', err);
+      // Only show error if not silent or if it's a critical failure during manual check
+      if (!silent) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        setStatus('error');
+        toast.error('Failed to check for updates');
+      } else {
+        setStatus('idle');
+      }
+    }
+  }, []);
 
   const installUpdate = useCallback(async () => {
     if (!update) return;
@@ -95,7 +91,7 @@ export function useUpdate() {
         `Failed to install update: ${err instanceof Error ? err.message : 'Unknown error'}`
       );
     }
-  }, [update, logger]);
+  }, [update]);
 
   return {
     status,

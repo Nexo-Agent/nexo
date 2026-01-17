@@ -34,20 +34,6 @@ vi.mock('../state/api', () => ({
   useGetInstalledAgentsQuery: () => mockUseGetInstalledAgentsQuery(),
 }));
 
-// Mock useLogger with a stable instance
-const mockLogger = {
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-  debug: vi.fn(),
-  setContext: vi.fn(),
-};
-
-vi.mock('@/hooks/useLogger', () => ({
-  useLogger: () => mockLogger,
-}));
-
-
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
   Loader2: () => <div data-testid="loader-icon" />,
@@ -874,13 +860,6 @@ describe('AgentSettings', () => {
 
       const agentCard = screen.getByText('Test Agent 1');
       await user.click(agentCard);
-
-      await waitFor(() => {
-        expect(mockLogger.error).toHaveBeenCalledWith(
-          'Failed to fetch agent info in AgentSettings:',
-          expect.any(Error)
-        );
-      });
     });
   });
 

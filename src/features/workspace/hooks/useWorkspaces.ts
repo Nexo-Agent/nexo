@@ -16,7 +16,7 @@ import {
 } from '@/features/notifications/state/notificationSlice';
 import { setSelectedModel } from '@/features/chat/state/chatInputSlice';
 import { createChat, clearAllChats } from '@/features/chat/state/chatsSlice';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 import {
   useGetWorkspacesQuery,
@@ -41,7 +41,6 @@ import { useGetMCPConnectionsQuery } from '@/features/mcp';
 export function useWorkspaces() {
   const dispatch = useAppDispatch();
   const { t } = useTranslation(['common', 'settings']);
-  const logger = useLogger();
 
   // Selectors
   // We still read from slice for components that expect slice structure,

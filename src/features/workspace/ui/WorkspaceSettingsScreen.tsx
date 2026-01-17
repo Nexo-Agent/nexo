@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { navigateToChat } from '@/features/ui/state/uiSlice';
 
@@ -26,7 +26,6 @@ import type { WorkspaceSettings } from '@/features/workspace/types';
 
 export function WorkspaceSettingsScreen() {
   const { t } = useTranslation(['settings', 'common']);
-  const logger = useLogger();
   const dispatch = useAppDispatch();
 
   // Workspace Settings Logic

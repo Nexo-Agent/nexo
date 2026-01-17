@@ -12,11 +12,10 @@ import {
   showError,
 } from '@/features/notifications/state/notificationSlice';
 import { useTranslation } from 'react-i18next';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export function ImagePreviewDialog() {
   const dispatch = useAppDispatch();
-  const logger = useLogger();
   const { t } = useTranslation('common');
   const open = useAppSelector((state) => state.ui.imagePreviewOpen);
   const imageUrl = useAppSelector((state) => state.ui.imagePreviewUrl);

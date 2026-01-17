@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Bot, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 import { useStickToBottom } from 'use-stick-to-bottom';
 import {
   Dialog,
@@ -31,7 +31,6 @@ export function AgentChatHistoryDialog({
   agentId,
 }: AgentChatHistoryDialogProps) {
   const { t: tChat } = useTranslation('chat');
-  const logger = useLogger();
   useAppSettings();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -129,7 +128,6 @@ export function AgentChatHistoryDialog({
     };
 
     loadMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, sessionId]);
 
   // Filter out tool messages for display (tool results are shown within tool_call messages)

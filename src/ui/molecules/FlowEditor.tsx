@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 import {
   ReactFlow,
@@ -681,7 +681,6 @@ function FlowEditorInner({
   className,
 }: FlowEditorProps) {
   const { t } = useTranslation(['flow']);
-  const logger = useLogger();
 
   const [nodes, setNodes, onNodesChange] = useNodesState(
     initialFlow?.nodes || []
@@ -752,7 +751,7 @@ function FlowEditorInner({
         logger.error('Failed to add node at center:', err);
       }
     },
-    [readOnly, screenToFlowPosition, setNodes, logger]
+    [readOnly, screenToFlowPosition, setNodes]
   );
 
   // Restore viewport if provided

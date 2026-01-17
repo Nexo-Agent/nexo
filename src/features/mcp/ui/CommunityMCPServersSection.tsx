@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Download, Loader2, Server, RefreshCw, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 import { Button } from '@/ui/atoms/button/button';
 import { Input } from '@/ui/atoms/input';
 import {
@@ -32,7 +32,6 @@ export function CommunityMCPServersSection({
   onInstall,
 }: CommunityMCPServersSectionProps) {
   const { t } = useTranslation('settings');
-  const logger = useLogger();
   const dispatch = useAppDispatch();
   const [servers, setServers] = useState<HubMCPServer[]>([]);
   const [loading, setLoading] = useState(true);

@@ -53,7 +53,7 @@ import {
 import type { MCPToolType, MCPServerConnection } from '../types';
 
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 interface PythonRuntimeStatus {
   version: string;
@@ -70,7 +70,6 @@ interface NodeRuntimeStatus {
 export function MCPServerConnections() {
   const { t } = useTranslation('settings');
   const dispatch = useAppDispatch();
-  const logger = useLogger();
 
   // RTK Query Hooks
   const { data: mcpConnections = [], refetch: refetchConnections } =
@@ -120,7 +119,7 @@ export function MCPServerConnections() {
       // Reset loading state when dialog closes
       setRuntimesLoading(false);
     }
-  }, [dialogOpen, logger]);
+  }, [dialogOpen]);
 
   const handleAdd = () => {
     setEditingConnection(null);

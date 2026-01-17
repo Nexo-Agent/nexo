@@ -11,7 +11,7 @@ import {
   type UsageChartPoint,
   type UsageStat,
 } from '@/models/usage';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export interface UseUsageReturn {
   filter: UsageFilter;
@@ -31,7 +31,7 @@ export interface UseUsageReturn {
 
 export function useUsage(): UseUsageReturn {
   const dispatch = useAppDispatch();
-  const logger = useLogger();
+
   const [filter, setFilter] = useState<UsageFilter>({});
   const [summary, setSummary] = useState<UsageSummary | null>(null);
   const [chartData, setChartData] = useState<UsageChartPoint[]>([]);
@@ -66,7 +66,6 @@ export function useUsage(): UseUsageReturn {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, interval, page]);
 
   useEffect(() => {

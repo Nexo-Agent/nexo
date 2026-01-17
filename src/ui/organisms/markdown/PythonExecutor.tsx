@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { cn } from '@/lib/utils';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 interface PythonExecutorProps {
   code: string;
@@ -23,7 +23,6 @@ export function PythonExecutor({
   version,
 }: PythonExecutorProps) {
   const { t } = useTranslation('common');
-  const logger = useLogger();
   const [output, setOutput] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isRunning, setIsRunning] = useState(false);

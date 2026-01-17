@@ -12,7 +12,7 @@ import { InstallPromptDialog } from './InstallPromptDialog';
 import type { HubMCPServer } from '@/features/mcp/types';
 import type { HubPrompt } from '@/features/prompt/types';
 import { Bot, Server, FileText } from 'lucide-react';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 interface Prompt {
   id: string;
@@ -20,7 +20,6 @@ interface Prompt {
 
 export function HubScreen() {
   const { t } = useTranslation('settings');
-  const logger = useLogger();
   const [activeTab, setActiveTab] = useState('agent');
 
   // Agents
@@ -55,7 +54,7 @@ export function HubScreen() {
     } catch (e) {
       logger.error('Failed to load prompts:', e);
     }
-  }, [logger]);
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

@@ -17,14 +17,14 @@ import {
 import { useWorkspaces } from '@/features/workspace';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
 import { FlowData } from '../types';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook to access and manage chat input state
  */
 export function useChatInput(selectedWorkspaceId: string | null) {
   const dispatch = useAppDispatch();
-  const logger = useLogger();
+
   const isLoadingSettingsRef = useRef(false);
   const { workspaceSettings } = useWorkspaces();
 
@@ -174,7 +174,6 @@ export function useChatInput(selectedWorkspaceId: string | null) {
     currentWorkspaceSettings?.llmConnectionId,
     currentWorkspaceSettings?.streamEnabled,
     isValidModel,
-    logger,
   ]);
 
   // Save chat input settings to SQLite when they change

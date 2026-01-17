@@ -2,10 +2,9 @@ import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
 import * as opener from '@tauri-apps/plugin-opener';
 import type { Message } from '@/app/types';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export function useExportChat() {
-  const logger = useLogger();
   const exportFile = async (
     content: string,
     filename: string,

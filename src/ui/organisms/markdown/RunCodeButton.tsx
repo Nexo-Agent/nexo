@@ -5,7 +5,7 @@ import { StreamdownContext } from '@/ui/atoms/streamdown/lib/context';
 import { cn } from '@/ui/atoms/streamdown/lib/utils';
 import { useCodeBlockContext } from '@/ui/atoms/streamdown/lib/code-block/context';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 export type RunCodeButtonProps = ComponentProps<'button'> & {
   code?: string;
@@ -29,7 +29,6 @@ export const RunCodeButton = ({
   ...props
 }: RunCodeButtonProps) => {
   const { t } = useTranslation('common');
-  const logger = useLogger();
   const { code: contextCode } = useCodeBlockContext();
   const { isAnimating } = useContext(StreamdownContext);
   const code = propCode ?? contextCode;

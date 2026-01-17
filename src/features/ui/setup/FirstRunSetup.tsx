@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/atoms/card';
-import { useLogger } from '@/hooks/useLogger';
+import { logger } from '@/lib/logger';
 
 type Step = 'welcome' | 'installing' | 'llm-setup' | 'completed';
 
@@ -79,7 +79,6 @@ const PROVIDER_OPTIONS = [
 
 export function FirstRunSetup({ open }: { open: boolean }) {
   const dispatch = useAppDispatch();
-  const logger = useLogger();
   const [createLLMConnection] = useCreateLLMConnectionMutation();
   const [step, setStep] = useState<Step>('welcome');
   const [installStatus, setInstallStatus] = useState<{
