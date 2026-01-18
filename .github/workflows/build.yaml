@@ -81,14 +81,13 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.7
+            # Nexo v0.1.0-beta.8
 
             ## Fixes
 
-            - Fixed error when switching between models with different thinking support
-              - Resolved 400 Bad Request error that occurred when sending messages after switching from a thinking-enabled model to one without thinking support
-              - Backend now validates model capabilities before including thinking configuration
-              - Frontend checks model support before sending thinking parameters
+            - Fixed Google Gemini API compatibility issue with tool declarations
+              - Resolved "Invalid JSON payload received. Unknown name 'additionalProperties'" error when using tools with Gemini models
+              - Improved tool declaration compatibility with Gemini 2.5 models
 
             ---
 
