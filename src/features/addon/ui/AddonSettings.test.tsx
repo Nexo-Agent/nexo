@@ -22,6 +22,10 @@ vi.mock('lucide-react', () => ({
   CheckCircle2: () => <div data-testid="check-circle-icon" />,
   AlertCircle: () => <div data-testid="alert-circle-icon" />,
   Info: () => <div data-testid="info-icon" />,
+  Package: () => <div data-testid="package-icon" />,
+  Loader2: () => <div data-testid="loader-icon" />,
+  X: () => <div data-testid="x-icon" />,
+  XIcon: () => <div data-testid="x-icon" />,
 }));
 
 const mockStore = configureStore({

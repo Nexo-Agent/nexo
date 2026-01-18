@@ -102,6 +102,25 @@ export function useAddons() {
     }
   };
 
+  const installPythonPackages = async (packages: string[]) => {
+    try {
+      await invoke('install_python_packages', {
+        packages,
+        version: null, // Use default/latest installed Python runtime
+      });
+      dispatch(
+        showSuccess(
+          t('pythonPackagesInstalled', {
+            packages: packages.join(', '),
+          })
+        )
+      );
+    } catch (error) {
+      handleCommandError(dispatch, error);
+      throw error; // Re-throw to let caller handle it
+    }
+  };
+
   // Initial load and focus re-fetch
   useEffect(() => {
     const loadAll = async () => {
@@ -142,6 +161,7 @@ export function useAddons() {
       uninstallPython,
       installNode,
       uninstallNode,
+      installPythonPackages,
     },
   };
 }

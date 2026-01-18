@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import {
@@ -8,10 +8,12 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  Package,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/ui/atoms/skeleton';
 import { useAddons } from '../hooks/useAddons';
+import { PythonPackageManagerDialog } from './PythonPackageManagerDialog';
 
 const middleEllipsis = (str: string, maxLength: number = 50) => {
   if (str.length <= maxLength) return str;
@@ -77,6 +79,7 @@ interface RuntimeCardProps {
   cleanupCount?: number;
   brandClass: string;
   extraInfo?: React.ReactNode;
+  onManagePackages?: () => void; // Optional for Python runtime only
 }
 
 const RuntimeCard = ({
@@ -91,6 +94,7 @@ const RuntimeCard = ({
   onUninstall,
   brandClass,
   extraInfo,
+  onManagePackages,
 }: RuntimeCardProps) => {
   const { t } = useTranslation('settings');
 
@@ -201,16 +205,30 @@ const RuntimeCard = ({
         </Button>
 
         {installed && (
-          <Button
-            onClick={onUninstall}
-            disabled={isInstalling}
-            variant="ghost"
-            size="sm"
-            className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
-          >
-            <Trash2 className="mr-2 size-3.5" />
-            {t('uninstall')}
-          </Button>
+          <>
+            {onManagePackages && (
+              <Button
+                onClick={onManagePackages}
+                disabled={isInstalling}
+                variant="outline"
+                size="sm"
+                className="w-full border-brand-python/30 text-brand-python hover:bg-brand-python/10 hover:text-brand-python"
+              >
+                <Package className="mr-2 size-3.5" />
+                {t('managePackages')}
+              </Button>
+            )}
+            <Button
+              onClick={onUninstall}
+              disabled={isInstalling}
+              variant="ghost"
+              size="sm"
+              className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="mr-2 size-3.5" />
+              {t('uninstall')}
+            </Button>
+          </>
         )}
       </div>
     </div>
@@ -229,6 +247,9 @@ export default function AddonSettings() {
     installingNode,
     actions,
   } = useAddons();
+
+  // State for Python package manager dialog
+  const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
 
   const activePython = useMemo(() => {
     if (pythonRuntimes.length === 0) return null;
@@ -297,6 +318,10 @@ export default function AddonSettings() {
     }
   };
 
+  const handleInstallPythonPackages = async (packages: string[]) => {
+    await actions.installPythonPackages(packages);
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col gap-1">
@@ -332,6 +357,7 @@ export default function AddonSettings() {
                 onCleanup={handleCleanupOtherPython}
                 cleanupCount={otherInstalledPythonCount}
                 brandClass="brand-python"
+                onManagePackages={() => setIsPackageDialogOpen(true)}
                 extraInfo={
                   addonConfig && (
                     <span className="text-[10px] font-normal text-muted-foreground opacity-70">
@@ -361,6 +387,14 @@ export default function AddonSettings() {
           </>
         )}
       </div>
+
+      {/* Python Package Manager Dialog */}
+      <PythonPackageManagerDialog
+        open={isPackageDialogOpen}
+        onOpenChange={setIsPackageDialogOpen}
+        onInstall={handleInstallPythonPackages}
+        pythonVersion={activePython?.version}
+      />
     </div>
   );
 }
