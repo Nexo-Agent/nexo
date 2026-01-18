@@ -37,7 +37,37 @@ Follow these steps to release a new version of Nexo:
    Include sections for Features, Fixes, and Improvements.
 
 5. **Update Release Note in GitHub Workflow**
-   Summarize the changes from `changelogs/<version>.md` into a human-readable format (easy for end-users, not just a list of PRs or commits) and update the `releaseBody` field in `.github/workflows/build.yaml`.
+   Summarize the changes from `changelogs/<version>.md` into a human-readable format and update the `releaseBody` field in `.github/workflows/build.yaml`.
+
+   **IMPORTANT**: Only include user-facing changes:
+   - ✅ New features
+   - ✅ Bug fixes
+   - ✅ UI/UX improvements
+   - ✅ Performance improvements (if noticeable to users)
+   - ✅ Breaking changes
+   - ❌ Code refactoring
+   - ❌ Unit tests
+   - ❌ Internal code cleanup
+   - ❌ Developer tooling changes
+
+   **Markdown Format Guidelines**:
+   - Keep formatting clean and simple
+   - Use standard markdown: headers (`##`), lists (`-`), and code blocks (`` ` ``)
+   - Avoid excessive use of emojis (maximum 1-2 per section if needed)
+   - Don't mix multiple markdown styles (bold + italic + emoji)
+   - Use consistent list format throughout
+   - Example of good format:
+
+     ```markdown
+     ## What's New
+
+     - Added feature X
+     - Fixed bug Y
+
+     ## Breaking Changes
+
+     - Changed API Z
+     ```
 
 6. **Commit changes**
    // turbo
