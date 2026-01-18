@@ -81,11 +81,14 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.6
+            # Nexo v0.1.0-beta.7
 
             ## Fixes
 
-            - Fixed Homebrew workflow dispatch API call for automated macOS releases
+            - Fixed error when switching between models with different thinking support
+              - Resolved 400 Bad Request error that occurred when sending messages after switching from a thinking-enabled model to one without thinking support
+              - Backend now validates model capabilities before including thinking configuration
+              - Frontend checks model support before sending thinking parameters
 
             ---
 
