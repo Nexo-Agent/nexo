@@ -4,7 +4,6 @@ import {
   Plus,
   Trash2,
   Pencil,
-  Loader2,
   Settings,
   Download,
   FileText,
@@ -215,19 +214,23 @@ export function ChatSidebar() {
                         >
                           {chat.title}
                         </div>
-                        {streamingByChatId[chat.id] && (
-                          <Loader2
-                            className={cn(
-                              'size-3 shrink-0 animate-spin',
-                              selectedChatId === chat.id &&
-                                !pausedStreaming[chat.id]
-                                ? 'text-primary'
-                                : 'text-muted-foreground opacity-60'
-                            )}
-                          />
-                        )}
+                        {/* Proposal C: No icon in row, using bottom shimmer instead */}
                       </div>
                     </div>
+
+                    {streamingByChatId[chat.id] && (
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden rounded-b-md">
+                        <div className="h-full w-full bg-primary/10">
+                          <div
+                            className={cn(
+                              'h-full bg-primary animate-indeterminate-bar',
+                              pausedStreaming[chat.id] &&
+                                'animate-none opacity-40'
+                            )}
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     {/* Export Button - Visible on hover */}
                     <div className="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100">
