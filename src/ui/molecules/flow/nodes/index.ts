@@ -7,6 +7,7 @@ import {
   DecisionNode,
   StartEndNode,
 } from './AlgorithmNodes';
+import { DatabaseNode, type DatabaseNodeData } from './DatabaseNode';
 
 export {
   SimpleNode,
@@ -19,6 +20,8 @@ export {
   InputOutputNode,
   DecisionNode,
   StartEndNode,
+  DatabaseNode,
+  type DatabaseNodeData,
 };
 
 export const nodeTypes = {
@@ -30,4 +33,5 @@ export const nodeTypes = {
   process: ProcessNode,
   'input-output': InputOutputNode,
   decision: DecisionNode,
+  database: DatabaseNode,
 };

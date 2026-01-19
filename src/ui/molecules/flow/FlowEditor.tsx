@@ -191,6 +191,100 @@ const TagsField = ({ label, tags, onChange, readOnly }: TagsFieldProps) => {
   );
 };
 
+// --- Schema Field Component ---
+interface SchemaFieldProps {
+  label: string;
+  schema: { title: string; type: string }[];
+  onChange: (schema: { title: string; type: string }[]) => void;
+  readOnly: boolean;
+}
+
+const SchemaField = ({
+  label,
+  schema,
+  onChange,
+  readOnly,
+}: SchemaFieldProps) => {
+  const [newTitle, setNewTitle] = useState('');
+  const [newType, setNewType] = useState('');
+
+  const handleAddEntry = () => {
+    if (newTitle.trim() && newType.trim()) {
+      onChange([...schema, { title: newTitle.trim(), type: newType.trim() }]);
+      setNewTitle('');
+      setNewType('');
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <Label>{label}</Label>
+      <div className="space-y-2 border rounded-md p-3 bg-muted/30">
+        {/* Display existing schema entries */}
+        {schema.map((entry, index) => (
+          <div key={index} className="flex items-center gap-2 group">
+            <Input
+              value={entry.title}
+              readOnly={readOnly}
+              onChange={(e) => {
+                const newSchema = [...schema];
+                newSchema[index] = { ...entry, title: e.target.value };
+                onChange(newSchema);
+              }}
+              className="h-8 text-xs flex-1"
+            />
+            <Input
+              value={entry.type}
+              readOnly={readOnly}
+              onChange={(e) => {
+                const newSchema = [...schema];
+                newSchema[index] = { ...entry, type: e.target.value };
+                onChange(newSchema);
+              }}
+              className="h-8 text-xs w-20"
+            />
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => onChange(schema.filter((_, i) => i !== index))}
+                className="text-muted-foreground hover:text-destructive transition-colors px-1"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+
+        {/* Add new entry */}
+        {!readOnly && (
+          <div className="flex gap-2 pt-2 border-t mt-2">
+            <Input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Title"
+              className="h-8 text-xs flex-1"
+            />
+            <Input
+              value={newType}
+              onChange={(e) => setNewType(e.target.value)}
+              placeholder="Type"
+              className="h-8 text-xs w-20"
+            />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={handleAddEntry}
+          disabled={!newTitle.trim() || !newType.trim()}
+          className="h-8 w-full flex items-center justify-center bg-primary text-primary-foreground rounded-md text-sm disabled:opacity-50"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // --- Property Field Component ---
 interface PropertyFieldProps {
   propertyKey: string;
@@ -458,6 +552,18 @@ const PropertyField = ({
         label={label}
         tags={value as string[]}
         onChange={(newTags) => onChange(propertyKey, newTags)}
+        readOnly={readOnly}
+      />
+    );
+  }
+
+  // Special handling for 'schema' array
+  if (propertyKey === 'schema' && Array.isArray(value)) {
+    return (
+      <SchemaField
+        label={label}
+        schema={value as { title: string; type: string }[]}
+        onChange={(newSchema) => onChange(propertyKey, newSchema)}
         readOnly={readOnly}
       />
     );

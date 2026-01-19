@@ -82,4 +82,13 @@ export const FLOW_NODES: FlowNodeType[] = [
       opacity: 1,
     },
   },
+  {
+    type: 'database',
+    label: 'Database Table',
+    description: 'Database table schema with fields',
+    initialData: {
+      label: 'Products',
+      schema: [{ title: 'id', type: 'uuid' }],
+    },
+  },
 ];

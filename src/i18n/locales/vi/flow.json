@@ -29,7 +29,8 @@
     "target": "Cổng đích (Target)",
     "source": "Cổng nguồn (Source)",
     "targetLabel": "Nhãn cổng đích",
-    "sourceLabel": "Nhãn cổng nguồn"
+    "sourceLabel": "Nhãn cổng nguồn",
+    "schema": "Sơ đồ (Schema)"
   },
   "nodes": {
     "simple": "Nút cơ bản",
@@ -39,7 +40,8 @@
     "process": "Xử lý",
     "inputOutput": "Nhập/Xuất",
     "decision": "Quyết định",
-    "group": "Nhóm nút"
+    "group": "Nhóm nút",
+    "database": "Bảng cơ sở dữ liệu"
   },
   "nodeDescriptions": {
     "simple": "Nút cơ bản với màu nền và màu chữ tùy chỉnh",
@@ -49,6 +51,7 @@
     "process": "Bước xử lý hoặc hành động",
     "inputOutput": "Thao tác nhập hoặc xuất dữ liệu",
     "decision": "Điểm rẽ nhánh (if/else)",
-    "group": "Nhóm nhiều nút lại với nhau với một màu nền"
+    "group": "Nhóm nhiều nút lại với nhau với một màu nền",
+    "database": "Sơ đồ bảng cơ sở dữ liệu với các trường dữ liệu"
   }
 }

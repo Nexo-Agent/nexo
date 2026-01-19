@@ -29,7 +29,8 @@
     "target": "Target Handle",
     "source": "Source Handle",
     "targetLabel": "Target Label",
-    "sourceLabel": "Source Label"
+    "sourceLabel": "Source Label",
+    "schema": "Schema"
   },
   "nodes": {
     "simple": "Simple Node",
@@ -39,7 +40,8 @@
     "process": "Process",
     "inputOutput": "Input/Output",
     "decision": "Decision",
-    "group": "Node Group"
+    "group": "Node Group",
+    "database": "Database Table"
   },
   "nodeDescriptions": {
     "simple": "Simple node with custom background and text colors",
@@ -49,6 +51,7 @@
     "process": "Processing step or action",
     "inputOutput": "Data input or output operation",
     "decision": "Branching point (if/else)",
-    "group": "Group multiple nodes together with a background color"
+    "group": "Group multiple nodes together with a background color",
+    "database": "Database table schema with fields"
   }
 }
