@@ -158,9 +158,9 @@ export function ChatMessages({
   const { scrollRef, contentRef } = useStickToBottom({
     resize: 'smooth',
     initial: 'smooth',
-    damping: 0.7,
-    stiffness: 0.05,
-    mass: 1.25,
+    damping: 0.15,
+    stiffness: 0.08,
+    mass: 1,
   });
 
   // Refs for ScrollArea

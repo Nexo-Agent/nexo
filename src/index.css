@@ -280,6 +280,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
   }
 
   html,
@@ -287,6 +288,7 @@
     @apply overflow-hidden;
     height: 100%;
     width: 100%;
+    overscroll-behavior: none;
   }
 
   body {
@@ -295,6 +297,7 @@
     font-size: var(--text-base);
     line-height: var(--leading-normal);
     font-weight: var(--font-weight-normal);
+    -webkit-overflow-scrolling: touch;
   }
 
   #root {

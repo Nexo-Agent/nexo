@@ -139,7 +139,7 @@ export const MessageItem = memo(
       <div
         ref={messageRef}
         className={cn(
-          'group flex min-w-0 w-full',
+          'group flex min-w-0 w-full animate-in fade-in slide-in-from-bottom-3 duration-500 ease-out',
           message.role === 'user' ? 'justify-end' : 'justify-start'
         )}
       >
