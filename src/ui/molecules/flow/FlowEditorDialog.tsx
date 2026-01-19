@@ -48,7 +48,7 @@ export function FlowEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="!max-w-none w-[98vw] max-h-[95vh] h-[95vh] flex flex-col">
+      <DialogContent className="max-w-none! w-[98vw] max-h-[95vh] h-[95vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {t('workflowEditor')}

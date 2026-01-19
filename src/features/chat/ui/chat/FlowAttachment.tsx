@@ -1,11 +1,5 @@
-import {
-  ReactFlow,
-  Background,
-  useNodesState,
-  useEdgesState,
-  ReactFlowProvider,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+import { FlowCanvas } from '@/ui/molecules/flow/FlowCanvas';
+import { ReactFlowProvider } from '@xyflow/react';
 import { Workflow, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { FlowData } from '@/features/chat/types';
@@ -25,11 +19,8 @@ function FlowAttachmentInner({
   className,
   mode = 'chatinput',
 }: FlowAttachmentProps) {
-  const [nodes] = useNodesState(flow.nodes || []);
-  const [edges] = useEdgesState(flow.edges || []);
-
-  const nodeCount = nodes.length;
-  const edgeCount = edges.length;
+  const nodeCount = flow.nodes?.length || 0;
+  const edgeCount = flow.edges?.length || 0;
 
   return (
     <div
@@ -47,22 +38,19 @@ function FlowAttachmentInner({
         )}
         onClick={onClick}
       >
-        {nodes.length > 0 ? (
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            fitView
-            nodesDraggable={false}
-            nodesConnectable={false}
-            elementsSelectable={false}
+        {nodeCount > 0 ? (
+          <FlowCanvas
+            nodes={flow.nodes || []}
+            edges={flow.edges || []}
+            readOnly={true}
+            fitView={true}
+            showControls={false}
+            showMiniMap={false}
             zoomOnScroll={false}
             panOnScroll={false}
             panOnDrag={false}
             zoomOnDoubleClick={false}
-            proOptions={{ hideAttribution: true }}
-          >
-            <Background />
-          </ReactFlow>
+          />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-muted/20 text-muted-foreground">
             <Workflow className="size-8 mb-2 opacity-50" />

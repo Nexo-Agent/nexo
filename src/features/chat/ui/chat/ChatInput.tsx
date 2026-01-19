@@ -51,12 +51,11 @@ import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { SlashCommandDropdown } from '@/ui/molecules/SlashCommandDropdown';
 import { AgentMentionDropdown } from '@/features/agent';
 import { VariableInputDialog } from '@/ui/molecules/VariableInputDialog';
-import { FlowEditorDialog } from '@/ui/molecules/FlowEditorDialog';
 import { PromptPanel } from './PromptPanel';
 import { AgentMentionChips } from './AgentBadgeOverlay';
 import { AttachedFileItem } from './AttachedFileItem';
 import { FlowAttachment } from './FlowAttachment';
-import { FLOW_NODES } from '@/constants/flow-nodes';
+import { FLOW_NODES, FlowEditorDialog } from '@/ui/molecules/flow';
 
 import {
   parsePromptVariables,

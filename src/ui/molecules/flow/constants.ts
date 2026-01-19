@@ -1,4 +1,4 @@
-import { type FlowNodeType } from '@/ui/molecules/FlowEditor';
+import { type FlowNodeType } from '@/ui/molecules/flow/FlowEditor';
 
 export const FLOW_NODES: FlowNodeType[] = [
   {

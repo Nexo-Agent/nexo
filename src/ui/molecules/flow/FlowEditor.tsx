@@ -2,19 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 
+import { FlowCanvas } from './FlowCanvas';
 import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
+  type Node,
+  type Connection,
+  type OnSelectionChangeParams,
   useNodesState,
   useEdgesState,
   addEdge,
   useReactFlow,
   ReactFlowProvider,
-  type Node,
-  type Connection,
-  type OnSelectionChangeParams,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Input } from '@/ui/atoms/input';
@@ -33,15 +30,6 @@ import {
 import { cn } from '@/lib/utils';
 
 import type { FlowData } from '@/features/chat/types';
-import {
-  SimpleNode,
-  RichNode,
-  GroupNode,
-  ProcessNode,
-  InputOutputNode,
-  DecisionNode,
-  StartEndNode,
-} from './flow-nodes';
 
 export interface FlowNodeType {
   type: string;
@@ -59,17 +47,6 @@ interface FlowEditorProps {
   readOnly?: boolean;
   className?: string;
 }
-
-const nodeTypes = {
-  simple: SimpleNode,
-  rich: RichNode,
-  group: GroupNode,
-  start: StartEndNode,
-  end: StartEndNode,
-  process: ProcessNode,
-  'input-output': InputOutputNode,
-  decision: DecisionNode,
-};
 
 // --- Node Item Component ---
 interface NodeItemProps {
@@ -714,11 +691,9 @@ function FlowEditorInner({
 
       try {
         // Calculate the center position in flow coordinates
-        // The center of the screen in viewport coordinates
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
 
-        // Convert screen coordinates to flow coordinates
         const position = screenToFlowPosition({
           x: centerX,
           y: centerY,
@@ -728,7 +703,7 @@ function FlowEditorInner({
           id: `node-${Date.now()}`,
           type: nodeTemplate.type,
           position,
-          zIndex: nodeTemplate.type === 'group' ? 0 : 10, // Use positive values, groups at bottom
+          zIndex: nodeTemplate.type === 'group' ? 0 : 10,
           data: {
             ...nodeTemplate.initialData,
             label: nodeTemplate.initialData?.label || nodeTemplate.label,
@@ -824,25 +799,17 @@ function FlowEditorInner({
 
       {/* 2. Main Area: Flow Canvas */}
       <div className="flex-1 min-w-0 bg-background relative h-full">
-        <ReactFlow
+        <FlowCanvas
           nodes={nodes}
           edges={edges}
           onNodesChange={readOnly ? undefined : onNodesChange}
           onEdgesChange={readOnly ? undefined : onEdgesChange}
           onConnect={readOnly ? undefined : onConnect}
           onSelectionChange={handleSelectionChange}
-          nodeTypes={nodeTypes}
-          fitView
-          nodesDraggable={!readOnly}
-          nodesConnectable={!readOnly}
-          elementsSelectable={true}
-          elevateNodesOnSelect={false}
-          style={{ width: '100%', height: '100%' }}
-        >
-          <Background />
-          <Controls />
-          <MiniMap />
-        </ReactFlow>
+          readOnly={readOnly}
+          fitView={true}
+          showBackground={true}
+        />
       </div>
 
       {/* 3. Right Sidebar: Properties */}
