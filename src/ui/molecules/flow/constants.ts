@@ -72,7 +72,7 @@ export const FLOW_NODES: FlowNodeType[] = [
     },
   },
   {
-    type: 'group',
+    type: 'labeledGroupNode',
     label: 'Node Group',
     description: 'Group multiple nodes together with a background color',
     initialData: {

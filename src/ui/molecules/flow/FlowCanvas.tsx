@@ -38,6 +38,7 @@ export interface FlowCanvasProps {
   panOnScroll?: boolean;
   panOnDrag?: boolean;
   zoomOnDoubleClick?: boolean;
+  onNodeDragStop?: (event: React.MouseEvent, node: Node, nodes: Node[]) => void;
 }
 
 export function FlowCanvas({
@@ -59,6 +60,7 @@ export function FlowCanvas({
   panOnScroll,
   panOnDrag,
   zoomOnDoubleClick,
+  onNodeDragStop,
 }: FlowCanvasProps) {
   const { theme } = useTheme();
   const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(() => {
@@ -102,6 +104,7 @@ export function FlowCanvas({
         onEdgesChange={readOnly ? undefined : onEdgesChange}
         onConnect={readOnly ? undefined : onConnect}
         onSelectionChange={handleSelectionChange}
+        onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
         fitView={fitView}
         nodesDraggable={!readOnly}

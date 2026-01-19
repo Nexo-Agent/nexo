@@ -230,11 +230,15 @@ function FlowEditorInner({
           y: centerY,
         });
 
+        const isGroup =
+          nodeTemplate.type === 'group' ||
+          nodeTemplate.type === 'labeledGroupNode';
+
         const newNode: Node = {
           id: `node-${Date.now()}`,
           type: nodeTemplate.type,
           position,
-          zIndex: nodeTemplate.type === 'group' ? 0 : 10,
+          zIndex: isGroup ? 0 : 10,
           data: {
             ...nodeTemplate.initialData,
             label: nodeTemplate.initialData?.label || nodeTemplate.label,
@@ -243,16 +247,12 @@ function FlowEditorInner({
             }),
             ...(nodeTemplate.style && { style: nodeTemplate.style }),
           },
-          ...(nodeTemplate.type === 'group' && {
+          ...(isGroup && {
             style: { width: 400, height: 200, ...nodeTemplate.style },
           }),
         };
 
-        setNodes((nds) =>
-          nodeTemplate.type === 'group'
-            ? [newNode, ...nds]
-            : nds.concat(newNode)
-        );
+        setNodes((nds) => (isGroup ? [newNode, ...nds] : nds.concat(newNode)));
       } catch (err) {
         logger.error('Failed to add node at center:', err);
       }
@@ -309,6 +309,70 @@ function FlowEditorInner({
     [setNodes]
   );
 
+  const onNodeDragStop = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      if (readOnly) return;
+
+      const droppedOver = nodes.find((n) => {
+        if (
+          n.id === node.id ||
+          (n.type !== 'group' && n.type !== 'labeledGroupNode')
+        )
+          return false;
+
+        const nWidth = n.width ?? n.measured?.width ?? 0;
+        const nHeight = n.height ?? n.measured?.height ?? 0;
+
+        return (
+          node.position.x >= n.position.x &&
+          node.position.y >= n.position.y &&
+          node.position.x <= n.position.x + nWidth &&
+          node.position.y <= n.position.y + nHeight
+        );
+      });
+
+      if (droppedOver && node.parentId !== droppedOver.id) {
+        setNodes((nds) =>
+          nds.map((n) => {
+            if (n.id === node.id) {
+              return {
+                ...n,
+                parentId: droppedOver.id,
+                extent: 'parent',
+                position: {
+                  x: node.position.x - droppedOver.position.x,
+                  y: node.position.y - droppedOver.position.y,
+                },
+              } as Node;
+            }
+            return n;
+          })
+        );
+      } else if (!droppedOver && node.parentId) {
+        const parent = nodes.find((p) => p.id === node.parentId);
+        if (parent) {
+          setNodes((nds) =>
+            nds.map((n) => {
+              if (n.id === node.id) {
+                return {
+                  ...n,
+                  parentId: undefined,
+                  extent: undefined,
+                  position: {
+                    x: node.position.x + parent.position.x,
+                    y: node.position.y + parent.position.y,
+                  },
+                } as Node;
+              }
+              return n;
+            })
+          );
+        }
+      }
+    },
+    [nodes, setNodes, readOnly]
+  );
+
   const selectedNode = useMemo(
     () => nodes.find((n) => n.id === selectedNodeId) || null,
     [nodes, selectedNodeId]
@@ -337,6 +401,7 @@ function FlowEditorInner({
           onEdgesChange={readOnly ? undefined : onEdgesChange}
           onConnect={readOnly ? undefined : onConnect}
           onSelectionChange={handleSelectionChange}
+          onNodeDragStop={onNodeDragStop}
           readOnly={readOnly}
           fitView={true}
           showBackground={true}

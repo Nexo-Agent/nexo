@@ -28,6 +28,7 @@ export const nodeTypes = {
   simple: SimpleNode,
   rich: RichNode,
   group: GroupNode,
+  labeledGroupNode: GroupNode,
   start: StartEndNode,
   end: StartEndNode,
   process: ProcessNode,

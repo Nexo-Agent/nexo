@@ -1,4 +1,4 @@
-import React, { type ReactNode, type ComponentProps } from 'react';
+import { type ReactNode, type ComponentProps } from 'react';
 import { Panel, type NodeProps, type PanelPosition } from '@xyflow/react';
 
 import { BaseNode } from '@/ui/atoms/xyflow/base-node';
@@ -27,10 +27,11 @@ export function GroupNodeLabel({
   );
 }
 
-export type GroupNodeProps = Partial<NodeProps> & {
-  label?: ReactNode;
-  position?: PanelPosition;
-};
+export type GroupNodeProps = ComponentProps<'div'> &
+  Partial<NodeProps> & {
+    label?: ReactNode;
+    position?: PanelPosition;
+  };
 
 /* GROUP NODE -------------------------------------------------------------- */
 
@@ -55,10 +56,7 @@ export function GroupNode({ label, position, ...props }: GroupNodeProps) {
   };
 
   return (
-    <BaseNode
-      className="bg-opacity-50 h-full overflow-hidden rounded-sm bg-white"
-      {...props}
-    >
+    <BaseNode className="bg-opacity-50 h-full rounded-sm bg-white" {...props}>
       <Panel className="m-0 p-0" position={position}>
         {label && (
           <GroupNodeLabel className={getLabelClassName(position)}>
