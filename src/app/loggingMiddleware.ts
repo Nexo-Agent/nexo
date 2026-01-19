@@ -17,16 +17,10 @@ export const loggingMiddleware: Middleware =
   (_store) => (next) => (action: unknown) => {
     const startTime = performance.now();
 
-    if (isAction(action)) {
-      logger.debug('Redux action dispatched', {
-        action: action.type,
-      });
-    }
-
     const result = next(action);
 
     const duration = performance.now() - startTime;
-    if (isAction(action) && duration > 100) {
+    if (isAction(action) && duration > 300) {
       logger.warn('Slow Redux action', {
         action: action.type,
         duration,
