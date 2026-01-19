@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { logger } from '@/lib/logger';
 import { CustomCodeComponent } from './CustomCodeComponent';
+import { MarkdownImage } from './MarkdownImage';
 import type { BundledTheme } from 'shiki';
 
 export function MarkdownContent({
@@ -136,6 +137,7 @@ export function MarkdownContent({
   const components = useMemo(
     () => ({
       code: CustomCodeComponent,
+      img: MarkdownImage,
     }),
     []
   );
