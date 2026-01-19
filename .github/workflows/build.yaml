@@ -81,15 +81,22 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.9
+            # Nexo v0.1.0-beta.10
 
-            ## Features
+            ## ✨ Features
 
-            - **Addon Management**: Added Python package management feature. Users can now install additional Python packages directly within the app settings.
+            - **Text-to-Speech (TTS)**: Added capability to read messages with multi-language support and specific voice selection for English.
+            - **Enhanced UI Overlay**: Replaced sidebar loading icons with a smooth shimmer progress bar.
+            - **Improved Image Preview**: Upgraded the image preview dialog with hover controls, auto-sizing, and "click outside" to close.
+            - **Platform-Native Menus**: Redesigned application menus tailored for macOS and Windows, including a "Check for Updates" feature.
+            - **Smooth Animations**: Integrated smooth scrolling for chat messages and refined UI transitions.
+            - **Advanced Controls**: Introduced an experimental toggle for "Raw Text Option" in AI messages.
 
-            ## Improvements
+            ## 🛠 Improvements
 
-            - **UI/UX**: Refined Addon Settings interface with a more compact and elegant design.
+            - Optimized performance by removing verbose Redux logging.
+            - Updated versioning info across the application.
+            - Refined message validation logic to exclude edited assistant messages.
 
             ---
 
