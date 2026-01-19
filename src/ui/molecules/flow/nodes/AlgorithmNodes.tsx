@@ -1,12 +1,14 @@
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { cn } from '@/lib/utils';
+import type { NodePropertyProps } from './types';
+import { PropertyField } from './components/NodePropertyFields';
 
 /**
  * Process Node - Rectangle shape
  * Represents a processing step or action in the algorithm
  */
-export const ProcessNode = memo(({ data, selected }: NodeProps) => {
+const ProcessNodeComponent = memo(({ data, selected }: NodeProps) => {
   const label = (data.label as string) || 'Process';
 
   return (
@@ -38,14 +40,34 @@ export const ProcessNode = memo(({ data, selected }: NodeProps) => {
     </div>
   );
 });
+ProcessNodeComponent.displayName = 'ProcessNode';
 
-ProcessNode.displayName = 'ProcessNode';
+const ProcessNodeProperty = ({
+  data,
+  onChange,
+  readOnly,
+}: NodePropertyProps) => (
+  <PropertyField
+    propertyKey="label"
+    value={data.label}
+    type="string"
+    onChange={(key, val) =>
+      onChange({ [key]: val } as Partial<Record<string, unknown>>)
+    }
+    readOnly={readOnly}
+  />
+);
+ProcessNodeProperty.displayName = 'ProcessNode.Property';
+
+export const ProcessNode = Object.assign(ProcessNodeComponent, {
+  Property: ProcessNodeProperty,
+});
 
 /**
  * Input/Output Node - Parallelogram shape
  * Represents data input or output operations
  */
-export const InputOutputNode = memo(({ data, selected }: NodeProps) => {
+const InputOutputNodeComponent = memo(({ data, selected }: NodeProps) => {
   const label = (data.label as string) || 'Input/Output';
 
   return (
@@ -56,12 +78,12 @@ export const InputOutputNode = memo(({ data, selected }: NodeProps) => {
           'bg-green-50 dark:bg-green-950',
           'border-2 border-green-500',
           'text-center text-sm font-medium',
-          '-skew-x-[20deg]', // Create parallelogram shape
+          '-skew-x-20', // Create parallelogram shape
           selected && 'ring-2 ring-green-600 shadow-lg'
         )}
       >
         {/* Anti-skew the text so it stays upright */}
-        <div className="skew-x-[20deg] text-green-900 dark:text-green-100">
+        <div className="skew-x-20 text-green-900 dark:text-green-100">
           {label}
         </div>
       </div>
@@ -82,14 +104,34 @@ export const InputOutputNode = memo(({ data, selected }: NodeProps) => {
     </div>
   );
 });
+InputOutputNodeComponent.displayName = 'InputOutputNode';
 
-InputOutputNode.displayName = 'InputOutputNode';
+const InputOutputNodeProperty = ({
+  data,
+  onChange,
+  readOnly,
+}: NodePropertyProps) => (
+  <PropertyField
+    propertyKey="label"
+    value={data.label}
+    type="string"
+    onChange={(key, val) =>
+      onChange({ [key]: val } as Partial<Record<string, unknown>>)
+    }
+    readOnly={readOnly}
+  />
+);
+InputOutputNodeProperty.displayName = 'InputOutputNode.Property';
+
+export const InputOutputNode = Object.assign(InputOutputNodeComponent, {
+  Property: InputOutputNodeProperty,
+});
 
 /**
  * Decision Node - Diamond shape
  * Represents a branching point in the algorithm (if/else, switch)
  */
-export const DecisionNode = memo(({ data, selected }: NodeProps) => {
+const DecisionNodeComponent = memo(({ data, selected }: NodeProps) => {
   const label = (data.label as string) || 'Decision';
 
   return (
@@ -150,14 +192,34 @@ export const DecisionNode = memo(({ data, selected }: NodeProps) => {
     </div>
   );
 });
+DecisionNodeComponent.displayName = 'DecisionNode';
 
-DecisionNode.displayName = 'DecisionNode';
+const DecisionNodeProperty = ({
+  data,
+  onChange,
+  readOnly,
+}: NodePropertyProps) => (
+  <PropertyField
+    propertyKey="label"
+    value={data.label}
+    type="string"
+    onChange={(key, val) =>
+      onChange({ [key]: val } as Partial<Record<string, unknown>>)
+    }
+    readOnly={readOnly}
+  />
+);
+DecisionNodeProperty.displayName = 'DecisionNode.Property';
+
+export const DecisionNode = Object.assign(DecisionNodeComponent, {
+  Property: DecisionNodeProperty,
+});
 
 /**
  * Start/End Node - Oval/Rounded shape
  * Represents the start or end point of the algorithm
  */
-export const StartEndNode = memo(({ data, selected }: NodeProps) => {
+const StartEndNodeComponent = memo(({ data, selected }: NodeProps) => {
   const label = (data.label as string) || 'Start/End';
   const isStart = (data.nodeType as string) === 'start';
 
@@ -205,5 +267,36 @@ export const StartEndNode = memo(({ data, selected }: NodeProps) => {
     </div>
   );
 });
+StartEndNodeComponent.displayName = 'StartEndNode';
 
-StartEndNode.displayName = 'StartEndNode';
+const StartEndNodeProperty = ({
+  data,
+  onChange,
+  readOnly,
+}: NodePropertyProps) => (
+  <div className="space-y-4">
+    <PropertyField
+      propertyKey="label"
+      value={data.label}
+      type="string"
+      onChange={(key, val) =>
+        onChange({ [key]: val } as Partial<Record<string, unknown>>)
+      }
+      readOnly={readOnly}
+    />
+    <PropertyField
+      propertyKey="nodeType"
+      value={data.nodeType}
+      type="string"
+      onChange={(key, val) =>
+        onChange({ [key]: val } as Partial<Record<string, unknown>>)
+      }
+      readOnly={readOnly}
+    />
+  </div>
+);
+StartEndNodeProperty.displayName = 'StartEndNode.Property';
+
+export const StartEndNode = Object.assign(StartEndNodeComponent, {
+  Property: StartEndNodeProperty,
+});

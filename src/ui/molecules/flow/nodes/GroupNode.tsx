@@ -1,6 +1,8 @@
 import { memo } from 'react';
 import { NodeProps, NodeResizer } from '@xyflow/react';
 import { cn } from '@/lib/utils';
+import type { NodePropertyProps } from './types';
+import { PropertyField } from './components/NodePropertyFields';
 
 export interface GroupNodeData {
   label?: string;
@@ -10,7 +12,7 @@ export interface GroupNodeData {
   opacity?: number;
 }
 
-export const GroupNode = memo(({ data, selected }: NodeProps) => {
+const GroupNodeComponent = memo(({ data, selected }: NodeProps) => {
   const nodeData = data as GroupNodeData;
   const {
     label = 'Group',
@@ -30,11 +32,6 @@ export const GroupNode = memo(({ data, selected }: NodeProps) => {
       )}
       style={{
         borderColor: selected ? undefined : borderColor,
-        // Opacity now only affects the background via CSS variable or direct opacity if needed,
-        // but here we can use a wrapper or just apply it to the bg color if it's rgba.
-        // To make it simple and effective, we'll use an overlay or just apply opacity to the whole div
-        // but keep the children opaque? No, it's better to just use the opacity prop on the div
-        // for background only OR use rgba for backgroundColor.
       }}
     >
       {/* Background layer with opacity */}
@@ -68,5 +65,63 @@ export const GroupNode = memo(({ data, selected }: NodeProps) => {
     </div>
   );
 });
+GroupNodeComponent.displayName = 'GroupNode';
 
-GroupNode.displayName = 'GroupNode';
+const GroupNodeProperty = ({
+  data,
+  onChange,
+  readOnly,
+}: NodePropertyProps<GroupNodeData>) => (
+  <div className="space-y-4">
+    <PropertyField
+      propertyKey="label"
+      value={data.label}
+      type="string"
+      onChange={(key, val) =>
+        onChange({ [key]: val } as Partial<GroupNodeData>)
+      }
+      readOnly={readOnly}
+    />
+    <PropertyField
+      propertyKey="backgroundColor"
+      value={data.backgroundColor}
+      type="string"
+      onChange={(key, val) =>
+        onChange({ [key]: val } as Partial<GroupNodeData>)
+      }
+      readOnly={readOnly}
+    />
+    <PropertyField
+      propertyKey="textColor"
+      value={data.textColor}
+      type="string"
+      onChange={(key, val) =>
+        onChange({ [key]: val } as Partial<GroupNodeData>)
+      }
+      readOnly={readOnly}
+    />
+    <PropertyField
+      propertyKey="borderColor"
+      value={data.borderColor}
+      type="string"
+      onChange={(key, val) =>
+        onChange({ [key]: val } as Partial<GroupNodeData>)
+      }
+      readOnly={!!readOnly}
+    />
+    <PropertyField
+      propertyKey="opacity"
+      value={data.opacity}
+      type="number"
+      onChange={(key, val) =>
+        onChange({ [key]: val } as Partial<GroupNodeData>)
+      }
+      readOnly={!!readOnly}
+    />
+  </div>
+);
+GroupNodeProperty.displayName = 'GroupNode.Property';
+
+export const GroupNode = Object.assign(GroupNodeComponent, {
+  Property: GroupNodeProperty,
+});

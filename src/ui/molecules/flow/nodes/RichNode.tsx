@@ -11,6 +11,8 @@ import {
 import { Badge } from '@/ui/atoms/badge';
 import { BaseHandle } from '@/ui/atoms/xyflow/base-handle';
 import { cn } from '@/lib/utils';
+import type { NodePropertyProps } from './types';
+import { PropertyField } from './components/NodePropertyFields';
 
 // Định nghĩa các kiểu dữ liệu cho RichNode
 export interface RichNodeData {
@@ -67,7 +69,7 @@ const badgeVariantMap = {
   warning: 'outline' as const,
 };
 
-export const RichNode = memo(({ data, selected }: NodeProps) => {
+const RichNodeComponent = memo(({ data, selected }: NodeProps) => {
   const nodeData = data as RichNodeData;
   const {
     label = 'Rich Node',
@@ -188,5 +190,92 @@ export const RichNode = memo(({ data, selected }: NodeProps) => {
     </Card>
   );
 });
+RichNodeComponent.displayName = 'RichNode';
 
-RichNode.displayName = 'RichNode';
+const RichNodeProperty = ({
+  data,
+  onChange,
+  readOnly,
+}: NodePropertyProps<RichNodeData>) => {
+  return (
+    <div className="space-y-4">
+      <PropertyField
+        propertyKey="label"
+        value={data.label}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<RichNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="description"
+        value={data.description}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<RichNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="icon"
+        value={data.icon}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<RichNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="variant"
+        value={data.variant}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<RichNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="status"
+        value={data.status}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<RichNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="tags"
+        value={data.tags}
+        type="object"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<RichNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="handlePosition"
+        value={data.handlePosition}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<RichNodeData>)
+        }
+        readOnly={!!readOnly}
+      />
+      <PropertyField
+        propertyKey="handles"
+        value={data.handles}
+        type="object"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<RichNodeData>)
+        }
+        readOnly={!!readOnly}
+      />
+    </div>
+  );
+};
+RichNodeProperty.displayName = 'RichNode.Property';
+
+export const RichNode = Object.assign(RichNodeComponent, {
+  Property: RichNodeProperty,
+});

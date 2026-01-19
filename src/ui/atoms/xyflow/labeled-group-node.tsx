@@ -1,4 +1,4 @@
-import { type ReactNode, type ComponentProps } from 'react';
+import React, { type ReactNode, type ComponentProps } from 'react';
 import { Panel, type NodeProps, type PanelPosition } from '@xyflow/react';
 
 import { BaseNode } from '@/ui/atoms/xyflow/base-node';

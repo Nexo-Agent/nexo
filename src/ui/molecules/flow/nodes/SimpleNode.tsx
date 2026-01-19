@@ -1,9 +1,10 @@
 import { memo } from 'react';
 import { Position, type NodeProps } from '@xyflow/react';
-
 import { BaseNode, BaseNodeContent } from '@/ui/atoms/xyflow/base-node';
 import { BaseHandle } from '@/ui/atoms/xyflow/base-handle';
 import { cn } from '@/lib/utils';
+import type { NodePropertyProps } from './types';
+import { PropertyField } from './components/NodePropertyFields';
 
 // Định nghĩa các kiểu dữ liệu cho SimpleNode (tối giản)
 export interface SimpleNodeData {
@@ -17,7 +18,7 @@ export interface SimpleNodeData {
   };
 }
 
-export const SimpleNode = memo(({ data, selected }: NodeProps) => {
+const SimpleNodeComponent = memo(({ data, selected }: NodeProps) => {
   const nodeData = data as SimpleNodeData;
   const {
     label = 'Node',
@@ -53,5 +54,65 @@ export const SimpleNode = memo(({ data, selected }: NodeProps) => {
     </BaseNode>
   );
 });
+SimpleNodeComponent.displayName = 'SimpleNode';
 
-SimpleNode.displayName = 'SimpleNode';
+const SimpleNodeProperty = ({
+  data,
+  onChange,
+  readOnly,
+}: NodePropertyProps<SimpleNodeData>) => {
+  return (
+    <div className="space-y-4">
+      <PropertyField
+        propertyKey="label"
+        value={data.label}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<SimpleNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="backgroundColor"
+        value={data.backgroundColor}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<SimpleNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="textColor"
+        value={data.textColor}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<SimpleNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="handlePosition"
+        value={data.handlePosition}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<SimpleNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <PropertyField
+        propertyKey="handles"
+        value={data.handles}
+        type="object"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<SimpleNodeData>)
+        }
+        readOnly={!!readOnly}
+      />
+    </div>
+  );
+};
+SimpleNodeProperty.displayName = 'SimpleNode.Property';
+
+export const SimpleNode = Object.assign(SimpleNodeComponent, {
+  Property: SimpleNodeProperty,
+});

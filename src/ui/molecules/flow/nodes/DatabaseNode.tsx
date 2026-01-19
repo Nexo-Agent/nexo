@@ -8,6 +8,8 @@ import {
   DatabaseSchemaTableRow,
   DatabaseSchemaTableCell,
 } from '@/ui/atoms/xyflow/database-schema-node';
+import type { NodePropertyProps } from './types';
+import { PropertyField, SchemaField } from './components/NodePropertyFields';
 
 export interface DatabaseField {
   title: string;
@@ -19,7 +21,7 @@ export interface DatabaseNodeData {
   schema: DatabaseField[];
 }
 
-export const DatabaseNode = memo(({ data }: NodeProps) => {
+const DatabaseNodeComponent = memo(({ data }: NodeProps) => {
   const nodeData = data as unknown as DatabaseNodeData;
   const { label = 'Table Name', schema = [] } = nodeData;
 
@@ -63,5 +65,35 @@ export const DatabaseNode = memo(({ data }: NodeProps) => {
     </DatabaseSchemaNode>
   );
 });
+DatabaseNodeComponent.displayName = 'DatabaseNode';
 
-DatabaseNode.displayName = 'DatabaseNode';
+const DatabaseNodeProperty = ({
+  data,
+  onChange,
+  readOnly,
+}: NodePropertyProps<DatabaseNodeData>) => {
+  return (
+    <div className="space-y-4">
+      <PropertyField
+        propertyKey="label"
+        value={data.label}
+        type="string"
+        onChange={(key, val) =>
+          onChange({ [key]: val } as Partial<DatabaseNodeData>)
+        }
+        readOnly={readOnly}
+      />
+      <SchemaField
+        label="Schema"
+        schema={data.schema}
+        onChange={(newSchema) => onChange({ schema: newSchema })}
+        readOnly={readOnly}
+      />
+    </div>
+  );
+};
+DatabaseNodeProperty.displayName = 'DatabaseNode.Property';
+
+export const DatabaseNode = Object.assign(DatabaseNodeComponent, {
+  Property: DatabaseNodeProperty,
+});
