@@ -108,6 +108,7 @@ export function ImagePreviewDialog() {
       <DialogContent
         className="p-0 border-none bg-transparent shadow-none overflow-hidden flex items-center justify-center sm:max-w-none max-w-[95vw] max-h-[95vh]"
         onClick={handleClose}
+        showCloseButton={false}
       >
         <div
           className="relative flex items-center justify-center w-full h-full cursor-zoom-out"
