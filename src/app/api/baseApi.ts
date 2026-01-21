@@ -55,6 +55,9 @@ export const baseApi = createApi({
     'MCPConnection',
     'Agent',
     'ChatInputSettings',
+    'HubAgent',
+    'HubMCPServer',
+    'HubPrompt',
   ],
   endpoints: () => ({}),
 });

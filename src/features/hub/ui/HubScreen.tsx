@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/atoms/tabs';
 import { useGetInstalledAgentsQuery } from '@/features/agent/state/api';
 import { useGetMCPConnectionsQuery } from '@/features/mcp/hooks/useMCPConnections';
-import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { CommunityAgentsSection } from './CommunityAgentsSection';
 import { CommunityMCPServersSection } from './CommunityMCPServersSection';
 import { CommunityPromptsSection } from './CommunityPromptsSection';
@@ -12,23 +11,19 @@ import { InstallPromptDialog } from './InstallPromptDialog';
 import type { HubMCPServer } from '@/features/mcp/types';
 import type { HubPrompt } from '@/features/prompt/types';
 import { Bot, Server, FileText } from 'lucide-react';
-import { logger } from '@/lib/logger';
-
-interface Prompt {
-  id: string;
-}
+import {
+  useGetHubAgentsQuery,
+  useGetHubPromptsQuery,
+  useGetInstalledPromptsQuery,
+} from '../state/api';
 
 export function HubScreen() {
   const { t } = useTranslation('settings');
   const [activeTab, setActiveTab] = useState('agent');
 
   // Agents
-  const { refetch: refetchAgents } = useGetInstalledAgentsQuery(); // We don't need the list for agent section as it checks internally or we assume distinct logic?
-  // Wait, CommunityAgentsSection might NOT check installed internally?
-  // AgentSettings passed `onInstalled` but didn't pass `installedIds`.
-  // Looking at AgentSettings code, CommunityAgentsSection is self-contained or uses query internally?
-  // I need to check CommunityAgentsSection to be sure.
-  // But for now, I'll assume it works similarly.
+  const { refetch: refetchAgents } = useGetInstalledAgentsQuery();
+  const { refetch: refetchHubAgents } = useGetHubAgentsQuery();
 
   // MCP
   const { data: mcpConnections = [], refetch: refetchMCP } =
@@ -40,26 +35,15 @@ export function HubScreen() {
   );
 
   // Prompts
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const installedPromptIds = prompts.map((p) => p.id);
+  const { data: installedPrompts = [], refetch: refetchInstalledPrompts } =
+    useGetInstalledPromptsQuery();
+  const installedPromptIds = installedPrompts.map((p) => p.id);
   const [promptInstallDialogOpen, setPromptInstallDialogOpen] = useState(false);
   const [promptToInstall, setPromptToInstall] = useState<HubPrompt | null>(
     null
   );
 
-  const loadPrompts = useCallback(async () => {
-    try {
-      const data = await invokeCommand<Prompt[]>(TauriCommands.GET_PROMPTS);
-      setPrompts(data);
-    } catch (e) {
-      logger.error('Failed to load prompts:', e);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadPrompts();
-  }, [loadPrompts]);
+  const { refetch: refetchHubPrompts } = useGetHubPromptsQuery();
 
   const handleMcpInstallClick = (server: HubMCPServer) => {
     setServerToInstall(server);
@@ -72,24 +56,45 @@ export function HubScreen() {
   };
 
   return (
-    <div className="space-y-6 h-full flex flex-col">
+    <div className="flex flex-col h-full bg-background overflow-hidden p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">
+          {t('hub.title', { defaultValue: 'Hub' })}
+        </h1>
+        <p className="text-muted-foreground">
+          {t('hub.description', {
+            defaultValue:
+              'Discover and install community agents, MCP servers, and prompts.',
+          })}
+        </p>
+      </div>
+
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
-        className="w-full flex flex-col flex-1 min-h-0"
+        className="flex-1 flex flex-col min-h-0"
       >
-        <TabsList className="grid w-full grid-cols-3 shrink-0">
-          <TabsTrigger value="agent" className="gap-2">
-            <Bot className="size-4" />
-            Agents
+        <TabsList className="w-full justify-start border-b rounded-none px-0 h-auto bg-transparent space-x-6">
+          <TabsTrigger
+            value="agent"
+            className="rounded-none data-[state=active]:bg-transparent px-2 pb-2 h-auto focus-visible:ring-0 focus-visible:outline-none"
+          >
+            <Bot className="mr-2 h-4 w-4" />
+            {t('hub.tabs.agents', { defaultValue: 'Agents' })}
           </TabsTrigger>
-          <TabsTrigger value="mcp" className="gap-2">
-            <Server className="size-4" />
-            {t('mcp.label', { defaultValue: 'MCP' })}
+          <TabsTrigger
+            value="mcp"
+            className="rounded-none data-[state=active]:bg-transparent px-2 pb-2 h-auto focus-visible:ring-0 focus-visible:outline-none"
+          >
+            <Server className="mr-2 h-4 w-4" />
+            {t('hub.tabs.mcp', { defaultValue: 'MCP Servers' })}
           </TabsTrigger>
-          <TabsTrigger value="prompt" className="gap-2">
-            <FileText className="size-4" />
-            {t('prompts.label', { defaultValue: 'Prompts' })}
+          <TabsTrigger
+            value="prompt"
+            className="rounded-none data-[state=active]:bg-transparent px-2 pb-2 h-auto focus-visible:ring-0 focus-visible:outline-none"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            {t('hub.tabs.prompts', { defaultValue: 'Prompts' })}
           </TabsTrigger>
         </TabsList>
 
@@ -97,9 +102,13 @@ export function HubScreen() {
           value="agent"
           className="mt-6 space-y-4 flex-1 flex flex-col min-h-0"
         >
-          {/* Reuse CommunityAgentsSection which seems to handle scrolling internally or needs a container */}
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-            <CommunityAgentsSection onInstalled={() => refetchAgents()} />
+            <CommunityAgentsSection
+              onInstalled={() => {
+                refetchAgents();
+                refetchHubAgents();
+              }}
+            />
           </div>
         </TabsContent>
 
@@ -142,7 +151,8 @@ export function HubScreen() {
         onOpenChange={setPromptInstallDialogOpen}
         prompt={promptToInstall}
         onInstalled={() => {
-          loadPrompts();
+          void refetchInstalledPrompts();
+          void refetchHubPrompts();
         }}
       />
     </div>

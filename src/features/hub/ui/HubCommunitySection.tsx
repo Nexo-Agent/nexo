@@ -23,7 +23,7 @@ interface HubCommunitySectionProps<T> {
   noResultsText: string;
 }
 
-export function HubCommunitySection<T>({
+function HubCommunitySectionInner<T>({
   data,
   loading,
   refreshing,
@@ -41,7 +41,13 @@ export function HubCommunitySection<T>({
   const { t } = useTranslation('settings');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredData = data.filter((item) => filterFn(item, searchQuery));
+  // Rule: js-early-exit - Defer value update to prioritize input responsiveness
+  const deferredQuery = React.useDeferredValue(searchQuery);
+
+  // Rule: rerender-memo - Memoize expensive filter operation
+  const filteredData = React.useMemo(() => {
+    return data.filter((item) => filterFn(item, deferredQuery));
+  }, [data, filterFn, deferredQuery]);
 
   if (loading && data.length === 0) {
     return (
@@ -57,7 +63,10 @@ export function HubCommunitySection<T>({
           </Button>
         </div>
         <ScrollArea className="h-[calc(100vh-280px)]">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+          <div
+            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6"
+            style={{ contentVisibility: 'auto' }}
+          >
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="flex flex-col h-full animate-pulse">
                 <CardHeader className="flex-row items-center gap-3 pb-3 space-y-0">
@@ -136,7 +145,10 @@ export function HubCommunitySection<T>({
             <p className="text-muted-foreground">{noResultsText}</p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+          <div
+            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6"
+            style={{ contentVisibility: 'auto' }}
+          >
             {filteredData.map(renderItem)}
           </div>
         )}
@@ -144,3 +156,7 @@ export function HubCommunitySection<T>({
     </div>
   );
 }
+
+export const HubCommunitySection = React.memo(
+  HubCommunitySectionInner
+) as typeof HubCommunitySectionInner;

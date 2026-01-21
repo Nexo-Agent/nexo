@@ -114,7 +114,8 @@ describe('HubCommunitySection', () => {
     { id: '2', name: 'Item 2' },
   ];
 
-  const defaultProps = {
+  const defaultProps: any = {
+    // Using any in tests to bypass the complex HubCommunitySection generic type inference issues with React.memo
     data: mockData,
     loading: false,
     refreshing: false,
