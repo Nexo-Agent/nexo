@@ -18,39 +18,56 @@ interface UseSlashCommandReturn {
   close: () => void;
 }
 
+// Module-level cache to store prompts across unmounts
+let cachedPrompts: Prompt[] | null = null;
+let isFetchingPrompts = false;
+
 export function useSlashCommand({
   input,
   onSelectPrompt,
 }: UseSlashCommandOptions): UseSlashCommandReturn {
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  // Initialize with cache if available
+  const [prompts, setPrompts] = useState<Prompt[]>(cachedPrompts || []);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [, setIsLoading] = useState(false);
   const [forceClosed, setForceClosed] = useState(false);
   const prevInputRef = useRef<string>('');
-  const hasLoadedPromptsRef = useRef(false);
 
-  // Load prompts function - only load once
+  // Track checked loaded state locally to avoid duplicate requests in this instance
+  // Note: cachedPrompts check handles the global caching
+  const hasAttemptedLoadRef = useRef(!!cachedPrompts);
+
+  // Load prompts function
   const loadPrompts = useCallback(async () => {
-    // Skip if already loaded
-    if (hasLoadedPromptsRef.current && prompts.length > 0) {
+    // Return immediately if we have cache
+    if (cachedPrompts) {
+      if (prompts.length === 0) {
+        setPrompts(cachedPrompts);
+      }
       return;
     }
 
+    // prevent race conditions/duplicate fetches
+    if (isFetchingPrompts) return;
+
+    isFetchingPrompts = true;
     setIsLoading(true);
     try {
       const data = await invokeCommand<Prompt[]>(TauriCommands.GET_PROMPTS);
+      cachedPrompts = data; // Update cache
       setPrompts(data);
-      hasLoadedPromptsRef.current = true;
+      hasAttemptedLoadRef.current = true;
     } catch (error) {
       logger.error('Error loading prompts:', error);
     } finally {
       setIsLoading(false);
+      isFetchingPrompts = false;
     }
   }, [prompts.length]);
 
   // Load prompts on mount - only once
   useEffect(() => {
-    if (!hasLoadedPromptsRef.current) {
+    if (!hasAttemptedLoadRef.current) {
       loadPrompts();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,7 +129,7 @@ export function useSlashCommand({
 
   // Only load prompts if not loaded yet and slash command becomes active
   useEffect(() => {
-    if (isActive && !hasLoadedPromptsRef.current) {
+    if (isActive && !hasAttemptedLoadRef.current) {
       loadPrompts();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

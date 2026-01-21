@@ -36,7 +36,6 @@ vi.mock('@/hooks/useLogger', () => ({
   }),
 }));
 
-
 vi.mock('@/features/notifications/state/notificationSlice', () => ({
   showError: vi.fn(),
   showSuccess: vi.fn(),
@@ -103,7 +102,7 @@ describe('LLMConnections', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAppDispatch as Mock).mockReturnValue(mockDispatch);
+    (useAppDispatch as unknown as Mock).mockReturnValue(mockDispatch);
     (useGetLLMConnectionsQuery as Mock).mockReturnValue({
       data: mockConnections,
       isLoading: false,

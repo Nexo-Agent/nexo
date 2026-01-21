@@ -78,7 +78,7 @@ describe('CommunityMCPServersSection', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAppDispatch as Mock).mockReturnValue(mockDispatch);
+    (useAppDispatch as unknown as Mock).mockReturnValue(mockDispatch);
     (invokeCommand as Mock).mockResolvedValue(mockServers);
   });
 

@@ -68,7 +68,8 @@ export function useKeyboardShortcuts() {
           activeElement.getAttribute('contenteditable') === 'true');
 
       // Determine modifier key (Cmd on macOS, Ctrl on Windows/Linux)
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      // Use userAgent as platform is deprecated and inconsistent
+      const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
       const modifierKey = isMac ? e.metaKey : e.ctrlKey;
 
       // Handle Esc key - always works, even in input fields

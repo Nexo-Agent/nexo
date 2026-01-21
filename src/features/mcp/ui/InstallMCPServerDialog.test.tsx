@@ -79,7 +79,7 @@ describe('InstallMCPServerDialog', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAppDispatch as Mock).mockReturnValue(mockDispatch);
+    (useAppDispatch as unknown as Mock).mockReturnValue(mockDispatch);
   });
 
   it('renders correctly when open', () => {

@@ -25,7 +25,6 @@ vi.mock('@/hooks/useLogger', () => ({
   }),
 }));
 
-
 // Mock notification actions
 vi.mock('@/features/notifications/state/notificationSlice', () => ({
   showSuccess: vi.fn((msg) => ({ type: 'success', payload: msg })),
@@ -38,7 +37,7 @@ describe('useUsage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAppDispatch as Mock).mockReturnValue(mockDispatch);
+    (useAppDispatch as unknown as Mock).mockReturnValue(mockDispatch);
 
     // Default mock responses
     mockInvoke.mockImplementation((cmd: string) => {

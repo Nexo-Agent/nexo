@@ -39,7 +39,6 @@ vi.mock('@/hooks/useLogger', () => ({
   }),
 }));
 
-
 vi.mock('@/features/notifications/state/notificationSlice', () => ({
   showError: vi.fn(),
   showSuccess: vi.fn(),
@@ -106,7 +105,7 @@ describe('MCPServerConnections', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAppDispatch as Mock).mockReturnValue(mockDispatch);
+    (useAppDispatch as unknown as Mock).mockReturnValue(mockDispatch);
     (useGetMCPConnectionsQuery as Mock).mockReturnValue({
       data: mockConnections,
       refetch: mockRefetch,
