@@ -13,15 +13,17 @@ vi.mock('@tauri-apps/api/event', () => ({
 }));
 
 // Mock translation if needed (react-i18next)
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-    i18n: {
-      changeLanguage: () => Promise.resolve(),
-    },
-  }),
-  initReactI18next: {
-    type: '3rdParty',
-    init: () => {},
-  },
-}));
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>();
+
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => key,
+      i18n: {
+        changeLanguage: () => Promise.resolve(),
+      },
+    }),
+    initReactI18next: { type: '3rdParty', init: () => {} },
+  };
+});

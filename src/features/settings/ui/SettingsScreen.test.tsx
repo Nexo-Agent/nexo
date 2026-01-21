@@ -17,13 +17,9 @@ vi.mock('@/app/hooks', () => ({
   ) => mockSelector(fn),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 vi.mock('lucide-react', () => ({
+  Search: () => <div data-testid="search-icon" />,
+  Loader2: () => <div data-testid="loader-icon" />,
   Settings: () => <div data-testid="settings-icon" />,
   Network: () => <div data-testid="network-icon" />,
   Server: () => <div data-testid="server-icon" />,
@@ -52,8 +48,10 @@ vi.mock('@/features/llm', () => ({
 vi.mock('@/features/mcp', () => ({
   MCPServerConnections: () => <div>MCP Connections</div>,
 }));
-vi.mock('@/features/settings', () => ({
+vi.mock('./AppSettings', () => ({
   AppSettings: () => <div>App Settings</div>,
+}));
+vi.mock('./PromptManagement', () => ({
   PromptManagement: () => <div>Prompt Management</div>,
 }));
 vi.mock('@/features/addon', () => ({
@@ -107,14 +105,14 @@ describe('SettingsScreen', () => {
     expect(screen.getAllByText('about')[0]).toBeInTheDocument();
   });
 
-  it('renders the correct content based on selected section', () => {
+  it('renders the correct content based on selected section', async () => {
     mockSelector.mockImplementation((selectorFn) => {
       const state = { ui: { settingsSection: 'llm' } };
       return selectorFn(state);
     });
 
     render(<SettingsScreen />);
-    expect(screen.getByText('LLM Connections')).toBeInTheDocument();
+    expect(await screen.findByText('LLM Connections')).toBeInTheDocument();
   });
 
   it('dispatches setSettingsSection when a sidebar item is clicked', () => {
