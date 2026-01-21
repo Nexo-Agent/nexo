@@ -1,5 +1,4 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { llmConnectionsReducer } from '@/features/llm';
 import { mcpConnectionsReducer } from '@/features/mcp';
 import {
   workspacesReducer,
@@ -22,7 +21,6 @@ import { baseApi } from './api/baseApi';
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
-    llmConnections: llmConnectionsReducer,
     mcpConnections: mcpConnectionsReducer,
     workspaces: workspacesReducer,
     chats: chatsReducer,

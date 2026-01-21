@@ -1,62 +1,10 @@
 import { baseApi } from '@/app/api/baseApi';
 import { TauriCommands } from '@/bindings/commands';
-import { logger } from '@/lib/logger';
-import type { LLMConnection, LLMModel } from '../types';
-
-// Types matching Rust structs
-interface DbLLMConnection {
-  id: string;
-  name: string;
-  base_url: string;
-  provider: string;
-  api_key: string;
-  models_json: string | null;
-  default_model: string | null;
-  enabled: boolean;
-  created_at: number;
-  updated_at: number;
-}
-
-export function dbToFrontendLLMConnection(
-  dbConn: DbLLMConnection
-): LLMConnection {
-  let models: LLMModel[] | undefined;
-  if (dbConn.models_json) {
-    try {
-      models = JSON.parse(dbConn.models_json);
-    } catch (e) {
-      logger.error('Error parsing models_json in LLM connection API:', e);
-      models = undefined;
-    }
-  }
-
-  // Validate provider type
-  const provider =
-    dbConn.provider === 'openai' ||
-    dbConn.provider === 'ollama' ||
-    dbConn.provider === 'vllm' ||
-    dbConn.provider === 'litellm' ||
-    dbConn.provider === 'fireworks' ||
-    dbConn.provider === 'openrouter' ||
-    dbConn.provider === 'groq' ||
-    dbConn.provider === 'together' ||
-    dbConn.provider === 'deepinfra' ||
-    dbConn.provider === 'google' ||
-    dbConn.provider === 'anthropic' ||
-    dbConn.provider === 'deepseek'
-      ? (dbConn.provider as LLMConnection['provider'])
-      : 'openai';
-
-  return {
-    id: dbConn.id,
-    name: dbConn.name,
-    baseUrl: dbConn.base_url,
-    provider,
-    apiKey: dbConn.api_key,
-    models,
-    enabled: dbConn.enabled,
-  };
-}
+import type { LLMConnection } from '../types';
+import {
+  dbToFrontendLLMConnection,
+  type DbLLMConnection,
+} from '../lib/transformers';
 
 export const llmConnectionsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { llmConnectionsApi, dbToFrontendLLMConnection } from './api';
+import { llmConnectionsApi } from './api';
+import { dbToFrontendLLMConnection } from '../lib/transformers';
 
 describe('llmConnectionsApi', () => {
   it('should have the correct endpoints defined', () => {

@@ -8,12 +8,12 @@ import {
   useUpdateLLMConnectionMutation,
   useDeleteLLMConnectionMutation,
   useToggleLLMConnectionEnabledMutation,
-} from '../hooks/useLLMConnections';
+} from '../state/api';
 import { useAppDispatch } from '@/app/hooks';
 import { showSuccess } from '@/features/notifications/state/notificationSlice';
 
 // Mock dependencies
-vi.mock('../hooks/useLLMConnections', () => ({
+vi.mock('../state/api', () => ({
   useGetLLMConnectionsQuery: vi.fn(),
   useCreateLLMConnectionMutation: vi.fn(),
   useUpdateLLMConnectionMutation: vi.fn(),
