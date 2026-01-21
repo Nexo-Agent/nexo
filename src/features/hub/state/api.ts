@@ -2,7 +2,7 @@ import { baseApi } from '@/app/api/baseApi';
 import { TauriCommands } from '@/bindings/commands';
 import type { HubAgent } from '@/features/agent/types';
 import type { HubMCPServer } from '@/features/mcp/types';
-import type { HubPrompt } from '@/features/prompt/types';
+import type { HubPrompt } from '../ui/prompt-types';
 import type { Prompt } from '@/app/types';
 
 export const hubApi = baseApi.injectEndpoints({

@@ -9,7 +9,7 @@ import { CommunityPromptsSection } from './CommunityPromptsSection';
 import { InstallMCPServerDialog } from './InstallMCPServerDialog';
 import { InstallPromptDialog } from './InstallPromptDialog';
 import type { HubMCPServer } from '@/features/mcp/types';
-import type { HubPrompt } from '@/features/prompt/types';
+import type { HubPrompt } from './prompt-types';
 import { Bot, Server, FileText } from 'lucide-react';
 import {
   useGetHubAgentsQuery,

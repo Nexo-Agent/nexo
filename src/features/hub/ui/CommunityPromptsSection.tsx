@@ -17,7 +17,7 @@ import {
   showError,
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
-import type { HubPrompt } from '@/features/prompt/types';
+import type { HubPrompt } from './prompt-types';
 import { HubCommunitySection } from './HubCommunitySection';
 import { logger } from '@/lib/logger';
 import {

@@ -18,7 +18,7 @@ import {
   showError,
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
-import type { HubPrompt, ParsedPromptTemplate } from '@/features/prompt/types';
+import type { HubPrompt, ParsedPromptTemplate } from './prompt-types';
 import { logger } from '@/lib/logger';
 
 export interface InstallPromptDialogProps {
