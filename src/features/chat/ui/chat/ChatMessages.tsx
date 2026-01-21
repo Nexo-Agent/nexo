@@ -97,16 +97,25 @@ export function ChatMessages({
   // Track which requests have already been timed out to prevent infinite loop
   const processedTimeoutsRef = useRef<Set<string>>(new Set());
 
+  // Keep ref of pendingRequests to avoid resetting interval on every change
+  const pendingRequestsRef = useRef(pendingRequests);
+  useEffect(() => {
+    pendingRequestsRef.current = pendingRequests;
+  }, [pendingRequests]);
+
   // Timeout for pending permissions
   useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
       const TIMEOUT_MS = 60 * 1000; // 60s
+      const currentPending = pendingRequestsRef.current;
 
-      if (pendingRequests) {
+      if (currentPending) {
         const newTimeLeft: Record<string, number> = {};
+        const activeIds = new Set<string>();
 
-        Object.values(pendingRequests).forEach((req) => {
+        Object.values(currentPending).forEach((req) => {
+          activeIds.add(req.messageId);
           if (req.timestamp) {
             const elapsed = now - req.timestamp;
             const remaining = Math.max(0, TIMEOUT_MS - elapsed);
@@ -135,11 +144,18 @@ export function ChatMessages({
         });
 
         setPermissionTimeLeft(newTimeLeft);
+
+        // Garbage collection: remove processed IDs that are no longer active to prevent memory leak
+        for (const id of processedTimeoutsRef.current) {
+          if (!activeIds.has(id)) {
+            processedTimeoutsRef.current.delete(id);
+          }
+        }
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [pendingRequests, handlePermissionRespond, dispatch, t]);
+  }, [handlePermissionRespond, dispatch, t]);
 
   const handleViewAgentDetails = useCallback(
     (sessionId: string, agentId: string) => {
@@ -177,18 +193,6 @@ export function ChatMessages({
       }
     }
   }, [scrollRef]);
-
-  // Ensure viewport is attached when ScrollArea is ready
-  useEffect(() => {
-    if (scrollAreaRef.current && typeof scrollRef === 'function') {
-      const viewport = scrollAreaRef.current.querySelector(
-        '[data-slot="scroll-area-viewport"]'
-      ) as HTMLElement;
-      if (viewport) {
-        scrollRef(viewport);
-      }
-    }
-  });
 
   return (
     <ScrollArea ref={scrollAreaRef} className="flex-1 py-4">
