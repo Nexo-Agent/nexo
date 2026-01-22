@@ -26,6 +26,7 @@ pub fn create_workspace(
         None,        // tool_permission_config
         Some(10),    // max_agent_iterations
         Some(false), // internal_tools_enabled
+        None,        // selected_skill_ids
     )?;
 
     Ok(workspace)

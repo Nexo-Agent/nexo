@@ -12,6 +12,7 @@ pub struct WorkspaceSettings {
     pub tool_permission_config: Option<String>, // JSON object: { "tool_name": "require" | "auto", ... }
     pub max_agent_iterations: Option<i64>,
     pub internal_tools_enabled: Option<i64>, // 1 for true, 0 for false, default 0
+    pub selected_skill_ids: Option<String>,  // JSON array of skill IDs
     pub created_at: i64,
     pub updated_at: i64,
 }

@@ -23,6 +23,7 @@ impl WorkspaceSettingsService {
         tool_permission_config: Option<String>,
         max_agent_iterations: Option<i64>,
         internal_tools_enabled: Option<bool>,
+        selected_skill_ids: Option<String>,
     ) -> Result<(), AppError> {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -42,6 +43,7 @@ impl WorkspaceSettingsService {
             tool_permission_config,
             max_agent_iterations,
             internal_tools_enabled: internal_tools_enabled_i64,
+            selected_skill_ids,
             created_at: now,
             updated_at: now,
         };
@@ -67,6 +69,7 @@ impl WorkspaceSettingsService {
                 None,
                 Some(10),
                 Some(false),
+                None,
             )?;
             return self.repository.get_by_workspace_id(workspace_id);
         }

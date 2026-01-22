@@ -15,6 +15,7 @@ use crate::features::mcp_connection::{
 use crate::features::message::{MessageRepository, MessageService, SqliteMessageRepository};
 use crate::features::prompt::{PromptRepository, PromptService, SqlitePromptRepository};
 
+use crate::features::skill::SkillService;
 use crate::features::tool::{mcp_refresh::MCPToolRefreshService, service::ToolService};
 use crate::features::usage::{SqliteUsageRepository, UsageRepository, UsageService};
 use crate::features::workspace::{
@@ -61,6 +62,9 @@ pub struct AppState {
 
     // Agent Manager
     pub agent_manager: Arc<crate::features::agent::manager::AgentManager>,
+
+    // Skill Service
+    pub skill_service: Arc<SkillService>,
 }
 
 impl AppState {
@@ -132,6 +136,9 @@ impl AppState {
             mcp_connection_service.clone(),
             workspace_settings_service.clone(),
         ));
+
+        let skill_service = Arc::new(SkillService::new((*app).clone()));
+
         let chat_service = Arc::new(ChatService::new(
             chat_repo,
             llm_service,
@@ -141,7 +148,9 @@ impl AppState {
             tool_service.clone(),
             usage_service.clone(),
             agent_manager.clone(),
+            skill_service.clone(),
         ));
+
         let app_settings_service = Arc::new(AppSettingsService::new(app_settings_repo));
         let prompt_service = Arc::new(PromptService::new(prompt_repo));
         let chat_input_settings_service =
@@ -170,6 +179,7 @@ impl AppState {
             prompt_service,
             pending_tool_permissions: Arc::new(Mutex::new(HashMap::new())),
             agent_manager,
+            skill_service,
         })
     }
 }

@@ -14,6 +14,7 @@ pub fn save_workspace_settings(
     tool_permission_config: Option<String>,
     max_agent_iterations: Option<i64>,
     internal_tools_enabled: Option<bool>,
+    selected_skill_ids: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<(), AppError> {
     state
@@ -29,6 +30,7 @@ pub fn save_workspace_settings(
             tool_permission_config,
             max_agent_iterations,
             internal_tools_enabled,
+            selected_skill_ids,
         )
         .map_err(|e| AppError::Generic(e.to_string()))
 }

@@ -37,13 +37,13 @@ impl WorkspaceSettingsRepository for SqliteWorkspaceSettingsRepository {
 
         if exists {
             conn.execute(
-                "UPDATE workspace_settings SET llm_connection_id = ?1, system_message = ?2, mcp_tool_ids = ?3, stream_enabled = ?4, default_model = ?5, tool_permission_config = ?6, max_agent_iterations = ?7, internal_tools_enabled = ?8, updated_at = ?9 WHERE workspace_id = ?10",
-                params![settings.llm_connection_id, settings.system_message, settings.mcp_tool_ids, settings.stream_enabled, settings.default_model, settings.tool_permission_config, settings.max_agent_iterations, settings.internal_tools_enabled, settings.updated_at, settings.workspace_id],
+                "UPDATE workspace_settings SET llm_connection_id = ?1, system_message = ?2, mcp_tool_ids = ?3, stream_enabled = ?4, default_model = ?5, tool_permission_config = ?6, max_agent_iterations = ?7, internal_tools_enabled = ?8, selected_skill_ids = ?9, updated_at = ?10 WHERE workspace_id = ?11",
+                params![settings.llm_connection_id, settings.system_message, settings.mcp_tool_ids, settings.stream_enabled, settings.default_model, settings.tool_permission_config, settings.max_agent_iterations, settings.internal_tools_enabled, settings.selected_skill_ids, settings.updated_at, settings.workspace_id],
             )?;
         } else {
             conn.execute(
-                "INSERT INTO workspace_settings (workspace_id, llm_connection_id, system_message, mcp_tool_ids, stream_enabled, default_model, tool_permission_config, max_agent_iterations, internal_tools_enabled, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
-                params![settings.workspace_id, settings.llm_connection_id, settings.system_message, settings.mcp_tool_ids, settings.stream_enabled, settings.default_model, settings.tool_permission_config, settings.max_agent_iterations, settings.internal_tools_enabled, settings.created_at, settings.updated_at],
+                "INSERT INTO workspace_settings (workspace_id, llm_connection_id, system_message, mcp_tool_ids, stream_enabled, default_model, tool_permission_config, max_agent_iterations, internal_tools_enabled, selected_skill_ids, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+                params![settings.workspace_id, settings.llm_connection_id, settings.system_message, settings.mcp_tool_ids, settings.stream_enabled, settings.default_model, settings.tool_permission_config, settings.max_agent_iterations, settings.internal_tools_enabled, settings.selected_skill_ids, settings.created_at, settings.updated_at],
             )?;
         }
 
@@ -56,7 +56,7 @@ impl WorkspaceSettingsRepository for SqliteWorkspaceSettingsRepository {
     ) -> Result<Option<WorkspaceSettings>, AppError> {
         let conn = crate::db::get_connection(&self.app)?;
         let result = conn.query_row(
-            "SELECT workspace_id, llm_connection_id, system_message, mcp_tool_ids, stream_enabled, default_model, tool_permission_config, created_at, updated_at, max_agent_iterations, internal_tools_enabled FROM workspace_settings WHERE workspace_id = ?1",
+            "SELECT workspace_id, llm_connection_id, system_message, mcp_tool_ids, stream_enabled, default_model, tool_permission_config, created_at, updated_at, max_agent_iterations, internal_tools_enabled, selected_skill_ids FROM workspace_settings WHERE workspace_id = ?1",
             params![workspace_id],
             |row| {
                 Ok(WorkspaceSettings {
@@ -71,6 +71,7 @@ impl WorkspaceSettingsRepository for SqliteWorkspaceSettingsRepository {
                     updated_at: row.get(8)?,
                     max_agent_iterations: row.get(9)?,
                     internal_tools_enabled: row.get(10)?,
+                    selected_skill_ids: row.get(11)?,
                 })
             },
         );

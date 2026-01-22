@@ -242,6 +242,12 @@ pub fn run() {
             features::agent::commands::delete_agent,
             features::agent::commands::get_agent_info,
             features::agent::commands::update_agent,
+            // Skill commands
+            features::skill::commands::get_all_skills,
+            features::skill::commands::sync_skills,
+            features::skill::commands::load_skill,
+            features::skill::commands::import_skill,
+            features::skill::commands::delete_skill,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

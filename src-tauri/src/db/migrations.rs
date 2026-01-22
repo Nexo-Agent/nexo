@@ -313,5 +313,26 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    // Create skills table
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS skills (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT NOT NULL,
+            metadata_json TEXT,
+            path TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+        )",
+        [],
+    )?;
+
+    // Add selected_skill_ids column if it doesn't exist
+    conn.execute(
+        "ALTER TABLE workspace_settings ADD COLUMN selected_skill_ids TEXT",
+        [],
+    )
+    .ok();
+
     Ok(())
 }

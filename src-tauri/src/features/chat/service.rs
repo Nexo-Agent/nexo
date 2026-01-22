@@ -4,6 +4,7 @@ use crate::error::AppError;
 use crate::events::{AgentEmitter, ToolEmitter};
 use crate::features::llm_connection::LLMConnectionService;
 use crate::features::message::{Message, MessageEmitter, MessageService};
+use crate::features::skill::SkillService;
 use crate::features::tool::service::ToolService;
 use crate::features::usage::UsageService;
 use crate::features::workspace::settings::{WorkspaceSettings, WorkspaceSettingsService};
@@ -32,6 +33,7 @@ pub struct ChatService {
     tool_service: Arc<ToolService>,
     usage_service: Arc<UsageService>,
     agent_manager: Arc<crate::features::agent::manager::AgentManager>,
+    skill_service: Arc<SkillService>,
     // Cancellation channels for each chat_id
     cancellation_senders: Arc<Mutex<HashMap<String, tokio::sync::broadcast::Sender<()>>>>,
 }
@@ -46,6 +48,7 @@ impl ChatService {
         tool_service: Arc<ToolService>,
         usage_service: Arc<UsageService>,
         agent_manager: Arc<crate::features::agent::manager::AgentManager>,
+        skill_service: Arc<SkillService>,
     ) -> Self {
         Self {
             repository,
@@ -56,6 +59,7 @@ impl ChatService {
             tool_service,
             usage_service,
             agent_manager,
+            skill_service,
             cancellation_senders: Arc::new(Mutex::new(HashMap::new())),
         }
     }
@@ -1819,12 +1823,28 @@ impl ChatService {
         let system_message =
             system_prompt_override.or_else(|| workspace_settings.system_message.clone());
 
-        if let Some(system_message) = system_message {
-            if !system_message.trim().is_empty() {
-                api_messages.push(ChatMessage::System {
-                    content: system_message,
-                });
+        let mut final_system_message = system_message.unwrap_or_default();
+
+        // Inject skills metadata if workspace has selected skills
+        if let Some(skill_ids_json) = &workspace_settings.selected_skill_ids {
+            let skill_ids: Vec<String> = serde_json::from_str(skill_ids_json).unwrap_or_default();
+
+            if !skill_ids.is_empty() {
+                if let Ok(skills_xml) = self.skill_service.generate_skills_xml(&skill_ids) {
+                    if !skills_xml.is_empty() {
+                        if !final_system_message.is_empty() {
+                            final_system_message.push_str("\n\n");
+                        }
+                        final_system_message.push_str(&skills_xml);
+                    }
+                }
             }
+        }
+
+        if !final_system_message.trim().is_empty() {
+            api_messages.push(ChatMessage::System {
+                content: final_system_message,
+            });
         }
 
         // Add conversation history (filter out tool_call messages for API)
