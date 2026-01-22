@@ -81,21 +81,19 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.11
+            # Nexo v0.1.0-beta.12
 
             ## Features
 
-            - **Flow Editor Enhancements**: Added node resizing, drag-and-drop for groups, database schema visualization, and standardized property editing UI
-            - **Hub & MCP Integration**: Migrated to RTK Query for better performance and code organization
-            - **Settings UI Improvements**: New sidebar with lazy loading and dedicated components for each settings section
-            - **Chat UI Optimizations**: Auto-resize textarea, improved rendering performance, and better component organization
-            - **LLM Connection Management**: Refactored to use direct API calls with granular hooks
+            - **Experimental Agent Toggle**: Added a new setting in Experiments to enable/disable Agent features, allowing users to opt-in to the agentic workflow.
+            - **Skill Management**: Introduced new UI for managing Agent Skills, including skill cards and an import dialog.
+            - **Improved Settings UI**: Dynamically organized settings sidebar that adapts based on enabled features.
 
             ## Improvements
 
-            - Reorganized flow components for better maintainability
-            - Updated README with new logo and simplified installation
-            - Enhanced code organization across multiple features
+            - **Chat Input Optimization**: Enhanced placeholder text and @mention logic to respect experimental settings.
+            - **Hub UI Enhancements**: Optimized Hub screen layout and added visibility controls for community agents.
+            - **UI Consistency**: Refined various settings screens (LLM, MCP, Prompts) for a cleaner, unified look.
 
             ---
 
