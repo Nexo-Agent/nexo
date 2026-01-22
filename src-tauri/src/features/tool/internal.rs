@@ -7,12 +7,12 @@ use tokio::process::Command;
 pub struct InternalToolService;
 
 impl InternalToolService {
-    /// Đảm bảo đường dẫn là tuyệt đối
+    /// Ensure the path is absolute
     fn ensure_absolute(path: &str) -> Result<PathBuf, AppError> {
         let path_buf = PathBuf::from(path);
         if !path_buf.is_absolute() {
             return Err(AppError::Validation(format!(
-                "Đường dẫn phải là tuyệt đối: {}",
+                "Path must be absolute: {}",
                 path
             )));
         }
@@ -22,12 +22,12 @@ impl InternalToolService {
     pub async fn read_file(arguments: Value) -> Result<Value, AppError> {
         let path_str = arguments["path"]
             .as_str()
-            .ok_or_else(|| AppError::Validation("Thiếu tham số 'path'".to_string()))?;
+            .ok_or_else(|| AppError::Validation("Missing 'path' parameter".to_string()))?;
 
         let path = Self::ensure_absolute(path_str)?;
 
         let content = fs::read_to_string(&path).await.map_err(|e| {
-            AppError::Generic(format!("Không thể đọc file {}: {}", path.display(), e))
+            AppError::Generic(format!("Cannot read file {}: {}", path.display(), e))
         })?;
 
         Ok(json!({ "content": content }))
@@ -36,22 +36,26 @@ impl InternalToolService {
     pub async fn write_file(arguments: Value) -> Result<Value, AppError> {
         let path_str = arguments["path"]
             .as_str()
-            .ok_or_else(|| AppError::Validation("Thiếu tham số 'path'".to_string()))?;
+            .ok_or_else(|| AppError::Validation("Missing 'path' parameter".to_string()))?;
         let content = arguments["content"]
             .as_str()
-            .ok_or_else(|| AppError::Validation("Thiếu tham số 'content'".to_string()))?;
+            .ok_or_else(|| AppError::Validation("Missing 'content' parameter".to_string()))?;
 
         let path = Self::ensure_absolute(path_str)?;
 
-        // Tạo thư mục cha nếu chưa có
+        // Create parent directories if they don't exist
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).await.map_err(|e| {
-                AppError::Generic(format!("Không thể tạo thư mục {}: {}", parent.display(), e))
+                AppError::Generic(format!(
+                    "Cannot create directory {}: {}",
+                    parent.display(),
+                    e
+                ))
             })?;
         }
 
         fs::write(&path, content).await.map_err(|e| {
-            AppError::Generic(format!("Không thể ghi file {}: {}", path.display(), e))
+            AppError::Generic(format!("Cannot write file {}: {}", path.display(), e))
         })?;
 
         Ok(json!({ "status": "success", "path": path_str }))
@@ -60,23 +64,19 @@ impl InternalToolService {
     pub async fn list_dir(arguments: Value) -> Result<Value, AppError> {
         let path_str = arguments["path"]
             .as_str()
-            .ok_or_else(|| AppError::Validation("Thiếu tham số 'path'".to_string()))?;
+            .ok_or_else(|| AppError::Validation("Missing 'path' parameter".to_string()))?;
 
         let path = Self::ensure_absolute(path_str)?;
 
         let mut entries = Vec::new();
         let mut read_dir = fs::read_dir(&path).await.map_err(|e| {
-            AppError::Generic(format!(
-                "Không thể liệt kê thư mục {}: {}",
-                path.display(),
-                e
-            ))
+            AppError::Generic(format!("Cannot list directory {}: {}", path.display(), e))
         })?;
 
         while let Some(entry) = read_dir
             .next_entry()
             .await
-            .map_err(|e| AppError::Generic(format!("Lỗi khi đọc entry thư mục: {}", e)))?
+            .map_err(|e| AppError::Generic(format!("Error reading directory entry: {}", e)))?
         {
             let meta = entry.metadata().await.ok();
             entries.push(json!({
@@ -92,7 +92,7 @@ impl InternalToolService {
     pub async fn run_command(arguments: Value) -> Result<Value, AppError> {
         let command = arguments["command"]
             .as_str()
-            .ok_or_else(|| AppError::Validation("Thiếu tham số 'command'".to_string()))?;
+            .ok_or_else(|| AppError::Validation("Missing 'command' parameter".to_string()))?;
         let args = arguments["args"]
             .as_array()
             .map(|a| {
@@ -114,8 +114,8 @@ impl InternalToolService {
         // Set timeout to prevent hanging
         let output = tokio::time::timeout(tokio::time::Duration::from_secs(30), cmd.output())
             .await
-            .map_err(|_| AppError::Generic("Lệnh thực thi quá thời gian (30s)".to_string()))?
-            .map_err(|e| AppError::Generic(format!("Lỗi khi chạy lệnh: {}", e)))?;
+            .map_err(|_| AppError::Generic("Command execution timed out (30s)".to_string()))?
+            .map_err(|e| AppError::Generic(format!("Error running command: {}", e)))?;
 
         Ok(json!({
             "status": if output.status.success() { "success" } else { "failed" },

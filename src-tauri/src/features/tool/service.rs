@@ -235,12 +235,12 @@ impl ToolService {
                 function: crate::models::llm_types::ChatCompletionToolFunction {
                     name: "read_file".to_string(),
                     description: Some(
-                        "Đọc nội dung của một tệp tin (Yêu cầu đường dẫn tuyệt đối)".to_string(),
+                        "Read the content of a file (Absolute path required)".to_string(),
                     ),
                     parameters: Some(serde_json::json!({
                         "type": "object",
                         "properties": {
-                            "path": { "type": "string", "description": "Đường dẫn tuyệt đối đến file" }
+                            "path": { "type": "string", "description": "Absolute path to the file" }
                         },
                         "required": ["path"]
                     })),
@@ -251,13 +251,13 @@ impl ToolService {
                 function: crate::models::llm_types::ChatCompletionToolFunction {
                     name: "write_file".to_string(),
                     description: Some(
-                        "Ghi nội dung vào một tệp tin (Yêu cầu đường dẫn tuyệt đối)".to_string(),
+                        "Write content to a file (Absolute path required)".to_string(),
                     ),
                     parameters: Some(serde_json::json!({
                         "type": "object",
                         "properties": {
-                            "path": { "type": "string", "description": "Đường dẫn tuyệt đối đến file" },
-                            "content": { "type": "string", "description": "Nội dung cần ghi" }
+                            "path": { "type": "string", "description": "Absolute path to the file" },
+                            "content": { "type": "string", "description": "Content to write" }
                         },
                         "required": ["path", "content"]
                     })),
@@ -268,13 +268,12 @@ impl ToolService {
                 function: crate::models::llm_types::ChatCompletionToolFunction {
                     name: "list_dir".to_string(),
                     description: Some(
-                        "Liệt kê nội dung của một thư mục (Yêu cầu đường dẫn tuyệt đối)"
-                            .to_string(),
+                        "List the contents of a directory (Absolute path required)".to_string(),
                     ),
                     parameters: Some(serde_json::json!({
                         "type": "object",
                         "properties": {
-                            "path": { "type": "string", "description": "Đường dẫn tuyệt đối đến thư mục" }
+                            "path": { "type": "string", "description": "Absolute path to the directory" }
                         },
                         "required": ["path"]
                     })),
@@ -285,15 +284,14 @@ impl ToolService {
                 function: crate::models::llm_types::ChatCompletionToolFunction {
                     name: "run_command".to_string(),
                     description: Some(
-                        "Chạy một lệnh shell (Yêu cầu đường dẫn tuyệt đối cho cwd nếu có)"
-                            .to_string(),
+                        "Run a shell command (Absolute path for cwd if provided)".to_string(),
                     ),
                     parameters: Some(serde_json::json!({
                         "type": "object",
                         "properties": {
-                            "command": { "type": "string", "description": "Lệnh cần chạy" },
-                            "args": { "type": "array", "items": { "type": "string" }, "description": "Các đối số của lệnh" },
-                            "cwd": { "type": "string", "description": "Thư mục làm việc (đường dẫn tuyệt đối)" }
+                            "command": { "type": "string", "description": "Command to run" },
+                            "args": { "type": "array", "items": { "type": "string" }, "description": "Arguments for the command" },
+                            "cwd": { "type": "string", "description": "Working directory (absolute path)" }
                         },
                         "required": ["command"]
                     })),

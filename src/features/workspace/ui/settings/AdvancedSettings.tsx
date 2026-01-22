@@ -38,13 +38,13 @@ export function AdvancedSettings({
               </TooltipTrigger>
               <TooltipContent>
                 {
-                  'Cho phép LLM sử dụng các công cụ hệ thống (read_file, write_file, list_dir, run_command).'
+                  'Allow LLM to use system tools (read_file, write_file, list_dir, run_command).'
                 }
               </TooltipContent>
             </Tooltip>
           </div>
           <p className="text-[11px] text-muted-foreground/80">
-            {'Lưu ý: Mọi công cụ đều yêu cầu đường dẫn tuyệt đối.'}
+            {'Note: All tools require absolute paths.'}
           </p>
         </div>
         <Switch
