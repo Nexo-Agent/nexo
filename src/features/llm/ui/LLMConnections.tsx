@@ -128,10 +128,7 @@ export function LLMConnections() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {t('manageLLMConnections')}
-        </p>
+      <div className="flex items-center justify-end">
         <Button onClick={handleAdd} size="sm" data-tour="llm-add-btn">
           <Plus className="mr-2 size-4" />
           {t('addConnection')}

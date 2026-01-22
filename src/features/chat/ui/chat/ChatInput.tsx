@@ -139,7 +139,7 @@ export function ChatInput({
   } = useChatInput(selectedWorkspaceId);
 
   // Get app settings for experimental features
-  const { enableWorkflowEditor } = useAppSettings();
+  const { enableWorkflowEditor, enableAgents } = useAppSettings();
 
   // Calculate active tools from workspace settings - fetching from backend for unified source of truth
   const { data: activeTools = [] } = useGetActiveToolsForWorkspaceQuery(
@@ -227,6 +227,7 @@ export function ChatInput({
   const agentMention = useAgentMention({
     input,
     onSelectAgent: handleSelectAgent,
+    enabled: enableAgents,
   });
 
   const handleVariableDialogSubmit = () => {
@@ -559,7 +560,13 @@ export function ChatInput({
                 onChange={(e) => handleInputChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onPaste={handleDisplayPaste}
-                placeholder={t('enterMessage')}
+                placeholder={
+                  enableAgents
+                    ? t('enterMessage')
+                    : t('enterMessageNoAgents', {
+                        defaultValue: 'Ask anything... (/ for templates)',
+                      })
+                }
                 disabled={disabled}
                 className={cn(
                   'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
@@ -579,7 +586,8 @@ export function ChatInput({
                   />
                 )}
               {/* Agent Mention Dropdown */}
-              {agentMention.isActive &&
+              {enableAgents &&
+                agentMention.isActive &&
                 agentMention.filteredAgents.length > 0 && (
                   <AgentMentionDropdown
                     agents={agentMention.filteredAgents}

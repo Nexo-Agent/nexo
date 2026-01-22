@@ -11,6 +11,7 @@ import { InstallPromptDialog } from './InstallPromptDialog';
 import type { HubMCPServer } from '@/features/mcp/types';
 import type { HubPrompt } from './prompt-types';
 import { Bot, Server, FileText } from 'lucide-react';
+import { useAppSettings } from '@/hooks/useAppSettings';
 import {
   useGetHubAgentsQuery,
   useGetHubPromptsQuery,
@@ -19,7 +20,8 @@ import {
 
 export function HubScreen() {
   const { t } = useTranslation('settings');
-  const [activeTab, setActiveTab] = useState('agent');
+  const { enableAgents } = useAppSettings();
+  const [activeTab, setActiveTab] = useState(enableAgents ? 'agent' : 'mcp');
 
   // Agents
   const { refetch: refetchAgents } = useGetInstalledAgentsQuery();
@@ -57,31 +59,21 @@ export function HubScreen() {
 
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t('hub.title', { defaultValue: 'Hub' })}
-        </h1>
-        <p className="text-muted-foreground">
-          {t('hub.description', {
-            defaultValue:
-              'Discover and install community agents, MCP servers, and prompts.',
-          })}
-        </p>
-      </div>
-
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
         className="flex-1 flex flex-col min-h-0"
       >
         <TabsList className="w-full justify-start border-b rounded-none px-0 h-auto bg-transparent space-x-6">
-          <TabsTrigger
-            value="agent"
-            className="rounded-none data-[state=active]:bg-transparent px-2 pb-2 h-auto focus-visible:ring-0 focus-visible:outline-none"
-          >
-            <Bot className="mr-2 h-4 w-4" />
-            {t('hub.tabs.agents', { defaultValue: 'Agents' })}
-          </TabsTrigger>
+          {enableAgents && (
+            <TabsTrigger
+              value="agent"
+              className="rounded-none data-[state=active]:bg-transparent px-2 pb-2 h-auto focus-visible:ring-0 focus-visible:outline-none"
+            >
+              <Bot className="mr-2 h-4 w-4" />
+              {t('hub.tabs.agents', { defaultValue: 'Agents' })}
+            </TabsTrigger>
+          )}
           <TabsTrigger
             value="mcp"
             className="rounded-none data-[state=active]:bg-transparent px-2 pb-2 h-auto focus-visible:ring-0 focus-visible:outline-none"
@@ -98,19 +90,21 @@ export function HubScreen() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent
-          value="agent"
-          className="mt-6 space-y-4 flex-1 flex flex-col min-h-0"
-        >
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-            <CommunityAgentsSection
-              onInstalled={() => {
-                refetchAgents();
-                refetchHubAgents();
-              }}
-            />
-          </div>
-        </TabsContent>
+        {enableAgents && (
+          <TabsContent
+            value="agent"
+            className="mt-6 space-y-4 flex-1 flex flex-col min-h-0"
+          >
+            <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+              <CommunityAgentsSection
+                onInstalled={() => {
+                  refetchAgents();
+                  refetchHubAgents();
+                }}
+              />
+            </div>
+          </TabsContent>
+        )}
 
         <TabsContent
           value="mcp"

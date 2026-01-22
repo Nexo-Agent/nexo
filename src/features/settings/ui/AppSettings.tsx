@@ -42,11 +42,13 @@ export function AppSettings() {
     showUsage,
     enableWorkflowEditor,
     enableRawText,
+    enableAgents,
     updateLanguage,
     updateTheme,
     updateShowUsage,
     updateEnableWorkflowEditor,
     updateEnableRawText,
+    updateEnableAgents,
   } = useAppSettings();
 
   const handleLanguageChange = (lang: 'vi' | 'en') => {
@@ -186,6 +188,21 @@ export function AppSettings() {
               id="enable-raw-text-switch"
               checked={enableRawText}
               onCheckedChange={updateEnableRawText}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-4 p-3 border rounded-lg bg-card/50">
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium leading-none">
+                {t('enableAgents')}
+              </h4>
+              <p className="text-xs text-muted-foreground">
+                {t('enableAgentsDescription')}
+              </p>
+            </div>
+            <Switch
+              id="enable-agents-switch"
+              checked={enableAgents}
+              onCheckedChange={updateEnableAgents}
             />
           </div>
         </CollapsibleContent>

@@ -144,7 +144,6 @@ describe('MCPServerConnections', () => {
 
   it('renders correctly with connections', () => {
     render(<MCPServerConnections />);
-    expect(screen.getByText('manageMCPServerConnections')).toBeInTheDocument();
     expect(screen.getByText('Test MCP')).toBeInTheDocument();
     expect(screen.getByText('test_tool')).toBeInTheDocument();
   });

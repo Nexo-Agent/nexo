@@ -13,66 +13,75 @@ import {
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
-import { setSettingsSection } from '@/features/ui/state/uiSlice';
+import {
+  setSettingsSection,
+  type SettingsSection,
+} from '@/features/ui/state/uiSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { useAppSettings } from '@/hooks/useAppSettings';
 
 export function SettingsSidebar() {
   const { t } = useTranslation(['settings', 'common']);
   const dispatch = useAppDispatch();
   const selectedSection = useAppSelector((state) => state.ui.settingsSection);
+  const { enableAgents } = useAppSettings();
 
   const sections = [
     {
-      id: 'general',
+      id: 'general' as const,
       label: t('generalSetting'),
       icon: <SettingsIcon className="size-4" />,
     },
     {
-      id: 'llm',
+      id: 'llm' as const,
       label: t('llmConnections'),
       icon: <Network className="size-4" />,
     },
     {
-      id: 'mcp',
+      id: 'mcp' as const,
       label: t('mcpServerConnections'),
       icon: <Server className="size-4" />,
     },
     {
-      id: 'prompts',
+      id: 'prompts' as const,
       label: t('promptManagement'),
       icon: <FileText className="size-4" />,
     },
+    ...(enableAgents
+      ? [
+          {
+            id: 'agent' as const,
+            label: t('agents'),
+            icon: <Bot className="size-4" />,
+          },
+        ]
+      : []),
     {
-      id: 'agent',
-      label: t('agents'),
-      icon: <Bot className="size-4" />,
-    },
-    {
-      id: 'skills',
+      id: 'skills' as const,
       label: t('skills'),
       icon: <Wand2 className="size-4" />,
     },
     {
-      id: 'addon',
+      id: 'addon' as const,
       label: t('addons'),
       icon: <Package className="size-4" />,
     },
     {
-      id: 'hub',
+      id: 'hub' as const,
       label: 'Hub',
       icon: <Globe className="size-4" />,
     },
     {
-      id: 'usage',
+      id: 'usage' as const,
       label: 'Usage',
       icon: <BarChart className="size-4" />,
     },
     {
-      id: 'about',
+      id: 'about' as const,
       label: t('about'),
       icon: <Info className="size-4" />,
     },
-  ] as const;
+  ];
 
   return (
     <div className="w-64 lg:w-72 xl:w-80 border-r border-sidebar-border bg-sidebar flex flex-col shrink-0">
@@ -81,7 +90,9 @@ export function SettingsSidebar() {
           {sections.map((section) => (
             <button
               key={section.id}
-              onClick={() => dispatch(setSettingsSection(section.id))}
+              onClick={() =>
+                dispatch(setSettingsSection(section.id as SettingsSection))
+              }
               data-tour={section.id === 'llm' ? 'settings-llm-tab' : undefined}
               className={cn(
                 'relative mb-1 w-full flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all group',

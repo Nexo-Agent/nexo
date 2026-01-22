@@ -7,6 +7,7 @@ import {
 interface UseAgentMentionOptions {
   input: string;
   onSelectAgent?: (agent: InstalledAgent) => void;
+  enabled?: boolean;
 }
 
 interface UseAgentMentionReturn {
@@ -22,6 +23,7 @@ interface UseAgentMentionReturn {
 export function useAgentMention({
   input,
   onSelectAgent,
+  enabled = true,
 }: UseAgentMentionOptions): UseAgentMentionReturn {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [forceClosed, setForceClosed] = useState(false);
@@ -48,7 +50,7 @@ export function useAgentMention({
 
   // Detect mention command and extract query
   const { isActive, query } = useMemo(() => {
-    if (forceClosed) {
+    if (!enabled || forceClosed) {
       return { isActive: false, query: '' };
     }
 
@@ -68,7 +70,7 @@ export function useAgentMention({
       spaceIndex === -1 ? afterTrigger : afterTrigger.substring(0, spaceIndex);
 
     return { isActive: true, query };
-  }, [input, forceClosed]);
+  }, [input, forceClosed, enabled]);
 
   // Load agents using RTK Query, skip if not active to save resources
   const { data: agents = [] } = useGetInstalledAgentsQuery(undefined, {

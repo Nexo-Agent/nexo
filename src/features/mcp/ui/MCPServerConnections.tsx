@@ -268,10 +268,7 @@ export function MCPServerConnections() {
 
   return (
     <div className="space-y-6 h-full flex flex-col">
-      <div className="flex items-center justify-between shrink-0">
-        <p className="text-sm text-muted-foreground">
-          {t('manageMCPServerConnections')}
-        </p>
+      <div className="flex items-center justify-end shrink-0">
         <Button onClick={handleAdd} size="sm">
           <Plus className="mr-2 size-4" />
           {t('addConnection')}

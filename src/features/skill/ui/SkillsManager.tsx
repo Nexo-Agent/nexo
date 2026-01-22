@@ -25,35 +25,27 @@ export function SkillsManager() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Agent Skills</h1>
-          <p className="text-muted-foreground">
-            Manage skills that can be used by your AI agents to perform
-            specialized tasks.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleOpenFolder}>
-            <FolderOpenIcon className="mr-2 h-4 w-4" />
-            Open Folder
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => syncSkills()}
-            disabled={isSyncing}
-          >
-            <RefreshCwIcon
-              className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
-            />
-            Sync
-          </Button>
-          <Button onClick={() => setIsImportOpen(true)}>
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Import Skill
-          </Button>
-        </div>
+    <div className="space-y-6">
+      <div className="flex gap-2 justify-end">
+        <Button variant="outline" onClick={handleOpenFolder} size="sm">
+          <FolderOpenIcon className="mr-2 h-4 w-4" />
+          Open Folder
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => syncSkills()}
+          disabled={isSyncing}
+        >
+          <RefreshCwIcon
+            className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
+          />
+          Sync
+        </Button>
+        <Button onClick={() => setIsImportOpen(true)} size="sm">
+          <PlusIcon className="mr-2 h-4 w-4" />
+          Import Skill
+        </Button>
       </div>
 
       <SkillsList />

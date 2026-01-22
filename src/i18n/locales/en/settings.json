@@ -272,6 +272,8 @@
   "enableWorkflowEditorDescription": "If enabled, the workflow button will be shown in the chat input to create and attach workflows.",
   "enableRawText": "Enable Raw Text Option",
   "enableRawTextDescription": "If enabled, a button to toggle between Markdown and Raw Text will be displayed in each AI message.",
+  "enableAgents": "Enable Agents",
+  "enableAgentsDescription": "If enabled, the Agents features will be available.",
   "deleteConnectionConfirm": "Are you sure you want to delete this connection?",
   "internalTools": "Internal Tools (Experimental)",
   "internalToolsDescription": "Allow LLM to use system tools (read_file, write_file, list_dir, run_command).",

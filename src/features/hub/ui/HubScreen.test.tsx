@@ -128,6 +128,12 @@ vi.mock('lucide-react', () => ({
   FileText: () => <div />,
 }));
 
+vi.mock('@/hooks/useAppSettings', () => ({
+  useAppSettings: () => ({
+    enableAgents: true,
+  }),
+}));
+
 describe('HubScreen', () => {
   it('renders correctly with default tab', () => {
     render(<HubScreen />);

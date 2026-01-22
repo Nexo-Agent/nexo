@@ -39,6 +39,7 @@ describe('uiSlice', () => {
       showUsage: false,
       enableWorkflowEditor: false,
       enableRawText: false,
+      enableAgents: false,
     },
     setupCompleted: false,
   };
@@ -97,6 +98,7 @@ describe('uiSlice', () => {
         if (args.key === 'showUsage') return Promise.resolve('true');
         if (args.key === 'enableWorkflowEditor') return Promise.resolve('true');
         if (args.key === 'enableRawText') return Promise.resolve('true');
+        if (args.key === 'enableAgents') return Promise.resolve('true');
         if (args.key === 'setupCompleted') return Promise.resolve('true');
         return Promise.resolve(null);
       });

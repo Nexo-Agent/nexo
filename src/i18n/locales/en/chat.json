@@ -10,6 +10,7 @@
   "enableStreamMode": "Enable stream mode to receive responses incrementally",
   "enableTools": "Enable tools feature for model",
   "enterMessage": "Ask anything... (@ for agents, / for templates)",
+  "enterMessageNoAgents": "Ask anything... (/ for templates)",
   "enterMessageCentered": "How can I help you today?",
   "enterVariableValues": "Enter values for the following variables:",
   "exportChat": "Export Chat",

@@ -120,8 +120,7 @@ export function PromptManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{t('managePrompts')}</p>
+      <div className="flex items-center justify-end">
         <Button onClick={handleAdd} size="sm">
           <Plus className="mr-2 size-4" />
           {t('addPrompt')}

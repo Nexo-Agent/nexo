@@ -132,7 +132,6 @@ describe('LLMConnections', () => {
 
   it('renders correctly with connections', () => {
     render(<LLMConnections />);
-    expect(screen.getByText('manageLLMConnections')).toBeInTheDocument();
     expect(screen.getByText('Test Connection')).toBeInTheDocument();
     expect(screen.getByText('openai')).toBeInTheDocument();
   });

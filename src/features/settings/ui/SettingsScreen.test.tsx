@@ -12,9 +12,7 @@ const mockSelector = vi.fn();
 
 vi.mock('@/app/hooks', () => ({
   useAppDispatch: () => mockDispatch,
-  useAppSelector: (
-    fn: (state: { ui: { settingsSection: string } }) => string
-  ) => mockSelector(fn),
+  useAppSelector: (fn: (state: any) => any) => mockSelector(fn),
 }));
 
 vi.mock('lucide-react', () => ({
@@ -88,13 +86,24 @@ vi.mock('@/ui/atoms/scroll-area', () => ({
 describe('SettingsScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSelector.mockImplementation(
-      (selectorFn: (state: { ui: { settingsSection: string } }) => string) => {
-        // Mock the state object for the selector
-        const state = { ui: { settingsSection: 'general' } };
-        return selectorFn(state);
-      }
-    );
+    mockSelector.mockImplementation((selectorFn: (state: any) => any) => {
+      // Mock the state object for the selector
+      const state = {
+        ui: {
+          settingsSection: 'general',
+          language: 'en',
+          theme: 'light',
+          loading: false,
+          experiments: {
+            showUsage: true,
+            enableWorkflowEditor: false,
+            enableRawText: false,
+            enableAgents: false,
+          },
+        },
+      };
+      return selectorFn(state);
+    });
   });
 
   it('renders sidebar with sections', () => {
@@ -108,7 +117,20 @@ describe('SettingsScreen', () => {
 
   it('renders the correct content based on selected section', async () => {
     mockSelector.mockImplementation((selectorFn) => {
-      const state = { ui: { settingsSection: 'llm' } };
+      const state = {
+        ui: {
+          settingsSection: 'llm',
+          language: 'en',
+          theme: 'light',
+          loading: false,
+          experiments: {
+            showUsage: true,
+            enableWorkflowEditor: false,
+            enableRawText: false,
+            enableAgents: false,
+          },
+        },
+      };
       return selectorFn(state);
     });
 
