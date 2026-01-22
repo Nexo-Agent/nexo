@@ -30,21 +30,19 @@ export function AdvancedSettings({
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1.5">
             <Label htmlFor="internal-tools-enabled" className="text-sm">
-              {'Internal Tools (Experimental)'}
+              {t('internalTools', { ns: 'settings' })}
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Info className="size-3.5 text-muted-foreground/70 cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
-                {
-                  'Allow LLM to use system tools (read_file, write_file, list_dir, run_command).'
-                }
+                {t('internalToolsDescription', { ns: 'settings' })}
               </TooltipContent>
             </Tooltip>
           </div>
           <p className="text-[11px] text-muted-foreground/80">
-            {'Note: All tools require absolute paths.'}
+            {t('internalToolsNote', { ns: 'settings' })}
           </p>
         </div>
         <Switch

@@ -271,5 +271,8 @@
   "enableWorkflowEditorDescription": "Nếu được bật, nút workflow sẽ hiển thị trong khung nhập tin nhắn để tạo và đính kèm workflow.",
   "enableRawText": "Bật tùy chọn Raw Text",
   "enableRawTextDescription": "Nếu được bật, tùy chọn chuyển đổi giữa Markdown và Raw Text sẽ hiển thị trong mỗi tin nhắn của AI.",
-  "deleteConnectionConfirm": "Bạn có chắc chắn muốn xóa kết nối này không?"
+  "deleteConnectionConfirm": "Bạn có chắc chắn muốn xóa kết nối này không?",
+  "internalTools": "Công cụ hệ thống (Thử nghiệm)",
+  "internalToolsDescription": "Cho phép LLM sử dụng các công cụ hệ thống (read_file, write_file, list_dir, run_command).",
+  "internalToolsNote": "Lưu ý: Mọi công cụ đều yêu cầu đường dẫn tuyệt đối."
 }
