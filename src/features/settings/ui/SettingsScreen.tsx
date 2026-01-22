@@ -50,6 +50,11 @@ const UpdateSection = lazy(() =>
     default: module.UpdateSection,
   }))
 );
+const SkillsManager = lazy(() =>
+  import('@/features/skill/ui/SkillsManager').then((module) => ({
+    default: module.SkillsManager,
+  }))
+);
 
 // Local Components (Fix Circular Dependencies by strict local import)
 import { AppSettings } from './AppSettings';
@@ -101,6 +106,8 @@ export function SettingsScreen() {
         return <AddonSettings />;
       case 'usage':
         return <UsagePage />;
+      case 'skills':
+        return <SkillsManager />;
       case 'about':
         return <AboutContent />;
       default:
@@ -114,6 +121,7 @@ export function SettingsScreen() {
     { id: 'mcp', label: t('mcpServerConnections') },
     { id: 'prompts', label: t('promptManagement') },
     { id: 'agent', label: t('agents') },
+    { id: 'skills', label: t('skills') },
     { id: 'addon', label: t('addons') },
     { id: 'hub', label: 'Hub' },
     { id: 'usage', label: 'Usage' },

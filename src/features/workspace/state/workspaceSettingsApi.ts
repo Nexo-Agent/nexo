@@ -13,6 +13,7 @@ interface DbWorkspaceSettings {
   tool_permission_config: string | null;
   max_agent_iterations: number | null;
   internal_tools_enabled: number | null;
+  selected_skill_ids: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -88,6 +89,9 @@ export const workspaceSettingsApi = baseApi.injectEndpoints({
             dbSettings.internal_tools_enabled !== null
               ? dbSettings.internal_tools_enabled === 1
               : undefined,
+          selectedSkillIds: dbSettings.selected_skill_ids
+            ? JSON.parse(dbSettings.selected_skill_ids)
+            : undefined,
         };
 
         return { data: settings };
@@ -130,6 +134,9 @@ export const workspaceSettingsApi = baseApi.injectEndpoints({
               settings.internalToolsEnabled !== undefined
                 ? settings.internalToolsEnabled
                 : null,
+            selectedSkillIds: settings.selectedSkillIds
+              ? JSON.stringify(settings.selectedSkillIds)
+              : null,
           },
         });
 

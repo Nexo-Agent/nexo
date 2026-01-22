@@ -17,6 +17,7 @@ import { BasicSettings } from './settings/BasicSettings';
 import { ModelSettings } from './settings/ModelSettings';
 import { MCPSettings } from './settings/MCPSettings';
 import { AdvancedSettings } from './settings/AdvancedSettings';
+import { SkillSettings } from './settings/SkillSettings';
 import { DangerZone } from './settings/DangerZone';
 
 interface WorkspaceSettingsFormProps {
@@ -70,6 +71,9 @@ export function WorkspaceSettingsForm({
   const [internalToolsEnabled, setInternalToolsEnabled] = useState<boolean>(
     initialSettings?.internalToolsEnabled ?? false
   );
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>(
+    initialSettings?.selectedSkillIds || []
+  );
 
   const [toolPermissionConfig, setToolPermissionConfig] = useState<
     Record<string, 'require' | 'auto'>
@@ -98,6 +102,7 @@ export function WorkspaceSettingsForm({
             : undefined,
         maxAgentIterations,
         internalToolsEnabled,
+        selectedSkillIds,
       };
       await onSave(newSettings);
       onOpenChange(false);
@@ -170,6 +175,13 @@ export function WorkspaceSettingsForm({
                 onMaxAgentIterationsChange={setMaxAgentIterations}
                 internalToolsEnabled={internalToolsEnabled}
                 onInternalToolsEnabledChange={setInternalToolsEnabled}
+              />
+
+              <Separator />
+
+              <SkillSettings
+                selectedSkillIds={selectedSkillIds}
+                onChange={setSelectedSkillIds}
               />
 
               <Separator />

@@ -263,6 +263,7 @@
   "aboutDescription": "A comprehensive platform for managing MCP servers, LLM connections, and workspace prompts.",
   "generalSetting": "General Settings",
   "agents": "Agents",
+  "skills": "Agent Skills",
   "addons": "Add-ons",
   "experiments": "Experiments",
   "showUsage": "Show token usage",

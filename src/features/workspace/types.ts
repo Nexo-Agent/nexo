@@ -14,4 +14,5 @@ export interface WorkspaceSettings {
   toolPermissionConfig?: Record<string, 'require' | 'auto'>; // Per-tool permission configuration
   maxAgentIterations?: number;
   internalToolsEnabled?: boolean;
+  selectedSkillIds?: string[];
 }

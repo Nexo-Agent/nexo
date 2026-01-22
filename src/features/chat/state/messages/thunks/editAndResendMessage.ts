@@ -68,8 +68,10 @@ export function createEditAndResendMessageThunk(actions: {
 
       if (messageIndex !== -1) {
         // 2. Remove the message being edited and all messages after it in Redux
-        // (Rust will delete them in database and create a new message)
-        // Remove messages after first
+        // (Rust backend will delete them in database and create a new message)
+
+        // First, remove all messages AFTER the message being edited
+        // (removeMessagesAfter keeps the specified message and removes everything after it)
         dispatch(
           actions.removeMessagesAfter({
             chatId,
@@ -77,7 +79,7 @@ export function createEditAndResendMessageThunk(actions: {
           })
         );
 
-        // Then remove the message itself
+        // Then remove the message being edited itself
         dispatch(
           actions.removeMessage({
             chatId,

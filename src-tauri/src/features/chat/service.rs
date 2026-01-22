@@ -922,41 +922,36 @@ impl ChatService {
         // Process new files
         let processed_new_files = self.process_incoming_files(&app, new_files)?;
 
-        // 1. Get the message to find its timestamp before deleting
-        let message_timestamp =
-            if let Some(message) = self.message_service.get_by_id(&message_id)? {
-                message.timestamp
-            } else {
-                // Message not found, just delete messages after it and proceed
-                self.message_service
-                    .delete_messages_after(chat_id.clone(), message_id.clone())?;
-                // Send message with new content (this will create a new user message and trigger agent loop with tool calls)
-                return self
-                    .send_message(
-                        chat_id,
-                        new_content,
-                        processed_new_files,
-                        metadata,
-                        selected_model,
-                        reasoning_effort,
-                        llm_connection_id,
-                        app,
-                    )
-                    .await;
-            };
-
-        // 2. Delete the message being edited (we'll create a new one)
-        self.message_service.delete(message_id.clone())?;
-
-        // 3. Delete all messages after this timestamp (these were after the deleted message)
-        let all_messages = self.message_service.get_by_chat_id(&chat_id)?;
-        for msg in all_messages {
-            if msg.timestamp > message_timestamp {
-                self.message_service.delete(msg.id)?;
-            }
+        // 1. Verify message exists
+        if self.message_service.get_by_id(&message_id)?.is_none() {
+            // Message not found, just delete messages after it and proceed
+            self.message_service
+                .delete_messages_after(chat_id.clone(), message_id.clone())?;
+            // Send message with new content (this will create a new user message and trigger agent loop with tool calls)
+            return self
+                .send_message(
+                    chat_id,
+                    new_content,
+                    processed_new_files,
+                    metadata,
+                    selected_model,
+                    reasoning_effort,
+                    llm_connection_id,
+                    app,
+                )
+                .await;
         }
 
-        // 4. Send message with new content (this will create a new user message and trigger agent loop with tool calls)
+        // 2. Delete the message being edited and all messages after it
+        // This uses delete_messages_after which:
+        // - Finds the position of message_id in the chat
+        // - Deletes all messages after that position
+        // Then we delete the message itself
+        self.message_service
+            .delete_messages_after(chat_id.clone(), message_id.clone())?;
+        self.message_service.delete(message_id.clone())?;
+
+        // 3. Send message with new content (this will create a new user message and trigger agent loop with tool calls)
         self.send_message(
             chat_id,
             new_content,

@@ -31,6 +31,7 @@ vi.mock('lucide-react', () => ({
   Globe: () => <div data-testid="globe-icon" />,
   Github: () => <div data-testid="github-icon" />,
   BookOpen: () => <div data-testid="book-icon" />,
+  Wand2: () => <div data-testid="wand-icon" />,
 }));
 
 vi.mock('@/features/ui/state/uiSlice', () => ({

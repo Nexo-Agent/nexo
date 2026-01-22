@@ -96,6 +96,15 @@ vi.mock('@/ui/molecules/VariableInputDialog', () => ({
   VariableInputDialog: () => <div data-testid="variable-input-dialog" />,
 }));
 
+vi.mock('@/features/skill/ui/SkillSelector', () => ({
+  SkillSelector: ({ selectedSkillIds, onChange }: any) => (
+    <div data-testid="skill-selector">
+      <div>Selected: {selectedSkillIds?.join(', ') || 'none'}</div>
+      <button onClick={() => onChange(['skill1'])}>Select Skill</button>
+    </div>
+  ),
+}));
+
 describe('WorkspaceSettingsForm', () => {
   const mockWorkspace = { id: '1', name: 'Original Name' };
   const mockInitialSettings = {

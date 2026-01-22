@@ -19,6 +19,7 @@ export interface UIState {
     | 'addon'
     | 'usage'
     | 'agent'
+    | 'skills'
     | 'experiments'
     | 'about';
   language: 'vi' | 'en';
@@ -236,6 +237,7 @@ const uiSlice = createSlice({
         | 'mcp'
         | 'prompts'
         | 'agent'
+        | 'skills'
         | 'experiments'
         | 'addon'
         | 'usage'

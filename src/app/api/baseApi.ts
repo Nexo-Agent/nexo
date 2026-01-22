@@ -59,6 +59,7 @@ export const baseApi = createApi({
     'HubMCPServer',
     'HubPrompt',
     'WorkspaceActiveTool',
+    'Skill',
   ],
   endpoints: () => ({}),
 });

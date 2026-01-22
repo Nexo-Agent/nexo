@@ -106,6 +106,13 @@ export const TauriCommands = {
   GET_AGENT_INFO: 'get_agent_info',
   UPDATE_AGENT: 'update_agent',
   GET_OR_CREATE_SPECIALIST_SESSION: 'get_or_create_specialist_session',
+
+  // Skill commands
+  GET_ALL_SKILLS: 'get_all_skills',
+  SYNC_SKILLS: 'sync_skills',
+  LOAD_SKILL: 'load_skill',
+  IMPORT_SKILL: 'import_skill',
+  DELETE_SKILL: 'delete_skill',
 } as const;
 
 export type TauriCommand = (typeof TauriCommands)[keyof typeof TauriCommands];

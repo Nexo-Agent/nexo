@@ -8,6 +8,7 @@ import {
   BarChart,
   Bot,
   Globe,
+  Wand2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -45,6 +46,11 @@ export function SettingsSidebar() {
       id: 'agent',
       label: t('agents'),
       icon: <Bot className="size-4" />,
+    },
+    {
+      id: 'skills',
+      label: t('skills'),
+      icon: <Wand2 className="size-4" />,
     },
     {
       id: 'addon',

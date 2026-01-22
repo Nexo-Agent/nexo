@@ -247,6 +247,7 @@
   "title": "Cài đặt",
   "generalSetting": "Cài đặt chung",
   "agents": "Agents",
+  "skills": "Agent Skills",
   "addons": "Add-ons",
   "tools": "tools",
   "toolsList": "Danh sách Tools ({{count}})",

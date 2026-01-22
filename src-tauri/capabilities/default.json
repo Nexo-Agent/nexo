@@ -26,6 +26,9 @@
         },
         {
           "path": "$APPDATA/files/**"
+        },
+        {
+          "path": "$APPDATA/skills"
         }
       ]
     },
