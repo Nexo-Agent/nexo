@@ -31,7 +31,9 @@ export const bundledLanguages: Record<
   LanguageRegistration | LanguageRegistration[]
 > = {
   javascript,
+  js: javascript, // alias
   typescript,
+  ts: typescript, // alias
   jsx,
   tsx,
   html,

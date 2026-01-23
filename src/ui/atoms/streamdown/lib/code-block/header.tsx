@@ -1,5 +1,5 @@
-// @ts-nocheck
 import type { ReactNode } from 'react';
+import { CodeBlockCopyButton } from './copy-button';
 
 type CodeBlockHeaderProps = {
   language: string;
@@ -16,6 +16,9 @@ export const CodeBlockHeader = ({
     data-streamdown="code-block-header"
   >
     <span className="ml-1 font-mono lowercase">{language}</span>
-    <div className="flex items-center gap-2">{children}</div>
+    <div className="flex items-center gap-2">
+      <CodeBlockCopyButton />
+      {children}
+    </div>
   </div>
 );
