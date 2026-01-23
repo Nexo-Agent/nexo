@@ -1823,7 +1823,14 @@ impl ChatService {
         let system_message =
             system_prompt_override.or_else(|| workspace_settings.system_message.clone());
 
-        let mut final_system_message = system_message.unwrap_or_default();
+        let mut final_system_message = crate::features::chat::prompts::get_app_prompt();
+
+        if let Some(msg) = system_message {
+            if !msg.trim().is_empty() {
+                final_system_message.push_str("\n\n");
+                final_system_message.push_str(&msg);
+            }
+        }
 
         // Inject skills metadata if workspace has selected skills
         if let Some(skill_ids_json) = &workspace_settings.selected_skill_ids {
