@@ -81,20 +81,11 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.13
+            # Nexo v0.1.0-beta.14
 
-            ## Features
+            ## Bug Fixes
 
-            - **Internal Tools Integration**: Added support for local file operations (`read_file`, `write_file`, `list_dir`) and shell commands (`run_command`) configurable per workspace.
-            - **Enhanced Node.js Runtime**: Automated setup for Node.js environments, including `agent-browser` and Chromium for agent-led browsing tasks.
-            - **New Package Management**: Introduced capability to install Node.js packages directly through the assistant.
-
-            ## Improvements
-
-            - **Skill Management Enhancement**: Added "Open Skills Folder" button for easier custom skill development.
-            - **Dialog & Navigation Improvements**: Refined "Escape" key behavior to only close modals before navigating away, and improved Mermaid diagram fullscreen experience.
-            - **UI & UX Polish**: Fixed visibility issues with message controls and corrected chronological message ordering.
-            - **Infrastructure**: Renamed agent configuration to `agent_servers` for better clarity in system management.
+            - **Menu Construction**: Fixed a compilation error in the application menu occurring on non-macOS platforms.
 
             ---
 
