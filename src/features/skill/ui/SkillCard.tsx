@@ -6,7 +6,6 @@ import {
   CardTitle,
 } from '@/ui/atoms/card';
 import { Badge } from '@/ui/atoms/badge';
-import { Button } from '@/ui/atoms/button/button';
 import type { SkillRecord } from '../types';
 
 interface SkillCardProps {
@@ -22,16 +21,18 @@ export function SkillCard({
   isSelected,
   onSelect,
   onViewDetails,
-  onDelete,
 }: SkillCardProps) {
   const metadata = skill.metadataJson ? JSON.parse(skill.metadataJson) : {};
 
   return (
-    <Card className={isSelected ? 'border-primary' : ''}>
+    <Card
+      className={isSelected ? 'border-primary' : 'cursor-pointer'}
+      onClick={() => onViewDetails?.(skill.id)}
+    >
       <CardHeader>
-        <div className="flex items-start justify-between">
+        <div className="flex">
           <div className="flex-1">
-            <CardTitle className="text-lg">{skill.name}</CardTitle>
+            <CardTitle className="text-lg p-0 m-0">{skill.name}</CardTitle>
             <CardDescription className="mt-2">
               {skill.description}
             </CardDescription>
@@ -53,24 +54,6 @@ export function SkillCard({
           )}
           {metadata.version && (
             <Badge variant="outline">v{metadata.version}</Badge>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onViewDetails?.(skill.id)}
-          >
-            View Details
-          </Button>
-          {onDelete && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onDelete(skill.id)}
-            >
-              Delete
-            </Button>
           )}
         </div>
       </CardContent>

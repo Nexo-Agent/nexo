@@ -30,7 +30,7 @@ export function SkillDetails({ skillId, isOpen, onClose }: SkillDetailsProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col">
-        <DialogHeader className="shrink-0">
+        <DialogHeader className="shrink-0 w-full">
           <DialogTitle>
             {isLoading ? (
               <Skeleton className="h-6 w-48" />
@@ -78,7 +78,7 @@ export function SkillDetails({ skillId, isOpen, onClose }: SkillDetailsProps) {
               <Skeleton className="h-4 w-[85%]" />
             </div>
           ) : skill ? (
-            <div className="space-y-4">
+            <ScrollArea>
               <p className="text-muted-foreground">
                 {skill.metadata.description}
               </p>
@@ -87,7 +87,7 @@ export function SkillDetails({ skillId, isOpen, onClose }: SkillDetailsProps) {
                   <MarkdownContent content={skill.instructions} />
                 </ScrollArea>
               </div>
-            </div>
+            </ScrollArea>
           ) : (
             <div className="text-center text-muted-foreground py-8">
               Failed to load skill details.
