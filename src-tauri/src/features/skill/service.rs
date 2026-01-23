@@ -144,6 +144,34 @@ impl SkillService {
         Ok(xml)
     }
 
+    /// Generate Markdown for system prompt with selected skills
+    pub fn generate_skills_markdown(&self, skill_ids: &[String]) -> Result<String, AppError> {
+        if skill_ids.is_empty() {
+            return Ok(String::new());
+        }
+
+        let conn = crate::db::connection::get_connection(&self.app)?;
+        let mut markdown = String::from("## Available Skills\n\n");
+
+        for skill_id in skill_ids {
+            if let Some(record) = SkillRepository::get_by_id(&conn, skill_id)? {
+                let skill_md_path = Path::new(&record.path).join("SKILL.md");
+                markdown.push_str(&format!(
+                    "- **{}**: {}\n  - Location: `{}`\n",
+                    record.name,
+                    record.description,
+                    skill_md_path.to_string_lossy()
+                ));
+            }
+        }
+
+        markdown.push_str("\n\nYou have access to a set of skills you can use to help the user.\n");
+        markdown.push_str("When a task matches a skill's description, use the `read_file` tool to load the full instructions from the skill's `SKILL.md` file at the specified location.\n");
+        markdown.push_str("Follow the instructions exactly as documented in the skill file.\n");
+
+        Ok(markdown)
+    }
+
     /// Import skill from external path
     pub fn import_skill(&self, source_path: &Path) -> Result<Skill, AppError> {
         // Parse skill from source

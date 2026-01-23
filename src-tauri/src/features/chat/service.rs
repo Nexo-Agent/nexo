@@ -697,6 +697,7 @@ impl ChatService {
             processed_files.as_deref(),
             metadata.as_deref(),
             system_prompt_override.clone(),
+            Some(&llm_connection.provider),
         )?;
 
         // 10. Determine if streaming is enabled
@@ -1035,6 +1036,7 @@ impl ChatService {
             &user_content,
             user_metadata.as_deref(),
             system_prompt_override.clone(),
+            Some(&llm_connection.provider),
         )?;
 
         // Create emitters once for agent loop
@@ -1791,6 +1793,7 @@ impl ChatService {
         user_content: &str,
         user_metadata: Option<&str>,
         system_prompt_override: Option<String>,
+        provider: Option<&str>,
     ) -> Result<Vec<ChatMessage>, AppError> {
         let existing_messages = self.message_service.get_by_chat_id(chat_id)?;
         self.prepare_messages(
@@ -1800,6 +1803,7 @@ impl ChatService {
             None,
             user_metadata,
             system_prompt_override,
+            provider,
         )
     }
 
@@ -1811,6 +1815,7 @@ impl ChatService {
         user_files: Option<&[String]>,
         user_metadata: Option<&str>,
         system_prompt_override: Option<String>,
+        provider: Option<&str>,
     ) -> Result<Vec<ChatMessage>, AppError> {
         let mut api_messages: Vec<ChatMessage> = Vec::new();
 
@@ -1825,13 +1830,19 @@ impl ChatService {
             let skill_ids: Vec<String> = serde_json::from_str(skill_ids_json).unwrap_or_default();
 
             if !skill_ids.is_empty() {
-                if let Ok(skills_xml) = self.skill_service.generate_skills_xml(&skill_ids) {
-                    if !skills_xml.is_empty() {
-                        if !final_system_message.is_empty() {
-                            final_system_message.push_str("\n\n");
-                        }
-                        final_system_message.push_str(&skills_xml);
+                // Use XML for Anthropic, Markdown for others
+                let skills_content =
+                    if provider.map(|p| p.to_lowercase()).as_deref() == Some("anthropic") {
+                        self.skill_service.generate_skills_xml(&skill_ids)?
+                    } else {
+                        self.skill_service.generate_skills_markdown(&skill_ids)?
+                    };
+
+                if !skills_content.is_empty() {
+                    if !final_system_message.is_empty() {
+                        final_system_message.push_str("\n\n");
                     }
+                    final_system_message.push_str(&skills_content);
                 }
             }
         }
