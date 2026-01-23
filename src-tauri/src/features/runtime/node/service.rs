@@ -145,7 +145,9 @@ impl NodeRuntime {
             .output()
             .map_err(AppError::Io)?;
 
-        if !output.status.success() {
+        if output.status.success() {
+            Self::install_browser_agent(app, full_version)?;
+        } else {
             let stderr = String::from_utf8_lossy(&output.stderr);
             let stdout = String::from_utf8_lossy(&output.stdout);
             return Err(AppError::Node(format!(
@@ -195,5 +197,75 @@ impl NodeRuntime {
             }
         }
         None
+    }
+
+    pub fn install_packages(
+        app: &AppHandle,
+        version: &str,
+        packages: &[String],
+    ) -> Result<(), AppError> {
+        if let Ok(rt) = Self::detect(app, version) {
+            if let Some(bin_dir) = rt.node_path.parent() {
+                let npm_path = if cfg!(windows) {
+                    bin_dir.join("npm.cmd")
+                } else {
+                    bin_dir.join("npm")
+                };
+
+                let mut command = Command::new(npm_path);
+                command.arg("install").arg("-g").args(packages);
+
+                let current_path = std::env::var("PATH").unwrap_or_default();
+                let separator = if cfg!(windows) { ";" } else { ":" };
+                command.env(
+                    "PATH",
+                    format!("{}{}{}", bin_dir.display(), separator, current_path),
+                );
+                let output = command.output()?;
+                if !output.status.success() {
+                    return Err(AppError::Node(
+                        String::from_utf8_lossy(&output.stderr).to_string(),
+                    ));
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn install_browser_agent(app: &AppHandle, version: &str) -> Result<(), AppError> {
+        let packages = vec![String::from("agent-browser")];
+        Self::install_packages(app, version, &packages)?;
+
+        // Now run "agent-browser install" to download Chromium
+        if let Ok(rt) = Self::detect(app, version) {
+            if let Some(bin_dir) = rt.node_path.parent() {
+                let agent_browser_bin = if cfg!(windows) {
+                    bin_dir.join("agent-browser.cmd")
+                } else {
+                    bin_dir.join("agent-browser")
+                };
+
+                let mut command = Command::new(agent_browser_bin);
+                command.arg("install");
+
+                // Ensure node is in PATH so the agent-browser script can run
+                let current_path = std::env::var("PATH").unwrap_or_default();
+                let separator = if cfg!(windows) { ";" } else { ":" };
+                command.env(
+                    "PATH",
+                    format!("{}{}{}", bin_dir.display(), separator, current_path),
+                );
+
+                let output = command.output()?;
+                if !output.status.success() {
+                    return Err(AppError::Node(format!(
+                        "Failed to download Chromium for agent-browser: {}",
+                        String::from_utf8_lossy(&output.stderr)
+                    )));
+                }
+            }
+        }
+
+        Ok(())
     }
 }
