@@ -1,13 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, MessageSquare } from 'lucide-react';
+import { Search, MessageSquare, CornerDownLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import {
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/atoms/dialog/component';
+import { Dialog, DialogBody, DialogContent } from '@/ui/atoms/dialog/component';
 
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { cn } from '@/lib/utils';
@@ -19,6 +13,7 @@ import {
 } from '../state/chatSearchSlice';
 import { useChats } from '../hooks/useChats';
 import { useWorkspaces } from '@/features/workspace';
+import { MarkdownContent } from '@/ui/organisms/markdown';
 
 export function ChatSearchDialog() {
   const { t } = useTranslation(['common']);
@@ -36,13 +31,9 @@ export function ChatSearchDialog() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Filter chats based on search query
-  // Use a ref to track previous chats length to avoid unnecessary re-filtering
-  const prevChatsLengthRef = useRef(chats.length);
-
   useEffect(() => {
     if (!searchQuery.trim()) {
       dispatch(setFilteredChats([]));
-      prevChatsLengthRef.current = chats.length;
       return;
     }
 
@@ -55,8 +46,7 @@ export function ChatSearchDialog() {
           chat.lastMessage?.toLowerCase().includes(query)
       );
     dispatch(setFilteredChats(filtered));
-    prevChatsLengthRef.current = chats.length;
-  }, [searchQuery, chats, dispatch]); // Only depend on chats.length, not the whole array
+  }, [searchQuery, chats, dispatch]);
 
   // Focus input when dialog opens
   useEffect(() => {
@@ -78,10 +68,14 @@ export function ChatSearchDialog() {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (filteredChats[selectedIndex]) {
-        handleChatSelect(filteredChats[selectedIndex].id);
-        dispatch(setSearchOpen(false));
+        handleChatClick(filteredChats[selectedIndex].id);
       }
     }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setSearchQuery(e.target.value));
+    setSelectedIndex(0);
   };
 
   // Scroll selected item into view
@@ -109,67 +103,94 @@ export function ChatSearchDialog() {
       open={searchOpen}
       onOpenChange={(open) => dispatch(setSearchOpen(open))}
     >
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Search className="size-4" />
-            {t('searchChats', { ns: 'common' })}
-          </DialogTitle>
-        </DialogHeader>
-        <DialogBody>
-          <div className="space-y-4">
-            <input
-              ref={inputRef}
-              data-slot="input"
-              placeholder={t('searchChatsPlaceholder', { ns: 'common' })}
-              value={searchQuery}
-              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              onKeyDown={handleKeyDown}
-              className={cn(
-                'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-                'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-                'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-                'w-full'
-              )}
-            />
-            {filteredChats.length > 0 && (
-              <ScrollArea className="max-h-[300px] [&_[data-slot='scroll-area-scrollbar']]:hidden">
-                <div ref={scrollAreaRef} className="space-y-1 pr-4">
-                  {filteredChats.map((chat, index) => (
+      <DialogContent
+        showCloseButton={false}
+        className={cn(
+          'sm:max-w-2xl overflow-hidden p-0 border-none shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] bg-background/70 backdrop-blur-3xl ring-1 ring-white/10 rounded-2xl',
+          'top-[15%] translate-y-0' // Fixed top position to prevent input box from moving (no layout shift)
+        )}
+      >
+        <div className="relative flex items-center px-6">
+          <Search className="size-6 text-muted-foreground/50 shrink-0 mr-4" />
+          <input
+            ref={inputRef}
+            placeholder={t('searchChatsPlaceholder', { ns: 'common' })}
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onKeyDown={handleKeyDown}
+            className={cn(
+              'h-20 w-full bg-transparent text-2xl font-light outline-none placeholder:text-muted-foreground/30',
+              'py-6'
+            )}
+          />
+        </div>
+
+        {searchQuery.trim() && (
+          <DialogBody className="p-0 border-t border-white/5">
+            <ScrollArea className="h-[450px]">
+              <div ref={scrollAreaRef} className="p-2 space-y-0.5">
+                {filteredChats.length > 0 ? (
+                  filteredChats.map((chat, index) => (
                     <div
                       key={chat.id}
                       data-chat-index={index}
                       onClick={() => handleChatClick(chat.id)}
                       className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-colors',
-                        'hover:bg-accent hover:text-accent-foreground',
-                        index === selectedIndex &&
-                          'bg-accent text-accent-foreground'
+                        'group flex items-center gap-4 rounded-xl px-4 py-3 cursor-pointer transition-all duration-150',
+                        index === selectedIndex
+                          ? 'bg-primary/15 shadow-sm ring-1 ring-primary/20'
+                          : 'hover:bg-white/1' // Subtler hover
                       )}
                     >
-                      <MessageSquare className="size-4 shrink-0 text-muted-foreground" />
+                      <div
+                        className={cn(
+                          'size-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200',
+                          index === selectedIndex
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted/50 text-muted-foreground'
+                        )}
+                      >
+                        <MessageSquare className="size-5" />
+                      </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium line-clamp-1">
-                          {chat.title}
+                        <div className="flex items-center justify-between gap-2">
+                          <div
+                            className={cn(
+                              'text-base font-medium truncate',
+                              index === selectedIndex
+                                ? 'text-foreground'
+                                : 'text-foreground/80'
+                            )}
+                          >
+                            {chat.title}
+                          </div>
+                          {index === selectedIndex && (
+                            <CornerDownLeft className="size-4 text-primary/60 opacity-100" />
+                          )}
                         </div>
                         {chat.lastMessage && (
-                          <div className="text-xs text-muted-foreground line-clamp-1 mt-1">
-                            {chat.lastMessage}
+                          <div className="mt-1 max-h-24 overflow-hidden pointer-events-none opacity-60 group-hover:opacity-80 transition-opacity">
+                            <MarkdownContent
+                              content={chat.lastMessage}
+                              className="text-sm prose-p:my-0 prose-pre:my-1 prose-pre:bg-transparent prose-pre:p-0 prose-code:text-xs prose-headings:text-sm prose-img:hidden prose-video:hidden"
+                            />
                           </div>
                         )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-            {searchQuery.trim() && filteredChats.length === 0 && (
-              <div className="text-center text-sm text-muted-foreground">
-                {t('noChatsFound', { ns: 'common' })}
+                  ))
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-center py-20 opacity-40">
+                    <Search className="size-12 mb-4 stroke-[1.5]" />
+                    <p className="text-lg font-light">
+                      {t('noChatsFound', { ns: 'common' })}
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </DialogBody>
+            </ScrollArea>
+          </DialogBody>
+        )}
       </DialogContent>
     </Dialog>
   );
