@@ -66,7 +66,7 @@ export const ExpandableMessageItem = memo(function ExpandableMessageItem({
         <div className="overflow-hidden">
           <div
             className={cn(
-              'mt-1 ml-1.5 pl-4 border-l-2 border-muted/30 transition-all duration-300 select-text',
+              'mt-1 ml-1.5 pl-4 border-l-2 border-muted/30 transition-[opacity,padding] duration-300 select-text',
               isExpanded ? 'opacity-100 py-2' : 'opacity-0',
               contentClassName
             )}

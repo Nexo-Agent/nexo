@@ -40,7 +40,7 @@ export function AgentCard({
   return (
     <div
       className={cn(
-        'relative rounded-xl w-full max-w-xl transition-all duration-300 isolate bg-card border border-border',
+        'relative rounded-xl w-full max-w-xl transition-shadow duration-300 isolate bg-card border border-border',
         status === 'running' && 'shadow-sm'
       )}
     >

@@ -515,7 +515,7 @@ export function ChatInput({
 
           <div
             className={cn(
-              'border border-border bg-muted/20 shadow-sm p-2 relative transition-colors',
+              'border border-border bg-muted/20 shadow-sm p-2 relative transition-[background-color,border-color]',
               isEditing ? 'rounded-b-lg border-t-0' : 'rounded-lg',
               isDragging && 'border-primary ring-2 ring-primary/20 bg-muted/50'
             )}
@@ -569,7 +569,7 @@ export function ChatInput({
                 }
                 disabled={disabled}
                 className={cn(
-                  'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+                  'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 transition-[color,box-shadow,background-color,border-color] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
                   'w-full min-h-[40px] max-h-[200px] resize-none leading-relaxed text-sm py-0 px-2 border-0 rounded-lg outline-none flex content-center ring-0 shadow-none focus:ring-0 focus:shadow-none bg-transparent dark:bg-transparent'
                 )}
                 rows={1}
@@ -655,7 +655,7 @@ export function ChatInput({
                   </Button>
 
                   {/* Hover Tooltip Panel */}
-                  <div className="absolute bottom-full left-0 mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="absolute bottom-full left-0 mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-[opacity,visibility] duration-200 z-50">
                     {/* Invisible bridge to keep hover active */}
                     <div className="absolute top-0 left-0 right-0 h-3 translate-y-full"></div>
                     <div className="bg-popover text-popover-foreground rounded-md border shadow-lg w-80">
@@ -914,7 +914,7 @@ export function ChatInput({
                   }
                   size="icon"
                   className={cn(
-                    'h-8 w-8 rounded-full transition-all shadow-sm',
+                    'h-8 w-8 rounded-full transition-[background-color,color,transform] shadow-sm',
                     input.trim()
                       ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105'
                       : effectiveIsStreaming

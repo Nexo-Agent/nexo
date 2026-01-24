@@ -36,7 +36,7 @@ export function MessageMentions({
             variant="secondary"
             className={cn(
               'inline-flex items-center gap-1.5 px-2 py-0.5 border',
-              'transition-all duration-300 cursor-default select-none shadow-xs',
+              'transition-colors duration-300 cursor-default select-none shadow-xs',
               isUser
                 ? 'bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground/30'
                 : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20'

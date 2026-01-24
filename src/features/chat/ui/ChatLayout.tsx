@@ -101,7 +101,7 @@ export function ChatLayout({ sidebar, content, rightArea }: ChatLayoutProps) {
       {/* Sidebar Container */}
       <div
         className={cn(
-          'relative shrink-0 overflow-hidden border-r border-border bg-sidebar transition-all duration-300 ease-in-out',
+          'relative shrink-0 overflow-hidden border-r border-border bg-sidebar transition-[width] duration-300 ease-in-out',
           resizingType === 'sidebar' && 'transition-none duration-0',
           isSidebarCollapsed ? 'w-0 border-r-0' : ''
         )}
@@ -140,7 +140,7 @@ export function ChatLayout({ sidebar, content, rightArea }: ChatLayoutProps) {
       {/* Right Area Container */}
       <div
         className={cn(
-          'relative shrink-0 overflow-hidden border-l border-border bg-sidebar transition-all duration-300 ease-in-out',
+          'relative shrink-0 overflow-hidden border-l border-border bg-sidebar transition-[width] duration-300 ease-in-out',
           resizingType === 'rightPanel' && 'transition-none duration-0',
           !isRightPanelOpen ? 'w-0 border-l-0' : ''
         )}

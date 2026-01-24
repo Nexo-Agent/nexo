@@ -48,7 +48,7 @@ export function ChatRightPanel() {
                 <button
                   onClick={() => dispatch(setRightPanelTab(tab.id))}
                   className={cn(
-                    'relative flex size-9 items-center justify-center rounded-md transition-all duration-200',
+                    'relative flex size-9 items-center justify-center rounded-md transition-colors duration-200',
                     activeTab === tab.id
                       ? 'bg-accent text-accent-foreground'
                       : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'

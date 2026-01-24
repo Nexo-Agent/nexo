@@ -185,7 +185,7 @@ export function ChatSearchDialog() {
                       data-chat-index={index}
                       onClick={() => handleResultClick(result)}
                       className={cn(
-                        'group flex items-center gap-4 rounded-xl px-4 py-3 cursor-pointer transition-all duration-150 w-full',
+                        'group flex items-center gap-4 rounded-xl px-4 py-3 cursor-pointer transition-[background-color,box-shadow,ring] duration-150 w-full',
                         index === selectedIndex
                           ? 'bg-primary/10 shadow-sm ring-1 ring-primary/20'
                           : 'hover:bg-muted/30' // Subtler hover

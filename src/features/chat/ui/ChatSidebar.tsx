@@ -187,7 +187,7 @@ export function ChatSidebar() {
                   <div
                     key={chat.id}
                     className={cn(
-                      'group relative flex cursor-pointer items-center gap-2 rounded-md pl-4 pr-2 py-1.5 transition-all',
+                      'group relative flex cursor-pointer items-center gap-2 rounded-md pl-4 pr-2 py-1.5 transition-[background-color,color,box-shadow]',
                       'hover:bg-accent hover:text-accent-foreground',
                       selectedChatId === chat.id
                         ? 'bg-accent text-accent-foreground shadow-sm'

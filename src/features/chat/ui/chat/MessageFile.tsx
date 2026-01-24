@@ -153,7 +153,7 @@ export const MessageFile = ({ src, mimeType, className }: MessageFileProps) => {
     <button
       type="button"
       className={cn(
-        'group relative flex items-center gap-3 w-full rounded-xl border transition-all duration-200',
+        'group relative flex items-center gap-3 w-full rounded-xl border transition-[box-shadow,transform,opacity] duration-200',
         'hover:shadow-sm hover:scale-[1.02] active:scale-[0.98]',
         fileInfo.bgColor,
         fileInfo.borderColor,
