@@ -81,11 +81,20 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.14
+            # Nexo v0.1.0-beta.15
 
-            ## Bug Fixes
+            ## What's New
 
-            - **Menu Construction**: Fixed a compilation error in the application menu occurring on non-macOS platforms.
+            - **Comprehensive Notes Management**: Added a full-featured notes system with UI, backend services, and database persistence.
+            - **Search Notes**: Extended search functionality to include notes content.
+            - **Multi-Tab Right Panel**: Introduced a multi-tab interface for the right panel (`Notes`/`Chat`).
+            - **Rich Clipboard Copy**: Implemented multi-format clipboard copy for chat messages (supports Markdown and formatted HTML).
+
+            ## UI/UX Improvements
+
+            - **Enhanced Chat Display**: Improved chat message components, including better thinking process visualization and tool call status.
+            - **Streaming Duration**: Added streaming duration display.
+            - **Search Dialog**: Refined the styling of the chat search dialog.
 
             ---
 
