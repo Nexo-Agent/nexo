@@ -516,7 +516,7 @@ impl ChatService {
                 )?;
 
                 // 2. Create Assistant Message (Agent Card Placeholder)
-                let assistant_timestamp = user_timestamp;
+                let assistant_timestamp = user_timestamp + 1;
                 let assistant_message_id = uuid::Uuid::new_v4().to_string();
 
                 // Metadata for Card
@@ -612,7 +612,7 @@ impl ChatService {
         }
 
         // 7. Create assistant message placeholder
-        let assistant_timestamp = user_timestamp;
+        let assistant_timestamp = user_timestamp + 1;
         let assistant_message_id = uuid::Uuid::new_v4().to_string();
 
         self.message_service.create(
