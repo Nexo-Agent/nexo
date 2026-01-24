@@ -113,6 +113,11 @@ export const TauriCommands = {
   LOAD_SKILL: 'load_skill',
   IMPORT_SKILL: 'import_skill',
   DELETE_SKILL: 'delete_skill',
+  // Note commands
+  CREATE_NOTE: 'create_note',
+  GET_NOTES: 'get_notes',
+  UPDATE_NOTE: 'update_note',
+  DELETE_NOTE: 'delete_note',
 } as const;
 
 export type TauriCommand = (typeof TauriCommands)[keyof typeof TauriCommands];

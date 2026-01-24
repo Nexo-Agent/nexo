@@ -249,6 +249,11 @@ pub fn run() {
             features::skill::commands::load_skill,
             features::skill::commands::import_skill,
             features::skill::commands::delete_skill,
+            // Note commands
+            features::notes::commands::create_note,
+            features::notes::commands::get_notes,
+            features::notes::commands::update_note,
+            features::notes::commands::delete_note,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

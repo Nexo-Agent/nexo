@@ -95,4 +95,11 @@ impl TauriCommands {
     pub const DELETE_AGENT: &'static str = "delete_agent";
     pub const GET_AGENT_INFO: &'static str = "get_agent_info";
     pub const UPDATE_AGENT: &'static str = "update_agent";
+    pub const GET_OR_CREATE_SPECIALIST_SESSION: &'static str = "get_or_create_specialist_session";
+
+    // Note commands
+    pub const CREATE_NOTE: &'static str = "create_note";
+    pub const GET_NOTES: &'static str = "get_notes";
+    pub const UPDATE_NOTE: &'static str = "update_note";
+    pub const DELETE_NOTE: &'static str = "delete_note";
 }

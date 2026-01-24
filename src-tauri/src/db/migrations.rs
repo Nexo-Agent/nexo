@@ -334,5 +334,17 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
     )
     .ok();
 
+    // Create notes table
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS notes (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+        )",
+        [],
+    )?;
+
     Ok(())
 }

@@ -15,6 +15,10 @@ use crate::features::mcp_connection::{
 use crate::features::message::{MessageRepository, MessageService, SqliteMessageRepository};
 use crate::features::prompt::{PromptRepository, PromptService, SqlitePromptRepository};
 
+use crate::features::notes::{
+    repository::{NoteRepository, SqliteNoteRepository},
+    service::NoteService,
+};
 use crate::features::skill::SkillService;
 use crate::features::tool::{mcp_refresh::MCPToolRefreshService, service::ToolService};
 use crate::features::usage::{SqliteUsageRepository, UsageRepository, UsageService};
@@ -56,6 +60,7 @@ pub struct AppState {
     pub tool_service: Arc<ToolService>,
     pub app_settings_service: Arc<AppSettingsService>,
     pub prompt_service: Arc<PromptService>,
+    pub note_service: Arc<NoteService>,
 
     // Tool permission state: message_id -> oneshot sender for approval response
     pub pending_tool_permissions: Arc<Mutex<HashMap<String, oneshot::Sender<PermissionDecision>>>>,
@@ -156,6 +161,9 @@ impl AppState {
         let chat_input_settings_service =
             Arc::new(ChatInputSettingsService::new(chat_input_settings_repo));
 
+        let note_repo: Arc<dyn NoteRepository> = Arc::new(SqliteNoteRepository::new(app.clone()));
+        let note_service = Arc::new(NoteService::new(note_repo));
+
         // Create and start MCP tool refresh service
         let mcp_tool_refresh_service = Arc::new(MCPToolRefreshService::new(
             (*app).clone(),
@@ -177,6 +185,7 @@ impl AppState {
             tool_service,
             app_settings_service,
             prompt_service,
+            note_service,
             pending_tool_permissions: Arc::new(Mutex::new(HashMap::new())),
             agent_manager,
             skill_service,
