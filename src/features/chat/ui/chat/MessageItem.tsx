@@ -174,7 +174,7 @@ export const MessageItem = memo(
                 isStreaming && 'will-change-contents',
                 message.role === 'user'
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-none'
+                  : 'bg-none px-0'
               )}
               style={
                 isStreaming

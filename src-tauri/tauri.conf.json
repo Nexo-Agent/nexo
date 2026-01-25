@@ -12,9 +12,9 @@
   "version": "0.1.0-beta.16",
   "identifier": "com.nexo.app",
   "build": {
-    "beforeDevCommand": "yarn dev",
+    "beforeDevCommand": "yarn ui:dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "yarn build",
+    "beforeBuildCommand": "yarn ui:build",
     "frontendDist": "../dist"
   },
   "app": {
