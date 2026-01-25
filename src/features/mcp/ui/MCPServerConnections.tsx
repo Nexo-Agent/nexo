@@ -588,12 +588,12 @@ function MCPServerConnectionDialog({
         </DialogHeader>
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col flex-1 min-h-0 overflow-hidden"
+          className="flex flex-col flex-1 min-h-0 overflow-hidden w-full"
         >
-          <DialogBody className="[&>div]:px-0 [&>div]:py-0">
-            <div className="space-y-6 px-4 py-2 pb-6">
+          <DialogBody className="[&>div]:px-0 [&>div]:py-0 w-full">
+            <div className="space-y-6 py-2 pb-6 w-full">
               {/* Basic Information */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                 <div className="md:col-span-2 space-y-2">
                   <Label htmlFor="mcp-name" className="text-sm font-medium">
                     {t('connectionName')}
