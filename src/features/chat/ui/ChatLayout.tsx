@@ -15,6 +15,9 @@ const DEFAULT_SIDEBAR_WIDTH = 280;
 const MIN_RIGHT_AREA_WIDTH = 300;
 const DEFAULT_RIGHT_AREA_WIDTH = 400;
 
+export const CHAT_WIDTH_CLASSES =
+  'mx-auto max-w-xl lg:max-w-2xl xl:max-w-3xl px-4';
+
 export function ChatLayout({ sidebar, content, rightArea }: ChatLayoutProps) {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.ui.isSidebarCollapsed

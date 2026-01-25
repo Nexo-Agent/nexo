@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
 import { AgentChatHistoryDialog } from '@/features/agent';
@@ -24,6 +25,7 @@ import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { messagesApi } from '../../state/messagesApi';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
 import { logger } from '@/lib/logger';
+import { CHAT_WIDTH_CLASSES } from '../ChatLayout';
 
 export function ChatArea() {
   const { t } = useTranslation(['common', 'settings']);
@@ -389,7 +391,7 @@ export function ChatArea() {
             {t('chatSloganDescription', { ns: 'common' })}
           </p>
         </div>
-        <div className="w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl px-4">
+        <div className={cn('w-full', CHAT_WIDTH_CLASSES)}>
           <ChatInput
             selectedWorkspaceId={selectedWorkspaceId}
             selectedChatId={selectedChatId}

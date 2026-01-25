@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useAppDispatch } from '@/app/hooks';
@@ -9,6 +10,7 @@ import type { Message } from '../../types';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { useToolPermission } from '../../hooks/useToolPermission';
 import { useChatScroll } from '../../hooks/useChatScroll';
+import { CHAT_WIDTH_CLASSES } from '../ChatLayout';
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -71,7 +73,7 @@ export function ChatMessages({
         showUsage={showUsage}
         t={t}
         isLoading={isLoading && !streamingMessageId}
-        className="max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto px-4"
+        className={cn(CHAT_WIDTH_CLASSES, 'py-4')}
       />
     </ScrollArea>
   );
