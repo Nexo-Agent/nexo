@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/ui/atoms/dialog';
+} from '@/ui/atoms/dialog/index';
 import { Button } from '@/ui/atoms/button/button';
 import { Textarea } from '@/ui/atoms/textarea';
 import { Package, Loader2 } from 'lucide-react';

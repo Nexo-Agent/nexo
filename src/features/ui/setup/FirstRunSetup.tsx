@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/ui/atoms/dialog';
+} from '@/ui/atoms/dialog/index';
 import { Input } from '@/ui/atoms/input';
 import { Label } from '@/ui/atoms/label';
 import {

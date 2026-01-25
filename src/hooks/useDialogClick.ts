@@ -1,4 +1,4 @@
-import { useDialogOrigin } from '@/ui/atoms/dialog';
+import { useDialogOrigin } from '@/ui/atoms/dialog/index';
 
 /**
  * Hook to handle dialog opening with origin tracking

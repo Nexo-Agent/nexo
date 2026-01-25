@@ -4,10 +4,11 @@ import { Button } from '@/ui/atoms/button/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/ui/atoms/dialog/component';
+} from '@/ui/atoms/dialog';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -32,14 +33,14 @@ export const DeleteConfirmDialog = memo(function DeleteConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md border-border/40 bg-background/95 backdrop-blur-lg shadow-xl">
         <DialogHeader>
           <DialogTitle>{t('deleteConnection')}</DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription>
             {t('confirmDeleteConnection', { ns: 'common' })}?
-          </p>
+          </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="mt-4">
           <Button
             type="button"
             variant="outline"

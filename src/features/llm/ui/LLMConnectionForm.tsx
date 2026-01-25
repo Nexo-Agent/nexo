@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/atoms/select';
-import { DialogBody, DialogFooter } from '@/ui/atoms/dialog/component';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { ProviderIcon } from '@/ui/atoms/provider-icon';
 import type { LLMConnection } from '../types';
@@ -91,9 +90,9 @@ export function LLMConnectionForm({
       onSubmit={handleSubmit}
       className="flex flex-col flex-1 min-h-0 w-full"
     >
-      <DialogBody className="overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0 w-full">
         <ScrollArea className="h-full">
-          <div className="space-y-4 pr-4">
+          <div className="space-y-4 px-6 py-2">
             <div className="space-y-2 w-full">
               <Label htmlFor="name">{t('connectionName')}</Label>
               <Input
@@ -207,8 +206,8 @@ export function LLMConnectionForm({
             )}
           </div>
         </ScrollArea>
-      </DialogBody>
-      <DialogFooter className="shrink-0 justify-between gap-2">
+      </div>
+      <div className="flex shrink-0 items-center justify-between gap-2 px-6 pb-6 pt-2">
         {onDelete && (
           <Button
             type="button"
@@ -237,7 +236,7 @@ export function LLMConnectionForm({
             t('add', { ns: 'common' })
           )}
         </Button>
-      </DialogFooter>
+      </div>
     </form>
   );
 }

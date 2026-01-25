@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/ui/atoms/dialog/component';
+} from '@/ui/atoms/dialog';
 import type { LLMConnection } from '../types';
 import { LLMConnectionForm } from './LLMConnectionForm';
 
@@ -31,14 +32,12 @@ export const LLMConnectionDialog = memo(function LLMConnectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl flex flex-col max-h-[90vh]">
-        <DialogHeader className="shrink-0">
-          <DialogTitle>
+      <DialogContent className="p-0 overflow-hidden flex flex-col max-h-[90vh] sm:max-w-2xl border-border/40 bg-background/95 backdrop-blur-lg shadow-xl">
+        <DialogHeader className="px-6 pt-6 pb-2 shrink-0">
+          <DialogTitle className="p-0 m-0">
             {connection ? t('editConnection') : t('addNewConnection')}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {t('configureConnection')}
-          </p>
+          <DialogDescription>{t('configureConnection')}</DialogDescription>
         </DialogHeader>
 
         <LLMConnectionForm

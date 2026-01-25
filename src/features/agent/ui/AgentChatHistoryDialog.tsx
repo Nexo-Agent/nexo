@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogBody,
-} from '@/ui/atoms/dialog';
+} from '@/ui/atoms/dialog/index';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { MessageList } from '@/features/chat/ui/chat/MessageList';
 import { useAppSettings } from '@/hooks/useAppSettings';
