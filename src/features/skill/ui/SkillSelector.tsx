@@ -44,7 +44,7 @@ export function SkillSelector({
             key={skill.id}
             variant={isSelected ? 'default' : 'outline'}
             className={cn(
-              'cursor-pointer transition-all',
+              'cursor-pointer transition-colors',
               isSelected && 'bg-primary text-primary-foreground'
             )}
             onClick={() => handleToggleSkill(skill.id)}

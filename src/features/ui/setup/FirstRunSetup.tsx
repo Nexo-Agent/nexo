@@ -384,7 +384,7 @@ export function FirstRunSetup({ open }: { open: boolean }) {
                     }))
                   }
                 >
-                  <SelectTrigger className="w-full h-11 border-input bg-background/50 focus:ring-primary/20 transition-all hover:bg-accent/50 focus:bg-background">
+                  <SelectTrigger className="w-full h-11 border-input bg-background/50 focus:ring-primary/20 transition-[background-color,box-shadow,ring] hover:bg-accent/50 focus:bg-background">
                     <SelectValue placeholder="Select provider" />
                   </SelectTrigger>
                   <SelectContent>
@@ -468,7 +468,7 @@ export function FirstRunSetup({ open }: { open: boolean }) {
               <Button
                 size="lg"
                 onClick={startSetup}
-                className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all px-8 h-12 text-base font-medium rounded-xl"
+                className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-[background-color,box-shadow,transform] px-8 h-12 text-base font-medium rounded-xl"
               >
                 Start Auto Setup
               </Button>
@@ -496,7 +496,7 @@ export function FirstRunSetup({ open }: { open: boolean }) {
                 size="lg"
                 onClick={handleLlmSubmit}
                 disabled={isSubmitting || !llmConfig.apiKey}
-                className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all min-w-[140px] rounded-xl h-11"
+                className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-[background-color,box-shadow,transform] min-w-[140px] rounded-xl h-11"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -525,7 +525,7 @@ function RuntimeInstallCard({
   return (
     <div
       className={cn(
-        'group flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card/60 transition-all duration-300 backdrop-blur-sm',
+        'group flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card/60 transition-[background-color,border-color,box-shadow,ring] duration-300 backdrop-blur-sm',
         status === 'installing' &&
           'border-primary/50 bg-primary/5 ring-1 ring-primary/20 shadow-[0_0_20px_-10px_rgba(var(--primary),0.2)]',
         status === 'success' && 'border-green-500/30 bg-green-500/5',
@@ -535,7 +535,7 @@ function RuntimeInstallCard({
       <div className="flex items-center gap-4">
         <div
           className={cn(
-            'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm transition-all duration-300',
+            'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm transition-[background-color,border-color,transform,box-shadow] duration-300',
             status === 'installing' &&
               'text-primary border-primary/20 scale-105',
             status === 'success' &&

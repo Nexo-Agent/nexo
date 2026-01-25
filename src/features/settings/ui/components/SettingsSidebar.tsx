@@ -95,7 +95,7 @@ export function SettingsSidebar() {
               }
               data-tour={section.id === 'llm' ? 'settings-llm-tab' : undefined}
               className={cn(
-                'relative mb-1 w-full flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all group',
+                'relative mb-1 w-full flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-[background-color,color,box-shadow] group',
                 'hover:bg-accent hover:text-accent-foreground',
                 selectedSection === section.id
                   ? 'bg-accent/80 text-accent-foreground shadow-sm'

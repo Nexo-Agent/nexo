@@ -30,7 +30,7 @@ export const LLMConnectionCard = memo(function LLMConnectionCard({
 
   return (
     <div
-      className={`group relative rounded-lg border bg-card p-4 hover:shadow-md hover:border-primary/20 transition-all duration-200 overflow-hidden ${
+      className={`group relative rounded-lg border bg-card p-4 hover:shadow-md hover:border-primary/20 transition-[box-shadow,border-color,opacity] duration-200 overflow-hidden ${
         !connection.enabled ? 'opacity-60' : ''
       }`}
     >

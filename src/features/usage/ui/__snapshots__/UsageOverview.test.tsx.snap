@@ -6,7 +6,7 @@ exports[`UsageOverview > matches snapshot 1`] = `
     class="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
   >
     <div
-      class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group"
+      class="rounded-lg border bg-card text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-linear-to-br from-background to-muted/20 hover:shadow-lg transition-shadow duration-300 group"
     >
       <div
         class="absolute top-0 right-0 w-24 h-24 bg-chart-amber/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-amber/20 transition-colors"
@@ -38,7 +38,7 @@ exports[`UsageOverview > matches snapshot 1`] = `
       </div>
     </div>
     <div
-      class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group"
+      class="rounded-lg border bg-card text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-linear-to-br from-background to-muted/20 hover:shadow-lg transition-shadow duration-300 group"
     >
       <div
         class="absolute top-0 right-0 w-24 h-24 bg-chart-violet/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-violet/20 transition-colors"
@@ -94,7 +94,7 @@ exports[`UsageOverview > matches snapshot 1`] = `
       </div>
     </div>
     <div
-      class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group"
+      class="rounded-lg border bg-card text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-linear-to-br from-background to-muted/20 hover:shadow-lg transition-shadow duration-300 group"
     >
       <div
         class="absolute top-0 right-0 w-24 h-24 bg-chart-blue/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-blue/20 transition-colors"
@@ -126,7 +126,7 @@ exports[`UsageOverview > matches snapshot 1`] = `
       </div>
     </div>
     <div
-      class="rounded-lg border text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group"
+      class="rounded-lg border bg-card text-card-foreground relative overflow-hidden border-none ring-1 ring-border shadow-md bg-linear-to-br from-background to-muted/20 hover:shadow-lg transition-shadow duration-300 group"
     >
       <div
         class="absolute top-0 right-0 w-24 h-24 bg-chart-emerald/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-emerald/20 transition-colors"

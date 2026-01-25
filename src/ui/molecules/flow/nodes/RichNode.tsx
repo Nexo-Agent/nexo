@@ -94,7 +94,7 @@ const RichNodeComponent = memo(({ data, selected }: NodeProps) => {
       <NodeResizer isVisible={selected} minWidth={200} minHeight={100} />
       <Card
         className={cn(
-          'min-w-[200px] h-full transition-all duration-200',
+          'min-w-[200px] h-full transition-[transform,background-color,border-color,box-shadow,ring] duration-200',
           'hover:shadow-md',
           variantStyles[variant],
           selected && 'ring-2 ring-primary shadow-lg scale-[1.02]',

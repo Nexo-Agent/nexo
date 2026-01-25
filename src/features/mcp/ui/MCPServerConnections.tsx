@@ -284,7 +284,7 @@ export function MCPServerConnections() {
               <div
                 key={connection.id}
                 onClick={() => handleEdit(connection)}
-                className="group relative rounded-lg border bg-card p-4 hover:shadow-md hover:border-primary/20 transition-all duration-200 cursor-pointer overflow-hidden"
+                className="group relative rounded-lg border bg-card p-4 hover:shadow-md hover:border-primary/20 transition-[box-shadow,border-color] duration-200 cursor-pointer overflow-hidden"
               >
                 {/* Subtle gradient overlay on hover */}
                 <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />

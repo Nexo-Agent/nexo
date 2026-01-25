@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from '@/ui/atoms/dialog';
 import { Button } from '@/ui/atoms/button/button';
@@ -56,11 +59,14 @@ export function PythonPackageManagerDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[460px] p-0 overflow-hidden border-border/40 bg-background/95 backdrop-blur-lg shadow-xl">
-        <header className="flex items-center gap-4 px-6 py-4 border-b border-border/40 bg-muted/20">
+        <DialogHeader
+          showBorder
+          className="flex-row items-center gap-4 px-6 py-4 bg-muted/20 space-y-0 w-full"
+        >
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-python/10 border border-brand-python/20">
             <Package className="size-5 text-brand-python" />
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 text-left">
             <DialogTitle className="text-base font-bold truncate">
               {t('managePythonPackages')}
             </DialogTitle>
@@ -72,9 +78,9 @@ export function PythonPackageManagerDialog({
                 : t('managePythonPackagesDescriptionNoVersion')}
             </DialogDescription>
           </div>
-        </header>
+        </DialogHeader>
 
-        <div className="px-6 py-5 space-y-4">
+        <DialogBody className="px-6 py-5 space-y-4 w-full">
           <div className="space-y-2">
             <label
               htmlFor="packages"
@@ -96,21 +102,21 @@ export function PythonPackageManagerDialog({
               {t('packageNamesHint')}
             </p>
           </div>
-        </div>
+        </DialogBody>
 
-        <footer className="px-6 pb-5 pt-1 flex items-center justify-end gap-2.5">
+        <DialogFooter className="px-6 pb-6 pt-2 flex flex-row items-center gap-3 space-y-0 w-full sm:justify-stretch">
           <Button
             variant="ghost"
             onClick={handleCancel}
             disabled={isInstalling}
-            className="h-9 px-4 text-xs font-semibold rounded-lg"
+            className="flex-1 h-10 text-xs font-semibold rounded-xl border border-border/40 hover:bg-muted/50 transition-colors"
           >
             {t('cancel', { ns: 'common' })}
           </Button>
           <Button
             onClick={handleInstall}
             disabled={isInstalling || packages.trim().length === 0}
-            className="h-9 px-6 text-xs font-bold bg-brand-python hover:bg-brand-python/90 text-white rounded-lg shadow-sm transition-all active:scale-[0.98]"
+            className="flex-1 h-10 text-xs font-bold bg-brand-python hover:bg-brand-python/90 text-white rounded-xl shadow-lg shadow-brand-python/10 transition-all active:scale-[0.98]"
           >
             {isInstalling ? (
               <div className="flex items-center gap-2">
@@ -124,7 +130,7 @@ export function PythonPackageManagerDialog({
               </div>
             )}
           </Button>
-        </footer>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -46,7 +46,7 @@ export function DangerZone({
             size="sm"
             onClick={onClearAllChats}
             disabled={!hasChats || isClearingChats}
-            className="border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-all shrink-0"
+            className="border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-[background-color,color,border-color] shrink-0"
           >
             {isClearingChats ? (
               <Loader2 className="size-3.5 animate-spin mr-2" />
@@ -75,7 +75,7 @@ export function DangerZone({
             size="sm"
             onClick={onDelete}
             disabled={isDeleting}
-            className="bg-destructive hover:bg-destructive/90 shadow-sm transition-all shrink-0"
+            className="bg-destructive hover:bg-destructive/90 shadow-sm transition-[background-color,box-shadow] shrink-0"
           >
             {isDeleting ? (
               <Loader2 className="size-3.5 animate-spin mr-2" />

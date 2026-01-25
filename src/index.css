@@ -292,7 +292,7 @@
   }
 
   body {
-    @apply bg-background text-foreground select-none;
+    @apply bg-background text-foreground;
     font-family: var(--font-sans);
     font-size: var(--text-base);
     line-height: var(--leading-normal);

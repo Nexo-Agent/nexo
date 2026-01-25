@@ -13,7 +13,7 @@ export const FeatureCard = memo(function FeatureCard({
   description,
 }: FeatureCardProps) {
   return (
-    <Card className="border bg-card/50 hover:bg-card hover:shadow-md transition-all duration-300 group">
+    <Card className="border bg-card/50 hover:bg-card hover:shadow-md transition-[background-color,box-shadow] duration-300 group">
       <CardContent className="p-4 flex gap-4">
         <div className="p-2.5 rounded-xl bg-primary/5 text-primary group-hover:bg-primary/10 transition-colors h-fit">
           {icon}

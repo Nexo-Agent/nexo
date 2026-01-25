@@ -277,7 +277,7 @@ export function AgentSettings() {
                 </div>
 
                 <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
                     showAdvanced ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
                   }`}
                 >
@@ -378,7 +378,7 @@ export function AgentSettings() {
             {agents.map((agent) => (
               <Card
                 key={agent.manifest.id}
-                className="cursor-pointer hover:bg-accent/50 transition-all hover:ring-1 hover:ring-primary/20"
+                className="cursor-pointer hover:bg-accent/50 transition-[background-color,ring,box-shadow] hover:ring-1 hover:ring-primary/20"
                 onClick={() => handleAgentClick(agent)}
               >
                 <CardHeader className="pb-3">

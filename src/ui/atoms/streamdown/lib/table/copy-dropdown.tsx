@@ -95,7 +95,7 @@ export const TableCopyDropdown = ({
     <div className="relative" ref={dropdownRef}>
       <button
         className={cn(
-          'cursor-pointer p-1 text-muted-foreground transition-all hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
+          'cursor-pointer p-1 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
           className
         )}
         disabled={isAnimating}

@@ -45,7 +45,7 @@ export function NoteList() {
               dispatch(setSearchQuery(''));
             }
           }}
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all hover:bg-primary hover:text-primary-foreground active:scale-95 shadow-sm"
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-[background-color,color,transform] hover:bg-primary hover:text-primary-foreground active:scale-95 shadow-sm"
         >
           <Plus className="size-4" />
         </button>

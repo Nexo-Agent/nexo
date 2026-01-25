@@ -130,7 +130,7 @@ export function UpdateModal({
                 </div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden ring-1 ring-border/50">
                   <div
-                    className="h-full bg-primary transition-all duration-300 relative"
+                    className="h-full bg-primary transition-[width] duration-300 relative"
                     style={{ width: `${downloadProgress}%` }}
                   >
                     <div className="absolute inset-0 bg-white/20 animate-pulse" />

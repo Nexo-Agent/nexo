@@ -292,7 +292,7 @@ export function MCPSettings({
 
                 <div
                   className={cn(
-                    'transition-all duration-300 ease-in-out',
+                    'transition-[grid-template-rows,opacity] duration-300 ease-in-out',
                     isCollapsed
                       ? 'grid grid-rows-[0fr] opacity-0'
                       : 'grid grid-rows-[1fr] opacity-100'

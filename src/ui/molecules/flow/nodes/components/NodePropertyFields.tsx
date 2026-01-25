@@ -142,7 +142,7 @@ export const SchemaField = ({
                       onChange(newSchema);
                     }}
                     placeholder="Field name"
-                    className="h-9 text-xs flex-1 bg-background border-border/40 focus:border-primary/50 transition-all rounded-md"
+                    className="h-9 text-xs flex-1 bg-background border-border/40 focus:border-primary/50 transition-[border-color] rounded-md"
                   />
                   <Input
                     value={entry.type}
@@ -153,7 +153,7 @@ export const SchemaField = ({
                       onChange(newSchema);
                     }}
                     placeholder="Type"
-                    className="h-9 text-xs w-28 bg-background border-border/40 focus:border-primary/50 transition-all rounded-md"
+                    className="h-9 text-xs w-28 bg-background border-border/40 focus:border-primary/50 transition-[border-color] rounded-md"
                   />
                   {!readOnly && (
                     <Button
@@ -163,7 +163,7 @@ export const SchemaField = ({
                       onClick={() =>
                         onChange(schema.filter((_, i) => i !== index))
                       }
-                      className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
+                      className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-[background-color,color] shrink-0"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -183,10 +183,10 @@ export const SchemaField = ({
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="Title"
-                  className="h-9 text-xs flex-1 border-border/40 bg-muted/20 focus:bg-background transition-all rounded-md"
+                  className="h-9 text-xs flex-1 border-border/40 bg-muted/20 focus:bg-background transition-[background-color,border-color] rounded-md"
                 />
                 <Select value={newType} onValueChange={setNewType}>
-                  <SelectTrigger className="h-9 text-xs w-28 border-border/40 bg-muted/20 focus:bg-background transition-all rounded-md">
+                  <SelectTrigger className="h-9 text-xs w-28 border-border/40 bg-muted/20 focus:bg-background transition-[background-color,border-color] rounded-md">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -201,7 +201,7 @@ export const SchemaField = ({
                 <Button
                   size="icon"
                   variant="secondary"
-                  className="h-9 w-9 shrink-0 shadow-sm hover:shadow transition-all bg-secondary/80 hover:bg-secondary"
+                  className="h-9 w-9 shrink-0 shadow-sm hover:shadow transition-[background-color,box-shadow] bg-secondary/80 hover:bg-secondary"
                   onClick={handleAddEntry}
                   disabled={!newTitle.trim()}
                 >

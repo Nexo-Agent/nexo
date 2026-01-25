@@ -40,7 +40,7 @@ const SimpleNodeComponent = memo(({ data, selected }: NodeProps) => {
       <NodeResizer isVisible={selected} minWidth={100} minHeight={40} />
       <BaseNode
         className={cn(
-          'min-w-[100px] h-full transition-all duration-200',
+          'min-w-[100px] h-full transition-[transform,background-color,color,box-shadow,border-color] duration-200',
           selected && 'scale-[1.02]'
         )}
         style={{

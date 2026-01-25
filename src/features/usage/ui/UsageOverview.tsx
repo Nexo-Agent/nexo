@@ -34,7 +34,7 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group">
+      <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-linear-to-br from-background to-muted/20 hover:shadow-lg transition-shadow duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-chart-amber/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-amber/20 transition-colors" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -55,7 +55,7 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
         </CardContent>
       </Card>
 
-      <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group">
+      <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-linear-to-br from-background to-muted/20 hover:shadow-lg transition-shadow duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-chart-violet/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-violet/20 transition-colors" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -84,7 +84,7 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
         </CardContent>
       </Card>
 
-      <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group">
+      <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-linear-to-br from-background to-muted/20 hover:shadow-lg transition-shadow duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-chart-blue/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-blue/20 transition-colors" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -101,7 +101,7 @@ export function UsageOverview({ summary, loading }: UsageOverviewProps) {
         </CardContent>
       </Card>
 
-      <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-gradient-to-br from-background to-muted/20 hover:shadow-lg transition-all duration-300 group">
+      <Card className="relative overflow-hidden border-none ring-1 ring-border shadow-md bg-linear-to-br from-background to-muted/20 hover:shadow-lg transition-shadow duration-300 group">
         <div className="absolute top-0 right-0 w-24 h-24 bg-chart-emerald/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-chart-emerald/20 transition-colors" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-muted-foreground">

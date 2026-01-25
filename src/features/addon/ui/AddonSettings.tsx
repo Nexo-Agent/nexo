@@ -101,7 +101,7 @@ const RuntimeCard = ({
   const { t } = useTranslation('settings');
 
   return (
-    <div className="group relative flex flex-col rounded-xl border bg-card p-6 hover:shadow-md transition-all duration-300 border-border/60">
+    <div className="group relative flex flex-col rounded-xl border bg-card p-6 hover:shadow-md transition-[box-shadow,border-color,background-color] duration-300 border-border/60">
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-4">
           <div
@@ -177,7 +177,7 @@ const RuntimeCard = ({
           onClick={onInstall}
           disabled={isInstalling}
           className={cn(
-            'w-full h-11 transition-all duration-300',
+            'w-full h-11 transition-[background-color,color,box-shadow,transform] duration-300',
             installed
               ? 'bg-muted hover:bg-muted/80 text-foreground'
               : cn(

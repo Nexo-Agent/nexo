@@ -118,7 +118,7 @@ export function UpdateSection() {
         <div className="mt-4">
           <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary transition-all duration-300 animate-pulse"
+              className="h-full bg-primary transition-[width] duration-300 animate-pulse"
               style={{ width: '100%' }}
             />
           </div>
