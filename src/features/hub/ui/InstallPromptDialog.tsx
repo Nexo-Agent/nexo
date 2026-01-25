@@ -5,12 +5,12 @@ import { Button } from '@/ui/atoms/button/button';
 import { Textarea } from '@/ui/atoms/textarea';
 import {
   Dialog,
-  DialogBody,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/ui/atoms/dialog/component';
+  DialogDescription,
+} from '@/ui/atoms/dialog';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { useAppDispatch } from '@/app/hooks';
@@ -117,11 +117,11 @@ export function InstallPromptDialog({
             {t('installPrompt', { defaultValue: 'Install Prompt' })}:{' '}
             {prompt.name}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">{prompt.description}</p>
+          <DialogDescription>{prompt.description}</DialogDescription>
         </DialogHeader>
 
-        <DialogBody>
-          <ScrollArea className="h-full [&_[data-slot='scroll-area-scrollbar']]:hidden">
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
             <div className="min-h-[300px] pr-4">
               {loading ? (
                 <div className="flex items-center justify-center min-h-[300px]">
@@ -167,7 +167,7 @@ export function InstallPromptDialog({
               )}
             </div>
           </ScrollArea>
-        </DialogBody>
+        </div>
 
         <DialogFooter className="shrink-0">
           <Button
