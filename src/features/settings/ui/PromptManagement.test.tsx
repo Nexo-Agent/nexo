@@ -14,6 +14,28 @@ vi.mock('lucide-react', () => ({
   Plus: () => <div data-testid="plus-icon" />,
   Trash2: () => <div data-testid="trash-icon" />,
   FileText: () => <div data-testid="file-icon" />,
+  XIcon: () => <div data-testid="x-icon" />,
+}));
+
+vi.mock('@/ui/molecules/ConfirmDialog', () => ({
+  ConfirmDialog: ({
+    open,
+    onConfirm,
+    onOpenChange,
+    title,
+  }: {
+    open: boolean;
+    onConfirm: () => void;
+    onOpenChange: (open: boolean) => void;
+    title: string;
+  }) =>
+    open ? (
+      <div data-testid="confirm-dialog">
+        <h3>{title}</h3>
+        <button onClick={onConfirm}>delete</button>
+        <button onClick={() => onOpenChange(false)}>cancel</button>
+      </div>
+    ) : null,
 }));
 
 vi.mock('@/lib/tauri', () => ({
@@ -40,7 +62,6 @@ vi.mock('@/hooks/useLogger', () => ({
     setContext: vi.fn(),
   }),
 }));
-
 
 vi.mock('@/features/notifications/state/notificationSlice', () => ({
   showError: vi.fn(),

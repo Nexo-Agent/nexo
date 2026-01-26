@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -7,17 +8,8 @@ import {
 } from '@/ui/atoms/select';
 import { UsageFilter } from '@/models/usage';
 import { Calendar, Clock, Trash2 } from 'lucide-react';
+import { ConfirmDialog } from '@/ui/molecules/ConfirmDialog';
 import { Button } from '@/ui/atoms/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from '@/ui/atoms/dialog';
 
 interface UsageHeaderProps {
   filter: UsageFilter;
@@ -34,6 +26,8 @@ export function UsageHeader({
   onIntervalChange,
   onClearUsage,
 }: UsageHeaderProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 items-center justify-between">
@@ -93,41 +87,25 @@ export function UsageHeader({
           </div>
         </div>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="bg-destructive/10 text-destructive hover:bg-destructive/20"
-            >
-              <Trash2 className="h-4 w-4" />
-              Clear Data
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Are you absolutely sure?</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete all
-                usage history and statistics.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <DialogClose asChild>
-                <Button
-                  variant="destructive"
-                  onClick={onClearUsage}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete
-                </Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button
+          variant="destructive"
+          size="sm"
+          className="bg-destructive/10 text-destructive hover:bg-destructive/20"
+          onClick={() => setConfirmOpen(true)}
+        >
+          <Trash2 className="h-4 w-4" />
+          Clear Data
+        </Button>
+
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title="Are you absolutely sure?"
+          description="This action cannot be undone. This will permanently delete all usage history and statistics."
+          onConfirm={onClearUsage}
+          confirmLabel="Delete"
+          variant="destructive"
+        />
       </div>
     </div>
   );

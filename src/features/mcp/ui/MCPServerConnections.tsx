@@ -3,14 +3,7 @@ import { Plus, AlertCircle, RefreshCw, Server, PowerOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { EmptyState } from '@/ui/atoms/empty-state';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/atoms/dialog';
+import { ConfirmDialog } from '@/ui/molecules/ConfirmDialog';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import {
   Tooltip,
@@ -431,23 +424,15 @@ function DeleteConfirmDialog({
   const { t } = useTranslation(['settings', 'common']);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('deleteConnection')}</DialogTitle>
-          <DialogDescription>
-            {t('deleteConnectionConfirm', { name: connectionName })}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t('cancel', { ns: 'common' })}
-          </Button>
-          <Button variant="destructive" onClick={onConfirm}>
-            {t('delete', { ns: 'common' })}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('deleteConnection')}
+      description={t('deleteConnectionConfirm', { name: connectionName })}
+      onConfirm={onConfirm}
+      confirmLabel={t('delete', { ns: 'common' })}
+      cancelLabel={t('cancel', { ns: 'common' })}
+      variant="destructive"
+    />
   );
 }

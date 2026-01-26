@@ -80,7 +80,7 @@ export function ConfirmDialog({
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="flex-1 rounded-xl h-11"
+            className="flex-1 rounded h-11"
             disabled={isLoading}
           >
             {cancelLabel || t('common:cancel')}
@@ -88,7 +88,7 @@ export function ConfirmDialog({
           <Button
             variant={variant}
             onClick={handleConfirm}
-            className="flex-1 rounded-xl h-11 shadow-sm font-semibold"
+            className="flex-1 rounded h-11 shadow-sm font-semibold"
             disabled={isLoading}
           >
             {isLoading ? (

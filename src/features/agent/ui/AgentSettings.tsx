@@ -41,6 +41,7 @@ import { TauriCommands } from '@/bindings/commands';
 import { invokeCommand } from '@/lib/tauri';
 import { useGetInstalledAgentsQuery } from '../state/api';
 import type { InstalledAgent } from '../types';
+import { ConfirmDialog } from '@/ui/molecules/ConfirmDialog';
 
 export function AgentSettings() {
   const {
@@ -672,51 +673,15 @@ export function AgentSettings() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete Agent</DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to delete{' '}
-              {selectedAgent && (
-                <span className="font-semibold">
-                  {selectedAgent.manifest.name}
-                </span>
-              )}
-              ? This action cannot be undone.
-            </p>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={deleting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDeleteAgent}
-              disabled={deleting}
-            >
-              {deleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Agent"
+        description={`Are you sure you want to delete ${selectedAgent?.manifest.name || 'this agent'}? This action cannot be undone.`}
+        onConfirm={handleDeleteAgent}
+        confirmLabel="Delete"
+        isLoading={deleting}
+      />
     </div>
   );
 }

@@ -23,6 +23,7 @@ import {
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
 import { logger } from '@/lib/logger';
+import { ConfirmDialog } from '@/ui/molecules/ConfirmDialog';
 
 interface Prompt {
   id: string;
@@ -323,34 +324,16 @@ function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   const { t } = useTranslation(['settings', 'common']);
 
-  const handleConfirm = () => {
-    onConfirm();
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t('deletePrompt')}</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {t('confirmDeletePrompt')}
-            {promptName && <span className="font-semibold"> {promptName}</span>}
-            ?
-          </p>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            {t('cancel', { ns: 'common' })}
-          </Button>
-          <Button type="button" variant="destructive" onClick={handleConfirm}>
-            {t('delete', { ns: 'common' })}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('deletePrompt')}
+      description={`${t('confirmDeletePrompt')}${promptName ? ` ${promptName}` : ''}?`}
+      onConfirm={onConfirm}
+      confirmLabel={t('delete', { ns: 'common' })}
+      cancelLabel={t('cancel', { ns: 'common' })}
+      variant="destructive"
+    />
   );
 }
