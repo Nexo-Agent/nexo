@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/atoms/select';
-import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { ProviderIcon } from '@/ui/atoms/provider-icon';
 import type { LLMConnection } from '../types';
 import { DEFAULT_URLS, PROVIDER_OPTIONS } from '../lib/constants';
@@ -86,134 +85,120 @@ export function LLMConnectionForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col flex-1 min-h-0 w-full"
-    >
-      <div className="flex-1 overflow-hidden min-h-0 w-full">
-        <ScrollArea className="h-full">
-          <div className="space-y-4 px-6 py-2">
-            <div className="space-y-2 w-full">
-              <Label htmlFor="name">{t('connectionName')}</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('connectionNamePlaceholder')}
-                className="w-full"
-                required
-                data-tour="llm-name-input"
-              />
-            </div>
-            <div className="space-y-2 w-full">
-              <Label htmlFor="provider">{t('provider')}</Label>
-              <Select value={provider} onValueChange={handleProviderChange}>
-                <SelectTrigger
-                  className="w-full"
-                  data-tour="llm-provider-select"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROVIDER_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div className="flex items-center gap-2">
-                        <ProviderIcon
-                          provider={option.value}
-                          className="size-4"
-                        />
-                        {option.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2 w-full">
-              <Label htmlFor="baseUrl">{t('baseUrl')}</Label>
-              <Input
-                id="baseUrl"
-                value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
-                placeholder={DEFAULT_URLS[provider]}
-                className="w-full"
-                required
-              />
-            </div>
-            <div className="space-y-2 w-full">
-              <Label htmlFor="apiKey">{t('apiKey')}</Label>
-              <Input
-                id="apiKey"
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder={
-                  provider === 'vllm' || provider === 'ollama'
-                    ? t('optional') + ' ' + t('enterApiKey')
-                    : t('enterApiKey')
-                }
-                className="w-full"
-                data-tour="llm-api-key-input"
-              />
-            </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2 w-full">
+          <Label htmlFor="name">{t('connectionName')}</Label>
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t('connectionNamePlaceholder')}
+            className="w-full"
+            required
+            data-tour="llm-name-input"
+          />
+        </div>
+        <div className="space-y-2 w-full">
+          <Label htmlFor="provider">{t('provider')}</Label>
+          <Select value={provider} onValueChange={handleProviderChange}>
+            <SelectTrigger className="w-full" data-tour="llm-provider-select">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PROVIDER_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  <div className="flex items-center gap-2">
+                    <ProviderIcon provider={option.value} className="size-4" />
+                    {option.label}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2 w-full">
+          <Label htmlFor="baseUrl">{t('baseUrl')}</Label>
+          <Input
+            id="baseUrl"
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
+            placeholder={DEFAULT_URLS[provider]}
+            className="w-full"
+            required
+          />
+        </div>
+        <div className="space-y-2 w-full">
+          <Label htmlFor="apiKey">{t('apiKey')}</Label>
+          <Input
+            id="apiKey"
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder={
+              provider === 'vllm' || provider === 'ollama'
+                ? t('optional') + ' ' + t('enterApiKey')
+                : t('enterApiKey')
+            }
+            className="w-full"
+            data-tour="llm-api-key-input"
+          />
+        </div>
 
-            {/* Connection Status */}
-            {(isTesting || testStatus) && (
-              <div className="space-y-2 w-full pt-1">
-                {isTesting ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
-                    <RefreshCw className="size-4 animate-spin" />
-                    <span>{t('testing')}</span>
-                  </div>
-                ) : testStatus === 'success' ? (
-                  <div className="flex items-center gap-2 text-sm text-success">
-                    <CheckCircle2 className="size-4" />
-                    <span>
-                      {t('connectionSuccess', { count: models.length })}
-                    </span>
-                  </div>
-                ) : testStatus === 'error' ? (
-                  <div className="flex items-center gap-2 text-sm text-destructive">
-                    <XCircle className="size-4" />
-                    <span>{testError || t('connectionFailed')}</span>
-                  </div>
-                ) : null}
+        {/* Connection Status */}
+        {(isTesting || testStatus) && (
+          <div className="space-y-2 w-full pt-1">
+            {isTesting ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+                <RefreshCw className="size-4 animate-spin" />
+                <span>{t('testing')}</span>
               </div>
-            )}
-
-            {/* Models List */}
-            {models.length > 0 && (
-              <div className="space-y-2 w-full">
-                <Label>{t('modelsList', { count: models.length })}</Label>
-                <ScrollArea className="h-[200px] w-full rounded-md border p-3">
-                  <div className="space-y-1">
-                    {models.map((model) => (
-                      <div
-                        key={model.id}
-                        className="flex items-center justify-between rounded-md bg-muted px-2 py-1.5 text-sm"
-                      >
-                        <span>{model.name}</span>
-                        {model.owned_by && (
-                          <span className="text-xs text-muted-foreground">
-                            {model.owned_by}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+            ) : testStatus === 'success' ? (
+              <div className="flex items-center gap-2 text-sm text-success font-medium">
+                <CheckCircle2 className="size-4" />
+                <span>{t('connectionSuccess', { count: models.length })}</span>
               </div>
-            )}
+            ) : testStatus === 'error' ? (
+              <div className="flex items-center gap-2 text-sm text-destructive font-medium">
+                <XCircle className="size-4" />
+                <span>{testError || t('connectionFailed')}</span>
+              </div>
+            ) : null}
           </div>
-        </ScrollArea>
+        )}
+
+        {/* Models List */}
+        {models.length > 0 && (
+          <div className="space-y-2 w-full">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {t('modelsList', { count: models.length })}
+            </Label>
+            <div className="max-h-[200px] w-full rounded-md border bg-muted/20 overflow-y-auto p-2 space-y-1">
+              {models.map((model) => (
+                <div
+                  key={model.id}
+                  className="flex items-center justify-between rounded-md bg-background/50 px-2 py-1.5 text-sm border border-border/40"
+                >
+                  <span className="font-medium">{model.name}</span>
+                  {model.owned_by && (
+                    <span className="text-[10px] text-muted-foreground uppercase">
+                      {model.owned_by}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      <div className="flex shrink-0 items-center justify-between gap-2 px-6 pb-6 pt-2">
+
+      <div className="flex items-center justify-between gap-3 pt-4 sticky bottom-0 bg-background/0">
         {onDelete && (
           <Button
             type="button"
             variant="destructive"
             onClick={onDelete}
-            className="flex-1"
+            className="flex-1 h-10"
           >
             <Trash2 className="mr-2 size-4" />
             {t('delete', { ns: 'common' })}
@@ -222,7 +207,7 @@ export function LLMConnectionForm({
         <Button
           type="submit"
           disabled={!name.trim() || !baseUrl.trim() || isTesting}
-          className="flex-1"
+          className="flex-1 h-10"
           data-tour="llm-save-btn"
         >
           {isTesting ? (

@@ -292,7 +292,7 @@ exports[`AgentSettings > Empty State > should match snapshot for empty state 1`]
             </div>
           </div>
           <div
-            class="flex-col-reverse gap-2 sm:flex-row shrink-0 px-4 pt-2 pb-4 ư-full flex justify-between items-center sm:justify-between w-full"
+            class="flex-col-reverse gap-2 sm:flex-row shrink-0 px-4 pt-2 pb-4 flex justify-between items-center sm:justify-between w-full"
             data-slot="dialog-footer"
           >
             <button
@@ -784,7 +784,7 @@ exports[`AgentSettings > Initial Rendering > should match snapshot 1`] = `
             </div>
           </div>
           <div
-            class="flex-col-reverse gap-2 sm:flex-row shrink-0 px-4 pt-2 pb-4 ư-full flex justify-between items-center sm:justify-between w-full"
+            class="flex-col-reverse gap-2 sm:flex-row shrink-0 px-4 pt-2 pb-4 flex justify-between items-center sm:justify-between w-full"
             data-slot="dialog-footer"
           >
             <button

@@ -18,6 +18,7 @@ import {
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
 import { logger } from '@/lib/logger';
+import { SectionHeader } from '@/ui/molecules/SectionHeader';
 import { LLMConnectionCard } from './LLMConnectionCard';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { LLMConnectionDialog } from './LLMConnectionDialog';
@@ -128,12 +129,12 @@ export function LLMConnections() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
+      <SectionHeader>
         <Button onClick={handleAdd} size="sm" data-tour="llm-add-btn">
           <Plus className="mr-2 size-4" />
           {t('addConnection')}
         </Button>
-      </div>
+      </SectionHeader>
 
       {llmConnections.length === 0 ? (
         <EmptyState icon={Network} title={t('noConnections')} />

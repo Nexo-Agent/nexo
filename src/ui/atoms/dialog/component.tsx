@@ -231,7 +231,7 @@ function DialogFooter({
       data-slot="dialog-footer"
       className={cn(
         'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end shrink-0 px-4 pt-2 pb-4',
-        'ư-full',
+        'w-full',
         showBorder && 'border-t border-border',
         className
       )}
