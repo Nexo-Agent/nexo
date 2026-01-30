@@ -80,7 +80,7 @@ export function PythonPackageManagerDialog({
           </div>
         </DialogHeader>
 
-        <DialogBody className="px-6 py-5 space-y-4 w-full">
+        <DialogBody className="px-2 py-2 space-y-4 w-full">
           <div className="space-y-2">
             <label
               htmlFor="packages"
@@ -95,7 +95,7 @@ export function PythonPackageManagerDialog({
               value={packages}
               onChange={(e) => setPackages(e.target.value)}
               disabled={isInstalling}
-              className="min-h-[120px] font-mono text-sm leading-relaxed p-3.5 bg-background shadow-inner border-border/60 focus:border-brand-python/40 focus:ring-1 focus:ring-brand-python/20 transition-all resize-none rounded-xl"
+              className="min-h-[120px] font-mono text-sm leading-relaxed bg-background shadow-inner border-border/60 focus:border-brand-python/40 focus:ring-1 focus:ring-brand-python/20 transition-all resize-none"
             />
 
             <p className="text-[11px] text-muted-foreground/40 italic px-1">
@@ -109,14 +109,14 @@ export function PythonPackageManagerDialog({
             variant="ghost"
             onClick={handleCancel}
             disabled={isInstalling}
-            className="flex-1 h-10 text-xs font-semibold rounded-xl border border-border/40 hover:bg-muted/50 transition-colors"
+            className="flex-1 h-10 text-xs font-semibold rounded border border-border/40 hover:bg-muted/50 transition-colors"
           >
             {t('cancel', { ns: 'common' })}
           </Button>
           <Button
             onClick={handleInstall}
             disabled={isInstalling || packages.trim().length === 0}
-            className="flex-1 h-10 text-xs font-bold bg-brand-python hover:bg-brand-python/90 text-white rounded-xl shadow-lg shadow-brand-python/10 transition-all active:scale-[0.98]"
+            className="flex-1 h-10 text-xs font-bold bg-brand-python hover:bg-brand-python/90 text-white rounded shadow-lg shadow-brand-python/10 transition-all active:scale-[0.98]"
           >
             {isInstalling ? (
               <div className="flex items-center gap-2">

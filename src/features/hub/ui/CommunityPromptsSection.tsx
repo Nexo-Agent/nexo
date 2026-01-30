@@ -1,16 +1,8 @@
 import { useCallback } from 'react';
-import { Download, FileText } from 'lucide-react';
+import { Download, FileText, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Avatar, AvatarFallback, AvatarImage } from '@/ui/atoms/avatar';
 import { Button } from '@/ui/atoms/button/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/ui/atoms/card';
+import { EntityCard } from '@/ui/molecules/EntityCard';
 
 import { useAppDispatch } from '@/app/hooks';
 import {
@@ -79,48 +71,38 @@ export function CommunityPromptsSection({
   const renderItem = useCallback(
     (prompt: HubPrompt) => {
       const isInstalled = installedPromptIds.includes(prompt.id);
-      return (
-        <Card
-          key={prompt.id}
-          className="flex flex-col h-full hover:bg-accent/50 transition-colors"
-        >
-          <CardHeader className="flex-row items-center gap-3 pb-3 space-y-0">
-            <Avatar className="size-10 rounded-md">
-              <AvatarImage
-                src={prompt.icon}
-                alt={prompt.name}
-                className="object-cover"
-              />
-              <AvatarFallback className="rounded bg-muted">
-                <FileText className="size-5 text-muted-foreground" />
-              </AvatarFallback>
-            </Avatar>
 
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-base truncate m-0 p-0">
-                {prompt.name}
-              </CardTitle>
-              <CardDescription className="text-xs mt-1 truncate">
-                {prompt.id}
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="flex-1">
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {prompt.description}
-            </p>
-          </CardContent>
-          <CardFooter className="pt-0">
+      const icon = prompt.icon ? (
+        <img
+          src={prompt.icon}
+          alt={prompt.name}
+          className="size-10 rounded-md object-cover bg-muted/20 p-1"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+      ) : (
+        <FileText className="size-5 text-primary" />
+      );
+
+      return (
+        <EntityCard
+          key={prompt.id}
+          icon={icon}
+          title={prompt.name}
+          subtitle={prompt.id}
+          description={prompt.description}
+          footer={
             <Button
               onClick={() => onInstall(prompt)}
               disabled={isInstalled}
-              className="w-full"
+              className="w-full h-9"
               size="sm"
-              variant={isInstalled ? 'outline' : 'default'}
+              variant={isInstalled ? 'secondary' : 'default'}
             >
               {isInstalled ? (
                 <>
-                  <FileText className="mr-2 size-4" />
+                  <Check className="mr-2 size-4" />
                   {t('installed', { defaultValue: 'Installed' })}
                 </>
               ) : (
@@ -130,8 +112,8 @@ export function CommunityPromptsSection({
                 </>
               )}
             </Button>
-          </CardFooter>
-        </Card>
+          }
+        />
       );
     },
     [installedPromptIds, onInstall, t]

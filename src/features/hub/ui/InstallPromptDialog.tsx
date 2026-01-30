@@ -3,21 +3,13 @@ import { Loader2, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { Textarea } from '@/ui/atoms/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/ui/atoms/dialog';
-import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { useAppDispatch } from '@/app/hooks';
 import {
   showError,
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
+import { FormDialog } from '@/ui/molecules/FormDialog';
 import type { HubPrompt, ParsedPromptTemplate } from './prompt-types';
 import { logger } from '@/lib/logger';
 
@@ -110,66 +102,14 @@ export function InstallPromptDialog({
   if (!prompt) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl flex flex-col max-h-[90vh]">
-        <DialogHeader className="shrink-0">
-          <DialogTitle>
-            {t('installPrompt', { defaultValue: 'Install Prompt' })}:{' '}
-            {prompt.name}
-          </DialogTitle>
-          <DialogDescription>{prompt.description}</DialogDescription>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="min-h-[300px] pr-4">
-              {loading ? (
-                <div className="flex items-center justify-center min-h-[300px]">
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  <p className="text-sm text-muted-foreground">
-                    {t('loadingTemplate', {
-                      defaultValue: 'Loading template...',
-                    })}
-                  </p>
-                </div>
-              ) : template ? (
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">
-                      {t('promptContent', {
-                        defaultValue: 'Prompt Content',
-                      })}
-                    </h4>
-                    {template.variables.length > 0 && (
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {t('variablesWillBeFilledInChat', {
-                          defaultValue:
-                            'Variables ({{variables}}) will be filled when using this prompt in chat.',
-                          variables: template.variables.join(', '),
-                        })}
-                      </p>
-                    )}
-                    <Textarea
-                      value={template.content}
-                      readOnly
-                      className="min-h-[200px] font-mono text-sm"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center min-h-[300px]">
-                  <p className="text-sm text-muted-foreground">
-                    {t('failedToLoadTemplate', {
-                      defaultValue: 'Failed to load template',
-                    })}
-                  </p>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </div>
-
-        <DialogFooter className="shrink-0">
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={`${t('installPrompt', { defaultValue: 'Install Prompt' })}: ${prompt.name}`}
+      description={prompt.description}
+      scrollable={false}
+      footer={
+        <div className="flex w-full justify-end gap-2">
           <Button
             type="button"
             variant="outline"
@@ -195,8 +135,35 @@ export function InstallPromptDialog({
               </>
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      }
+    >
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[300px]">
+          <Loader2 className="mr-2 size-4 animate-spin" />
+          <p className="text-sm text-muted-foreground">
+            {t('loadingTemplate', {
+              defaultValue: 'Loading template...',
+            })}
+          </p>
+        </div>
+      ) : template ? (
+        <div className="space-y-4">
+          <Textarea
+            value={template.content}
+            readOnly
+            className="font-mono text-sm h-[50vh]"
+          />
+        </div>
+      ) : (
+        <div className="flex items-center justify-center min-h-[300px]">
+          <p className="text-sm text-muted-foreground">
+            {t('failedToLoadTemplate', {
+              defaultValue: 'Failed to load template',
+            })}
+          </p>
+        </div>
+      )}
+    </FormDialog>
   );
 }
