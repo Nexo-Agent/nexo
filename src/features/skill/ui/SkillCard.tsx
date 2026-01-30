@@ -1,11 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/ui/atoms/card';
+import { EntityCard } from '@/ui/molecules/EntityCard';
 import { Badge } from '@/ui/atoms/badge';
+import { Button } from '@/ui/atoms/button';
+import { Zap, Trash2 } from 'lucide-react';
 import type { SkillRecord } from '../types';
 
 interface SkillCardProps {
@@ -21,42 +17,56 @@ export function SkillCard({
   isSelected,
   onSelect,
   onViewDetails,
+  onDelete,
 }: SkillCardProps) {
   const metadata = skill.metadataJson ? JSON.parse(skill.metadataJson) : {};
 
+  const badges = (
+    <div className="flex flex-wrap gap-2">
+      {metadata.author && <Badge variant="secondary">{metadata.author}</Badge>}
+      {metadata.version && <Badge variant="outline">v{metadata.version}</Badge>}
+    </div>
+  );
+
+  const actions = (
+    <div className="flex items-center gap-1">
+      {onSelect && (
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={(e) => {
+            e.stopPropagation();
+            onSelect(skill.id);
+          }}
+          className="mr-2 cursor-pointer"
+        />
+      )}
+      {onDelete && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(skill.id);
+          }}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
+
   return (
-    <Card
-      className={isSelected ? 'border-primary' : 'cursor-pointer'}
+    <EntityCard
+      title={skill.name}
+      description={skill.description}
+      icon={<Zap className="size-5" />}
+      extra={badges}
+      actions={actions}
       onClick={() => onViewDetails?.(skill.id)}
-    >
-      <CardHeader>
-        <div className="flex">
-          <div className="flex-1">
-            <CardTitle className="text-lg p-0 m-0">{skill.name}</CardTitle>
-            <CardDescription className="mt-2">
-              {skill.description}
-            </CardDescription>
-          </div>
-          {onSelect && (
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={() => onSelect(skill.id)}
-              className="mt-1"
-            />
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {metadata.author && (
-            <Badge variant="secondary">{metadata.author}</Badge>
-          )}
-          {metadata.version && (
-            <Badge variant="outline">v{metadata.version}</Badge>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      active={isSelected}
+      className={isSelected ? 'border-primary ring-1 ring-primary' : ''}
+    />
   );
 }

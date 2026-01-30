@@ -1,16 +1,8 @@
 import * as React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogDescription,
-} from '@/ui/atoms/dialog/component';
-import { Button } from '@/ui/atoms/button/button';
+import { FormDialog } from '@/ui/molecules/FormDialog';
+import { Button } from '@/ui/atoms/button';
 import { Input } from '@/ui/atoms/input';
-import { Label } from '@/ui/atoms/label.tsx'; // Fixed import to include .tsx as per find_by_name
+import { Label } from '@/ui/atoms/label';
 import { useImportSkillMutation } from '../state/skillsApi';
 import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
@@ -41,45 +33,41 @@ export function ImportSkillDialog({ isOpen, onClose }: ImportSkillDialogProps) {
     }
   };
 
-  // Note: ideally we would use @tauri-apps/api/dialog to browse for a folder
-  // but for now we provide a manual input.
+  const footer = (
+    <>
+      <Button variant="outline" onClick={onClose}>
+        Cancel
+      </Button>
+      <Button onClick={handleImport} disabled={isLoading}>
+        {isLoading ? 'Importing...' : 'Import Skill'}
+      </Button>
+    </>
+  );
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Import Skill</DialogTitle>
-          <DialogDescription>
-            Enter the local path to the skill directory containing a SKILL.md
-            file.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogBody>
-          <div className="space-y-4">
-            <div className="grid w-full items-center gap-1.5">
-              <Label htmlFor="sourcePath">Source Path</Label>
-              <Input
-                id="sourcePath"
-                placeholder="/path/to/skill-directory"
-                value={sourcePath}
-                onChange={(e) => setSourcePath(e.target.value)}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              The directory must contain a <strong>SKILL.md</strong> file with
-              required metadata in YAML frontmatter.
-            </p>
-          </div>
-        </DialogBody>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleImport} disabled={isLoading}>
-            {isLoading ? 'Importing...' : 'Import Skill'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open={isOpen}
+      onOpenChange={(open) => !open && onClose()}
+      title="Import Skill"
+      description="Enter the local path to the skill directory containing a SKILL.md file."
+      footer={footer}
+      maxWidth="md"
+    >
+      <div className="space-y-4">
+        <div className="grid w-full items-center gap-1.5">
+          <Label htmlFor="sourcePath">Source Path</Label>
+          <Input
+            id="sourcePath"
+            placeholder="/path/to/skill-directory"
+            value={sourcePath}
+            onChange={(e) => setSourcePath(e.target.value)}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          The directory must contain a <strong>SKILL.md</strong> file with
+          required metadata in YAML frontmatter.
+        </p>
+      </div>
+    </FormDialog>
   );
 }

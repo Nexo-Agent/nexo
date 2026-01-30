@@ -30,6 +30,7 @@ interface FormDialogProps {
     | 'max-w-[420px]';
   className?: string;
   scrollable?: boolean;
+  scrollableHeightClass?: string;
 }
 
 /**
@@ -45,6 +46,7 @@ export function FormDialog({
   maxWidth = '2xl',
   className,
   scrollable = true,
+  scrollableHeightClass = '',
 }: FormDialogProps) {
   const maxWidthClass = {
     sm: 'sm:max-w-sm',
@@ -74,7 +76,7 @@ export function FormDialog({
 
         <DialogBody className="flex-1 overflow-hidden p-0">
           {scrollable ? (
-            <ScrollArea className="h-full px-6 py-4 **:data-[slot='scroll-area-scrollbar']:hidden">
+            <ScrollArea className={scrollableHeightClass}>
               <div className="space-y-6 pb-4">{children}</div>
             </ScrollArea>
           ) : (
