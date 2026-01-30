@@ -20,6 +20,7 @@ import type {
   PythonRuntimeStatus,
   NodeRuntimeStatus,
 } from '../types';
+import { ScrollArea } from '@/ui/atoms/scroll-area';
 
 // Skeleton component for runtime selector loading state
 function RuntimeSelectorSkeleton() {
@@ -191,6 +192,7 @@ export function MCPServerConnectionDialog({
           </Button>
         </div>
       }
+      scrollable={false}
     >
       <div className="space-y-6">
         {/* Basic Information */}
@@ -338,12 +340,12 @@ export function MCPServerConnectionDialog({
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               {t('toolsList', { count: connection.tools.length })}
             </Label>
-            <div className="rounded-xl border bg-muted/20 overflow-hidden">
-              <div className="max-h-[250px] overflow-y-auto divide-y divide-border/50">
+            <ScrollArea className="h-[200px] w-full rounded-md border p-3">
+              <div className="flex flex-col gap-y-4">
                 {connection.tools.map((tool, index) => (
                   <div
                     key={index}
-                    className="px-4 py-3 text-sm hover:bg-muted/30 transition-colors"
+                    className="px-2 text-sm hover:bg-muted/30 transition-colors"
                   >
                     <div className="font-semibold text-foreground">
                       {tool.name}
@@ -356,7 +358,7 @@ export function MCPServerConnectionDialog({
                   </div>
                 ))}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         )}
       </div>

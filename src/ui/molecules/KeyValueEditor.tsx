@@ -5,6 +5,7 @@ import { Button } from '@/ui/atoms/button/button';
 import { Input } from '@/ui/atoms/input';
 import { Label } from '@/ui/atoms/label';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '../atoms/scroll-area';
 
 interface KeyValueItem {
   key: string;
@@ -105,13 +106,13 @@ export function KeyValueEditor({
       </div>
 
       {items.length > 0 && (
-        <div className="space-y-2.5">
+        <ScrollArea className="h-[150px]">
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex items-center gap-2 group animate-in fade-in slide-in-from-top-1 duration-200"
+              className="flex items-center gap-2 group animate-in fade-in slide-in-from-top-1 duration-200 my-2"
             >
-              <div className="flex-1 grid grid-cols-2 gap-2">
+              <div className="flex-1 grid grid-cols-2 gap-1">
                 <Input
                   value={item.key}
                   onChange={(e) => handleKeyChange(index, e.target.value)}
@@ -142,7 +143,7 @@ export function KeyValueEditor({
               </Button>
             </div>
           ))}
-        </div>
+        </ScrollArea>
       )}
 
       {helperText && (
