@@ -282,13 +282,13 @@ export function ChatSidebar() {
         </div>
       </ScrollArea>
 
-      <div className="p-2 mt-auto border-t border-sidebar-border">
+      <div className="px-2 py-4 mt-auto border-sidebar-border">
         <Button
           onClick={() => {
             dispatch(setWorkspaceSettingsOpen(true));
           }}
-          className="w-full justify-start gap-2"
-          variant="ghost"
+          className="w-full justify-center gap-2"
+          variant="default"
         >
           <Settings className="size-4" />
           <span>{t('settings:workspaceSettings')}</span>
