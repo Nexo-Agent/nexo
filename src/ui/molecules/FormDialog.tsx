@@ -80,7 +80,7 @@ export function FormDialog({
               <div className="space-y-6 pb-4">{children}</div>
             </ScrollArea>
           ) : (
-            <div className="h-full px-6 py-4 space-y-6">{children}</div>
+            <div className="h-full px-2 py-4 space-y-6">{children}</div>
           )}
         </DialogBody>
 

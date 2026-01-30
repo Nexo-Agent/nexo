@@ -289,5 +289,6 @@
   "runCommandDesc": "Thực thi một lệnh shell",
   "streamEnabled": "Bật chế độ stream",
   "streamEnabledDescription": "Nếu được bật, các token sẽ được hiển thị khi chúng được tạo ra.",
-  "noModels": "Không có mô hình"
+  "noModels": "Không có mô hình",
+  "systemMessagePlaceholder": "Bạn là một trợ lý hữu ích."
 }

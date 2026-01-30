@@ -313,7 +313,10 @@ impl ToolService {
                 function: crate::models::llm_types::ChatCompletionToolFunction {
                     name: "read_file".to_string(),
                     description: Some(
-                        "Read the content of a file (Absolute path required)".to_string(),
+                        "Read the content of a file (Absolute path required). \
+                        Examples: \
+                        - { \"path\": \"/abs/path/to/file.txt\" } \
+                        - { \"path\": \"/Users/name/project/src/main.rs\" }".to_string(),
                     ),
                     parameters: Some(serde_json::json!({
                         "type": "object",
@@ -329,7 +332,10 @@ impl ToolService {
                 function: crate::models::llm_types::ChatCompletionToolFunction {
                     name: "write_file".to_string(),
                     description: Some(
-                        "Write content to a file (Absolute path required)".to_string(),
+                        "Write content to a file (Absolute path required). \
+                        Examples: \
+                        - { \"path\": \"/abs/path/to/file.txt\", \"content\": \"hello world\" } \
+                        - { \"path\": \"/Users/name/project/config.json\", \"content\": \"{\\\"key\\\": \\\"value\\\"}\" }".to_string(),
                     ),
                     parameters: Some(serde_json::json!({
                         "type": "object",
@@ -346,7 +352,10 @@ impl ToolService {
                 function: crate::models::llm_types::ChatCompletionToolFunction {
                     name: "list_dir".to_string(),
                     description: Some(
-                        "List the contents of a directory (Absolute path required)".to_string(),
+                        "List the contents of a directory (Absolute path required). \
+                        Examples: \
+                        - { \"path\": \"/abs/path/to/dir\" } \
+                        - { \"path\": \"/Users/name/code/nexo\" }".to_string(),
                     ),
                     parameters: Some(serde_json::json!({
                         "type": "object",
@@ -362,7 +371,12 @@ impl ToolService {
                 function: crate::models::llm_types::ChatCompletionToolFunction {
                     name: "run_command".to_string(),
                     description: Some(
-                        "Run a shell command. Uses the app process environment. Default cwd is the system temp directory.".to_string(),
+                        "Run a shell command. Uses the app process environment. Default cwd is the system temp directory. \
+                        Examples: \
+                        - { \"command\": \"ls\", \"args\": [\"-la\"], \"cwd\": \"/abs/path\" } \
+                        - { \"command\": \"git\", \"args\": [\"status\"] } \
+                        - { \"command\": \"npm\", \"args\": [\"install\", \"lodash\"] } \
+                        - { \"command\": \"python\", \"args\": [\"--version\"] }".to_string(),
                     ),
                     parameters: Some(serde_json::json!({
                         "type": "object",

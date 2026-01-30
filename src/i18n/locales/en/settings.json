@@ -288,5 +288,6 @@
   "runCommand": "run_command",
   "runCommandDesc": "Execute a shell command",
   "streamEnabled": "Enable stream",
-  "noModels": "No models found"
+  "noModels": "No models found",
+  "systemMessagePlaceholder": "You are a helpful assistant."
 }
