@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/atoms/tabs';
 import { useGetInstalledAgentsQuery } from '@/features/agent/state/api';
 import { useGetMCPConnectionsQuery } from '@/features/mcp';
 import { CommunityAgentsSection } from './CommunityAgentsSection';
-import { CommunityMCPServersSection } from './CommunityMCPServersSection';
+import { CommunityMCPServersSection } from '@/features/mcp/ui/CommunityMCPServersSection';
 import { CommunityPromptsSection } from './CommunityPromptsSection';
 import { InstallMCPServerDialog } from './InstallMCPServerDialog';
 import { InstallPromptDialog } from './InstallPromptDialog';

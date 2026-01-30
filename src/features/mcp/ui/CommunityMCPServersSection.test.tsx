@@ -186,7 +186,8 @@ describe('CommunityMCPServersSection', () => {
       />
     );
 
-    expect(screen.getByText('loadingHubMCPServers')).toBeInTheDocument();
+    // HubCommunitySection renders skeletons during loading, so we check for the container
+    expect(screen.getByTestId('scroll-area')).toBeInTheDocument();
   });
 
   it('renders servers after loading', async () => {

@@ -3,21 +3,13 @@ import { Loader2, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { Label } from '@/ui/atoms/label';
-import {
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/atoms/dialog/component';
-import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { useAppDispatch } from '@/app/hooks';
 import {
   showError,
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
+import { FormDialog } from '@/ui/molecules/FormDialog';
 import type { HubMCPServer } from '@/features/mcp/types';
 import { logger } from '@/lib/logger';
 
@@ -112,65 +104,13 @@ export function InstallMCPServerDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl flex flex-col max-h-[90vh]">
-        <DialogHeader className="shrink-0">
-          <DialogTitle>
-            {t('installMCPServer', { defaultValue: 'Install MCP Server' })}:{' '}
-            {server.name}
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground">{server.description}</p>
-        </DialogHeader>
-
-        <DialogBody className="overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="space-y-6 pr-4 pb-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5 p-3 rounded-lg border bg-muted/30">
-                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    {t('serverType', { defaultValue: 'Server Type' })}
-                  </Label>
-                  <p className="text-sm font-mono font-medium">
-                    {server.type.toUpperCase()}
-                  </p>
-                </div>
-                <div className="space-y-1.5 p-3 rounded-lg border bg-muted/30">
-                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    {t('serverId', { defaultValue: 'Server ID' })}
-                  </Label>
-                  <p className="text-sm font-mono truncate">{server.id}</p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  {t('serverConfig', { defaultValue: 'Server Configuration' })}
-                </Label>
-                <div className="relative group">
-                  <pre className="text-xs font-mono bg-zinc-950 text-zinc-300 p-4 rounded-lg overflow-auto max-h-[250px] border border-zinc-800">
-                    {formatConfigPreview()}
-                  </pre>
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-700">
-                      JS
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-lg p-4">
-                <p className="text-xs text-amber-800 dark:text-amber-400 leading-relaxed">
-                  {t('installNote', {
-                    defaultValue:
-                      'Note: After installation, you can configure additional environment variables and headers in the connection settings.',
-                  })}
-                </p>
-              </div>
-            </div>
-          </ScrollArea>
-        </DialogBody>
-
-        <DialogFooter className="shrink-0">
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={`${t('installMCPServer', { defaultValue: 'Install MCP Server' })}: ${server.name}`}
+      description={server.description}
+      footer={
+        <div className="flex w-full justify-end gap-2">
           <Button
             type="button"
             variant="outline"
@@ -192,8 +132,52 @@ export function InstallMCPServerDialog({
               </>
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      }
+    >
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5 p-3 rounded-lg border bg-muted/30">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t('serverType', { defaultValue: 'Server Type' })}
+            </Label>
+            <p className="text-sm font-mono font-medium">
+              {server.type.toUpperCase()}
+            </p>
+          </div>
+          <div className="space-y-1.5 p-3 rounded-lg border bg-muted/30">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t('serverId', { defaultValue: 'Server ID' })}
+            </Label>
+            <p className="text-sm font-mono truncate">{server.id}</p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">
+            {t('serverConfig', { defaultValue: 'Server Configuration' })}
+          </Label>
+          <div className="relative group">
+            <pre className="text-xs font-mono bg-zinc-950 text-zinc-300 p-4 rounded-lg overflow-auto max-h-[250px] border border-zinc-800">
+              {formatConfigPreview()}
+            </pre>
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-700">
+                JS
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-lg p-4">
+          <p className="text-xs text-amber-800 dark:text-amber-400 leading-relaxed">
+            {t('installNote', {
+              defaultValue:
+                'Note: After installation, you can configure additional environment variables and headers in the connection settings.',
+            })}
+          </p>
+        </div>
+      </div>
+    </FormDialog>
   );
 }

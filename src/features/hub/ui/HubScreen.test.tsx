@@ -102,7 +102,7 @@ vi.mock('./CommunityAgentsSection', () => ({
   ),
 }));
 
-vi.mock('./CommunityMCPServersSection', () => ({
+vi.mock('@/features/mcp/ui/CommunityMCPServersSection', () => ({
   CommunityMCPServersSection: () => (
     <div data-testid="community-mcp">Community MCP</div>
   ),
