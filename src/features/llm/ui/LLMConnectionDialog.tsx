@@ -32,6 +32,7 @@ export const LLMConnectionDialog = memo(function LLMConnectionDialog({
       title={connection ? t('editConnection') : t('addNewConnection')}
       description={t('configureConnection')}
       maxWidth="2xl"
+      scrollable={false}
     >
       <LLMConnectionForm
         connection={connection}

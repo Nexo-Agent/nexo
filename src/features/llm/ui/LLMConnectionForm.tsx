@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Trash2, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
+import { Trash2, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/ui/atoms/button/button';
 import { Input } from '@/ui/atoms/input';
 import { Label } from '@/ui/atoms/label';
@@ -15,6 +15,8 @@ import type { LLMConnection } from '../types';
 import { DEFAULT_URLS, PROVIDER_OPTIONS } from '../lib/constants';
 import { useTestConnection } from '../hooks/useTestConnection';
 import { useLLMConnectionForm } from '../hooks/useLLMConnectionForm';
+import { ScrollArea } from '@/ui/atoms/scroll-area';
+import { cn } from '@/lib/utils';
 
 interface LLMConnectionFormProps {
   connection: LLMConnection | null;
@@ -145,51 +147,55 @@ export function LLMConnectionForm({
           />
         </div>
 
-        {/* Connection Status */}
-        {(isTesting || testStatus) && (
-          <div className="space-y-2 w-full pt-1">
-            {isTesting ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
-                <RefreshCw className="size-4 animate-spin" />
-                <span>{t('testing')}</span>
-              </div>
-            ) : testStatus === 'success' ? (
-              <div className="flex items-center gap-2 text-sm text-success font-medium">
-                <CheckCircle2 className="size-4" />
-                <span>{t('connectionSuccess', { count: models.length })}</span>
-              </div>
-            ) : testStatus === 'error' ? (
-              <div className="flex items-center gap-2 text-sm text-destructive font-medium">
-                <XCircle className="size-4" />
-                <span>{testError || t('connectionFailed')}</span>
-              </div>
-            ) : null}
-          </div>
-        )}
+        <div
+          className={cn(
+            'flex items-center gap-2 text-sm font-medium',
+            testStatus === 'success'
+              ? 'text-success'
+              : testStatus === 'error'
+                ? 'text-destructive'
+                : 'text-muted-foreground'
+          )}
+        >
+          <CheckCircle2 className="size-4" />
+          <span>
+            {testStatus === 'success'
+              ? t('connectionSuccess', { count: models.length })
+              : testStatus === 'error'
+                ? testError
+                : t('testing')}
+          </span>
+        </div>
 
         {/* Models List */}
-        {models.length > 0 && (
-          <div className="space-y-2 w-full">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('modelsList', { count: models.length })}
-            </Label>
-            <div className="max-h-[200px] w-full rounded-md border bg-muted/20 overflow-y-auto p-2 space-y-1">
-              {models.map((model) => (
-                <div
-                  key={model.id}
-                  className="flex items-center justify-between rounded-md bg-background/50 px-2 py-1.5 text-sm border border-border/40"
-                >
-                  <span className="font-medium">{model.name}</span>
-                  {model.owned_by && (
-                    <span className="text-[10px] text-muted-foreground uppercase">
-                      {model.owned_by}
-                    </span>
-                  )}
-                </div>
-              ))}
+        <div className="space-y-2 w-full">
+          <Label>{t('modelsList', { count: models.length })}</Label>
+          {models.length > 0 ? (
+            <ScrollArea className="h-[200px] w-full rounded-md border p-3">
+              <div className="flex gap-y-4 flex-col">
+                {models.map((model) => (
+                  <div
+                    key={model.id}
+                    className="flex items-center justify-between rounded-md bg-muted px-2 text-sm"
+                  >
+                    <span>{model.name}</span>
+                    {model.owned_by && (
+                      <span className="text-xs text-muted-foreground">
+                        {model.owned_by}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          ) : (
+            <div className="h-[200px] w-full rounded-md border p-3">
+              <div className="flex items-center justify-center h-full">
+                <span className="text-muted-foreground">{t('noModels')}</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-between gap-3 pt-4 sticky bottom-0 bg-background/0">

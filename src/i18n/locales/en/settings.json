@@ -287,5 +287,6 @@
   "listDirDesc": "List contents of a directory",
   "runCommand": "run_command",
   "runCommandDesc": "Execute a shell command",
-  "streamEnabled": "Enable stream"
+  "streamEnabled": "Enable stream",
+  "noModels": "No models found"
 }
