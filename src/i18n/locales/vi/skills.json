@@ -1,0 +1,9 @@
+{
+  "deleteSkill": "Xóa Skill",
+  "deleteSkillConfirmation": "Bạn có chắc chắn muốn xóa skill này không? Hành động này sẽ xóa nó khỏi hệ thống tệp.",
+  "deleteSkillSuccess": "Xóa skill thành công",
+  "deleteSkillError": "Xóa skill thất bại",
+  "loadingSkills": "Đang tải danh sách skill...",
+  "noSkillsFound": "Không tìm thấy skill nào. Hãy import một thư mục skill để bắt đầu.",
+  "cannotUndone": "Hành động này không thể hoàn tác."
+}

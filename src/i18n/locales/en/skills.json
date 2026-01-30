@@ -1,0 +1,9 @@
+{
+  "deleteSkill": "Delete Skill",
+  "deleteSkillConfirmation": "Are you sure you want to delete this skill? This will remove it from the filesystem.",
+  "deleteSkillSuccess": "Skill deleted successfully",
+  "deleteSkillError": "Failed to delete skill",
+  "loadingSkills": "Loading skills...",
+  "noSkillsFound": "No skills found. Import a skill directory to get started.",
+  "cannotUndone": "This action cannot be undone."
+}

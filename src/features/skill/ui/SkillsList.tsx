@@ -6,27 +6,33 @@ import {
 import { SkillCard } from './SkillCard';
 import { SkillDetails } from './SkillDetails';
 import { toast } from 'sonner';
+import { FormDialog } from '@/ui/molecules/FormDialog';
+import { Button } from '@/ui/atoms/button';
+import { useTranslation } from 'react-i18next';
 
 export function SkillsList() {
+  const { t } = useTranslation(['skills', 'common']);
   const { data: skills, isLoading } = useGetAllSkillsQuery();
   const [deleteSkill] = useDeleteSkillMutation();
   const [selectedSkillId, setSelectedSkillId] = React.useState<string | null>(
     null
   );
   const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
+  const [skillToDelete, setSkillToDelete] = React.useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (
-      confirm(
-        'Are you sure you want to delete this skill? This will remove it from the filesystem.'
-      )
-    ) {
-      try {
-        await deleteSkill(id).unwrap();
-        toast.success('Skill deleted successfully');
-      } catch (_error) {
-        toast.error('Failed to delete skill');
-      }
+  const handleDelete = (id: string) => {
+    setSkillToDelete(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!skillToDelete) return;
+    try {
+      await deleteSkill(skillToDelete).unwrap();
+      toast.success(t('deleteSkillSuccess'));
+    } catch (_error) {
+      toast.error(t('deleteSkillError'));
+    } finally {
+      setSkillToDelete(null);
     }
   };
 
@@ -36,7 +42,7 @@ export function SkillsList() {
   };
 
   if (isLoading) {
-    return <div>Loading skills...</div>;
+    return <div>{t('loadingSkills')}</div>;
   }
 
   return (
@@ -54,7 +60,7 @@ export function SkillsList() {
 
       {skills?.length === 0 && (
         <div className="text-center text-muted-foreground py-12 border-2 border-dashed rounded-lg">
-          No skills found. Import a skill directory to get started.
+          {t('noSkillsFound')}
         </div>
       )}
 
@@ -63,6 +69,30 @@ export function SkillsList() {
         isOpen={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
       />
+
+      <FormDialog
+        open={!!skillToDelete}
+        onOpenChange={(open) => !open && setSkillToDelete(null)}
+        title={t('deleteSkill')}
+        description={t('deleteSkillConfirmation')}
+        maxWidth="sm"
+        footer={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setSkillToDelete(null)}
+              className="mr-2"
+            >
+              {t('common:cancel')}
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              {t('common:delete')}
+            </Button>
+          </>
+        }
+      >
+        <div className="text-sm text-muted-foreground">{t('cannotUndone')}</div>
+      </FormDialog>
     </div>
   );
 }
