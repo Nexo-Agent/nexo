@@ -2,15 +2,7 @@ import { useState } from 'react';
 import { useAppDispatch } from '@/app/hooks';
 import { setSetupCompleted } from '@/features/ui/state/uiSlice';
 import { Button } from '@/ui/atoms/button/button';
-import {
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/atoms/dialog/index';
+import { FormDialog } from '@/ui/molecules/FormDialog';
 import { Input } from '@/ui/atoms/input';
 import { Label } from '@/ui/atoms/label';
 import {
@@ -284,263 +276,246 @@ export function FirstRunSetup({ open }: { open: boolean }) {
     return models;
   };
 
+  const titles: Record<Step, string> = {
+    welcome: 'Chào mừng đến với Nexo',
+    installing: 'Đang thiết lập môi trường',
+    'llm-setup': 'Kết nối AI của bạn',
+    completed: 'Hoàn tất',
+  };
+
+  const descriptions: Record<Step, string> = {
+    welcome:
+      'Không gian làm việc AI mạnh mẽ, ưu tiên xử lý cục bộ. Hãy để chúng tôi chuẩn bị mọi thứ cho bạn.',
+    installing:
+      'Chúng tôi đang cài đặt các runtime cần thiết để vận hành quy trình tự động của bạn.',
+    'llm-setup':
+      'Chọn nhà cung cấp AI yêu thích để bắt đầu trò chuyện và tạo mã nguồn.',
+    completed: '',
+  };
+
+  const renderFooter = () => {
+    if (step === 'welcome') {
+      return (
+        <div className="flex w-full items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={skipSetup}
+            className="text-muted-foreground hover:text-foreground hover:bg-transparent px-2 font-semibold text-[14px]"
+          >
+            Bỏ qua thiết lập
+          </Button>
+          <Button
+            onClick={startSetup}
+            className="bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 px-8 h-11 text-[14px] font-semibold rounded min-w-[160px]"
+          >
+            Bắt đầu thiết lập
+          </Button>
+        </div>
+      );
+    }
+
+    if (step === 'installing') {
+      return (
+        <div className="w-full flex items-center justify-center gap-3 py-1">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          <span className="text-[13px] font-semibold text-foreground/70 animate-pulse">
+            Đang cấu hình không gian làm việc...
+          </span>
+        </div>
+      );
+    }
+
+    if (step === 'llm-setup') {
+      return (
+        <div className="flex w-full items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={skipSetup}
+            className="text-muted-foreground hover:text-foreground hover:bg-transparent px-2 font-semibold text-[14px]"
+          >
+            Bỏ qua
+          </Button>
+          <Button
+            onClick={handleLlmSubmit}
+            disabled={isSubmitting || !llmConfig.apiKey}
+            className="bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all px-8 h-11 text-[14px] font-bold rounded min-w-[160px]"
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : null}
+            Kết nối & Cài đặt
+          </Button>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   if (!open) return null;
 
   return (
-    <Dialog open={open}>
-      <DialogContent
-        className="sm:max-w-[540px] h-auto max-h-[90vh] flex flex-col border-border/40 shadow-2xl p-0 gap-0 overflow-hidden bg-background rounded-3xl"
-        showCloseButton={false}
-      >
-        <DialogHeader
-          className={cn(
-            'relative flex flex-col items-center justify-center shrink-0 text-center overflow-hidden border-b border-border/30 transition-all duration-500',
-            step === 'welcome' ? 'h-[220px]' : 'h-[160px]'
-          )}
-        >
-          {/* Background Decorative Element */}
-          <div className="absolute inset-0 bg-linear-to-b from-muted/50 to-background z-0" />
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-3xl z-0" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-3xl z-0" />
-
-          <div className="relative z-10 flex flex-col items-center">
-            {step === 'welcome' && (
-              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-background shadow-xl ring-1 ring-border/50 animate-in zoom-in-50 duration-700">
-                <img
-                  src="/icon.svg"
-                  alt="Nexo Logo"
-                  className="h-12 w-12 drop-shadow-md"
-                />
-              </div>
-            )}
-
-            <DialogTitle
-              className={cn(
-                'font-bold tracking-tight text-foreground px-6 transition-all duration-500',
-                step === 'welcome' ? 'text-3xl' : 'text-2xl'
-              )}
-            >
-              {step === 'welcome' && 'Chào mừng đến với Nexo'}
-              {step === 'installing' && 'Đang thiết lập môi trường'}
-              {step === 'llm-setup' && 'Kết nối AI của bạn'}
-            </DialogTitle>
-
-            <DialogDescription className="text-sm text-muted-foreground/90 max-w-[400px] mt-3 px-8 leading-relaxed font-medium">
-              {step === 'welcome' &&
-                'Không gian làm việc AI mạnh mẽ, ưu tiên xử lý cục bộ. Hãy để chúng tôi chuẩn bị mọi thứ cho bạn.'}
-              {step === 'installing' &&
-                'Chúng tôi đang cài đặt các runtime cần thiết để vận hành quy trình tự động của bạn.'}
-              {step === 'llm-setup' &&
-                'Chọn nhà cung cấp AI yêu thích để bắt đầu trò chuyện và tạo mã nguồn.'}
-            </DialogDescription>
-          </div>
-        </DialogHeader>
-
-        <DialogBody className="relative z-10 flex-1 py-8 px-8 flex flex-col overflow-y-auto">
-          {step === 'welcome' && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-              <div className="space-y-4">
-                <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-1">
-                  Cài đặt đề xuất bao gồm
-                </h4>
-                <div className="grid gap-2.5">
-                  <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-muted/40 border border-border/30 hover:bg-muted/60 transition-all duration-300">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20 shadow-sm">
-                      <Terminal className="h-4.5 w-4.5" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-sm">
-                        Runtime Python & Node.js
-                      </span>
-                      <span className="text-[11px] text-muted-foreground">
-                        Cần thiết cho các tác vụ nâng cao và tự động hóa
-                      </span>
-                    </div>
+    <FormDialog
+      open={open}
+      onOpenChange={(val) => !val && skipSetup()}
+      title={titles[step]}
+      description={descriptions[step]}
+      footer={renderFooter()}
+      className="sm:max-w-[540px]"
+    >
+      <div className="flex-1 py-4 flex flex-col">
+        {step === 'welcome' && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+            <div className="space-y-4">
+              <h4 className="text-[11px] font-bold text-muted-foreground uppercase px-1">
+                Cài đặt đề xuất bao gồm
+              </h4>
+              <div className="grid gap-2.5">
+                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-muted/40 border border-border/30 hover:bg-muted/60 transition-all duration-300">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20 shadow-sm">
+                    <Terminal className="h-4.5 w-4.5" />
                   </div>
-                  <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-muted/40 border border-border/30 hover:bg-muted/60 transition-all duration-300">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 ring-1 ring-purple-500/20 shadow-sm">
-                      <Bot className="h-4.5 w-4.5" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-sm">
-                        Kết nối LLM mặc định
-                      </span>
-                      <span className="text-[11px] text-muted-foreground">
-                        Thiết lập mô hình ngôn ngữ để bắt đầu làm việc
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {step === 'installing' && (
-            <div className="space-y-3.5 animate-in fade-in slide-in-from-right-8 duration-700">
-              <RuntimeInstallCard
-                icon={<Cpu className="h-5 w-5" />}
-                title="Runtime Python"
-                description="Môi trường cốt lõi cho AI Agent"
-                status={installStatus.python}
-              />
-              <RuntimeInstallCard
-                icon={<Terminal className="h-5 w-5" />}
-                title="Runtime Node.js"
-                description="Công cụ cho các tiện ích JavaScript"
-                status={installStatus.node}
-              />
-            </div>
-          )}
-
-          {step === 'llm-setup' && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-8 duration-700">
-              <div className="grid gap-2">
-                <Label className="text-[12px] font-semibold text-foreground/80 ml-1">
-                  Nhà cung cấp AI
-                </Label>
-                <Select
-                  value={llmConfig.provider}
-                  onValueChange={(val) =>
-                    setLlmConfig((prev) => ({
-                      ...prev,
-                      provider: val as LLMConnection['provider'],
-                      baseUrl:
-                        (!prev.baseUrl ||
-                          prev.baseUrl === DEFAULT_URLS[prev.provider]) &&
-                        DEFAULT_URLS[val]
-                          ? DEFAULT_URLS[val]
-                          : prev.baseUrl,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="w-full h-11 rounded-xl border-border/60 bg-muted/30 focus:ring-primary/20 transition-all hover:bg-muted/50 focus:bg-background">
-                    <SelectValue placeholder="Chọn nhà cung cấp" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl shadow-xl border-border/40">
-                    {PROVIDER_OPTIONS.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className="py-2"
-                      >
-                        <div className="flex items-center gap-3">
-                          <ProviderIcon
-                            provider={option.value}
-                            className="h-4 w-4"
-                          />
-                          <span className="font-medium text-sm">
-                            {option.label}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label className="text-[12px] font-semibold text-foreground/80 ml-1">
-                    Base URL
-                  </Label>
-                  <div className="relative group">
-                    <Globe className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                    <Input
-                      className="h-10 pl-10 rounded-xl border-border/60 bg-muted/30 focus:bg-background transition-all text-sm"
-                      value={llmConfig.baseUrl}
-                      onChange={(e) =>
-                        setLlmConfig((prev) => ({
-                          ...prev,
-                          baseUrl: e.target.value,
-                        }))
-                      }
-                      placeholder="https://api..."
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between px-1">
-                    <Label className="text-[12px] font-semibold text-foreground/80">
-                      API Key
-                    </Label>
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground/50 tracking-wider">
-                      Lưu trữ cục bộ
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm">
+                      Runtime Python & Node.js
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Cần thiết cho các tác vụ nâng cao và tự động hóa
                     </span>
                   </div>
-                  <div className="relative group">
-                    <Key className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                    <Input
-                      className="h-10 pl-10 rounded-xl border-border/60 font-mono text-sm bg-muted/30 focus:bg-background transition-all"
-                      type="password"
-                      value={llmConfig.apiKey}
-                      onChange={(e) =>
-                        setLlmConfig((prev) => ({
-                          ...prev,
-                          apiKey: e.target.value,
-                        }))
-                      }
-                      placeholder="sk-..."
-                    />
+                </div>
+                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-muted/40 border border-border/30 hover:bg-muted/60 transition-all duration-300">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 ring-1 ring-purple-500/20 shadow-sm">
+                    <Bot className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm">
+                      Kết nối LLM mặc định
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Thiết lập mô hình ngôn ngữ để bắt đầu làm việc
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
-          )}
-        </DialogBody>
+          </div>
+        )}
 
-        <DialogFooter className="sm:justify-between px-8 py-6 bg-muted/5 border-t border-border/30">
-          {step === 'welcome' && (
-            <>
-              <Button
-                variant="ghost"
-                onClick={skipSetup}
-                className="text-muted-foreground hover:text-foreground hover:bg-transparent px-2 font-semibold text-[14px]"
-              >
-                Bỏ qua thiết lập
-              </Button>
-              <Button
-                onClick={startSetup}
-                className="bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 px-8 h-11 text-[14px] font-bold rounded-2xl min-w-[160px]"
-              >
-                Bắt đầu thiết lập
-              </Button>
-            </>
-          )}
+        {step === 'installing' && (
+          <div className="space-y-3.5 animate-in fade-in slide-in-from-right-8 duration-700">
+            <RuntimeInstallCard
+              icon={<Cpu className="h-5 w-5" />}
+              title="Runtime Python"
+              description="Môi trường cốt lõi cho AI Agent"
+              status={installStatus.python}
+            />
+            <RuntimeInstallCard
+              icon={<Terminal className="h-5 w-5" />}
+              title="Runtime Node.js"
+              description="Công cụ cho các tiện ích JavaScript"
+              status={installStatus.node}
+            />
+          </div>
+        )}
 
-          {step === 'installing' && (
-            <div className="w-full flex items-center justify-center gap-3 py-1">
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="text-[13px] font-semibold text-foreground/70 animate-pulse">
-                Đang cấu hình không gian làm việc...
-              </span>
+        {step === 'llm-setup' && (
+          <div className="space-y-5 animate-in fade-in slide-in-from-right-8 duration-700">
+            <div className="grid gap-2">
+              <Label className="text-[12px] font-semibold text-foreground/80 ml-1">
+                Nhà cung cấp AI
+              </Label>
+              <Select
+                value={llmConfig.provider}
+                onValueChange={(val) =>
+                  setLlmConfig((prev) => ({
+                    ...prev,
+                    provider: val as LLMConnection['provider'],
+                    baseUrl:
+                      (!prev.baseUrl ||
+                        prev.baseUrl === DEFAULT_URLS[prev.provider]) &&
+                      DEFAULT_URLS[val]
+                        ? DEFAULT_URLS[val]
+                        : prev.baseUrl,
+                  }))
+                }
+              >
+                <SelectTrigger className="w-full h-11 rounded-xl border-border/60 bg-muted/30 focus:ring-primary/20 transition-all hover:bg-muted/50 focus:bg-background">
+                  <SelectValue placeholder="Chọn nhà cung cấp" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl shadow-xl border-border/40">
+                  {PROVIDER_OPTIONS.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="py-2"
+                    >
+                      <div className="flex items-center gap-3">
+                        <ProviderIcon
+                          provider={option.value}
+                          className="h-4 w-4"
+                        />
+                        <span className="font-medium text-sm">
+                          {option.label}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          )}
 
-          {step === 'llm-setup' && (
-            <>
-              <Button
-                variant="ghost"
-                onClick={skipSetup}
-                className="text-muted-foreground hover:text-foreground hover:bg-transparent px-2 font-semibold text-[14px]"
-              >
-                Bỏ qua
-              </Button>
-              <Button
-                onClick={handleLlmSubmit}
-                disabled={isSubmitting || !llmConfig.apiKey}
-                className="bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all px-8 h-11 text-[14px] font-bold rounded-2xl min-w-[160px]"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Kết nối & Cài đặt
-              </Button>
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <div className="space-y-4">
+              <div className="grid gap-2">
+                <Label className="text-[12px] font-semibold text-foreground/80 ml-1">
+                  Base URL
+                </Label>
+                <div className="relative group">
+                  <Globe className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
+                  <Input
+                    className="h-10 pl-10 rounded-xl border-border/60 bg-muted/30 focus:bg-background transition-all text-sm"
+                    value={llmConfig.baseUrl}
+                    onChange={(e) =>
+                      setLlmConfig((prev) => ({
+                        ...prev,
+                        baseUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="https://api..."
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between px-1">
+                  <Label className="text-[12px] font-semibold text-foreground/80">
+                    API Key
+                  </Label>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground/50 tracking-wider">
+                    Lưu trữ cục bộ
+                  </span>
+                </div>
+                <div className="relative group">
+                  <Key className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
+                  <Input
+                    className="h-10 pl-10 rounded-xl border-border/60 font-mono text-sm bg-muted/30 focus:bg-background transition-all"
+                    type="password"
+                    value={llmConfig.apiKey}
+                    onChange={(e) =>
+                      setLlmConfig((prev) => ({
+                        ...prev,
+                        apiKey: e.target.value,
+                      }))
+                    }
+                    placeholder="sk-..."
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </FormDialog>
   );
 }
 
@@ -558,7 +533,7 @@ function RuntimeInstallCard({
   return (
     <div
       className={cn(
-        'group flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card/60 transition-[background-color,border-color,box-shadow,ring] duration-300 backdrop-blur-sm',
+        'group flex items-center justify-between p-4 rounded border border-border/40 bg-card/60 transition-[background-color,border-color,box-shadow,ring] duration-300 backdrop-blur-sm',
         status === 'installing' &&
           'border-primary/50 bg-primary/5 ring-1 ring-primary/20 shadow-[0_0_20px_-10px_rgba(var(--primary),0.2)]',
         status === 'success' && 'border-green-500/30 bg-green-500/5',
