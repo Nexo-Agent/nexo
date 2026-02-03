@@ -320,13 +320,13 @@ export function ChatInput({
     return enabledConnections
       .map((conn: LLMConnection) => ({
         ...conn,
-        models: (
-          conn.models?.sort((a, b) => a.id.localeCompare(b.id)) || []
-        ).filter(
-          (m) =>
-            m.name?.toLowerCase().includes(modelSearchTerm.toLowerCase()) ||
-            m.id.toLowerCase().includes(modelSearchTerm.toLowerCase())
-        ),
+        models: [...(conn.models || [])]
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .filter(
+            (m) =>
+              m.name?.toLowerCase().includes(modelSearchTerm.toLowerCase()) ||
+              m.id.toLowerCase().includes(modelSearchTerm.toLowerCase())
+          ),
       }))
       .filter((conn) => conn.models && conn.models.length > 0);
   }, [llmConnections, modelSearchTerm]);
