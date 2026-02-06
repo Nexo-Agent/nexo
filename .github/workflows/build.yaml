@@ -81,18 +81,11 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.19
+            # Nexo v0.1.0-beta.20
 
-            ## New Features
+            ## Bug Fixes
 
-            - **Enhanced Tools and Skills**: Added usage examples to tool descriptions and improved skill management with localized UI and dedicated confirmation dialogs.
-            - **Setup Experience**: Refactored the first-run setup UI for a smoother onboarding experience with dynamic step content.
-
-            ## UI/UX Improvements
-
-            - **Editor Refinements**: Enhanced textarea components with dynamic height and optimized the note editor layout.
-            - **LLM Connection Management**: Improved the LLM connection form with consolidated status display and better feedback when no models are found.
-            - **Visual Consistency**: Standardized dialogs and entity cards across the application for a more unified and premium feel.
+            - **Model Sorting**: Fixed an issue where sorting models directly mutated the original array, which could cause unexpected behavior in the UI.
 
             ---
 
