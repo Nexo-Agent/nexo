@@ -1,7 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-
-const getSpeechSynthesis = () =>
-  typeof window !== 'undefined' ? window.speechSynthesis : null;
+import EasySpeech from 'easy-speech';
 
 function cleanTextForTTS(text: string): string {
   return text
@@ -25,55 +23,91 @@ function detectLanguage(text: string): string {
   return hasVietnamese ? 'vi-VN' : 'en-US';
 }
 
+function selectVoice(
+  voices: SpeechSynthesisVoice[],
+  lang: string
+): SpeechSynthesisVoice | undefined {
+  const findVoice = (targetLang: string) =>
+    voices.find((v) => v.lang === targetLang) ||
+    voices.find((v) => v.lang.startsWith(targetLang.split('-')[0]));
+
+  if (lang === 'vi-VN') return findVoice(lang);
+  if (lang === 'en-US') {
+    const samantha = voices.find((v) => v.name === 'Samantha');
+    if (samantha) return samantha;
+    return findVoice('en');
+  }
+  const byLang = findVoice(lang);
+  if (byLang) return byLang;
+  return voices.find((v) => v.default) ?? voices[0];
+}
+
+const TTS_INIT_OPTIONS = {
+  maxTimeout: 5000,
+  interval: 250,
+  quiet: true,
+} as const;
+
 export const useTTS = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  /** True when init succeeded and at least one voice is available (TTS usable). */
+  const [isAvailable, setIsAvailable] = useState(false);
+  const initPromiseRef = useRef<Promise<boolean> | null>(null);
+  const initializedRef = useRef(false);
+
+  const ensureInit = useCallback((): Promise<boolean> => {
+    if (typeof window === 'undefined') return Promise.resolve(false);
+    if (initPromiseRef.current) return initPromiseRef.current;
+    initPromiseRef.current = EasySpeech.init(TTS_INIT_OPTIONS).then((ok) => {
+      initializedRef.current = ok;
+      if (ok && EasySpeech.voices().length > 0) {
+        setIsAvailable(true);
+      }
+      return ok;
+    });
+    return initPromiseRef.current;
+  }, []);
 
   const stop = useCallback(() => {
-    const synth = getSpeechSynthesis();
-    if (synth) synth.cancel();
+    if (typeof window === 'undefined') return;
+    if (!initializedRef.current) {
+      setIsPlaying(false);
+      return;
+    }
+    EasySpeech.cancel();
     setIsPlaying(false);
   }, []);
 
   const speak = useCallback(
-    (text: string) => {
+    async (text: string) => {
       const cleanText = cleanTextForTTS(text);
       if (!cleanText) return;
 
-      const synth = getSpeechSynthesis();
-      if (!synth) return;
-      synth.cancel();
+      if (typeof window === 'undefined') return;
+      const ok = await ensureInit();
+      if (!ok) return;
 
-      const utterance = new SpeechSynthesisUtterance(cleanText);
+      const voices = EasySpeech.voices();
+      if (!voices.length) return;
+
       const lang = detectLanguage(cleanText);
-      const voices = synth.getVoices();
+      const voice = selectVoice(voices, lang);
 
-      const findVoice = (targetLang: string) =>
-        voices.find((v) => v.lang === targetLang) ||
-        voices.find((v) => v.lang.startsWith(targetLang.split('-')[0]));
+      stop();
 
-      let voice: SpeechSynthesisVoice | undefined =
-        lang === 'vi-VN'
-          ? findVoice(lang)
-          : lang === 'en-US'
-            ? voices.find((v) => v.name === 'Samantha')
-            : undefined;
-      if (!voice) voice = voices.find((v) => v.default) || voices[0];
-
-      if (voice) {
-        utterance.voice = voice;
-        utterance.lang = voice.lang;
-      } else {
-        utterance.lang = lang;
+      try {
+        await EasySpeech.speak({
+          text: cleanText,
+          voice: voice ?? undefined,
+          start: () => setIsPlaying(true),
+          end: () => setIsPlaying(false),
+          error: () => setIsPlaying(false),
+        });
+      } catch {
+        setIsPlaying(false);
       }
-
-      utterance.onstart = () => setIsPlaying(true);
-      utterance.onend = () => setIsPlaying(false);
-      utterance.onerror = () => setIsPlaying(false);
-      utteranceRef.current = utterance;
-      synth.speak(utterance);
     },
-    [stop]
+    [ensureInit, stop]
   );
 
   const toggle = useCallback(
@@ -81,18 +115,21 @@ export const useTTS = () => {
       if (isPlaying) {
         stop();
       } else {
-        speak(text);
+        void speak(text);
       }
     },
     [isPlaying, speak, stop]
   );
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    void ensureInit();
     return () => {
-      const synth = getSpeechSynthesis();
-      if (synth) synth.cancel();
+      if (initializedRef.current) {
+        EasySpeech.cancel();
+      }
     };
-  }, []);
+  }, [ensureInit]);
 
-  return { isPlaying, speak, stop, toggle };
+  return { isPlaying, isAvailable, speak, stop, toggle };
 };

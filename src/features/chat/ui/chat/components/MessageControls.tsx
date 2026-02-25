@@ -36,7 +36,7 @@ export const MessageControls = memo(function MessageControls({
   t,
   className,
 }: MessageControlsProps) {
-  const { isPlaying, toggle } = useTTS();
+  const { isPlaying, isAvailable, toggle } = useTTS();
 
   const handleToggleTTS = () => {
     toggle(content);
@@ -96,20 +96,22 @@ export const MessageControls = memo(function MessageControls({
           <Copy className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
         )}
       </button>
-      <button
-        className={cn(
-          'p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors group/btn',
-          isPlaying && 'text-primary animate-pulse'
-        )}
-        onClick={handleToggleTTS}
-        title={t('readAloud') || 'Read aloud'}
-      >
-        {isPlaying ? (
-          <VolumeX className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
-        ) : (
-          <Volume2 className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
-        )}
-      </button>
+      {isAvailable && (
+        <button
+          className={cn(
+            'p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors group/btn',
+            isPlaying && 'text-primary animate-pulse'
+          )}
+          onClick={handleToggleTTS}
+          title={t('readAloud') || 'Read aloud'}
+        >
+          {isPlaying ? (
+            <VolumeX className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
+          ) : (
+            <Volume2 className="h-3.5 w-3.5 opacity-70 group-hover/btn:opacity-100 transition-opacity" />
+          )}
+        </button>
+      )}
     </div>
   );
 });

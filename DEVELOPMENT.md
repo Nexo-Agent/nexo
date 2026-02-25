@@ -36,6 +36,32 @@ sudo apt-get install libglib2.0-dev \
     librsvg2-dev
 ```
 
+**Text-to-Speech (TTS) on Linux**  
+The app uses the Web Speech API (via [easy-speech](https://github.com/leaonline/easy-speech)). On Linux, synthesis depends on the system TTS stack:
+
+- **Tauri (WebKitGTK)**: Uses the platform backend (e.g. speech-dispatcher or libspiel). Install at least one of:
+  - `speech-dispatcher` + `espeak` or `espeak-ng`
+    ```bash
+    sudo apt-get install speech-dispatcher espeak
+    ```
+  - On Fedora: `sudo dnf install speech-dispatcher speech-*`
+- **Chromium (browser)**: Same idea; some builds need Chromium started with `--enable-speech-dispatcher` if voices stay empty.
+
+**Verify TTS**: Open the app, open DevTools (e.g. right‑click → Inspect → Console), then run:
+
+```js
+// Quick check: do we have synthesis and voices?
+const s = window.speechSynthesis;
+console.log(
+  'speechSynthesis:',
+  !!s,
+  '| voices:',
+  s?.getVoices?.()?.length ?? 0
+);
+```
+
+If `voices` is 0 after a few seconds, install/configure the packages above and restart.
+
 #### Windows
 
 - **Microsoft Visual Studio C++ Build Tools** (Select "Desktop development with C++" workload).
