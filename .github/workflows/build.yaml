@@ -81,11 +81,15 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.20
+            # Nexo v0.1.0-beta.21
+
+            ## What's New
+
+            - **Text-to-Speech**: Switched to easy-speech for more reliable TTS on Chromium (Linux/Windows). Read aloud button only appears when TTS is available (e.g. after installing speech-dispatcher + espeak on Linux).
 
             ## Bug Fixes
 
-            - **Model Sorting**: Fixed an issue where sorting models directly mutated the original array, which could cause unexpected behavior in the UI.
+            - **TTS**: Fixed "EasySpeech: not initialized" error when closing the app or navigating away before TTS finished initializing.
 
             ---
 
