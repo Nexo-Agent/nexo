@@ -24,7 +24,8 @@ You need the webkit2gtk and appindicator libraries:
 
 ```bash
 sudo apt-get update
-sudo apt-get install libwebkit2gtk-4.1-dev \
+sudo apt-get install libglib2.0-dev \
+    libwebkit2gtk-4.1-dev \
     build-essential \
     curl \
     wget \

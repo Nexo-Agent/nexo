@@ -1,78 +1,80 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
+const getSpeechSynthesis = () =>
+  typeof window !== 'undefined' ? window.speechSynthesis : null;
+
+function cleanTextForTTS(text: string): string {
+  return text
+    .replace(/#+\s/g, '') // headers
+    .replace(/\*\*/g, '') // bold
+    .replace(/\*/g, '') // italic
+    .replace(/```[\s\S]*?```/g, '') // code blocks
+    .replace(/`.*?`/g, '') // inline code
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // links
+    .replace(/!\[.*?\]\(.*?\)/g, '') // images
+    .replace(/>\s/g, '') // quotes
+    .replace(/-\s/g, '') // list items
+    .trim();
+}
+
+function detectLanguage(text: string): string {
+  const hasVietnamese =
+    /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(
+      text
+    );
+  return hasVietnamese ? 'vi-VN' : 'en-US';
+}
+
 export const useTTS = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const stop = useCallback(() => {
-    window.speechSynthesis.cancel();
+    const synth = getSpeechSynthesis();
+    if (synth) synth.cancel();
     setIsPlaying(false);
   }, []);
 
-  const speak = useCallback((text: string) => {
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
+  const speak = useCallback(
+    (text: string) => {
+      const cleanText = cleanTextForTTS(text);
+      if (!cleanText) return;
 
-    // Remove markdown symbols for better reading
-    // This is a basic cleanup, can be improved
-    const cleanText = text
-      .replace(/#+\s/g, '') // headers
-      .replace(/\*\*/g, '') // bold
-      .replace(/\*/g, '') // italic
-      .replace(/```[\s\S]*?```/g, '') // code blocks
-      .replace(/`.*?`/g, '') // inline code
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // links
-      .replace(/!\[.*?\]\(.*?\)/g, '') // images
-      .replace(/>\s/g, '') // quotes
-      .replace(/-\s/g, '') // list items
-      .trim();
+      const synth = getSpeechSynthesis();
+      if (!synth) return;
+      synth.cancel();
 
-    if (!cleanText) return;
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      const lang = detectLanguage(cleanText);
+      const voices = synth.getVoices();
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-
-    // Detect language (simple check for Vietnamese characters)
-    const hasVietnamese =
-      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(
-        cleanText
-      );
-    const lang = hasVietnamese ? 'vi-VN' : 'en-US';
-
-    const voices = window.speechSynthesis.getVoices();
-
-    const findVoice = (targetLang: string) => {
-      return (
+      const findVoice = (targetLang: string) =>
         voices.find((v) => v.lang === targetLang) ||
-        voices.find((v) => v.lang.startsWith(targetLang.split('-')[0]))
-      );
-    };
+        voices.find((v) => v.lang.startsWith(targetLang.split('-')[0]));
 
-    let voice: SpeechSynthesisVoice | undefined;
-    if (lang === 'vi-VN') {
-      voice = findVoice(lang);
-    } else if (lang === 'en-US') {
-      voice = voices.find((v) => v.name === 'Samantha');
-    }
+      let voice: SpeechSynthesisVoice | undefined =
+        lang === 'vi-VN'
+          ? findVoice(lang)
+          : lang === 'en-US'
+            ? voices.find((v) => v.name === 'Samantha')
+            : undefined;
+      if (!voice) voice = voices.find((v) => v.default) || voices[0];
 
-    // Fallback if target language voice not found
-    if (!voice) {
-      voice = voices.find((v) => v.default) || voices[0];
-    }
+      if (voice) {
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+      } else {
+        utterance.lang = lang;
+      }
 
-    if (voice) {
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
-    } else {
-      utterance.lang = lang;
-    }
-
-    utterance.onstart = () => setIsPlaying(true);
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
-
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, []);
+      utterance.onstart = () => setIsPlaying(true);
+      utterance.onend = () => setIsPlaying(false);
+      utterance.onerror = () => setIsPlaying(false);
+      utteranceRef.current = utterance;
+      synth.speak(utterance);
+    },
+    [stop]
+  );
 
   const toggle = useCallback(
     (text: string) => {
@@ -87,7 +89,8 @@ export const useTTS = () => {
 
   useEffect(() => {
     return () => {
-      window.speechSynthesis.cancel();
+      const synth = getSpeechSynthesis();
+      if (synth) synth.cancel();
     };
   }, []);
 
