@@ -174,6 +174,7 @@ export function useChatInput(selectedWorkspaceId: string | null) {
     currentWorkspaceSettings?.llmConnectionId,
     currentWorkspaceSettings?.streamEnabled,
     isValidModel,
+    selectedModel,
   ]);
 
   // Save chat input settings to SQLite when they change

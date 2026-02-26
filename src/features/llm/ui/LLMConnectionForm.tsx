@@ -198,7 +198,7 @@ export function LLMConnectionForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-4 sticky bottom-0 bg-background/0">
+      <div className="flex items-center justify-between gap-3 pt-4 border-t bg-background shrink-0">
         {onDelete && (
           <Button
             type="button"
