@@ -1,6 +1,56 @@
 import { describe, it, expect } from 'vitest';
-import { sortMessages } from './messageSorting';
+import {
+  getAssistantMessageIdsWithToolCalls,
+  sortMessages,
+} from './messageSorting';
 import type { Message } from '../../../types';
+
+describe('getAssistantMessageIdsWithToolCalls', () => {
+  it('should include assistant messages linked to tool_call messages', () => {
+    const messages: Message[] = [
+      {
+        id: 'assistant-1',
+        role: 'assistant',
+        content: 'Thinking',
+        timestamp: 1000,
+      },
+      {
+        id: 'tool-call-1',
+        role: 'tool_call',
+        content: '{"name":"search"}',
+        timestamp: 1100,
+        assistantMessageId: 'assistant-1',
+      },
+      {
+        id: 'assistant-2',
+        role: 'assistant',
+        content: 'Final answer',
+        timestamp: 2000,
+      },
+    ];
+
+    const ids = getAssistantMessageIdsWithToolCalls(messages);
+
+    expect(ids.has('assistant-1')).toBe(true);
+    expect(ids.has('assistant-2')).toBe(false);
+  });
+
+  it('should include assistant messages with in-flight toolCalls', () => {
+    const messages: Message[] = [
+      {
+        id: 'assistant-1',
+        role: 'assistant',
+        content: '',
+        timestamp: 1000,
+        toolCalls: [{ id: 'tc-1', name: 'search', arguments: {} }],
+      },
+    ];
+
+    const ids = getAssistantMessageIdsWithToolCalls(messages);
+
+    expect(ids.has('assistant-1')).toBe(true);
+  });
+});
 
 describe('sortMessages', () => {
   it('should sort messages by timestamp', () => {

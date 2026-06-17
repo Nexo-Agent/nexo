@@ -5,7 +5,10 @@ import { ToolCallItem } from './ToolCallItem';
 import { ThinkingItem } from './ThinkingItem';
 import { MessageItem } from './MessageItem';
 import { useComponentPerformance } from '@/hooks/useComponentPerformance';
-import { sortMessages } from './utils/messageSorting';
+import {
+  getAssistantMessageIdsWithToolCalls,
+  sortMessages,
+} from './utils/messageSorting';
 import { cn } from '@/lib/utils';
 import { useMessageListState } from '../../hooks/useMessageListState';
 
@@ -126,6 +129,11 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
     // Memoize sorted messages - only recalculate when messages array changes
     const sortedMessages = useMemo(() => sortMessages(messages), [messages]);
 
+    const assistantIdsWithToolCalls = useMemo(
+      () => getAssistantMessageIdsWithToolCalls(messages),
+      [messages]
+    );
+
     // Find the last message that will be rendered (not skipped)
     const lastRenderableMessageId = useMemo(() => {
       for (let i = sortedMessages.length - 1; i >= 0; i--) {
@@ -173,6 +181,10 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
               ? pendingRequests[message.id]
               : null;
 
+          const isIntermediateAssistantStep =
+            message.role === 'assistant' &&
+            assistantIdsWithToolCalls.has(message.id);
+
           const showThinking = Boolean(
             enableThinkingItem &&
             message.role === 'assistant' &&
@@ -181,9 +193,15 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
                 streamingMessageId === message.id &&
                 !message.content))
           );
+          const hasMeaningfulContent = message.content.trim().length > 0;
           const showMessage = Boolean(
-            message.role !== 'assistant' || message.content
+            message.role !== 'assistant' ||
+            (isIntermediateAssistantStep
+              ? hasMeaningfulContent
+              : message.content)
           );
+
+          const showTokenUsage = showUsage && !isIntermediateAssistantStep;
 
           return (
             <Fragment key={message.id}>
@@ -204,7 +222,7 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
                     <MessageItem
                       key={`content-${message.id}`}
                       message={message}
-                      showUsage={showUsage}
+                      showUsage={showTokenUsage}
                       markdownEnabled={isMarkdownEnabled}
                       isCopied={copiedId === message.id}
                       onToggleMarkdown={toggleMarkdown}

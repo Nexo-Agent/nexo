@@ -1,6 +1,26 @@
 import type { Message } from '../../../types';
 
 /**
+ * Returns assistant message IDs that triggered tool calls (intermediate agent-loop steps).
+ * Covers both persisted tool_call messages and in-flight toolCalls on assistant messages.
+ */
+export function getAssistantMessageIdsWithToolCalls(
+  messages: Message[]
+): Set<string> {
+  const ids = new Set<string>();
+
+  for (const m of messages) {
+    if (m.role === 'tool_call' && m.assistantMessageId) {
+      ids.add(m.assistantMessageId);
+    } else if (m.role === 'assistant' && (m.toolCalls?.length ?? 0) > 0) {
+      ids.add(m.id);
+    }
+  }
+
+  return ids;
+}
+
+/**
  * Sorts messages by timestamp and groups tool calls with their parent assistant messages.
  * This ensures the display order: Thinking (part of assistant message) -> Tool Call
  *
