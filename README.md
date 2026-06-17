@@ -37,7 +37,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Nexo-Agent/nexo/main/install
 You can pin a version by setting `VERSION`, for example:
 
 ```bash
-VERSION=0.1.0-beta.21 bash <(curl -fsSL https://raw.githubusercontent.com/Nexo-Agent/nexo/main/installer.sh)
+VERSION=0.1.0-beta.22 bash <(curl -fsSL https://raw.githubusercontent.com/Nexo-Agent/nexo/main/installer.sh)
 ```
 
 ### Quick install (Windows 10+)
@@ -51,7 +51,7 @@ Run in PowerShell:
 Pin a version:
 
 ```powershell
-& ([ScriptBlock]::Create((iwr -useb https://raw.githubusercontent.com/Nexo-Agent/nexo/main/installer-windows.ps1))) -Version "0.1.0-beta.21"
+& ([ScriptBlock]::Create((iwr -useb https://raw.githubusercontent.com/Nexo-Agent/nexo/main/installer-windows.ps1))) -Version "0.1.0-beta.22"
 ```
 
 Silent install (run PowerShell as Administrator):

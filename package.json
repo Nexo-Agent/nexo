@@ -1,7 +1,7 @@
 {
   "name": "llm-client",
   "private": true,
-  "version": "0.1.0-beta.21",
+  "version": "0.1.0-beta.22",
   "identifier": "com.nexo.app",
   "type": "module",
   "scripts": {
