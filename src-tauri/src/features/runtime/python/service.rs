@@ -123,6 +123,11 @@ impl PythonRuntime {
         })
     }
 
+    /// Check if specific Python version is installed
+    pub fn is_installed(app: &AppHandle, full_version: &str) -> bool {
+        Self::get_installed_python(app, full_version).is_ok()
+    }
+
     pub fn get_installed_python(app: &AppHandle, full_version: &str) -> Result<PathBuf, AppError> {
         let app_data = app.path().app_data_dir().map_err(AppError::Tauri)?;
         let python_dir = app_data.join("python-runtimes").join(full_version);
@@ -189,7 +194,7 @@ impl PythonRuntime {
     pub fn install(
         app: &AppHandle,
         full_version: &str,
-        _uv_version: &str, // No longer needed, UV is bundled
+        packages: &[String],
     ) -> Result<(), AppError> {
         // Get bundled UV path
         let uv_path = get_bundled_uv_path(app)?;
@@ -263,19 +268,11 @@ impl PythonRuntime {
             )));
         }
 
-        // Now install default packages into the venv
-        let python_path = Self::get_installed_python(app, full_version)?;
-        let default_packages = vec![
-            "numpy".to_string(),
-            "scipy".to_string(),
-            "sympy".to_string(),
-            "statsmodels".to_string(),
-            "scikit-learn".to_string(),
-            "tabulate".to_string(),
-            "matplotlib".to_string(),
-        ];
-
-        Self::install_packages(app, &python_path, &default_packages)?;
+        // Install packages into the venv
+        if !packages.is_empty() {
+            let python_path = Self::get_installed_python(app, full_version)?;
+            Self::install_packages(app, &python_path, packages)?;
+        }
 
         Ok(())
     }

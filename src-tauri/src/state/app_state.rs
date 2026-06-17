@@ -110,7 +110,7 @@ impl AppState {
                 .path()
                 .app_data_dir()
                 .map_err(crate::error::AppError::Tauri)?,
-            crate::features::runtime::python::service::get_bundled_uv_path(&app)?,
+            crate::features::sandbox::SandboxService::bundled_uv_path(&app)?,
         ));
 
         // Create services

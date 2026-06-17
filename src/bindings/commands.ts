@@ -90,10 +90,6 @@ export const TauriCommands = {
   UNINSTALL_PYTHON_RUNTIME: 'uninstall_python_runtime',
   EXECUTE_PYTHON_CODE: 'execute_python_code',
 
-  // Addon config commands
-  GET_ADDON_CONFIG: 'get_addon_config',
-  REFRESH_ADDON_CONFIG: 'refresh_addon_config',
-
   // Node commands
   GET_NODE_RUNTIMES_STATUS: 'get_node_runtimes_status',
   INSTALL_NODE_RUNTIME: 'install_node_runtime',

@@ -1,7 +1,7 @@
 use crate::error::AppError;
-use crate::features::addon::service::IndexConfigService;
 use crate::features::runtime::python::service::PythonRuntime;
-use tauri::{command, AppHandle, State};
+use crate::features::sandbox::{RuntimeKind, SandboxService};
+use tauri::{command, AppHandle};
 
 #[derive(serde::Serialize)]
 pub struct PythonRuntimeStatus {
@@ -11,53 +11,25 @@ pub struct PythonRuntimeStatus {
 }
 
 #[command]
-pub async fn get_python_runtimes_status(
-    app: AppHandle,
-    config_service: State<'_, IndexConfigService>,
-) -> Result<Vec<PythonRuntimeStatus>, AppError> {
-    // Get configured versions from IndexConfigService
-    let config = config_service.get_config();
-
-    // Fetch all installed pythons in one go
-    let installed_pythons = PythonRuntime::list_installed(&app)?;
-
-    let statuses = config
-        .addons
-        .python
-        .versions
-        .iter()
-        .map(|full_version| {
-            let path = installed_pythons.get(full_version).cloned();
-            PythonRuntimeStatus {
-                version: full_version.clone(),
-                installed: path.is_some(),
-                path: path.map(|p| p.to_string_lossy().to_string()),
-            }
-        })
-        .collect();
-
-    Ok(statuses)
+pub async fn get_python_runtimes_status(app: AppHandle) -> Result<Vec<PythonRuntimeStatus>, AppError> {
+    let status = SandboxService::status(&app);
+    Ok(vec![PythonRuntimeStatus {
+        version: status.python.version,
+        installed: status.python.installed,
+        path: status.python.path,
+    }])
 }
 
 #[command]
-pub async fn install_python_runtime(
-    app: AppHandle,
-    version: String,
-    config_service: State<'_, IndexConfigService>,
-) -> Result<(), AppError> {
-    // Get config to lookup uv version
-    let config = config_service.get_config();
-
-    // Verify version exists in config
-    if !config.addons.python.versions.contains(&version) {
+pub async fn install_python_runtime(app: AppHandle, version: String) -> Result<(), AppError> {
+    let manifest = SandboxService::manifest();
+    if version != manifest.python.version {
         return Err(AppError::Python(format!(
-            "Version {version} not found in config"
+            "Version {version} not found in sandbox config"
         )));
     }
 
-    let uv_version = &config.addons.python.uv.version;
-
-    PythonRuntime::install(&app, &version, uv_version)
+    PythonRuntime::install(&app, &version, &manifest.python.packages)
 }
 
 #[command]
@@ -71,7 +43,13 @@ pub async fn execute_python_code(
     code: String,
     version: Option<String>,
 ) -> Result<crate::features::runtime::python::service::ExecutionResult, AppError> {
-    PythonRuntime::execute_script(&app, version, &code)
+    SandboxService::ensure_ready(&app).await?;
+
+    if version.is_some() {
+        PythonRuntime::execute_script(&app, version, &code)
+    } else {
+        SandboxService::run_script(&app, RuntimeKind::Python, &code)
+    }
 }
 
 #[command]
@@ -80,20 +58,12 @@ pub async fn install_python_packages(
     packages: Vec<String>,
     version: Option<String>,
 ) -> Result<(), AppError> {
-    let python_path = if let Some(v) = version {
-        PythonRuntime::detect(&app, &v)?.python_path
+    SandboxService::ensure_ready(&app).await?;
+
+    if version.is_some() {
+        let python_path = PythonRuntime::detect(&app, version.as_ref().unwrap())?.python_path;
+        PythonRuntime::install_packages(&app, &python_path, &packages)
     } else {
-        // Find latest installed version
-        let installed = PythonRuntime::list_installed(&app)?;
-        let mut versions: Vec<_> = installed.keys().cloned().collect();
-        versions.sort();
-
-        if let Some(latest) = versions.last() {
-            installed.get(latest).unwrap().clone()
-        } else {
-            return Err(AppError::Python("No Python runtime installed".to_string()));
-        }
-    };
-
-    PythonRuntime::install_packages(&app, &python_path, &packages)
+        SandboxService::add_packages(&app, RuntimeKind::Python, &packages)
+    }
 }

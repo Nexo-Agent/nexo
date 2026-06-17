@@ -38,7 +38,6 @@ export function useNotificationListener() {
       case 'IO':
         return <Archive className="size-4" />;
       case 'MCP':
-      case 'Addon':
         return <Plug className="size-4" />;
       case 'Prompt':
       case 'LLM':

@@ -4,7 +4,6 @@ import {
   Server,
   FileText,
   Info,
-  Package,
   BarChart,
   Bot,
   Globe,
@@ -60,11 +59,6 @@ export function SettingsSidebar() {
       id: 'skills' as const,
       label: t('skills'),
       icon: <Wand2 className="size-4" />,
-    },
-    {
-      id: 'addon' as const,
-      label: t('addons'),
-      icon: <Package className="size-4" />,
     },
     {
       id: 'hub' as const,

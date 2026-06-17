@@ -50,9 +50,6 @@ vi.mock('./AppSettings', () => ({
 vi.mock('./PromptManagement', () => ({
   PromptManagement: () => <div>Prompt Management</div>,
 }));
-vi.mock('@/features/addon', () => ({
-  AddonSettings: () => <div>Addon Settings</div>,
-}));
 vi.mock('@/features/hub/ui/HubScreen', () => ({
   HubScreen: () => <div>Hub Screen</div>,
 }));

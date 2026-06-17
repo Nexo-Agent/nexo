@@ -80,10 +80,6 @@ impl TauriCommands {
     pub const UNINSTALL_PYTHON_RUNTIME: &'static str = "uninstall_python_runtime";
     pub const EXECUTE_PYTHON_CODE: &'static str = "execute_python_code";
 
-    // Addon config commands
-    pub const GET_ADDON_CONFIG: &'static str = "get_addon_config";
-    pub const REFRESH_ADDON_CONFIG: &'static str = "refresh_addon_config";
-
     // Node commands
     pub const GET_NODE_RUNTIMES_STATUS: &'static str = "get_node_runtimes_status";
     pub const INSTALL_NODE_RUNTIME: &'static str = "install_node_runtime";

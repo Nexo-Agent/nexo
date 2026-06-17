@@ -133,9 +133,14 @@ pub fn run() {
             let mcp_client_state = state::MCPClientState::new();
             app.manage(mcp_client_state);
 
-            // Initialize IndexConfigService
-            let index_config_service = features::addon::service::IndexConfigService::new();
-            app.manage(index_config_service);
+            // Bootstrap sandbox in background (mandatory Python + Node runtimes)
+            let bootstrap_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                if let Err(e) = features::sandbox::SandboxService::ensure_ready(&bootstrap_handle).await
+                {
+                    tracing::error!("Sandbox bootstrap failed: {e}");
+                }
+            });
 
             // Create and set menu
             let menu = menu::create_menu(app.handle())?;
@@ -224,9 +229,6 @@ pub fn run() {
             features::runtime::python::commands::uninstall_python_runtime,
             features::runtime::python::commands::execute_python_code,
             features::runtime::python::commands::install_python_packages,
-            // Addon config commands
-            features::addon::commands::get_addon_config,
-            features::addon::commands::refresh_addon_config,
             // Node commands
             features::runtime::node::commands::get_node_runtimes_status,
             features::runtime::node::commands::install_node_runtime,

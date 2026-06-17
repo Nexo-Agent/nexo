@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use tokio::fs;
 use tokio::process::Command;
 
-use crate::features::runtime::node::service::NodeRuntime;
+use crate::features::sandbox::{RuntimeKind, SandboxService};
 use tauri::AppHandle;
 
 pub struct InternalToolService;
@@ -109,18 +109,12 @@ impl InternalToolService {
         let mut cmd = Command::new(command);
         cmd.args(&args);
 
-        // Add bundled Node.js bin directory to PATH if available
-        if let Some(bin_dir) = NodeRuntime::get_node_bin_path(app) {
-            let bin_dir_str = bin_dir.to_string_lossy();
-            let current_path = std::env::var("PATH").unwrap_or_default();
-            let separator = if cfg!(windows) { ";" } else { ":" };
-
-            let new_path = if current_path.is_empty() {
-                bin_dir_str.to_string()
-            } else {
-                format!("{}{}{}", bin_dir_str, separator, current_path)
-            };
-            cmd.env("PATH", new_path);
+        // Add sandbox Node.js bin directory to PATH if available
+        if let Ok(env) = SandboxService::env(app, RuntimeKind::NodeJs, std::collections::HashMap::new())
+        {
+            if let Some(path) = env.get("PATH") {
+                cmd.env("PATH", path);
+            }
         }
 
         // Set CWD to provided value or system temp dir

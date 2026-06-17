@@ -26,11 +26,6 @@ const MCPServerConnections = lazy(() =>
     default: module.MCPServerConnections,
   }))
 );
-const AddonSettings = lazy(() =>
-  import('@/features/addon').then((module) => ({
-    default: module.AddonSettings,
-  }))
-);
 const HubScreen = lazy(() =>
   import('@/features/hub/ui/HubScreen').then((module) => ({
     default: module.HubScreen,
@@ -88,8 +83,6 @@ export function SettingsScreen() {
         return <PromptManagement />;
       case 'agent':
         return <AgentSettings />;
-      case 'addon':
-        return <AddonSettings />;
       case 'usage':
         return <UsagePage />;
       case 'skills':
@@ -108,7 +101,6 @@ export function SettingsScreen() {
     { id: 'prompts', label: t('promptManagement') },
     { id: 'agent', label: t('agents') },
     { id: 'skills', label: t('skills') },
-    { id: 'addon', label: t('addons') },
     { id: 'hub', label: 'Hub' },
     { id: 'usage', label: 'Usage' },
     { id: 'about', label: t('about') },

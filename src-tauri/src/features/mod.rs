@@ -10,8 +10,8 @@ pub mod tool;
 pub mod usage;
 pub mod workspace;
 
-pub mod addon;
 pub mod agent;
+pub mod sandbox;
 pub mod app_settings;
 pub mod harness;
 pub mod notes;

@@ -1,8 +1,6 @@
 use super::models::MCPTool;
 use crate::error::AppError;
-use crate::features::addon::models::AddonIndex;
-use crate::features::runtime::node::service::NodeRuntime;
-use crate::features::runtime::python::service::PythonRuntime;
+use crate::features::sandbox::{RuntimeKind, SandboxService};
 use rust_mcp_sdk::{
     mcp_client::{client_runtime, ClientHandler, ClientRuntime},
     schema::{
@@ -72,6 +70,8 @@ impl MCPClientService {
         env_vars_json: Option<String>,
         runtime_path: Option<String>,
     ) -> Result<Arc<ClientRuntime>, AppError> {
+        SandboxService::ensure_ready(app).await?;
+
         // Validate transport type
         if r#type != "sse"
             && r#type != "http-streamable"
@@ -145,133 +145,22 @@ impl MCPClientService {
             let mut command = parts[0].clone();
             let args: Vec<String> = parts[1..].to_vec();
 
-            // Handle runtime configuration
-            if let Some(rt_path) = runtime_path {
-                if !rt_path.is_empty() && rt_path != "default" {
-                    if command == "uv" {
-                        // For uv, keep 'uv' as command but set UV_PYTHON
-                        // Try to find bundled uv first
-                        let config = AddonIndex::default();
-                        let installed = PythonRuntime::list_installed(app).unwrap_or_default();
-                        for full_version in config.addons.python.versions.iter().rev() {
-                            if installed.contains_key(full_version) {
-                                if let Ok(rt) = PythonRuntime::detect(app, full_version) {
-                                    command = rt.uv_path.to_string_lossy().to_string();
-                                    break;
-                                }
-                            }
-                        }
+            let (resolved_command, resolved_env) = Self::resolve_stdio_command(
+                app,
+                &command,
+                runtime_path.as_deref(),
+                env_vars,
+            )?;
+            command = resolved_command;
+            env_vars = Some(resolved_env);
 
-                        // Set UV_PYTHON
-                        if let Some(vars) = &mut env_vars {
-                            vars.insert("UV_PYTHON".to_string(), rt_path);
-                        } else {
-                            let mut vars = HashMap::new();
-                            vars.insert("UV_PYTHON".to_string(), rt_path);
-                            env_vars = Some(vars);
-                        }
-                    } else if command == "python"
-                        || command == "python3"
-                        || command == "node"
-                        || command == "npm"
-                    {
-                        // For generic python/node commands, replace with the specific runtime path
-                        command = rt_path;
-                    }
-                }
-            }
-
-            // If command is still generic and we haven't set a specific runtime (or we want to fallback), try auto-detection
-            if (command == "python" || command == "python3" || command == "uv")
-                && env_vars.as_ref().and_then(|v| v.get("UV_PYTHON")).is_none()
-            {
-                // Try to use bundled Python runtime
-                let config = AddonIndex::default();
-
-                let mut runtime = None;
-                let installed = PythonRuntime::list_installed(app).unwrap_or_default();
-                for full_version in config.addons.python.versions.iter().rev() {
-                    if installed.contains_key(full_version) {
-                        if let Ok(rt) = PythonRuntime::detect(app, full_version) {
-                            runtime = Some(rt);
-                            break;
-                        }
-                    }
-                }
-
-                if let Some(rt) = runtime {
-                    if command == "python" || command == "python3" {
-                        command = rt.python_path.to_string_lossy().to_string();
-                    } else if command == "uv" {
-                        command = rt.uv_path.to_string_lossy().to_string();
-
-                        // Set UV_PYTHON environment variable so uv uses our bundled python
-                        let python_path = rt.python_path.to_string_lossy().to_string();
-                        if let Some(vars) = &mut env_vars {
-                            vars.insert("UV_PYTHON".to_string(), python_path);
-                        } else {
-                            let mut vars = HashMap::new();
-                            vars.insert("UV_PYTHON".to_string(), python_path);
-                            env_vars = Some(vars);
-                        }
-                    }
-                }
-            }
-
-            // Node.js auto-detection
-            if command == "node" || command == "npm" || command == "npx" {
-                let config = AddonIndex::default();
-                for full_version in config.addons.nodejs.versions.iter().rev() {
-                    if let Ok(rt) = NodeRuntime::detect(app, full_version) {
-                        // Get the bin directory containing node
-                        let node_bin_dir = rt.node_path.parent().map(std::path::Path::to_path_buf);
-
-                        if command == "node" {
-                            command = rt.node_path.to_string_lossy().to_string();
-                        } else {
-                            // npm or npx
-                            if let Some(parent) = rt.node_path.parent() {
-                                let binary_name = if cfg!(windows) {
-                                    format!("{command}.cmd")
-                                } else {
-                                    command.clone()
-                                };
-                                let binary_path = parent.join(&binary_name);
-                                // Check both exists() and symlink_metadata() to handle symlinks in production
-                                if binary_path.exists() || binary_path.symlink_metadata().is_ok() {
-                                    command = binary_path.to_string_lossy().to_string();
-                                }
-                            }
-                        }
-
-                        // Add node bin directory to PATH so npx/npm can find node
-                        // This is required because npx uses #!/usr/bin/env node shebang
-                        if let Some(bin_dir) = node_bin_dir {
-                            let bin_dir_str = bin_dir.to_string_lossy().to_string();
-                            let new_path = if let Ok(current_path) = std::env::var("PATH") {
-                                format!("{bin_dir_str}:{current_path}")
-                            } else {
-                                bin_dir_str
-                            };
-
-                            if let Some(vars) = &mut env_vars {
-                                vars.insert("PATH".to_string(), new_path);
-                            } else {
-                                let mut vars = HashMap::new();
-                                vars.insert("PATH".to_string(), new_path);
-                                env_vars = Some(vars);
-                            }
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            // Set UV_CACHE_DIR for isolation if command is uv or if we've already set UV_PYTHON (likely uv usage)
+            // Set UV_CACHE_DIR for isolation if command is uv or if UV_PYTHON is set
             if command.ends_with("uv")
                 || command.ends_with("uv.exe")
-                || env_vars.as_ref().and_then(|v| v.get("UV_PYTHON")).is_some()
+                || env_vars
+                    .as_ref()
+                    .and_then(|v| v.get("UV_PYTHON"))
+                    .is_some()
             {
                 if let Ok(cache_dir) = app.path().app_cache_dir() {
                     let uv_cache = cache_dir.join("uv_cache");
@@ -428,5 +317,51 @@ impl MCPClientService {
         let _ = client.shut_down().await;
 
         Ok(result_json)
+    }
+
+    fn runtime_kind_for_command(command: &str) -> Option<RuntimeKind> {
+        match command {
+            "python" | "python3" | "uv" => Some(RuntimeKind::Python),
+            "node" | "npm" | "npx" => Some(RuntimeKind::NodeJs),
+            _ => None,
+        }
+    }
+
+    fn resolve_stdio_command(
+        app: &AppHandle,
+        command: &str,
+        runtime_path: Option<&str>,
+        env_vars: Option<HashMap<String, String>>,
+    ) -> Result<(String, HashMap<String, String>), AppError> {
+        let mut env = env_vars.unwrap_or_default();
+        let explicit_path = runtime_path.filter(|p| !p.is_empty() && *p != "default");
+
+        if let Some(kind) = Self::runtime_kind_for_command(command) {
+            let rt = SandboxService::get(app, kind)?;
+
+            if command == "uv" {
+                if let Some(path) = explicit_path {
+                    env.insert("UV_PYTHON".to_string(), path.to_string());
+                    let resolved = rt.resolve("uv", None).to_string_lossy().to_string();
+                    env = SandboxService::env(app, kind, env)?;
+                    return Ok((resolved, env));
+                }
+            }
+
+            let resolved = if let Some(path) = explicit_path {
+                if command == "uv" {
+                    rt.resolve("uv", None).to_string_lossy().to_string()
+                } else {
+                    path.to_string()
+                }
+            } else {
+                rt.resolve(command, None).to_string_lossy().to_string()
+            };
+
+            env = SandboxService::env(app, kind, env)?;
+            return Ok((resolved, env));
+        }
+
+        Ok((command.to_string(), env))
     }
 }

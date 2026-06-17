@@ -8,7 +8,7 @@ mod tests {
         // The bindings will be generated at compile time
 
         // Just verify constants are accessible
-        assert_eq!(TauriCommands::GET_ADDON_CONFIG, "get_addon_config");
+        assert_eq!(TauriCommands::GET_PYTHON_RUNTIMES_STATUS, "get_python_runtimes_status");
         assert_eq!(TauriEvents::MESSAGE_CHUNK, "message-chunk");
     }
 }

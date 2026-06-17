@@ -10,7 +10,6 @@ export type SettingsSection =
   | 'llm'
   | 'mcp'
   | 'prompts'
-  | 'addon'
   | 'usage'
   | 'agent'
   | 'skills'

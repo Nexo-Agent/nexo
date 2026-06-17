@@ -16,26 +16,10 @@ import { ProviderIcon } from '@/ui/atoms/provider-icon';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { useCreateLLMConnectionMutation } from '@/features/llm/state/api';
 import type { LLMConnection, LLMModel } from '@/features/llm/types';
-import {
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  Cpu,
-  Terminal,
-  Key,
-  Globe,
-  Bot,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Loader2, Key, Globe, Bot } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
-type Step = 'welcome' | 'installing' | 'llm-setup' | 'completed';
-
-interface RuntimeStatus {
-  version: string;
-  installed: boolean;
-  path: string | null;
-}
+type Step = 'welcome' | 'llm-setup';
 
 const DEFAULT_URLS: Record<string, string> = {
   openai: 'https://api.openai.com/v1',
@@ -71,10 +55,6 @@ export function FirstRunSetup({ open }: { open: boolean }) {
   const dispatch = useAppDispatch();
   const [createLLMConnection] = useCreateLLMConnectionMutation();
   const [step, setStep] = useState<Step>('welcome');
-  const [installStatus, setInstallStatus] = useState<{
-    python: 'pending' | 'installing' | 'success' | 'error';
-    node: 'pending' | 'installing' | 'success' | 'error';
-  }>({ python: 'pending', node: 'pending' });
 
   const [llmConfig, setLlmConfig] = useState<{
     provider: LLMConnection['provider'];
@@ -95,103 +75,9 @@ export function FirstRunSetup({ open }: { open: boolean }) {
     dispatch(setSetupCompleted(true));
   };
 
-  const installPython = async () => {
-    try {
-      setInstallStatus((prev) => ({ ...prev, python: 'installing' }));
-      const pyStatuses = await invokeCommand<RuntimeStatus[]>(
-        TauriCommands.GET_PYTHON_RUNTIMES_STATUS
-      );
-
-      if (pyStatuses.length > 0) {
-        // Sort to get latest version
-        const sorted = [...pyStatuses].sort((a, b) =>
-          b.version.localeCompare(a.version, undefined, { numeric: true })
-        );
-        const targetVersion = sorted[0].version;
-
-        if (!sorted[0].installed) {
-          await invokeCommand(TauriCommands.INSTALL_PYTHON_RUNTIME, {
-            version: targetVersion,
-          });
-
-          // Verify installation
-          const updatedStatuses = await invokeCommand<RuntimeStatus[]>(
-            TauriCommands.GET_PYTHON_RUNTIMES_STATUS
-          );
-          const updatedStatus = updatedStatuses.find(
-            (s) => s.version === targetVersion
-          );
-
-          if (!updatedStatus?.installed) {
-            throw new Error(`Verification failed for Python ${targetVersion}`);
-          }
-        }
-        setInstallStatus((prev) => ({ ...prev, python: 'success' }));
-      } else {
-        logger.error('No Python runtimes available to install');
-        setInstallStatus((prev) => ({ ...prev, python: 'error' }));
-      }
-    } catch (error) {
-      logger.error('Python install failed', error);
-      setInstallStatus((prev) => ({ ...prev, python: 'error' }));
-    }
-  };
-
-  const installNode = async () => {
-    try {
-      setInstallStatus((prev) => ({ ...prev, node: 'installing' }));
-      const nodeStatuses = await invokeCommand<RuntimeStatus[]>(
-        TauriCommands.GET_NODE_RUNTIMES_STATUS
-      );
-
-      if (nodeStatuses.length > 0) {
-        // Sort to get latest version
-        const sorted = [...nodeStatuses].sort((a, b) =>
-          b.version.localeCompare(a.version, undefined, { numeric: true })
-        );
-        const targetVersion = sorted[0].version;
-
-        if (!sorted[0].installed) {
-          await invokeCommand(TauriCommands.INSTALL_NODE_RUNTIME, {
-            version: targetVersion,
-          });
-
-          // Verify installation
-          const updatedStatuses = await invokeCommand<RuntimeStatus[]>(
-            TauriCommands.GET_NODE_RUNTIMES_STATUS
-          );
-          const updatedStatus = updatedStatuses.find(
-            (s) => s.version === targetVersion
-          );
-
-          if (!updatedStatus?.installed) {
-            throw new Error(`Verification failed for Node.js ${targetVersion}`);
-          }
-        }
-        setInstallStatus((prev) => ({ ...prev, node: 'success' }));
-      } else {
-        logger.error('No Node.js runtimes available to install');
-        setInstallStatus((prev) => ({ ...prev, node: 'error' }));
-      }
-    } catch (error) {
-      logger.error('Node install failed', error);
-      setInstallStatus((prev) => ({ ...prev, node: 'error' }));
-    }
-  };
-
-  const installRuntimes = async () => {
-    await Promise.all([installPython(), installNode()]);
-
-    // Setup completed
-    setTimeout(() => {
-      dispatch(setSetupCompleted(true));
-    }, 1000);
-  };
-
   const handleLlmSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // 1. Fetch models first
       let models: LLMModel[] = [];
       try {
         const fetchedModels = await invokeCommand<LLMModel[]>(
@@ -202,15 +88,11 @@ export function FirstRunSetup({ open }: { open: boolean }) {
             apiKey: llmConfig.apiKey || null,
           }
         );
-        // Filter popular models like in Settings
         models = filterPopularModels(fetchedModels, llmConfig.provider);
       } catch (error) {
         logger.error('Failed to fetch models during setup:', error);
-        // We continue even if model fetching fails, saving an empty list
-        // which the user can fix later in settings
       }
 
-      // 2. Create connection with models
       await createLLMConnection({
         name: 'Default Connection',
         provider: llmConfig.provider,
@@ -219,6 +101,8 @@ export function FirstRunSetup({ open }: { open: boolean }) {
         models,
         enabled: true,
       }).unwrap();
+
+      dispatch(setSetupCompleted(true));
     } catch (error) {
       logger.error('Failed to create LLM connection', error);
       const { toast } = await import('sonner');
@@ -227,12 +111,9 @@ export function FirstRunSetup({ open }: { open: boolean }) {
       );
     } finally {
       setIsSubmitting(false);
-      setStep('installing');
-      installRuntimes();
     }
   };
 
-  // Helper function to filter popular models (duplicated from LLMConnections.tsx)
   const filterPopularModels = (
     models: LLMModel[],
     provider: string
@@ -278,19 +159,14 @@ export function FirstRunSetup({ open }: { open: boolean }) {
 
   const titles: Record<Step, string> = {
     welcome: 'Chào mừng đến với Nexo',
-    installing: 'Đang thiết lập môi trường',
     'llm-setup': 'Kết nối AI của bạn',
-    completed: 'Hoàn tất',
   };
 
   const descriptions: Record<Step, string> = {
     welcome:
       'Không gian làm việc AI mạnh mẽ, ưu tiên xử lý cục bộ. Hãy để chúng tôi chuẩn bị mọi thứ cho bạn.',
-    installing:
-      'Chúng tôi đang cài đặt các runtime cần thiết để vận hành quy trình tự động của bạn.',
     'llm-setup':
       'Chọn nhà cung cấp AI yêu thích để bắt đầu trò chuyện và tạo mã nguồn.',
-    completed: '',
   };
 
   const renderFooter = () => {
@@ -314,17 +190,6 @@ export function FirstRunSetup({ open }: { open: boolean }) {
       );
     }
 
-    if (step === 'installing') {
-      return (
-        <div className="w-full flex items-center justify-center gap-3 py-1">
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          <span className="text-[13px] font-semibold text-foreground/70 animate-pulse">
-            Đang cấu hình không gian làm việc...
-          </span>
-        </div>
-      );
-    }
-
     if (step === 'llm-setup') {
       return (
         <div className="flex w-full items-center justify-between">
@@ -343,7 +208,7 @@ export function FirstRunSetup({ open }: { open: boolean }) {
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : null}
-            Kết nối & Cài đặt
+            Kết nối
           </Button>
         </div>
       );
@@ -372,19 +237,6 @@ export function FirstRunSetup({ open }: { open: boolean }) {
               </h4>
               <div className="grid gap-2.5">
                 <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-muted/40 border border-border/30 hover:bg-muted/60 transition-all duration-300">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20 shadow-sm">
-                    <Terminal className="h-4.5 w-4.5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm">
-                      Runtime Python & Node.js
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      Cần thiết cho các tác vụ nâng cao và tự động hóa
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-muted/40 border border-border/30 hover:bg-muted/60 transition-all duration-300">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 ring-1 ring-purple-500/20 shadow-sm">
                     <Bot className="h-4.5 w-4.5" />
                   </div>
@@ -399,23 +251,6 @@ export function FirstRunSetup({ open }: { open: boolean }) {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {step === 'installing' && (
-          <div className="space-y-3.5 animate-in fade-in slide-in-from-right-8 duration-700">
-            <RuntimeInstallCard
-              icon={<Cpu className="h-5 w-5" />}
-              title="Runtime Python"
-              description="Môi trường cốt lõi cho AI Agent"
-              status={installStatus.python}
-            />
-            <RuntimeInstallCard
-              icon={<Terminal className="h-5 w-5" />}
-              title="Runtime Node.js"
-              description="Công cụ cho các tiện ích JavaScript"
-              status={installStatus.node}
-            />
           </div>
         )}
 
@@ -517,91 +352,4 @@ export function FirstRunSetup({ open }: { open: boolean }) {
       </div>
     </FormDialog>
   );
-}
-
-function RuntimeInstallCard({
-  icon,
-  title,
-  description,
-  status,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  status: 'pending' | 'installing' | 'success' | 'error';
-}) {
-  return (
-    <div
-      className={cn(
-        'group flex items-center justify-between p-4 rounded border border-border/40 bg-card/60 transition-[background-color,border-color,box-shadow,ring] duration-300 backdrop-blur-sm',
-        status === 'installing' &&
-          'border-primary/50 bg-primary/5 ring-1 ring-primary/20 shadow-[0_0_20px_-10px_rgba(var(--primary),0.2)]',
-        status === 'success' && 'border-green-500/30 bg-green-500/5',
-        status === 'error' && 'border-destructive/30 bg-destructive/5'
-      )}
-    >
-      <div className="flex items-center gap-4">
-        <div
-          className={cn(
-            'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm transition-[background-color,border-color,transform,box-shadow] duration-300',
-            status === 'installing' &&
-              'text-primary border-primary/20 scale-105',
-            status === 'success' &&
-              'text-green-600 border-green-500/20 bg-green-50',
-            status === 'error' &&
-              'text-destructive border-destructive/20 bg-destructive/10'
-          )}
-        >
-          {status === 'installing' ? (
-            <Loader2 className="h-6 w-6 animate-spin" />
-          ) : status === 'success' ? (
-            <CheckCircle2 className="h-6 w-6 animate-in zoom-in duration-300" />
-          ) : status === 'error' ? (
-            <XCircle className="h-6 w-6 animate-in zoom-in duration-300" />
-          ) : (
-            <div className="opacity-70 group-hover:opacity-100 transition-opacity">
-              {icon}
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="font-semibold tracking-tight text-foreground">
-            {title}
-          </span>
-          <span className="text-sm text-muted-foreground">{description}</span>
-        </div>
-      </div>
-      <div className="pl-4">
-        <StatusBadge status={status} />
-      </div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  if (status === 'pending')
-    return (
-      <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-        Waiting
-      </span>
-    );
-  if (status === 'installing')
-    return (
-      <span className="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse">
-        Installing...
-      </span>
-    );
-  if (status === 'success')
-    return (
-      <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">
-        Ready
-      </span>
-    );
-  if (status === 'error')
-    return (
-      <span className="text-[10px] font-bold text-destructive uppercase tracking-widest">
-        Failed
-      </span>
-    );
-  return null;
 }

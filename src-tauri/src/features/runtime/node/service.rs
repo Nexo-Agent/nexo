@@ -116,7 +116,11 @@ impl NodeRuntime {
     }
 
     /// Download and install Node runtime using fnm
-    pub fn install(app: &AppHandle, full_version: &str) -> Result<(), AppError> {
+    pub fn install(
+        app: &AppHandle,
+        full_version: &str,
+        packages: &[String],
+    ) -> Result<(), AppError> {
         let fnm_path = get_bundled_fnm_path(app)?;
         let app_data = app.path().app_data_dir().map_err(AppError::Tauri)?;
         let fnm_dir = app_data.join("node-runtimes");
@@ -151,7 +155,12 @@ impl NodeRuntime {
             .map_err(AppError::Io)?;
 
         if output.status.success() {
-            Self::install_browser_agent(app, full_version)?;
+            if !packages.is_empty() {
+                Self::install_packages(app, full_version, packages)?;
+                if packages.iter().any(|p| p == "agent-browser") {
+                    Self::install_browser_agent_chromium(app, full_version)?;
+                }
+            }
         } else {
             let stderr = String::from_utf8_lossy(&output.stderr);
             let stdout = String::from_utf8_lossy(&output.stdout);
@@ -190,20 +199,6 @@ impl NodeRuntime {
         Ok(())
     }
 
-    /// Get the path to the bundled Node.js bin directory
-    pub fn get_node_bin_path(app: &AppHandle) -> Option<PathBuf> {
-        let config = crate::features::addon::models::AddonIndex::default();
-        for full_version in config.addons.nodejs.versions.iter().rev() {
-            if let Ok(rt) = Self::detect(app, full_version) {
-                // Get the bin directory containing node
-                if let Some(bin_dir) = rt.bin_dir() {
-                    return Some(bin_dir);
-                }
-            }
-        }
-        None
-    }
-
     pub fn install_packages(
         app: &AppHandle,
         version: &str,
@@ -236,11 +231,8 @@ impl NodeRuntime {
         Ok(())
     }
 
-    fn install_browser_agent(app: &AppHandle, version: &str) -> Result<(), AppError> {
-        let packages = vec![String::from("agent-browser")];
-        Self::install_packages(app, version, &packages)?;
-
-        // Now run "agent-browser install" to download Chromium
+    fn install_browser_agent_chromium(app: &AppHandle, version: &str) -> Result<(), AppError> {
+        // Run "agent-browser install" to download Chromium
         let rt = Self::detect(app, version)?;
         if let Some(bin_dir) = rt.bin_dir() {
             let agent_browser_bin = if cfg!(windows) {
