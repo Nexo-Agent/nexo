@@ -22,7 +22,6 @@ const IGNORED_ACTIONS = [
 
 // Actions that indicate errors
 const ERROR_ACTIONS = [
-  'messages/setStreamingError',
   'notification/showError',
   'llmConnections/testConnectionFailure',
   'mcpConnections/connectionError',

@@ -205,37 +205,4 @@ export const reducers = {
     // Remove from paused (UI will update again)
     delete state.pausedStreaming[action.payload];
   },
-  setStreamingError: (
-    state: MessagesState,
-    action: PayloadAction<{
-      chatId: string;
-      messageId: string;
-      error: 'timeout' | 'network' | 'unknown';
-      canRetry: boolean;
-    }>
-  ) => {
-    state.streamingErrors[action.payload.chatId] = {
-      messageId: action.payload.messageId,
-      error: action.payload.error,
-      canRetry: action.payload.canRetry,
-    };
-  },
-  clearStreamingError: (
-    state: MessagesState,
-    action: PayloadAction<string>
-  ) => {
-    delete state.streamingErrors[action.payload];
-  },
-  setStreamingStartTime: (
-    state: MessagesState,
-    action: PayloadAction<{ chatId: string; timestamp: number }>
-  ) => {
-    state.streamingStartTimes[action.payload.chatId] = action.payload.timestamp;
-  },
-  clearStreamingStartTime: (
-    state: MessagesState,
-    action: PayloadAction<string>
-  ) => {
-    delete state.streamingStartTimes[action.payload];
-  },
 };

@@ -73,10 +73,7 @@ export function ChatArea() {
     isStreaming,
     isAgentStreaming,
     streamingMessageId,
-    streamingError,
-    timeLeft,
     handleStopStreaming,
-    handleRetryStreaming,
   } = useMessages(selectedChatId);
 
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -427,9 +424,6 @@ export function ChatArea() {
             selectedLLMConnectionId={selectedLLMConnectionId}
             onSend={handleSend}
             disabled={chatInputDisabled}
-            timeLeft={timeLeft}
-            streamingError={selectedChatId ? streamingError : undefined}
-            onRetryStreaming={handleRetryStreaming}
             isEditing={!!editingMessageId}
             onCancelEdit={() => handleEditMessage(null)}
           />
@@ -470,9 +464,6 @@ export function ChatArea() {
         onSend={handleSend}
         disabled={chatInputDisabled}
         dropdownDirection="up"
-        timeLeft={timeLeft}
-        streamingError={selectedChatId ? streamingError : undefined}
-        onRetryStreaming={handleRetryStreaming}
         isEditing={!!editingMessageId}
         onCancelEdit={() => handleEditMessage(null)}
       />

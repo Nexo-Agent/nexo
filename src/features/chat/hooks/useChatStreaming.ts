@@ -5,8 +5,6 @@ import {
   setStreamingMessageId,
   setStreamingByChatId,
   clearStreamingMessageId,
-  setStreamingStartTime,
-  clearStreamingStartTime,
   updateMessageTokenUsage,
 } from '@/features/chat/state/messages';
 import type { Message } from '@/app/types';
@@ -162,13 +160,6 @@ export function useChatStreaming() {
           })
         );
         dispatch(setStreamingMessageId(payload.assistant_message_id));
-
-        dispatch(
-          setStreamingStartTime({
-            chatId: payload.chat_id,
-            timestamp: Date.now(),
-          })
-        );
       }
     );
 
@@ -293,7 +284,6 @@ export function useChatStreaming() {
             })
           );
           dispatch(clearStreamingMessageId());
-          dispatch(clearStreamingStartTime(payload.chat_id));
         }
 
         dispatch(
@@ -329,7 +319,6 @@ export function useChatStreaming() {
           })
         );
         dispatch(clearStreamingMessageId());
-        dispatch(clearStreamingStartTime(payload.chat_id));
       }
     );
 
@@ -353,7 +342,6 @@ export function useChatStreaming() {
             })
           );
           dispatch(clearStreamingMessageId());
-          dispatch(clearStreamingStartTime(payload.chat_id));
         }
 
         // Only show success toast for agent tasks (not for image generation)
@@ -435,7 +423,6 @@ export function useChatStreaming() {
           })
         );
         dispatch(clearStreamingMessageId());
-        dispatch(clearStreamingStartTime(payload.chat_id));
       }
     );
 

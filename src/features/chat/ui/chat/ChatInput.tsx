@@ -73,9 +73,6 @@ interface ChatInputProps {
   onSend: (content?: string, images?: string[], metadata?: string) => void;
   disabled?: boolean;
   dropdownDirection?: 'up' | 'down';
-  timeLeft?: number | null;
-  streamingError?: { messageId: string; error: string; canRetry: boolean };
-  onRetryStreaming?: () => void;
   isEditing?: boolean;
   onCancelEdit?: () => void;
 }
@@ -87,9 +84,6 @@ export function ChatInput({
   onSend,
   disabled = false,
   dropdownDirection = 'down',
-  timeLeft,
-  streamingError,
-  onRetryStreaming,
   isEditing = false,
   onCancelEdit,
 }: ChatInputProps) {
@@ -454,47 +448,6 @@ export function ChatInput({
   return (
     <>
       <div className="bg-background">
-        {/* Streaming timeout countdown - sticky at top of input area */}
-        {effectiveIsStreaming &&
-          timeLeft !== null &&
-          timeLeft !== undefined &&
-          timeLeft > 0 && (
-            <div className={cn(CHAT_WIDTH_CLASSES, 'pb-0')}>
-              <div
-                className={`rounded-lg px-3 py-1.5 text-xs border flex items-center justify-between ${
-                  timeLeft <= 10
-                    ? 'bg-red-500/10 dark:bg-red-500/20 text-red-700 dark:text-red-300 border-red-500/30'
-                    : timeLeft <= 30
-                      ? 'bg-orange-500/10 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-500/30'
-                      : 'bg-green-500/10 dark:bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30'
-                }`}
-              >
-                <span className="font-medium">
-                  {t('streamingTimeout')} {timeLeft}s
-                </span>
-              </div>
-            </div>
-          )}
-
-        {/* Streaming error message */}
-        {streamingError && (
-          <div className={cn(CHAT_WIDTH_CLASSES, 'pb-2')}>
-            <div className="rounded-lg bg-destructive/10 px-3 py-2 border border-destructive/30 flex items-center justify-between">
-              <span className="text-xs text-destructive font-medium">
-                {t('streamingTimeoutError')}
-              </span>
-              {onRetryStreaming && (
-                <button
-                  onClick={onRetryStreaming}
-                  className="ml-2 px-2 py-0.5 text-xs bg-destructive/20 hover:bg-destructive/30 rounded transition-colors"
-                >
-                  {t('retry')}
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
         <div className={cn(CHAT_WIDTH_CLASSES, 'py-2')}>
           {/* Edit Mode Bar - Above ChatInput */}
           {isEditing && (
