@@ -8,7 +8,13 @@ export const DEFAULT_HTML_PREVIEW_HEIGHT = 400;
 export const HTML_PREVIEW_SANDBOX = 'allow-scripts';
 
 /** CDN hosts allowed for external script/style loads inside previews. */
-export const HTML_PREVIEW_CDN_WHITELIST = ['cdn.jsdelivr.net'] as const;
+export const HTML_PREVIEW_CDN_WHITELIST = [
+  'cdn.jsdelivr.net',
+  'unpkg.com',
+  'cdnjs.cloudflare.com',
+  'esm.sh',
+  'cdn.skypack.dev',
+] as const;
 
 /** Markdown fence language for interactive HTML previews. */
 export const HTML_PREVIEW_FENCE_LANGUAGE = 'html';

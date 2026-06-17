@@ -42,7 +42,7 @@ Here is a quarterly revenue bar chart:
 ```
 
 Technical rules:
-- Self-contained document with inline CSS/JS or libraries from https://cdn.jsdelivr.net only
+- Self-contained document with inline CSS/JS or libraries from trusted CDNs only (https://cdn.jsdelivr.net, https://unpkg.com, https://cdnjs.cloudflare.com, https://esm.sh, https://cdn.skypack.dev)
 - Prefer Chart.js for charts; no external API calls
 - For simple static diagrams (flowchart, sequence), prefer ```mermaid over HTML
 - Keep under 50KB; use responsive layout

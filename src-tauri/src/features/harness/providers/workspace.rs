@@ -9,6 +9,42 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::broadcast;
 
+fn escape_raw_newlines_in_json_strings(input: &str) -> String {
+    let mut output = String::with_capacity(input.len());
+    let mut in_string = false;
+    let mut escaped = false;
+
+    for ch in input.chars() {
+        if in_string {
+            if ch == '\n' {
+                output.push_str("\\n");
+                escaped = false;
+                continue;
+            }
+            if ch == '\r' {
+                output.push_str("\\r");
+                escaped = false;
+                continue;
+            }
+        }
+
+        output.push(ch);
+
+        if escaped {
+            escaped = false;
+            continue;
+        }
+
+        match ch {
+            '\\' if in_string => escaped = true,
+            '"' => in_string = !in_string,
+            _ => {}
+        }
+    }
+
+    output
+}
+
 pub struct WorkspaceToolExecutor {
     tool_service: Arc<ToolService>,
     tool_to_connection: HashMap<String, String>,
@@ -46,11 +82,17 @@ impl WorkspaceToolExecutor {
         let arguments: Value = if arguments_str.trim().is_empty() {
             serde_json::json!({})
         } else {
-            serde_json::from_str(arguments_str).map_err(|e| {
-                AppError::Validation(format!(
-                    "Failed to parse tool arguments for '{tool_name}': {e} (arguments: '{arguments_str}')"
-                ))
-            })?
+            match serde_json::from_str(arguments_str) {
+                Ok(value) => value,
+                Err(original_err) => {
+                    let repaired_args = escape_raw_newlines_in_json_strings(arguments_str);
+                    serde_json::from_str(&repaired_args).map_err(|_| {
+                        AppError::Validation(format!(
+                            "Failed to parse tool arguments for '{tool_name}': {original_err} (arguments: '{arguments_str}')"
+                        ))
+                    })?
+                }
+            }
         };
 
         let tool_exec_future = self.tool_service.execute_tool(
