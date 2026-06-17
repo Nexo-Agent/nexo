@@ -58,5 +58,12 @@
   "tools": "Tools",
   "toolsNotSupported": "Model này không hỗ trợ tools",
   "totalTokens": "Total tokens",
-  "visionNotSupported": "Model này không hỗ trợ tải ảnh"
+  "visionNotSupported": "Model này không hỗ trợ tải ảnh",
+  "htmlPreview.title": "Xem trước HTML",
+  "htmlPreview.loading": "Đang tải preview...",
+  "htmlPreview.download": "Tải HTML",
+  "htmlPreview.fullscreen": "Xem toàn màn hình",
+  "htmlPreview.fullscreenDescription": "Đang xem HTML preview ở chế độ toàn màn hình",
+  "htmlPreview.viewSource": "Xem mã nguồn",
+  "htmlPreview.renderError": "Không thể hiển thị HTML preview"
 }

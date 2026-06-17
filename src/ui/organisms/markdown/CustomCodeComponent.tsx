@@ -12,9 +12,19 @@ import { CodeBlockSkeleton } from '@/ui/atoms/streamdown/lib/code-block/skeleton
 import type { ExtraProps } from '@/ui/atoms/streamdown/lib/markdown';
 import { cn } from '@/ui/atoms/streamdown/lib/utils';
 import { MermaidComponent } from '@/ui/atoms/streamdown/lib/mermaid-component';
+import { HTML_PREVIEW_FENCE_LANGUAGE } from '@/features/chat/lib/html-preview';
+import { HtmlPreviewSkeleton } from '@/features/chat/ui/html-preview/HtmlPreviewSkeleton';
 import { RunCodeButton } from './RunCodeButton';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+const HtmlPreviewComponent = lazy(() =>
+  import('@/features/chat/ui/html-preview/HtmlPreviewComponent').then(
+    (mod) => ({
+      default: mod.HtmlPreviewComponent,
+    })
+  )
+);
 
 const CodeBlock = lazy(() =>
   import('@/ui/atoms/streamdown/lib/code-block').then((mod) => ({
@@ -148,6 +158,14 @@ export const CustomCodeComponent = ({
   // For mermaid, use original component
   if (language === 'mermaid') {
     return <MermaidComponent code={code} className={className} />;
+  }
+
+  if (language === HTML_PREVIEW_FENCE_LANGUAGE) {
+    return (
+      <Suspense fallback={<HtmlPreviewSkeleton className={className} />}>
+        <HtmlPreviewComponent code={code} className={className} />
+      </Suspense>
+    );
   }
 
   // For code blocks, add run button to controlElements

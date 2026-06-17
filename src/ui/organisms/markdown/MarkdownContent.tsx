@@ -13,6 +13,7 @@ import { useAppSelector } from '@/app/hooks';
 import { cn } from '@/lib/utils';
 import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { logger } from '@/lib/logger';
+import { shouldBypassStreamBuffer } from '@/features/chat/lib/html-preview';
 import { CustomCodeComponent } from './CustomCodeComponent';
 import { MarkdownImage } from './MarkdownImage';
 import type { BundledTheme } from 'shiki';
@@ -108,9 +109,15 @@ export function MarkdownContent({
     const newChunk = sanitizedContent.slice(lastUpdateLength.current);
     const newlineCount = (newChunk.match(/\n/g) || []).length;
 
-    // Update if > 5 newlines or > 500 chars or user stopped typing for 800ms
-    // This creates larger chunks of text appearing at once
-    const shouldUpdate = newlineCount >= 5 || diff > 500;
+    // Bypass smoothing while streaming inside an open html fence
+    const bypassForHtmlPreview = shouldBypassStreamBuffer(
+      sanitizedContent,
+      isStreaming
+    );
+
+    // Update if > 5 newlines or > 500 chars, html fence is open, or debounce timeout
+    const shouldUpdate =
+      bypassForHtmlPreview || newlineCount >= 5 || diff > 500;
 
     if (shouldUpdate) {
       if (bufferTimeout.current) clearTimeout(bufferTimeout.current);

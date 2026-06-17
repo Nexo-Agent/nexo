@@ -1,7 +1,7 @@
 import type { CodeBlock } from '@/app/types';
 
 /**
- * Extracts code blocks from markdown content (python and mermaid only)
+ * Extracts code blocks from markdown content (python, mermaid, and html)
  * Content is not modified, only code blocks are extracted and stored
  * @param content - The markdown content
  * @returns Extracted code blocks with id as index (0, 1, 2, ...)
@@ -14,13 +14,11 @@ export function extractCodeBlocks(content: string): CodeBlock[] {
   // Also handles code blocks without language: ```\ncode\n```
   const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
 
-  // Extract code blocks (only python and mermaid)
   content.replace(codeBlockRegex, (match, language, code) => {
     const lang = (language || '').toLowerCase().trim();
     const codeContent = code.trim();
 
-    // Only extract python and mermaid blocks
-    if (lang === 'python' || lang === 'mermaid') {
+    if (lang === 'python' || lang === 'mermaid' || lang === 'html') {
       codeBlocks.push({
         id: String(blockIndex), // Use index as id
         content: codeContent,
