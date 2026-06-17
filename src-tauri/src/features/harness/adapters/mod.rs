@@ -1,0 +1,8 @@
+pub mod files;
+pub mod hooks_tauri;
+pub mod incoming_files;
+pub mod llm;
+pub mod permission;
+pub mod prompt;
+pub mod session;
+pub mod title;

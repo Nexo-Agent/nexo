@@ -21,6 +21,7 @@ use crate::features::notes::{
 };
 use crate::features::skill::SkillService;
 use crate::features::tool::{mcp_refresh::MCPToolRefreshService, service::ToolService};
+use crate::features::harness::HarnessFactory;
 use crate::features::usage::{SqliteUsageRepository, UsageRepository, UsageService};
 use crate::features::workspace::{
     management::{SqliteWorkspaceRepository, WorkspaceRepository, WorkspaceService},
@@ -144,16 +145,25 @@ impl AppState {
 
         let skill_service = Arc::new(SkillService::new((*app).clone()));
 
-        let chat_service = Arc::new(ChatService::new(
-            chat_repo,
-            llm_service,
+        let harness_factory = Arc::new(HarnessFactory::new(
+            llm_service.clone(),
             message_service.clone(),
-            workspace_settings_service,
-            llm_connection_service.clone(),
+            chat_repo.clone(),
             tool_service.clone(),
             usage_service.clone(),
             agent_manager.clone(),
             skill_service.clone(),
+            llm_connection_service.clone(),
+            workspace_settings_service.clone(),
+        ));
+
+        let chat_service = Arc::new(ChatService::new(
+            chat_repo,
+            message_service.clone(),
+            workspace_settings_service,
+            llm_connection_service.clone(),
+            agent_manager.clone(),
+            harness_factory,
         ));
 
         let app_settings_service = Arc::new(AppSettingsService::new(app_settings_repo));
