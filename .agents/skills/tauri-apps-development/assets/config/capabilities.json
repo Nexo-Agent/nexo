@@ -1,0 +1,186 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-minimize",
+    "core:window:allow-maximize",
+    "core:window:allow-close",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-is-maximized",
+    "core:window:allow-set-fullscreen",
+    "core:window:allow-is-fullscreen",
+    "opener:default",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        {
+          "path": "/$HOME/Downloads"
+        },
+        {
+          "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
+        },
+        {
+          "path": "$APPDATA/skills"
+        }
+      ]
+    },
+    "clipboard-manager:default",
+    "dialog:default",
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [
+        {
+          "path": "$APPDATA/mermaid_cache"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache/**"
+        }
+      ]
+    },
+    "fs:default",
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [
+        {
+          "path": "$APPDATA/mermaid_cache"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache/**"
+        }
+      ]
+    },
+    "fs:allow-write-file",
+    "fs:allow-create",
+    "fs:allow-mkdir",
+    "updater:allow-check",
+    "updater:allow-install",
+    "updater:allow-download-and-install",
+    "process:allow-restart",
+    "log:default",
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        {
+          "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        {
+          "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-stat",
+      "allow": [
+        {
+          "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        {
+          "path": "$APPDATA/images/**"
+        },
+        {
+          "path": "$APPDATA/files/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-create",
+      "allow": [
+        {
+          "path": "$APPDATA/images"
+        },
+        {
+          "path": "$APPDATA/files"
+        },
+        {
+          "path": "$DOWNLOAD"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [
+        {
+          "path": "$APPDATA/images"
+        },
+        {
+          "path": "$APPDATA/files"
+        },
+        {
+          "path": "$DOWNLOAD"
+        },
+        {
+          "path": "$APPDATA/mermaid_cache"
+        }
+      ]
+    }
+  ]
+}
