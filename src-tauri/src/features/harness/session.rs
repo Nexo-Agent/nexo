@@ -47,8 +47,7 @@ impl AgentSession {
         } = request;
 
         let tool_ctx = resolve_tool_context(
-            &self.deps.agent_manager,
-            &self.deps.tool_service,
+            &self.deps.tool_deps,
             &app,
             agent_id.as_deref(),
             &workspace_id,
@@ -83,7 +82,8 @@ impl AgentSession {
             user_metadata,
             assistant_message_id,
             initial_llm_response: None,
-            tools: tool_ctx.tools,
+            tools: tool_ctx.llm_tools,
+            tool_runtime: tool_ctx.runtime,
             system_prompt_override: tool_ctx.system_prompt_override,
             model,
             reasoning_effort,

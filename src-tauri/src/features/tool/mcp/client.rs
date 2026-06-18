@@ -1,4 +1,4 @@
-use super::models::MCPTool;
+use crate::features::tool::models::MCPTool;
 use crate::error::AppError;
 use crate::features::sandbox::{RuntimeKind, SandboxService};
 use rust_mcp_sdk::{

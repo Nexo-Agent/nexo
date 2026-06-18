@@ -1,7 +1,9 @@
+pub mod builtin;
 pub mod commands;
-pub mod ask_user;
-pub mod internal;
-pub mod mcp_client;
-pub mod mcp_refresh;
+pub mod core;
+pub mod mcp;
 pub mod models;
-pub mod service;
+
+pub use builtin::{get_ask_user_tool, resolve_answers_to_llm_format, OTHER_OPTION_ID};
+pub use core::{ToolDeps, ToolExecutionContext, ToolResult, ToolRuntime, ResolveMode};
+pub use mcp::{MCPClientService, MCPToolRefreshService};

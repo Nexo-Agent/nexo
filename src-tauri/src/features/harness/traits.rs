@@ -4,7 +4,7 @@ use crate::features::harness::types::{
 };
 use crate::features::message::Message;
 use crate::features::workspace::settings::WorkspaceSettings;
-use crate::models::llm_types::{ChatCompletionTool, LLMChatRequest, LLMChatResponse, ToolCall};
+use crate::models::llm_types::{LLMChatRequest, LLMChatResponse, ToolCall};
 use async_trait::async_trait;
 use serde_json::Value;
 use std::sync::Arc;
@@ -64,20 +64,16 @@ pub trait SessionStore: Send + Sync {
     fn update_chat_last_message(&self, chat_id: &str, preview: &str) -> Result<(), AppError>;
 }
 
-/// A single source of tools (MCP, internal, agent).
-#[async_trait]
-pub trait ToolProvider: Send + Sync {
-    fn list_tools(&self) -> Vec<ChatCompletionTool>;
-
-    async fn call(
-        &self,
-        tool_name: &str,
-        arguments: Value,
-        cancellation_rx: &mut broadcast::Receiver<()>,
-    ) -> Result<Value, AppError>;
+/// Shared dependencies for building an agent session.
+pub struct HarnessDeps {
+    pub prompt_provider: Arc<dyn PromptProvider>,
+    pub message_builder: Arc<dyn MessageBuilder>,
+    pub session_store: Arc<dyn SessionStore>,
+    pub llm_client: Arc<dyn LlmClient>,
+    pub hooks: Arc<dyn HarnessHooks>,
+    pub tool_deps: Arc<crate::features::tool::core::ToolDeps>,
+    pub message_service: Arc<crate::features::message::MessageService>,
 }
-
-/// Wraps LLM provider calls.
 #[async_trait]
 pub trait LlmClient: Send + Sync {
     async fn chat(
@@ -190,14 +186,3 @@ pub trait HarnessHooks: Send + Sync {
     ) -> Result<(), AppError>;
 }
 
-/// Shared dependencies for building an agent session.
-pub struct HarnessDeps {
-    pub prompt_provider: Arc<dyn PromptProvider>,
-    pub message_builder: Arc<dyn MessageBuilder>,
-    pub session_store: Arc<dyn SessionStore>,
-    pub llm_client: Arc<dyn LlmClient>,
-    pub hooks: Arc<dyn HarnessHooks>,
-    pub tool_service: Arc<crate::features::tool::service::ToolService>,
-    pub agent_manager: Arc<crate::features::agent::manager::AgentManager>,
-    pub message_service: Arc<crate::features::message::MessageService>,
-}

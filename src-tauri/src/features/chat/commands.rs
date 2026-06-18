@@ -196,7 +196,7 @@ pub fn respond_user_question(
     };
 
     // Validate answers against original questions before unblocking
-    crate::features::tool::ask_user::resolve_answers_to_llm_format(&pending.questions, &answers)?;
+    crate::features::tool::builtin::resolve_answers_to_llm_format(&pending.questions, &answers)?;
 
     let response = crate::state::UserQuestionResponse { answers };
 

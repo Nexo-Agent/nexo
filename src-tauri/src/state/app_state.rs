@@ -20,7 +20,7 @@ use crate::features::notes::{
     service::NoteService,
 };
 use crate::features::skill::SkillService;
-use crate::features::tool::{mcp_refresh::MCPToolRefreshService, service::ToolService};
+use crate::features::tool::{mcp::MCPToolRefreshService, core::ToolDeps};
 use crate::features::harness::HarnessFactory;
 use crate::features::usage::{SqliteUsageRepository, UsageRepository, UsageService};
 use crate::features::workspace::{
@@ -58,7 +58,7 @@ pub struct AppState {
     pub mcp_connection_service: Arc<MCPConnectionService>,
     pub usage_service: Arc<UsageService>,
     #[allow(dead_code)]
-    pub tool_service: Arc<ToolService>,
+    pub tool_deps: Arc<ToolDeps>,
     pub app_settings_service: Arc<AppSettingsService>,
     pub prompt_service: Arc<PromptService>,
     pub note_service: Arc<NoteService>,
@@ -141,10 +141,11 @@ impl AppState {
             Arc::new(SqliteMCPConnectionRepository::new(app.clone()));
         let mcp_connection_service =
             Arc::new(MCPConnectionService::new(mcp_connection_repo.clone()));
-        let tool_service = Arc::new(ToolService::new(
+        let tool_deps = Arc::new(ToolDeps::new(
             (*app).clone(),
             mcp_connection_service.clone(),
             workspace_settings_service.clone(),
+            agent_manager.clone(),
         ));
 
         let skill_service = Arc::new(SkillService::new((*app).clone()));
@@ -153,9 +154,8 @@ impl AppState {
             llm_service.clone(),
             message_service.clone(),
             chat_repo.clone(),
-            tool_service.clone(),
+            tool_deps.clone(),
             usage_service.clone(),
-            agent_manager.clone(),
             skill_service.clone(),
             llm_connection_service.clone(),
             workspace_settings_service.clone(),
@@ -196,7 +196,7 @@ impl AppState {
             llm_connection_service,
             mcp_connection_service,
             usage_service,
-            tool_service,
+            tool_deps,
             app_settings_service,
             prompt_service,
             note_service,

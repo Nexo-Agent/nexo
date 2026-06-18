@@ -2,7 +2,6 @@ use crate::features::llm_connection::models::LLMConnection;
 use crate::features::message::Message;
 use crate::features::workspace::settings::WorkspaceSettings;
 use crate::models::llm_types::{ChatCompletionTool, ChatMessage, LLMChatResponse};
-use serde_json::Value;
 
 /// Input for a single conversation turn (user message → final assistant response).
 #[derive(Debug, Clone)]
@@ -15,6 +14,7 @@ pub struct TurnInput {
     pub assistant_message_id: String,
     pub initial_llm_response: Option<LLMChatResponse>,
     pub tools: Option<Vec<ChatCompletionTool>>,
+    pub tool_runtime: std::sync::Arc<crate::features::tool::core::ToolRuntime>,
     pub system_prompt_override: Option<String>,
     pub model: String,
     pub reasoning_effort: Option<String>,
@@ -41,54 +41,8 @@ pub enum TurnOutcome {
     BudgetExceeded,
 }
 
-/// Standardized tool declaration for the harness (maps to LLM function-calling schema).
-#[derive(Debug, Clone)]
-pub struct ToolSpec {
-    pub name: String,
-    pub description: Option<String>,
-    pub parameters: Option<Value>,
-    pub source: String,
-    pub is_sensitive: bool,
-}
-
 /// Standardized result from any tool provider.
-#[derive(Debug, Clone)]
-pub struct ToolResult {
-    pub tool_name: String,
-    pub content: String,
-    pub is_error: bool,
-    pub raw_size: usize,
-    pub truncated: bool,
-    pub metadata: Value,
-}
-
-impl ToolResult {
-    pub fn ok(tool_name: impl Into<String>, content: impl Into<String>) -> Self {
-        let content = content.into();
-        let len = content.len();
-        Self {
-            tool_name: tool_name.into(),
-            content,
-            is_error: false,
-            raw_size: len,
-            truncated: false,
-            metadata: Value::Null,
-        }
-    }
-
-    pub fn err(tool_name: impl Into<String>, content: impl Into<String>) -> Self {
-        let content = content.into();
-        let len = content.len();
-        Self {
-            tool_name: tool_name.into(),
-            content,
-            is_error: true,
-            raw_size: len,
-            truncated: false,
-            metadata: Value::Null,
-        }
-    }
-}
+pub use crate::features::tool::core::ToolResult;
 
 /// Context for building prompts.
 #[derive(Debug, Clone)]

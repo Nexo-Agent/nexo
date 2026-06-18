@@ -1,5 +1,4 @@
 use crate::error::AppError;
-use crate::features::agent::manager::AgentManager;
 use crate::features::chat::repository::ChatRepository;
 use crate::features::harness::adapters::incoming_files::{merge_file_metadata, process_incoming_files};
 use crate::features::harness::adapters::title::TitleGenerator;
@@ -14,7 +13,7 @@ use crate::features::harness::types::{HarnessMessages, MessageBuildContext, Mess
 use crate::features::llm_connection::LLMConnectionService;
 use crate::features::message::MessageService;
 use crate::features::skill::SkillService;
-use crate::features::tool::service::ToolService;
+use crate::features::tool::core::ToolDeps;
 use crate::features::usage::UsageService;
 use crate::features::workspace::settings::WorkspaceSettingsService;
 use crate::services::LLMService;
@@ -32,9 +31,8 @@ impl HarnessFactory {
         llm_service: Arc<LLMService>,
         message_service: Arc<MessageService>,
         chat_repository: Arc<dyn ChatRepository>,
-        tool_service: Arc<ToolService>,
+        tool_deps: Arc<ToolDeps>,
         usage_service: Arc<UsageService>,
-        agent_manager: Arc<AgentManager>,
         skill_service: Arc<SkillService>,
         llm_connection_service: Arc<LLMConnectionService>,
         workspace_settings_service: Arc<WorkspaceSettingsService>,
@@ -59,8 +57,7 @@ impl HarnessFactory {
             session_store,
             llm_client: llm_client.clone(),
             hooks,
-            tool_service,
-            agent_manager,
+            tool_deps,
             message_service: message_service.clone(),
         });
 

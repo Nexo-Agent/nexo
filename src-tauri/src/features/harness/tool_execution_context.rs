@@ -1,10 +1,2 @@
-use tauri::AppHandle;
-
-/// Runtime context passed to tool executors for tools that need chat/session info.
-#[derive(Clone)]
-pub struct ToolExecutionContext {
-    pub app: AppHandle,
-    pub chat_id: String,
-    pub message_id: String,
-    pub tool_call_id: String,
-}
+//! Runtime context for tool execution during a harness turn.
+pub use crate::features::tool::core::ToolExecutionContext;

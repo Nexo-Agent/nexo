@@ -1,11 +1,11 @@
 use crate::error::AppError;
 use crate::features::harness::intent_router::IntentRouter;
 use crate::features::harness::loop_detector::LoopDetector;
-use crate::features::harness::providers::agent::AgentToolExecutor;
-use crate::features::harness::providers::workspace::WorkspaceToolExecutor;
-use crate::features::harness::tool_execution_context::ToolExecutionContext;
 use crate::features::harness::traits::HarnessDeps;
 use crate::features::harness::types::{TurnInput, TurnOutput};
+use crate::features::tool::core::{
+    parse_tool_arguments, ToolExecutionContext, ToolInteraction, ToolRuntime,
+};
 use crate::models::llm_types::{
     AssistantContent, ChatMessage, LLMChatRequest, LLMChatResponse, UserContent,
 };
@@ -45,13 +45,14 @@ impl ConversationTurnController {
             mut assistant_message_id,
             initial_llm_response: _,
             tools,
+            tool_runtime,
             system_prompt_override: _,
             model,
             reasoning_effort,
             llm_connection,
             max_iterations,
             stream_enabled,
-            agent_id,
+            agent_id: _,
             workspace_settings,
         } = input;
 
@@ -205,8 +206,7 @@ impl ConversationTurnController {
                         .execute_tool_calls(
                             &chat_id,
                             &assistant_message_id,
-                            &workspace_id,
-                            agent_id.as_deref(),
+                            &tool_runtime,
                             &allowed_tools,
                             &app,
                             cancellation_rx,
@@ -276,8 +276,7 @@ impl ConversationTurnController {
         &self,
         chat_id: &str,
         assistant_message_id: &str,
-        workspace_id: &str,
-        agent_id: Option<&str>,
+        tool_runtime: &Arc<ToolRuntime>,
         tool_calls: &[crate::models::llm_types::ToolCall],
         app: &AppHandle,
         cancellation_rx: &mut broadcast::Receiver<()>,
@@ -299,23 +298,6 @@ impl ConversationTurnController {
         let mut successful_count = 0;
         let mut failed_count = 0;
 
-        let agent_executor = if let Some(aid) = agent_id {
-            let client = self
-                .deps
-                .agent_manager
-                .get_agent_client(app, aid)
-                .await
-                .map_err(|e| AppError::Generic(e.to_string()))?;
-            Some(AgentToolExecutor::new(client))
-        } else {
-            None
-        };
-
-        let workspace_executor = WorkspaceToolExecutor::new(
-            self.deps.tool_service.clone(),
-            workspace_id,
-        )?;
-
         for tool_call in tool_calls {
             self.loop_detector.record(
                 &tool_call.function.name,
@@ -326,16 +308,26 @@ impl ConversationTurnController {
                 // TODO(harness): return TurnOutcome::NeedsUserInput when LoopDetector is implemented
             }
 
+            let is_await_user = tool_runtime
+                .find_spec(&tool_call.function.name)
+                .is_some_and(|s| s.behavior.interaction == ToolInteraction::AwaitUser);
+
             let tool_call_message_id = format!("tool_call_{}", tool_call.id);
             let tool_call_timestamp = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
                 .as_millis() as i64;
 
+            let initial_status = if is_await_user {
+                "waiting_for_user"
+            } else {
+                "executing"
+            };
+
             let tool_call_data = serde_json::json!({
                 "name": tool_call.function.name,
                 "arguments": tool_call.function.arguments,
-                "status": if tool_call.function.name == "ask_user" { "waiting_for_user" } else { "executing" }
+                "status": initial_status
             });
 
             session_store.create_tool_call_message(
@@ -352,22 +344,12 @@ impl ConversationTurnController {
                     assistant_message_id,
                     &tool_call.id,
                     &tool_call.function.name,
-                    if tool_call.function.name == "ask_user" {
-                        "waiting_for_user"
-                    } else {
-                        "executing"
-                    },
+                    initial_status,
                     None,
                     None,
                     app,
                 )
                 .await?;
-
-            let timeout_secs = if tool_call.function.name == "ask_user" {
-                None
-            } else {
-                Some(60)
-            };
 
             let context = ToolExecutionContext {
                 app: app.clone(),
@@ -376,44 +358,32 @@ impl ConversationTurnController {
                 tool_call_id: tool_call.id.clone(),
             };
 
-            let execution_result = if tool_call.function.name == "ask_user" {
-                workspace_executor
-                    .execute(
-                        &tool_call.function.name,
-                        &tool_call.function.arguments,
-                        cancellation_rx,
-                        timeout_secs,
-                        &context,
-                    )
-                    .await
-            } else if let Some(ref executor) = agent_executor {
-                executor
-                    .execute(
-                        &tool_call.function.name,
-                        &tool_call.function.arguments,
-                        cancellation_rx,
-                    )
-                    .await
-            } else {
-                workspace_executor
-                    .execute(
-                        &tool_call.function.name,
-                        &tool_call.function.arguments,
-                        cancellation_rx,
-                        timeout_secs,
-                        &context,
-                    )
-                    .await
-            };
+            let arguments = parse_tool_arguments(
+                &tool_call.function.name,
+                &tool_call.function.arguments,
+            )?;
+
+            let execution_result = tool_runtime
+                .execute(
+                    &tool_call.function.name,
+                    arguments,
+                    &context,
+                    cancellation_rx,
+                )
+                .await;
 
             let result = match execution_result {
-                Ok(result) => {
+                Ok(tool_result) => {
                     successful_count += 1;
+                    let result_value: serde_json::Value =
+                        serde_json::from_str(&tool_result.content).unwrap_or_else(|_| {
+                            serde_json::Value::String(tool_result.content.clone())
+                        });
 
                     let completed_data = serde_json::json!({
                         "name": tool_call.function.name,
                         "arguments": tool_call.function.arguments,
-                        "result": result,
+                        "result": result_value,
                         "status": "completed"
                     });
                     session_store.update_tool_call_message(
@@ -428,13 +398,13 @@ impl ConversationTurnController {
                             &tool_call.id,
                             &tool_call.function.name,
                             "completed",
-                            Some(result.clone()),
+                            Some(result_value.clone()),
                             None,
                             app,
                         )
                         .await?;
 
-                    result
+                    result_value
                 }
                 Err(e) => {
                     if matches!(e, AppError::Cancelled) {
@@ -490,12 +460,13 @@ impl ConversationTurnController {
             };
 
             let tool_result_message_id = format!("tool_result_{}", tool_call.id);
+            let llm_content = serde_json::to_string(&result)?;
 
             message_service.create(
                 tool_result_message_id,
                 chat_id.to_string(),
                 "tool".to_string(),
-                serde_json::to_string(&result)?,
+                llm_content.clone(),
                 Some(tool_call_timestamp),
                 None,
                 Some(tool_call.id.clone()),
@@ -503,7 +474,7 @@ impl ConversationTurnController {
             )?;
 
             tool_results.push(ChatMessage::Tool {
-                content: serde_json::to_string(&result)?,
+                content: llm_content,
                 tool_call_id: tool_call.id.clone(),
             });
         }

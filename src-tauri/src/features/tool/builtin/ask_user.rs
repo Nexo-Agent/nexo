@@ -1,9 +1,15 @@
 use crate::error::AppError;
-use crate::features::harness::tool_execution_context::ToolExecutionContext;
+use crate::features::tool::core::context::ToolExecutionContext;
+use crate::features::tool::core::result::ToolResult;
+use crate::features::tool::core::spec::{ToolBehavior, ToolSpec};
+use crate::features::tool::core::traits::Tool;
+use crate::features::tool::core::llm_adapter::tool_spec_to_llm_tool;
+use crate::models::llm_types::ChatCompletionTool;
 use crate::state::{
     PendingUserQuestion, UserQuestionAnswerInput, UserQuestionDefinition, UserQuestionOption,
     UserQuestionResponse,
 };
+use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use tauri::Manager;
@@ -11,18 +17,19 @@ use tokio::sync::oneshot;
 
 pub const OTHER_OPTION_ID: &str = "other";
 
-pub fn get_ask_user_tool() -> crate::models::llm_types::ChatCompletionTool {
-    crate::models::llm_types::ChatCompletionTool {
-        r#type: "function".to_string(),
-        function: crate::models::llm_types::ChatCompletionToolFunction {
-            name: "ask_user".to_string(),
-            description: Some(
+pub struct AskUserTool;
+
+impl AskUserTool {
+    pub fn spec_value() -> ToolSpec {
+        ToolSpec::new(
+            "ask_user",
+            Some(
                 "Ask the user one or more clarifying questions with predefined options. \
                 Use when you need the user to choose between approaches or provide missing information. \
                 Each question must have a unique id, a prompt, and at least one option (id + label). \
                 The UI will append an 'Other' option for free-text input.".to_string(),
             ),
-            parameters: Some(json!({
+            Some(json!({
                 "type": "object",
                 "properties": {
                     "title": {
@@ -60,8 +67,34 @@ pub fn get_ask_user_tool() -> crate::models::llm_types::ChatCompletionTool {
                 },
                 "required": ["questions"]
             })),
-        },
+            "builtin",
+            "System",
+            ToolBehavior::await_user(),
+        )
     }
+}
+
+#[async_trait]
+impl Tool for AskUserTool {
+    fn spec(&self) -> ToolSpec {
+        Self::spec_value()
+    }
+
+    async fn execute(
+        &self,
+        arguments: Value,
+        ctx: &ToolExecutionContext,
+    ) -> Result<ToolResult, AppError> {
+        let result = execute_ask_user(arguments, ctx).await?;
+        Ok(ToolResult::ok(
+            "ask_user",
+            serde_json::to_string(&result)?,
+        ))
+    }
+}
+
+pub fn get_ask_user_tool() -> ChatCompletionTool {
+    tool_spec_to_llm_tool(&AskUserTool::spec_value())
 }
 
 fn parse_questions(arguments: &Value) -> Result<Vec<UserQuestionDefinition>, AppError> {
@@ -195,7 +228,7 @@ pub fn resolve_answers_to_llm_format(
     Ok(json!({ "answers": answers }))
 }
 
-pub async fn ask_user(
+async fn execute_ask_user(
     arguments: Value,
     context: &ToolExecutionContext,
 ) -> Result<Value, AppError> {

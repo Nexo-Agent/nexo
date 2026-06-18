@@ -327,7 +327,7 @@ impl AgentManager {
         app: &tauri::AppHandle,
         agent_id: &str,
     ) -> Result<std::sync::Arc<rust_mcp_sdk::mcp_client::ClientRuntime>> {
-        use crate::features::tool::mcp_client::MCPClientService;
+        use crate::features::tool::mcp::MCPClientService;
         use crate::state::MCPClientState;
         use tauri::Manager;
 
@@ -414,7 +414,7 @@ impl AgentManager {
         app: &tauri::AppHandle,
         agent_id: &str,
     ) -> Result<(Vec<crate::features::tool::models::MCPTool>, String), anyhow::Error> {
-        use crate::features::tool::mcp_client::MCPClientService;
+        use crate::features::tool::mcp::MCPClientService;
         use crate::features::tool::models::MCPTool;
 
         // 1. Get instructions

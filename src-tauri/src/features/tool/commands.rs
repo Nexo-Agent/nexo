@@ -1,6 +1,7 @@
-use super::mcp_client::MCPClientService;
+use super::mcp::MCPClientService;
 use super::models::MCPTool;
 use crate::error::AppError;
+use crate::features::tool::core::{ResolveMode, ToolRuntime};
 use crate::state::mcp_client_state::MCPClientState;
 use tauri::State;
 
@@ -34,8 +35,6 @@ pub async fn connect_mcp_server_and_fetch_tools(
     env_vars: Option<String>,
     runtime_path: Option<String>,
 ) -> Result<Vec<MCPTool>, AppError> {
-    // This is the same logic as test_mcp_connection_and_fetch_tools
-    // but we'll use it for automatic connection when saving
     MCPClientService::test_connection_and_fetch_tools(
         &app,
         url,
@@ -60,7 +59,6 @@ pub async fn get_mcp_client(
 ) -> Result<(), AppError> {
     let mut connection_info = state.connection_info.lock().await;
 
-    // Store connection info for later use
     connection_info.insert(
         connection_id,
         (url, r#type, headers, env_vars, runtime_path),
@@ -74,12 +72,11 @@ pub async fn call_mcp_tool(
     app: tauri::AppHandle,
     connection_id: String,
     tool_name: String,
-    arguments: String, // JSON string
+    arguments: String,
     state: State<'_, MCPClientState>,
 ) -> Result<String, AppError> {
     let connection_info = state.connection_info.lock().await;
 
-    // Get connection info
     let (url, r#type, headers, env_vars, runtime_path) = connection_info
         .get(&connection_id)
         .ok_or_else(|| AppError::Mcp(format!("MCP connection not found: {connection_id}")))?
@@ -87,11 +84,9 @@ pub async fn call_mcp_tool(
 
     drop(connection_info);
 
-    // Parse arguments
     let args: serde_json::Value = serde_json::from_str(&arguments)
         .map_err(|e| AppError::Mcp(format!("Failed to parse arguments: {e}")))?;
 
-    // Call tool with client (creates client, calls tool, cleans up)
     MCPClientService::call_tool(
         &app,
         url,
@@ -112,19 +107,22 @@ pub async fn disconnect_mcp_client(
     state: State<'_, MCPClientState>,
 ) -> Result<(), AppError> {
     let mut connection_info = state.connection_info.lock().await;
-
-    // Remove connection info
     connection_info.remove(&connection_id);
-
     Ok(())
 }
+
 #[tauri::command]
-pub fn get_active_tools_for_workspace(
+pub async fn get_active_tools_for_workspace(
     workspace_id: String,
     state: State<'_, crate::state::AppState>,
 ) -> Result<Vec<crate::features::tool::models::UnifiedToolInfo>, AppError> {
-    state
-        .tool_service
-        .get_active_tools_info_for_workspace(&workspace_id)
-        .map_err(|e| AppError::Generic(e.to_string()))
+    let runtime = ToolRuntime::resolve(
+        &state.tool_deps,
+        ResolveMode::Workspace {
+            workspace_id: &workspace_id,
+        },
+    )
+    .await?;
+
+    Ok(runtime.list_unified_info())
 }
