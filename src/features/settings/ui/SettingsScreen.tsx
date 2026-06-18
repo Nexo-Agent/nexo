@@ -2,7 +2,7 @@ import { Suspense, lazy } from 'react';
 import {
   Network,
   Server,
-  FileText,
+  Wand2,
   Github,
   Globe,
   BookOpen,
@@ -15,7 +15,6 @@ import { useAppSelector } from '@/app/hooks';
 import { Separator } from '@/ui/atoms/separator';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 
-// Section Components - Lazy Loaded
 const LLMConnections = lazy(() =>
   import('@/features/llm').then((module) => ({
     default: module.LLMConnections,
@@ -26,18 +25,8 @@ const MCPServerConnections = lazy(() =>
     default: module.MCPServerConnections,
   }))
 );
-const HubScreen = lazy(() =>
-  import('@/features/hub/ui/HubScreen').then((module) => ({
-    default: module.HubScreen,
-  }))
-);
 const UsagePage = lazy(() =>
   import('@/features/usage').then((module) => ({ default: module.UsagePage }))
-);
-const AgentSettings = lazy(() =>
-  import('@/features/agent').then((module) => ({
-    default: module.AgentSettings,
-  }))
 );
 const UpdateSection = lazy(() =>
   import('@/features/updater/ui/UpdateSection').then((module) => ({
@@ -55,15 +44,12 @@ const WebSearchSettings = lazy(() =>
   }))
 );
 
-// Local Components (Fix Circular Dependencies by strict local import)
 import { AppSettings } from './AppSettings';
-import { PromptManagement } from './PromptManagement';
 import { FeatureCard } from './components/FeatureCard';
 import { ResourceButton } from './components/ResourceButton';
 import { SettingsSidebar } from './components/SettingsSidebar';
 import { GITHUB_URL, WEBSITE_URL, DOCS_URL } from '../lib/constants';
 
-// Loading fallback
 const SectionLoader = () => (
   <div className="flex h-full w-full items-center justify-center p-12">
     <Loader2 className="size-8 animate-spin text-muted-foreground" />
@@ -76,8 +62,6 @@ export function SettingsScreen() {
 
   const renderContent = () => {
     switch (selectedSection) {
-      case 'hub':
-        return <HubScreen />;
       case 'general':
         return <AppSettings />;
       case 'llm':
@@ -86,10 +70,6 @@ export function SettingsScreen() {
         return <MCPServerConnections />;
       case 'web_search':
         return <WebSearchSettings />;
-      case 'prompts':
-        return <PromptManagement />;
-      case 'agent':
-        return <AgentSettings />;
       case 'usage':
         return <UsagePage />;
       case 'skills':
@@ -97,7 +77,7 @@ export function SettingsScreen() {
       case 'about':
         return <AboutContent />;
       default:
-        return <HubScreen />;
+        return <AppSettings />;
     }
   };
 
@@ -106,10 +86,7 @@ export function SettingsScreen() {
     { id: 'llm', label: t('llmConnections') },
     { id: 'mcp', label: t('mcpServerConnections') },
     { id: 'web_search', label: t('webSearch') },
-    { id: 'prompts', label: t('promptManagement') },
-    { id: 'agent', label: t('agents') },
     { id: 'skills', label: t('skills') },
-    { id: 'hub', label: 'Hub' },
     { id: 'usage', label: 'Usage' },
     { id: 'about', label: t('about') },
   ];
@@ -132,7 +109,6 @@ export function SettingsScreen() {
 
     return (
       <div className="max-w-3xl mx-auto pb-10 space-y-8 animate-in fade-in duration-500">
-        {/* Header Section */}
         <div className="flex flex-col items-center text-center space-y-4 pt-4">
           <div className="relative group">
             <div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-secondary/20 rounded-3xl blur opacity-40 group-hover:opacity-75 transition duration-500" />
@@ -154,7 +130,6 @@ export function SettingsScreen() {
           </div>
         </div>
 
-        {/* Update Section */}
         <div className="max-w-xl mx-auto w-full">
           <Suspense fallback={<SectionLoader />}>
             <UpdateSection />
@@ -163,7 +138,6 @@ export function SettingsScreen() {
 
         <Separator className="opacity-50" />
 
-        {/* Features/Highlights */}
         <div className="space-y-4">
           <h4 className="font-semibold text-sm text-foreground/80 uppercase tracking-wider px-1">
             {tCommon('keyFeatures', { defaultValue: 'Core Capabilities' })}
@@ -180,9 +154,9 @@ export function SettingsScreen() {
               description="Full support for Model Context Protocol servers and tools."
             />
             <FeatureCard
-              icon={<FileText className="size-5" />}
-              title="Custom Prompts"
-              description="Create, manage, and reuse your own specialized system prompts."
+              icon={<Wand2 className="size-5" />}
+              title="Agent Skills"
+              description="Install and use Agent Skills from your filesystem or GitHub."
             />
             <FeatureCard
               icon={<Shield className="size-5" />}
@@ -192,7 +166,6 @@ export function SettingsScreen() {
           </div>
         </div>
 
-        {/* Resources & Links */}
         <div className="space-y-4">
           <h4 className="font-semibold text-sm text-foreground/80 uppercase tracking-wider px-1">
             {tCommon('resources', { defaultValue: 'Resources' })}
@@ -216,7 +189,6 @@ export function SettingsScreen() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="pt-8 text-center space-y-1">
           <p className="text-xs text-muted-foreground">
             Built with Tauri, React & Rust

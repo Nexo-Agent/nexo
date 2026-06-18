@@ -36,6 +36,8 @@ tauri-plugin-clipboard-manager = "2"
 flate2 = "1.0"
 tar = "0.4"
 zip = "2.2"
+notify = "7.0"
+notify-debouncer-full = "0.4"
 serde_yaml = "0.9"
 ts-rs = "9.0"
 uuid = { version = "1.19.0", features = ["v4", "serde"] }

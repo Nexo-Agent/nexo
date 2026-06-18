@@ -101,6 +101,39 @@ pub fn extract_flow_description(metadata: &str) -> Option<String> {
     Some(description)
 }
 
+/// Append skill instructions from message metadata (skill is not stored in visible user content).
+pub fn append_skill_from_metadata(
+    effective_content: &mut String,
+    metadata: &str,
+    skill_service: &crate::features::skill::SkillService,
+) -> Result<(), AppError> {
+    let meta_json: serde_json::Value = match serde_json::from_str(metadata) {
+        Ok(v) => v,
+        Err(_) => return Ok(()),
+    };
+
+    let skill_id = meta_json
+        .get("skillId")
+        .and_then(|v| v.as_str())
+        .or_else(|| {
+            meta_json
+                .get("skill")
+                .and_then(|s| s.get("id"))
+                .and_then(|v| v.as_str())
+        });
+
+    let Some(skill_id) = skill_id else {
+        return Ok(());
+    };
+
+    let skill = skill_service.load_skill(skill_id)?;
+    if !effective_content.trim().is_empty() {
+        effective_content.push_str("\n\n");
+    }
+    effective_content.push_str(&skill.instructions);
+    Ok(())
+}
+
 pub fn build_user_content_from_parts(
     file_loader: &dyn FileContentLoader,
     text: &str,

@@ -12,6 +12,8 @@ import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { FLOW_NODES } from '@/ui/molecules/flow/constants';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import type { Message } from '../../types';
+import { parseSkillAttachment } from '../../lib/skillAttachment';
+import { SkillChip } from './SkillChip';
 import { MessageAttachments } from './components/MessageAttachments';
 import { MessageControls } from './components/MessageControls';
 
@@ -108,6 +110,7 @@ export const MessageItem = memo(
 
     const agentCardData =
       parsedMetadata?.type === 'agent_card' ? parsedMetadata : null;
+    const skillData = parseSkillAttachment(parsedMetadata);
     const flowData =
       parsedMetadata?.type === 'flow_attachment' ? parsedMetadata.flow : null;
 
@@ -231,17 +234,29 @@ export const MessageItem = memo(
                     </div>
                   )}
 
-                  {/* Content */}
-                  <div className="whitespace-pre-wrap wrap-break-words">
-                    {message.role === 'assistant' && markdownEnabled ? (
-                      <MarkdownContent
-                        content={cleanedContent}
-                        messageId={message.id}
+                  {skillData && (
+                    <div className="mb-2">
+                      <SkillChip
+                        name={skillData.skillName}
+                        description={skillData.description}
+                        mode="message"
                       />
-                    ) : (
-                      cleanedContent
-                    )}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Content */}
+                  {cleanedContent && (
+                    <div className="whitespace-pre-wrap wrap-break-words">
+                      {message.role === 'assistant' && markdownEnabled ? (
+                        <MarkdownContent
+                          content={cleanedContent}
+                          messageId={message.id}
+                        />
+                      ) : (
+                        cleanedContent
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Gradient fade overlay when collapsed */}

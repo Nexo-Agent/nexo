@@ -1,41 +1,33 @@
 import { memo } from 'react';
 import { FlowAttachment } from '../FlowAttachment';
 import { AttachedFileItem } from '../AttachedFileItem';
-import { PromptPanel } from '../PromptPanel';
-import { AgentMentionChips } from '../AgentBadgeOverlay';
-import { InstalledAgent } from '@/app/types';
+import { SkillChip } from '../SkillChip';
 import { FlowData } from '@/features/chat/types';
+import type { InsertedSkill } from '../../../lib/skillAttachment';
 
 interface ChatAttachmentsProps {
   attachedFiles: File[];
   attachedFlow: FlowData | null;
-  insertedPrompt: { name: string; content: string } | null;
-  selectedAgentIds: string[];
-  installedAgents: InstalledAgent[];
+  insertedSkill: InsertedSkill | null;
   onRemoveFile: (index: number) => void;
   onRemoveFlow: () => void;
   onOpenFlowDialog: () => void;
-  onRemovePrompt: () => void;
-  onRemoveAgent: (agentId: string) => void;
+  onRemoveSkill: () => void;
   disabled?: boolean;
 }
 
 export const ChatAttachments = memo(function ChatAttachments({
   attachedFiles,
   attachedFlow,
-  insertedPrompt,
-  selectedAgentIds,
-  installedAgents,
+  insertedSkill,
   onRemoveFile,
   onRemoveFlow,
   onOpenFlowDialog,
-  onRemovePrompt,
-  onRemoveAgent,
+  onRemoveSkill,
   disabled,
 }: ChatAttachmentsProps) {
   return (
     <>
-      {/* Attached Files */}
       {attachedFiles.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-2">
           {attachedFiles.map((file, index) => (
@@ -50,7 +42,6 @@ export const ChatAttachments = memo(function ChatAttachments({
         </div>
       )}
 
-      {/* Attached Flow */}
       {attachedFlow && (
         <div className="flex gap-2 p-2 pt-0">
           <FlowAttachment
@@ -62,21 +53,17 @@ export const ChatAttachments = memo(function ChatAttachments({
         </div>
       )}
 
-      {/* Inserted Prompt Panel */}
-      {insertedPrompt && (
-        <PromptPanel
-          promptName={insertedPrompt.name}
-          promptContent={insertedPrompt.content}
-          onRemove={onRemovePrompt}
-        />
+      {insertedSkill && (
+        <div className="mb-2">
+          <SkillChip
+            name={insertedSkill.skillName}
+            description={insertedSkill.description}
+            onRemove={onRemoveSkill}
+            disabled={disabled}
+            mode="input"
+          />
+        </div>
       )}
-
-      {/* Agent Mention Chips */}
-      <AgentMentionChips
-        agentIds={selectedAgentIds}
-        agents={installedAgents}
-        onRemoveAgent={onRemoveAgent}
-      />
     </>
   );
 });

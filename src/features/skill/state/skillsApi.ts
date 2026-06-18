@@ -17,19 +17,6 @@ export const skillsApi = baseApi.injectEndpoints({
       providesTags: ['Skill'],
     }),
 
-    syncSkills: builder.mutation<void, void>({
-      queryFn: async (_arg, _api, _extraOptions, baseQuery) => {
-        const result = await baseQuery({
-          command: TauriCommands.SYNC_SKILLS,
-          args: {},
-        });
-
-        if (result.error) return { error: result.error };
-        return { data: undefined };
-      },
-      invalidatesTags: ['Skill'],
-    }),
-
     loadSkill: builder.query<Skill, string>({
       queryFn: async (skillId, _api, _extraOptions, baseQuery) => {
         const result = await baseQuery({
@@ -42,11 +29,23 @@ export const skillsApi = baseApi.injectEndpoints({
       },
     }),
 
-    importSkill: builder.mutation<Skill, string>({
-      queryFn: async (sourcePath, _api, _extraOptions, baseQuery) => {
+    openSkillsFolder: builder.mutation<string, void>({
+      queryFn: async (_arg, _api, _extraOptions, baseQuery) => {
         const result = await baseQuery({
-          command: TauriCommands.IMPORT_SKILL,
-          args: { sourcePath },
+          command: TauriCommands.OPEN_SKILLS_FOLDER,
+          args: {},
+        });
+
+        if (result.error) return { error: result.error };
+        return { data: result.data as string };
+      },
+    }),
+
+    importSkillFromGithub: builder.mutation<Skill, string>({
+      queryFn: async (url, _api, _extraOptions, baseQuery) => {
+        const result = await baseQuery({
+          command: TauriCommands.IMPORT_SKILL_FROM_GITHUB,
+          args: { url },
         });
 
         if (result.error) return { error: result.error };
@@ -72,8 +71,8 @@ export const skillsApi = baseApi.injectEndpoints({
 
 export const {
   useGetAllSkillsQuery,
-  useSyncSkillsMutation,
   useLazyLoadSkillQuery,
-  useImportSkillMutation,
+  useOpenSkillsFolderMutation,
+  useImportSkillFromGithubMutation,
   useDeleteSkillMutation,
 } = skillsApi;

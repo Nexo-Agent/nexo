@@ -6,8 +6,6 @@ export {
   useDisconnectMCPConnectionMutation,
   useUpdateMCPConnectionMutation,
   useRemoveMCPConnectionMutation,
-  useGetHubMCPServersQuery,
-  useRefreshHubIndexMutation,
 } from './state/api';
 export { mcpConnectionsApi } from './state/api';
 export { default as mcpConnectionsReducer } from './state/slice';

@@ -1,5 +1,7 @@
 use crate::error::AppError;
-use crate::features::harness::adapters::files::{build_user_content_from_parts, extract_flow_description};
+use crate::features::harness::adapters::files::{
+    append_skill_from_metadata, build_user_content_from_parts, extract_flow_description,
+};
 use crate::features::harness::traits::{MessageBuilder, PromptProvider};
 use crate::features::harness::types::{HarnessMessages, MessageBuildContext, PromptContext};
 use crate::features::skill::SkillService;
@@ -60,17 +62,43 @@ impl PromptProvider for NexoPromptProvider {
 pub struct NexoMessageBuilder {
     prompt_provider: Arc<dyn PromptProvider>,
     file_loader: Arc<dyn crate::features::harness::traits::FileContentLoader>,
+    skill_service: Option<Arc<SkillService>>,
 }
 
 impl NexoMessageBuilder {
     pub fn new(
         prompt_provider: Arc<dyn PromptProvider>,
         file_loader: Arc<dyn crate::features::harness::traits::FileContentLoader>,
+        skill_service: Arc<SkillService>,
     ) -> Self {
         Self {
             prompt_provider,
             file_loader,
+            skill_service: Some(skill_service),
         }
+    }
+
+    #[cfg(test)]
+    fn new_for_test(
+        prompt_provider: Arc<dyn PromptProvider>,
+        file_loader: Arc<dyn crate::features::harness::traits::FileContentLoader>,
+    ) -> Self {
+        Self {
+            prompt_provider,
+            file_loader,
+            skill_service: None,
+        }
+    }
+
+    fn append_skill_instructions(
+        &self,
+        content: &mut String,
+        metadata: &str,
+    ) -> Result<(), AppError> {
+        if let Some(skill_service) = &self.skill_service {
+            append_skill_from_metadata(content, metadata, skill_service.as_ref())?;
+        }
+        Ok(())
     }
 }
 
@@ -101,6 +129,7 @@ impl MessageBuilder for NexoMessageBuilder {
                         if let Some(flow_desc) = extract_flow_description(metadata) {
                             effective_content.push_str(&flow_desc);
                         }
+                        self.append_skill_instructions(&mut effective_content, metadata)?;
 
                         if let Ok(meta_json) = serde_json::from_str::<serde_json::Value>(metadata)
                         {
@@ -160,6 +189,7 @@ impl MessageBuilder for NexoMessageBuilder {
             if let Some(flow_desc) = extract_flow_description(metadata) {
                 effective_user_content.push_str(&flow_desc);
             }
+            self.append_skill_instructions(&mut effective_user_content, metadata)?;
         }
 
         let content = build_user_content_from_parts(
@@ -246,7 +276,7 @@ mod tests {
 
     #[test]
     fn build_messages_skips_tool_call_role() {
-        let builder = NexoMessageBuilder::new(
+        let builder = NexoMessageBuilder::new_for_test(
             Arc::new(StubPrompt),
             Arc::new(DefaultFileContentLoader),
         );
@@ -296,7 +326,7 @@ mod tests {
 
     #[test]
     fn build_messages_reconstructs_assistant_tool_calls() {
-        let builder = NexoMessageBuilder::new(
+        let builder = NexoMessageBuilder::new_for_test(
             Arc::new(StubPrompt),
             Arc::new(DefaultFileContentLoader),
         );

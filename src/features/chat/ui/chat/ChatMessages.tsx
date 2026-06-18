@@ -1,9 +1,6 @@
-import { useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useAppSettings } from '@/hooks/useAppSettings';
-import { useAppDispatch } from '@/app/hooks';
-import { setAgentChatHistoryDrawerOpen } from '@/features/ui/state/uiSlice';
 import { MessageList } from './MessageList';
 import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import type { Message } from '../../types';
@@ -35,25 +32,10 @@ export function ChatMessages({
 
   const { t } = useTranslation('chat');
   const { showUsage } = useAppSettings();
-  const dispatch = useAppDispatch();
 
-  // Custom hooks
   const { pendingRequests, permissionTimeLeft, handlePermissionRespond } =
     useToolPermission();
   const { contentRef, scrollAreaRef } = useChatScroll();
-
-  const handleViewAgentDetails = useCallback(
-    (sessionId: string, agentId: string) => {
-      dispatch(
-        setAgentChatHistoryDrawerOpen({
-          open: true,
-          sessionId,
-          agentId,
-        })
-      );
-    },
-    [dispatch]
-  );
 
   return (
     <ScrollArea ref={scrollAreaRef} className="flex-1 py-4">
@@ -66,7 +48,6 @@ export function ChatMessages({
         streamingMessageId={streamingMessageId}
         pendingRequests={pendingRequests}
         onPermissionRespond={handlePermissionRespond}
-        onViewAgentDetails={handleViewAgentDetails}
         onCancelToolExecution={onCancelToolExecution}
         onEditingMessageIdChange={onEditMessage}
         permissionTimeLeft={permissionTimeLeft}

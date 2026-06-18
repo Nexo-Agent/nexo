@@ -9,6 +9,9 @@ use serde_json::{json, Value};
 use std::path::PathBuf;
 use tokio::process::Command;
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
 fn ensure_absolute(path: &str) -> Result<PathBuf, AppError> {
     let path_buf = PathBuf::from(path);
     if !path_buf.is_absolute() {
@@ -27,18 +30,18 @@ impl Tool for RunCommandTool {
         ToolSpec::new(
             "run_command",
             Some(
-                "Run a shell command. Uses the app process environment. Default cwd is the system temp directory. \
+                "Run a shell command (executable and arguments in one string). Uses the app process environment. \
+                Default cwd is the system temp directory. \
                 Examples: \
-                - { \"command\": \"ls\", \"args\": [\"-la\"], \"cwd\": \"/abs/path\" } \
-                - { \"command\": \"git\", \"args\": [\"status\"] } \
-                - { \"command\": \"npm\", \"args\": [\"install\", \"lodash\"] } \
-                - { \"command\": \"python\", \"args\": [\"--version\"] }".to_string(),
+                - { \"command\": \"ls -la\", \"cwd\": \"/abs/path\" } \
+                - { \"command\": \"git status\" } \
+                - { \"command\": \"npm install lodash\" } \
+                - { \"command\": \"python --version\" }".to_string(),
             ),
             Some(json!({
                 "type": "object",
                 "properties": {
-                    "command": { "type": "string", "description": "Command to run" },
-                    "args": { "type": "array", "items": { "type": "string" }, "description": "Arguments for the command" },
+                    "command": { "type": "string", "description": "Full shell command to run (including arguments)" },
                     "cwd": { "type": "string", "description": "Working directory (absolute path). Defaults to system temp directory." }
                 },
                 "required": ["command"]
@@ -57,18 +60,12 @@ impl Tool for RunCommandTool {
         let command = arguments["command"]
             .as_str()
             .ok_or_else(|| AppError::Validation("Missing 'command' parameter".to_string()))?;
-        let args = arguments["args"]
-            .as_array()
-            .map(|a| {
-                a.iter()
-                    .filter_map(|v| v.as_str().map(|s| s.to_string()))
-                    .collect::<Vec<String>>()
-            })
-            .unwrap_or_default();
         let cwd_str = arguments["cwd"].as_str();
 
-        let mut cmd = Command::new(command);
-        cmd.args(&args);
+        let mut cmd = shell_command(command);
+
+        #[cfg(windows)]
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
 
         if let Ok(env) =
             SandboxService::env(&ctx.app, RuntimeKind::NodeJs, std::collections::HashMap::new())
@@ -98,5 +95,20 @@ impl Tool for RunCommandTool {
                 "exit_code": output.status.code()
             }))?,
         ))
+    }
+}
+
+fn shell_command(command: &str) -> Command {
+    #[cfg(windows)]
+    {
+        let mut cmd = Command::new("cmd");
+        cmd.arg("/C").arg(command);
+        cmd
+    }
+    #[cfg(not(windows))]
+    {
+        let mut cmd = Command::new("sh");
+        cmd.arg("-c").arg(command);
+        cmd
     }
 }

@@ -47,16 +47,7 @@ vi.mock('@/features/mcp', () => ({
 vi.mock('./AppSettings', () => ({
   AppSettings: () => <div>App Settings</div>,
 }));
-vi.mock('./PromptManagement', () => ({
-  PromptManagement: () => <div>Prompt Management</div>,
-}));
-vi.mock('@/features/hub/ui/HubScreen', () => ({
-  HubScreen: () => <div>Hub Screen</div>,
-}));
 vi.mock('@/features/usage', () => ({ UsagePage: () => <div>Usage Page</div> }));
-vi.mock('@/features/agent', () => ({
-  AgentSettings: () => <div>Agent Settings</div>,
-}));
 vi.mock('@/features/updater/ui/UpdateSection', () => ({
   UpdateSection: () => <div>Update Section</div>,
 }));
@@ -92,7 +83,6 @@ describe('SettingsScreen', () => {
             showUsage: true,
             enableWorkflowEditor: false,
             enableRawText: false,
-            enableAgents: false,
           },
         },
       };
@@ -121,7 +111,6 @@ describe('SettingsScreen', () => {
             showUsage: true,
             enableWorkflowEditor: false,
             enableRawText: false,
-            enableAgents: false,
           },
         },
       };

@@ -48,7 +48,6 @@ impl AgentSession {
 
         let tool_ctx = resolve_tool_context(
             &self.deps.tool_deps,
-            &app,
             agent_id.as_deref(),
             &workspace_id,
             &model,

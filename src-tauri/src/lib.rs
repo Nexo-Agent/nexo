@@ -129,6 +129,22 @@ pub fn run() {
 
             app.manage(app_state);
 
+            // Start skill filesystem watcher
+            let managed = app.state::<state::AppState>();
+            if let Ok(skills_dir) = managed.skill_service.skills_dir_path() {
+                if let Err(e) = features::skill::watcher::SkillWatcher::start(
+                    app.handle().clone(),
+                    skills_dir,
+                    managed.skill_sync_coordinator.clone(),
+                ) {
+                    log::error!("Failed to start skill watcher: {e}");
+                }
+            }
+
+            if let Err(e) = managed.skill_sync_coordinator.sync_now() {
+                log::error!("Initial skill sync failed: {e}");
+            }
+
             // Initialize MCPClientState
             let mcp_client_state = state::MCPClientState::new();
             app.manage(mcp_client_state);
@@ -205,20 +221,6 @@ pub fn run() {
             features::app_settings::commands::get_all_app_settings,
             // Web Search commands
             features::web_search::commands::test_web_search_connection,
-            // Prompt commands
-            features::prompt::commands::create_prompt,
-            features::prompt::commands::get_prompts,
-            features::prompt::commands::update_prompt,
-            features::prompt::commands::delete_prompt,
-            // Hub commands
-            features::hub::commands::fetch_hub_prompts,
-            features::hub::commands::fetch_prompt_template,
-            features::hub::commands::install_prompt_from_hub,
-            features::hub::commands::fetch_hub_mcp_servers,
-            features::hub::commands::install_mcp_server_from_hub,
-            features::hub::commands::refresh_hub_index,
-            features::hub::commands::fetch_hub_agents,
-            features::hub::commands::install_agent_from_hub,
             // MCP Tools commands
             features::tool::commands::test_mcp_connection_and_fetch_tools,
             features::tool::commands::connect_mcp_server_and_fetch_tools,
@@ -242,17 +244,11 @@ pub fn run() {
             features::usage::commands::get_usage_chart,
             features::usage::commands::get_usage_logs,
             features::usage::commands::clear_usage,
-            // Agent commands
-            features::agent::commands::install_agent,
-            features::agent::commands::get_installed_agents,
-            features::agent::commands::delete_agent,
-            features::agent::commands::get_agent_info,
-            features::agent::commands::update_agent,
             // Skill commands
             features::skill::commands::get_all_skills,
-            features::skill::commands::sync_skills,
             features::skill::commands::load_skill,
-            features::skill::commands::import_skill,
+            features::skill::commands::open_skills_folder,
+            features::skill::commands::import_skill_from_github,
             features::skill::commands::delete_skill,
             // Note commands
             features::notes::commands::create_note,

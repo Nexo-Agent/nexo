@@ -30,6 +30,17 @@
       }
     ],
     "security": {
+      "dangerousDisableAssetCspModification": [
+        "style-src",
+        "script-src",
+        "img-src",
+        "font-src",
+        "connect-src",
+        "frame-src",
+        "object-src",
+        "base-uri",
+        "form-action"
+      ],
       "csp": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://esm.sh https://cdn.skypack.dev"
     }
   },

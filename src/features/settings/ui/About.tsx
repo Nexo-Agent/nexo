@@ -102,10 +102,10 @@ export function About({ open, onOpenChange }: AboutProps) {
                 </div>
                 <div className="rounded-lg border bg-card p-3 space-y-1">
                   <div className="text-xs font-medium text-foreground">
-                    Custom Prompts
+                    Agent Skills
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Manage prompt templates
+                    Install skills from folder or GitHub
                   </div>
                 </div>
                 <div className="rounded-lg border bg-card p-3 space-y-1">

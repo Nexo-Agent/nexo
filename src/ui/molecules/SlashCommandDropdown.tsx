@@ -1,31 +1,35 @@
 import { useEffect, useRef } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
-import { parsePromptVariables } from '@/features/settings/lib/prompt-utils';
-import type { Prompt } from '@/app/types';
+import type { SkillRecord } from '@/features/skill/types';
+import { useTranslation } from 'react-i18next';
 
 interface SlashCommandDropdownProps {
-  prompts: Prompt[];
+  skills: SkillRecord[];
   selectedIndex: number;
-  onSelect: (prompt: Prompt) => void;
+  onSelect: (skill: SkillRecord) => void;
   position?: { top: number; left: number };
   direction?: 'up' | 'down';
+  isEmptyWorkspace?: boolean;
+  onOpenWorkspaceSettings?: () => void;
 }
 
 export function SlashCommandDropdown({
-  prompts,
+  skills,
   selectedIndex,
   onSelect,
   position,
   direction = 'down',
+  isEmptyWorkspace = false,
+  onOpenWorkspaceSettings,
 }: SlashCommandDropdownProps) {
+  const { t } = useTranslation('chat');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Scroll selected item into view
   useEffect(() => {
-    if (scrollAreaRef.current && prompts.length > 0 && selectedIndex >= 0) {
+    if (scrollAreaRef.current && skills.length > 0 && selectedIndex >= 0) {
       const selectedElement = itemRefs.current[selectedIndex];
       if (selectedElement) {
         selectedElement.scrollIntoView({
@@ -34,17 +38,35 @@ export function SlashCommandDropdown({
         });
       }
     }
-  }, [selectedIndex, prompts.length]);
-
-  if (prompts.length === 0) {
-    return null;
-  }
-
-  const handleClick = (prompt: Prompt) => {
-    onSelect(prompt);
-  };
+  }, [selectedIndex, skills.length]);
 
   const isUpward = direction === 'up';
+
+  if (isEmptyWorkspace) {
+    return (
+      <div
+        className={cn(
+          'absolute z-50 w-full max-w-md rounded-lg border bg-popover shadow-lg p-3 text-sm text-muted-foreground',
+          isUpward ? 'bottom-full mb-2' : 'top-full mt-2'
+        )}
+      >
+        {t('slashNoSkillsHint')}{' '}
+        {onOpenWorkspaceSettings && (
+          <button
+            type="button"
+            className="text-primary underline underline-offset-2"
+            onClick={onOpenWorkspaceSettings}
+          >
+            {t('slashOpenWorkspaceSettings')}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (skills.length === 0) {
+    return null;
+  }
 
   return (
     <div
@@ -58,36 +80,30 @@ export function SlashCommandDropdown({
     >
       <ScrollArea className="max-h-[200px]">
         <div className="p-1" ref={scrollAreaRef}>
-          {prompts.map((prompt, index) => {
-            const hasVariables =
-              parsePromptVariables(prompt.content).length > 0;
+          {skills.map((skill, index) => {
             const isSelected = index === selectedIndex;
 
             return (
               <div
-                key={prompt.id}
+                key={skill.id}
                 ref={(el) => {
                   itemRefs.current[index] = el;
                 }}
-                onClick={() => handleClick(prompt)}
+                onClick={() => onSelect(skill)}
                 className={cn(
                   'flex items-start gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors',
                   'hover:bg-accent',
                   isSelected && 'bg-accent'
                 )}
               >
+                <Wand2 className="size-4 shrink-0 text-muted-foreground mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium truncate">
-                      {prompt.name}
-                    </span>
-                    {hasVariables && (
-                      <Sparkles className="size-3 shrink-0 text-muted-foreground" />
-                    )}
+                  <div className="text-sm font-medium truncate">
+                    {skill.name}
                   </div>
-                  {prompt.content && (
+                  {skill.description && (
                     <div className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                      {prompt.content}
+                      {skill.description}
                     </div>
                   )}
                 </div>

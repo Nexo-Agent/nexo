@@ -46,6 +46,9 @@ export const TauriEvents = {
 
   // Chat events
   CHAT_UPDATED: 'chat-updated',
+
+  // Skill events
+  SKILLS_CHANGED: 'skills-changed',
 } as const;
 
 export type TauriEvent = (typeof TauriEvents)[keyof typeof TauriEvents];

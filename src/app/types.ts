@@ -2,7 +2,6 @@
 
 export type { LLMModel, LLMConnection } from '@/features/llm/types';
 
-// Re-export MCP types from mcp module for backward compatibility
 export type {
   MCPToolType as MCPTool,
   MCPServerConnection,
@@ -17,18 +16,3 @@ export type {
   CodeBlock,
   Message,
 } from '@/features/chat/types';
-
-export interface Prompt {
-  id: string;
-  name: string;
-  content: string;
-  created_at: number;
-  updated_at: number;
-}
-
-export type {
-  AgentManifest,
-  InstalledAgent,
-  AgentSource,
-  InstallInfo,
-} from '@/features/agent/types';

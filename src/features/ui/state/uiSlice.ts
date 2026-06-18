@@ -5,14 +5,11 @@ import { logger } from '@/lib/logger';
 export type Page = 'chat' | 'settings' | 'workspaceSettings';
 
 export type SettingsSection =
-  | 'hub'
   | 'general'
   | 'llm'
   | 'mcp'
   | 'web_search'
-  | 'prompts'
   | 'usage'
-  | 'agent'
   | 'skills'
   | 'experiments'
   | 'about';
@@ -54,7 +51,6 @@ export interface UIState {
     showUsage: boolean;
     enableWorkflowEditor: boolean;
     enableRawText: boolean;
-    enableAgents: boolean;
   };
   setupCompleted: boolean;
 }
@@ -82,9 +78,6 @@ export const loadAppSettings = createAsyncThunk(
           key: 'enableRawText',
         }),
         invokeCommand<string | null>(TauriCommands.GET_APP_SETTING, {
-          key: 'enableAgents',
-        }),
-        invokeCommand<string | null>(TauriCommands.GET_APP_SETTING, {
           key: 'setupCompleted',
         }),
       ]);
@@ -95,7 +88,6 @@ export const loadAppSettings = createAsyncThunk(
         showUsage,
         enableWorkflowEditor,
         enableRawText,
-        enableAgents,
         setupCompleted,
       ] = settingsResults;
 
@@ -145,9 +137,8 @@ export const loadAppSettings = createAsyncThunk(
         theme: finalTheme,
         experiments: {
           showUsage: showUsage === 'true' || showUsage === null, // Default to true for developer mode
-          enableWorkflowEditor: enableWorkflowEditor === 'true', // Default to false (disabled)
-          enableRawText: enableRawText === 'true', // Default to false (disabled)
-          enableAgents: enableAgents === 'true', // Default to false (disabled)
+          enableWorkflowEditor: enableWorkflowEditor === 'true',
+          enableRawText: enableRawText === 'true',
         },
         setupCompleted: setupCompleted === 'true',
       };
@@ -158,9 +149,8 @@ export const loadAppSettings = createAsyncThunk(
         theme: 'light' as const,
         experiments: {
           showUsage: true,
-          enableWorkflowEditor: false, // Default to false (disabled)
-          enableRawText: false, // Default to false (disabled)
-          enableAgents: false, // Default to false (disabled)
+          enableWorkflowEditor: false,
+          enableRawText: false,
         },
         setupCompleted: false,
       };
@@ -212,7 +202,6 @@ const initialState: UIState = {
     showUsage: false,
     enableWorkflowEditor: false,
     enableRawText: false,
-    enableAgents: false,
   },
   setupCompleted: false,
 };
@@ -339,15 +328,6 @@ const uiSlice = createSlice({
         logger.error('Failed to save enableRawText to database:', error);
       });
     },
-    setEnableAgents: (state, action: PayloadAction<boolean>) => {
-      state.experiments.enableAgents = action.payload;
-      invokeCommand(TauriCommands.SAVE_APP_SETTING, {
-        key: 'enableAgents',
-        value: action.payload ? 'true' : 'false',
-      }).catch((error) => {
-        logger.error('Failed to save enableAgents to database:', error);
-      });
-    },
     setSetupCompleted: (state, action: PayloadAction<boolean>) => {
       state.setupCompleted = action.payload;
       invokeCommand(TauriCommands.SAVE_APP_SETTING, {
@@ -407,7 +387,6 @@ export const {
   setShowUsage,
   setEnableWorkflowEditor,
   setEnableRawText,
-  setEnableAgents,
   setSetupCompleted,
 } = uiSlice.actions;
 export default uiSlice.reducer;

@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
 import { AskUserPanel } from './AskUserPanel';
-import { AgentChatHistoryDialog } from '@/features/agent';
 import { ImagePreviewDialog } from '@/ui/molecules/ImagePreviewDialog';
 import { useMessages } from '../../hooks/useMessages';
 import { useAskUser } from '../../hooks/useAskUser';
@@ -22,7 +21,6 @@ import {
   setAttachedFlow,
 } from '../../state/chatInputSlice';
 import { showError } from '@/features/notifications/state/notificationSlice';
-import { setAgentChatHistoryDrawerOpen } from '@/features/ui/state/uiSlice';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { messagesApi } from '../../state/messagesApi';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
@@ -39,17 +37,6 @@ export function ChatArea() {
 
   // Get selectedChatId from Redux state
   const selectedChatId = useAppSelector((state) => state.chats.selectedChatId);
-
-  // Get agent chat history drawer state
-  const agentChatHistoryDrawerOpen = useAppSelector(
-    (state) => state.ui.agentChatHistoryDrawerOpen
-  );
-  const agentChatHistorySessionId = useAppSelector(
-    (state) => state.ui.agentChatHistorySessionId
-  );
-  const agentChatHistoryAgentId = useAppSelector(
-    (state) => state.ui.agentChatHistoryAgentId
-  );
 
   const selectedLLMConnectionId = selectedWorkspace
     ? workspaceSettings[selectedWorkspace.id]?.llmConnectionId
@@ -71,7 +58,6 @@ export function ChatArea() {
     messages,
     pausedStreaming,
     isStreaming,
-    isAgentStreaming,
     streamingMessageId,
     handleStopStreaming,
   } = useMessages(selectedChatId);
@@ -438,11 +424,7 @@ export function ChatArea() {
       {/* Messages Area */}
       <ChatMessages
         messages={messages}
-        isLoading={
-          isStreaming &&
-          !pausedStreaming[selectedChatId || ''] &&
-          !isAgentStreaming
-        }
+        isLoading={isStreaming && !pausedStreaming[selectedChatId || '']}
         streamingMessageId={streamingMessageId}
         onCancelToolExecution={handleStopStreaming}
         onEditMessage={handleEditMessage}
@@ -468,21 +450,6 @@ export function ChatArea() {
         onCancelEdit={() => handleEditMessage(null)}
       />
 
-      {/* Agent Chat History Dialog */}
-      <AgentChatHistoryDialog
-        open={agentChatHistoryDrawerOpen}
-        onOpenChange={(open) =>
-          dispatch(
-            setAgentChatHistoryDrawerOpen({
-              open,
-              sessionId: null,
-              agentId: null,
-            })
-          )
-        }
-        sessionId={agentChatHistorySessionId}
-        agentId={agentChatHistoryAgentId}
-      />
       <ImagePreviewDialog />
     </>
   );

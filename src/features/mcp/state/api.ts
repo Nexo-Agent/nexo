@@ -1,7 +1,7 @@
 import { baseApi } from '@/app/api/baseApi';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { logger } from '@/lib/logger';
-import type { MCPServerConnection, MCPToolType, HubMCPServer } from '../types';
+import type { MCPServerConnection, MCPToolType } from '../types';
 
 // Types matching Rust structs
 interface DbMCPServerConnection {
@@ -264,27 +264,6 @@ export const mcpConnectionsApi = baseApi.injectEndpoints({
         { type: 'MCPConnection', id: 'LIST' },
       ],
     }),
-
-    getHubMCPServers: builder.query<HubMCPServer[], void>({
-      query: () => ({
-        command: TauriCommands.FETCH_HUB_MCP_SERVERS,
-      }),
-      providesTags: ['HubMCPServer'],
-    }),
-
-    refreshHubIndex: builder.mutation<void, void>({
-      queryFn: async () => {
-        try {
-          await invokeCommand(TauriCommands.REFRESH_HUB_INDEX);
-          return { data: undefined };
-        } catch (error: unknown) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          return { error: { message: errorMessage } };
-        }
-      },
-      invalidatesTags: ['HubMCPServer'],
-    }),
   }),
 });
 
@@ -295,6 +274,4 @@ export const {
   useDisconnectMCPConnectionMutation,
   useUpdateMCPConnectionMutation,
   useRemoveMCPConnectionMutation,
-  useGetHubMCPServersQuery,
-  useRefreshHubIndexMutation,
 } = mcpConnectionsApi;

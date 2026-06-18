@@ -38,11 +38,12 @@ impl HarnessFactory {
         workspace_settings_service: Arc<WorkspaceSettingsService>,
     ) -> Self {
         let prompt_provider: Arc<dyn PromptProvider> =
-            Arc::new(NexoPromptProvider::new(skill_service));
+            Arc::new(NexoPromptProvider::new(skill_service.clone()));
         let file_loader = Arc::new(DefaultFileContentLoader);
         let message_builder = Arc::new(NexoMessageBuilder::new(
             prompt_provider.clone(),
             file_loader,
+            skill_service.clone(),
         ));
         let session_store = Arc::new(SqliteSessionStore::new(
             message_service.clone(),

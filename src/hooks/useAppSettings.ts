@@ -5,7 +5,6 @@ import {
   setShowUsage,
   setEnableWorkflowEditor,
   setEnableRawText,
-  setEnableAgents,
   loadAppSettings,
 } from '@/features/ui/state/uiSlice';
 
@@ -25,9 +24,6 @@ type Theme =
   | 'nord'
   | 'ayu-dark';
 
-/**
- * Hook to access and manage app settings (language and theme)
- */
 export function useAppSettings() {
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.ui.language);
@@ -39,9 +35,6 @@ export function useAppSettings() {
   );
   const enableRawText = useAppSelector(
     (state) => state.ui.experiments.enableRawText
-  );
-  const enableAgents = useAppSelector(
-    (state) => state.ui.experiments.enableAgents
   );
 
   const updateLanguage = (lang: 'vi' | 'en') => {
@@ -64,10 +57,6 @@ export function useAppSettings() {
     dispatch(setEnableRawText(enable));
   };
 
-  const updateEnableAgents = (enable: boolean) => {
-    dispatch(setEnableAgents(enable));
-  };
-
   const reloadSettings = () => {
     dispatch(loadAppSettings());
   };
@@ -79,13 +68,11 @@ export function useAppSettings() {
     showUsage,
     enableWorkflowEditor,
     enableRawText,
-    enableAgents,
     updateLanguage,
     updateTheme,
     updateShowUsage,
     updateEnableWorkflowEditor,
     updateEnableRawText,
-    updateEnableAgents,
     reloadSettings,
   };
 }

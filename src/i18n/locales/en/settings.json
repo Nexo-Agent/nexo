@@ -230,7 +230,7 @@
   "showOnlyConnected": "Show Only Connected",
   "solarizedDarkTheme": "Solarized Dark",
   "solarizedLightTheme": "Solarized Light",
-  "sseType": "SSE (Server-Sent Events)",
+  "sseType": "SSE",
   "sseUrlPlaceholder": "http://localhost:3000/mcp",
   "stdioType": "STDIO",
   "stdioUrlPlaceholder": "/path/to/command or command",

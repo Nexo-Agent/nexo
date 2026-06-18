@@ -33,23 +33,6 @@ export interface MCPServerConnection {
   errorMessage?: string;
 }
 
-export interface HubMCPServer {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  type: 'stdio' | 'sse';
-  config: HubMCPServerConfig;
-}
-
-export interface HubMCPServerConfig {
-  command?: string;
-  args?: string[];
-  env?: Record<string, string>;
-  url?: string;
-  headers?: Record<string, string>;
-}
-
 export interface PythonRuntimeStatus {
   version: string;
   installed: boolean;

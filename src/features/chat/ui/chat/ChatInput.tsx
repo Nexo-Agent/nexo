@@ -36,8 +36,8 @@ import {
   DropdownMenuRadioItem,
 } from '@/ui/atoms/dropdown-menu';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
-import { useGetInstalledAgentsQuery } from '@/features/agent';
 import { useGetActiveToolsForWorkspaceQuery } from '@/features/tools/state/toolsApi';
+import { useWorkspaces } from '@/features/workspace';
 import { useAppDispatch } from '@/app/hooks';
 import type { LLMConnection } from '@/features/llm/types';
 import { cn, formatFileSize } from '@/lib/utils';
@@ -46,19 +46,14 @@ import { isVisionModel } from '@/features/llm/lib/model-utils';
 import { useChatInput } from '../../hooks/useChatInput';
 import { useMessages } from '../../hooks/useMessages';
 import { useSlashCommand } from '@/hooks/useSlashCommand';
-import { useAgentMention } from '@/features/chat/hooks/useAgentMention';
+import { skillRecordToInserted } from '@/features/chat/lib/skillAttachment';
+import type { InsertedSkill } from '@/features/chat/lib/skillAttachment';
 import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { SlashCommandDropdown } from '@/ui/molecules/SlashCommandDropdown';
-import { AgentMentionDropdown } from '@/features/agent';
-import { VariableInputDialog } from '@/ui/molecules/VariableInputDialog';
 import { FLOW_NODES, FlowEditorDialog } from '@/ui/molecules/flow';
 
-import {
-  parsePromptVariables,
-  renderPrompt,
-} from '@/features/settings/lib/prompt-utils';
-import type { Prompt, InstalledAgent } from '@/app/types';
 import { useAppSettings } from '@/hooks/useAppSettings';
+import { setWorkspaceSettingsOpen } from '@/features/ui/state/uiSlice';
 import { useChatSubmit } from '../../hooks/useChatSubmit';
 import { useChatDragDrop } from '../../hooks/useChatDragDrop';
 import { ChatAttachments } from './components/ChatAttachments';
@@ -97,25 +92,19 @@ export function ChatInput({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const { data: llmConnections = [] } = useGetLLMConnectionsQuery();
-  const { data: installedAgents = [] } = useGetInstalledAgentsQuery();
-
-  // State for variable input dialog
-  const [variableDialogOpen, setVariableDialogOpen] = useState(false);
-  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
-  const [promptVariables, setPromptVariables] = useState<
-    Record<string, string>
-  >({});
-
-  // State for inserted prompt (to show prompt panel)
-  const [insertedPrompt, setInsertedPrompt] = useState<{
-    name: string;
-    content: string;
-  } | null>(null);
-
-  // State for selected agents (to show as chips)
-  const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
+  const { selectedWorkspace, workspaceSettings: allWorkspaceSettings } =
+    useWorkspaces();
+  const workspaceSettings = selectedWorkspace
+    ? allWorkspaceSettings[selectedWorkspace.id]
+    : undefined;
+  const workspaceSelectedSkillIds = workspaceSettings?.selectedSkillIds ?? [];
 
   const [flowDialogOpen, setFlowDialogOpen] = useState(false);
+
+  // State for inserted skill (shown as chip above textarea)
+  const [insertedSkill, setInsertedSkill] = useState<InsertedSkill | null>(
+    null
+  );
 
   // Use chat input hook
   const {
@@ -134,7 +123,7 @@ export function ChatInput({
   } = useChatInput(selectedWorkspaceId);
 
   // Get app settings for experimental features
-  const { enableWorkflowEditor, enableAgents } = useAppSettings();
+  const { enableWorkflowEditor } = useAppSettings();
 
   // Calculate active tools from workspace settings - fetching from backend for unified source of truth
   const { data: activeTools = [] } = useGetActiveToolsForWorkspaceQuery(
@@ -143,102 +132,31 @@ export function ChatInput({
   );
 
   // Use messages hook for streaming state
-  const { handleStopStreaming, isStreaming, isAgentStreaming } =
-    useMessages(selectedChatId);
+  const { handleStopStreaming, isStreaming } = useMessages(selectedChatId);
 
-  // If streaming is due to agent card, don't show streaming UI in input
-  const effectiveIsStreaming = isStreaming && !isAgentStreaming;
+  const effectiveIsStreaming = isStreaming;
 
-  // Insert prompt content into input, replacing the slash command
-  const insertPromptContent = (content: string, promptName?: string) => {
-    // Instead of inserting into textarea, set the inserted prompt state
-    // This will show the prompt panel above textarea
-    if (promptName) {
-      setInsertedPrompt({
-        name: promptName,
-        content: content,
-      });
-    }
-
-    // Clear the slash command from input
-    handleInputChange('');
-
-    // Focus textarea
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-      }
-    }, 0);
-  };
-
-  // Handle prompt selection
-  const handleSelectPrompt = (prompt: Prompt) => {
-    const variableNames = parsePromptVariables(prompt.content);
-
-    if (variableNames.length > 0) {
-      const initialVariables: Record<string, string> = {};
-      variableNames.forEach((name) => {
-        initialVariables[name] = '';
-      });
-      setPromptVariables(initialVariables);
-      slashCommand.close();
-      setSelectedPrompt(prompt);
-      setVariableDialogOpen(true);
-    } else {
-      slashCommand.close();
-      // Use setTimeout to ensure close() state is set before input changes
-      setTimeout(() => {
-        insertPromptContent(prompt.content, prompt.name);
-      }, 0);
-    }
-  };
+  const slashCloseRef = useRef<() => void>(() => {});
 
   const slashCommand = useSlashCommand({
     input,
-    onSelectPrompt: handleSelectPrompt,
+    workspaceSelectedSkillIds,
+    onSelectSkill: (skill) => {
+      slashCloseRef.current();
+      setTimeout(() => {
+        setInsertedSkill(skillRecordToInserted(skill));
+        handleInputChange('');
+        textareaRef.current?.focus();
+      }, 0);
+    },
   });
 
-  const handleSelectAgent = (agent: InstalledAgent) => {
-    // Add agent to selected list if not already there
-    if (!selectedAgentIds.includes(agent.manifest.id)) {
-      setSelectedAgentIds([...selectedAgentIds, agent.manifest.id]);
-    }
+  useEffect(() => {
+    slashCloseRef.current = slashCommand.close;
+  }, [slashCommand.close]);
 
-    // Remove the @ mention text from input
-    const queryLength = agentMention.query.length;
-    const newInput = input.substring(1 + queryLength).trimStart();
-    handleInputChange(newInput);
-
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(0, 0);
-      }
-    }, 0);
-
-    agentMention.close();
-  };
-
-  const agentMention = useAgentMention({
-    input,
-    onSelectAgent: handleSelectAgent,
-    enabled: enableAgents,
-  });
-
-  const handleVariableDialogSubmit = () => {
-    if (!selectedPrompt) return;
-    const renderedContent = renderPrompt(
-      selectedPrompt.content,
-      promptVariables
-    );
-    insertPromptContent(renderedContent, selectedPrompt.name);
-    setVariableDialogOpen(false);
-    setSelectedPrompt(null);
-    setPromptVariables({});
-  };
-
-  const handleRemovePrompt = useCallback(() => {
-    setInsertedPrompt(null);
+  const handleRemoveSkill = useCallback(() => {
+    setInsertedSkill(null);
   }, []);
 
   const handleRemoveFlow = useCallback(() => {
@@ -249,22 +167,15 @@ export function ChatInput({
     setFlowDialogOpen(true);
   }, []);
 
-  const handleRemoveAgent = useCallback((agentId: string) => {
-    setSelectedAgentIds((prev) => prev.filter((id) => id !== agentId));
-  }, []);
-
-  // Custom hooks for Logic Separation
   const { handleSubmit } = useChatSubmit({
     onSend,
     attachedFiles,
     attachedFlow,
-    selectedAgentIds,
-    setInsertedPrompt,
-    setSelectedAgentIds,
+    setInsertedSkill,
     setFlow,
     handleFileUpload,
     input,
-    insertedPrompt,
+    insertedSkill,
   });
 
   // Find current connection and model name
@@ -342,24 +253,8 @@ export function ChatInput({
       }
     }
 
-    if (agentMention.isActive) {
-      const handled = agentMention.handleKeyDown(e);
-      if (handled) {
-        return;
-      }
-
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        agentMention.close();
-        return;
-      }
-    }
-
     if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-      if (slashCommand.isActive && slashCommand.filteredPrompts.length > 0) {
-        return;
-      }
-      if (agentMention.isActive && agentMention.filteredAgents.length > 0) {
+      if (slashCommand.isActive && slashCommand.filteredSkills.length > 0) {
         return;
       }
       e.preventDefault();
@@ -484,14 +379,11 @@ export function ChatInput({
             <ChatAttachments
               attachedFiles={attachedFiles}
               attachedFlow={attachedFlow}
-              insertedPrompt={insertedPrompt}
-              selectedAgentIds={selectedAgentIds}
-              installedAgents={installedAgents}
+              insertedSkill={insertedSkill}
               onRemoveFile={handleRemoveFile}
               onRemoveFlow={handleRemoveFlow}
               onOpenFlowDialog={handleOpenFlowDialog}
-              onRemovePrompt={handleRemovePrompt}
-              onRemoveAgent={handleRemoveAgent}
+              onRemoveSkill={handleRemoveSkill}
               disabled={disabled}
             />
 
@@ -514,13 +406,7 @@ export function ChatInput({
                 onChange={(e) => handleInputChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onPaste={handleDisplayPaste}
-                placeholder={
-                  enableAgents
-                    ? t('enterMessage')
-                    : t('enterMessageNoAgents', {
-                        defaultValue: 'Ask anything... (/ for templates)',
-                      })
-                }
+                placeholder={t('enterMessage')}
                 disabled={disabled}
                 className={cn(
                   'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 transition-[color,box-shadow,background-color,border-color] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
@@ -531,24 +417,17 @@ export function ChatInput({
               />
               {/* Slash Command Dropdown */}
               {slashCommand.isActive &&
-                slashCommand.filteredPrompts.length > 0 && (
+                (slashCommand.filteredSkills.length > 0 ||
+                  slashCommand.isEmptyWorkspace) && (
                   <SlashCommandDropdown
-                    prompts={slashCommand.filteredPrompts}
+                    skills={slashCommand.filteredSkills}
                     selectedIndex={slashCommand.selectedIndex}
                     onSelect={slashCommand.handleSelect}
                     direction={dropdownDirection}
-                  />
-                )}
-              {/* Agent Mention Dropdown */}
-              {enableAgents &&
-                agentMention.isActive &&
-                agentMention.filteredAgents.length > 0 && (
-                  <AgentMentionDropdown
-                    agents={agentMention.filteredAgents}
-                    selectedIndex={agentMention.selectedIndex}
-                    onSelect={agentMention.handleSelect}
-                    direction={dropdownDirection}
-                    position={{ top: 0, left: 0 }} // Position handled by dropdown logic mostly
+                    isEmptyWorkspace={slashCommand.isEmptyWorkspace}
+                    onOpenWorkspaceSettings={() =>
+                      dispatch(setWorkspaceSettingsOpen(true))
+                    }
                   />
                 )}
             </div>
@@ -851,9 +730,7 @@ export function ChatInput({
                 {/* Send/Stop Button */}
                 <Button
                   onClick={
-                    input.trim() ||
-                    insertedPrompt ||
-                    selectedAgentIds.length > 0
+                    input.trim() || insertedSkill
                       ? handleSubmit
                       : effectiveIsStreaming
                         ? handleStopStreaming
@@ -861,10 +738,7 @@ export function ChatInput({
                   }
                   disabled={
                     disabled ||
-                    (!input.trim() &&
-                      !insertedPrompt &&
-                      selectedAgentIds.length === 0 &&
-                      !effectiveIsStreaming)
+                    (!input.trim() && !insertedSkill && !effectiveIsStreaming)
                   }
                   size="icon"
                   className={cn(
@@ -893,30 +767,6 @@ export function ChatInput({
           </div>
         </div>
       </div>
-      {/* Variable Input Dialog */}
-      <VariableInputDialog
-        open={variableDialogOpen}
-        title={selectedPrompt?.name || ''}
-        variableNames={
-          selectedPrompt ? parsePromptVariables(selectedPrompt.content) : []
-        }
-        variables={promptVariables}
-        renderedPreview={
-          selectedPrompt
-            ? renderPrompt(selectedPrompt.content, promptVariables)
-            : undefined
-        }
-        onClose={() => {
-          setVariableDialogOpen(false);
-          setSelectedPrompt(null);
-          setPromptVariables({});
-        }}
-        onSubmit={handleVariableDialogSubmit}
-        onVariableChange={(name, value) =>
-          setPromptVariables((prev) => ({ ...prev, [name]: value }))
-        }
-      />
-      {/* Flow Editor Dialog */}
       <FlowEditorDialog
         open={flowDialogOpen}
         initialFlow={attachedFlow || undefined}

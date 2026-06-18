@@ -346,5 +346,8 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    // Drop legacy prompts table (feature removed)
+    conn.execute("DROP TABLE IF EXISTS prompts", [])?;
+
     Ok(())
 }

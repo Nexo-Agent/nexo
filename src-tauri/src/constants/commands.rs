@@ -24,6 +24,7 @@ impl TauriCommands {
     pub const RESPOND_TOOL_PERMISSION: &'static str = "respond_tool_permission";
     pub const RESPOND_USER_QUESTION: &'static str = "respond_user_question";
     pub const GENERATE_CHAT_TITLE: &'static str = "generate_chat_title";
+    pub const GET_OR_CREATE_SPECIALIST_SESSION: &'static str = "get_or_create_specialist_session";
 
     // Message commands
     pub const CREATE_MESSAGE: &'static str = "create_message";
@@ -54,20 +55,6 @@ impl TauriCommands {
     // Web Search commands
     pub const TEST_WEB_SEARCH_CONNECTION: &'static str = "test_web_search_connection";
 
-    // Prompt commands
-    pub const CREATE_PROMPT: &'static str = "create_prompt";
-    pub const GET_PROMPTS: &'static str = "get_prompts";
-    pub const UPDATE_PROMPT: &'static str = "update_prompt";
-    pub const DELETE_PROMPT: &'static str = "delete_prompt";
-
-    // Hub commands
-    pub const FETCH_HUB_PROMPTS: &'static str = "fetch_hub_prompts";
-    pub const FETCH_PROMPT_TEMPLATE: &'static str = "fetch_prompt_template";
-    pub const INSTALL_PROMPT_FROM_HUB: &'static str = "install_prompt_from_hub";
-    pub const FETCH_HUB_MCP_SERVERS: &'static str = "fetch_hub_mcp_servers";
-    pub const INSTALL_MCP_SERVER_FROM_HUB: &'static str = "install_mcp_server_from_hub";
-    pub const REFRESH_HUB_INDEX: &'static str = "refresh_hub_index";
-
     // MCP Tools commands
     pub const TEST_MCP_CONNECTION_AND_FETCH_TOOLS: &'static str =
         "test_mcp_connection_and_fetch_tools";
@@ -89,13 +76,12 @@ impl TauriCommands {
     pub const INSTALL_NODE_RUNTIME: &'static str = "install_node_runtime";
     pub const UNINSTALL_NODE_RUNTIME: &'static str = "uninstall_node_runtime";
 
-    // Agent commands
-    pub const INSTALL_AGENT: &'static str = "install_agent";
-    pub const GET_INSTALLED_AGENTS: &'static str = "get_installed_agents";
-    pub const DELETE_AGENT: &'static str = "delete_agent";
-    pub const GET_AGENT_INFO: &'static str = "get_agent_info";
-    pub const UPDATE_AGENT: &'static str = "update_agent";
-    pub const GET_OR_CREATE_SPECIALIST_SESSION: &'static str = "get_or_create_specialist_session";
+    // Skill commands
+    pub const GET_ALL_SKILLS: &'static str = "get_all_skills";
+    pub const LOAD_SKILL: &'static str = "load_skill";
+    pub const OPEN_SKILLS_FOLDER: &'static str = "open_skills_folder";
+    pub const IMPORT_SKILL_FROM_GITHUB: &'static str = "import_skill_from_github";
+    pub const DELETE_SKILL: &'static str = "delete_skill";
 
     // Note commands
     pub const CREATE_NOTE: &'static str = "create_note";

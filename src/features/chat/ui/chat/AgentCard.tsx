@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { Bot, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/ui/atoms/button/button';
+import { Bot, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useGetInstalledAgentsQuery } from '@/features/agent';
 
 interface AgentCardProps {
   agentId: string;
@@ -13,29 +11,18 @@ interface AgentCardProps {
 
 export function AgentCard({
   agentId,
-  sessionId,
   status,
-  onViewDetails,
   children,
 }: AgentCardProps & { children?: React.ReactNode }) {
-  // Use RTK Query to fetch agents (cached)
-  const { data: agents = [] } = useGetInstalledAgentsQuery();
-
   const [isExpanded, setIsExpanded] = useState(false);
   const [prevStatus, setPrevStatus] = useState(status);
 
-  const agentName =
-    agents.find((a) => a.manifest.id === agentId)?.manifest.name ?? null;
-
-  // Auto-collapse when finished. Do NOT auto-expand on running.
   if (status !== prevStatus) {
     setPrevStatus(status);
     if (status !== 'running') {
       setIsExpanded(false);
     }
   }
-
-  // Effect removed, replaced by derived state from query data
 
   return (
     <div
@@ -57,9 +44,7 @@ export function AgentCard({
         {/* Info */}
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
           <div className="flex items-center gap-2">
-            <h4 className="font-semibold text-sm truncate">
-              {agentName || agentId}
-            </h4>
+            <h4 className="font-semibold text-sm truncate">{agentId}</h4>
             {status === 'running' && (
               <span className="flex h-1.5 w-1.5 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -88,18 +73,6 @@ export function AgentCard({
 
         {/* Actions */}
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewDetails?.(sessionId);
-            }}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-            title="View Session Details"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </Button>
           <div className="h-8 w-8 flex items-center justify-center text-muted-foreground">
             {isExpanded ? (
               <ChevronUp className="h-4 w-4" />

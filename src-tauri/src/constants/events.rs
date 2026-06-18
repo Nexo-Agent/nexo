@@ -48,4 +48,7 @@ impl TauriEvents {
 
     // Chat events
     pub const CHAT_UPDATED: &'static str = "chat-updated";
+
+    // Skill events
+    pub const SKILLS_CHANGED: &'static str = "skills-changed";
 }

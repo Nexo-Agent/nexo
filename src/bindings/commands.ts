@@ -25,6 +25,7 @@ export const TauriCommands = {
   RESPOND_TOOL_PERMISSION: 'respond_tool_permission',
   RESPOND_USER_QUESTION: 'respond_user_question',
   GENERATE_CHAT_TITLE: 'generate_chat_title',
+  GET_OR_CREATE_SPECIALIST_SESSION: 'get_or_create_specialist_session',
 
   // Chat Input Settings commands
   GET_CHAT_INPUT_SETTINGS: 'get_chat_input_settings',
@@ -64,22 +65,6 @@ export const TauriCommands = {
   // Web Search commands
   TEST_WEB_SEARCH_CONNECTION: 'test_web_search_connection',
 
-  // Prompt commands
-  CREATE_PROMPT: 'create_prompt',
-  GET_PROMPTS: 'get_prompts',
-  UPDATE_PROMPT: 'update_prompt',
-  DELETE_PROMPT: 'delete_prompt',
-
-  // Hub commands
-  FETCH_HUB_PROMPTS: 'fetch_hub_prompts',
-  FETCH_PROMPT_TEMPLATE: 'fetch_prompt_template',
-  INSTALL_PROMPT_FROM_HUB: 'install_prompt_from_hub',
-  FETCH_HUB_MCP_SERVERS: 'fetch_hub_mcp_servers',
-  INSTALL_MCP_SERVER_FROM_HUB: 'install_mcp_server_from_hub',
-  REFRESH_HUB_INDEX: 'refresh_hub_index',
-  FETCH_HUB_AGENTS: 'fetch_hub_agents',
-  INSTALL_AGENT_FROM_HUB: 'install_agent_from_hub',
-
   // MCP Tools commands
   TEST_MCP_CONNECTION_AND_FETCH_TOOLS: 'test_mcp_connection_and_fetch_tools',
   CONNECT_MCP_SERVER_AND_FETCH_TOOLS: 'connect_mcp_server_and_fetch_tools',
@@ -99,20 +84,13 @@ export const TauriCommands = {
   INSTALL_NODE_RUNTIME: 'install_node_runtime',
   UNINSTALL_NODE_RUNTIME: 'uninstall_node_runtime',
 
-  // Agent commands
-  INSTALL_AGENT: 'install_agent',
-  GET_INSTALLED_AGENTS: 'get_installed_agents',
-  DELETE_AGENT: 'delete_agent',
-  GET_AGENT_INFO: 'get_agent_info',
-  UPDATE_AGENT: 'update_agent',
-  GET_OR_CREATE_SPECIALIST_SESSION: 'get_or_create_specialist_session',
-
   // Skill commands
   GET_ALL_SKILLS: 'get_all_skills',
-  SYNC_SKILLS: 'sync_skills',
   LOAD_SKILL: 'load_skill',
-  IMPORT_SKILL: 'import_skill',
+  OPEN_SKILLS_FOLDER: 'open_skills_folder',
+  IMPORT_SKILL_FROM_GITHUB: 'import_skill_from_github',
   DELETE_SKILL: 'delete_skill',
+
   // Note commands
   CREATE_NOTE: 'create_note',
   GET_NOTES: 'get_notes',

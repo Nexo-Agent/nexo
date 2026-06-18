@@ -1,9 +1,22 @@
 {
   "deleteSkill": "Xóa Skill",
-  "deleteSkillConfirmation": "Bạn có chắc chắn muốn xóa skill này không? Hành động này sẽ xóa nó khỏi hệ thống tệp.",
-  "deleteSkillSuccess": "Xóa skill thành công",
-  "deleteSkillError": "Xóa skill thất bại",
-  "loadingSkills": "Đang tải danh sách skill...",
-  "noSkillsFound": "Không tìm thấy skill nào. Hãy import một thư mục skill để bắt đầu.",
-  "cannotUndone": "Hành động này không thể hoàn tác."
+  "deleteSkillConfirmation": "Bạn có chắc muốn xóa skill này? Thao tác sẽ xóa khỏi thư mục skills.",
+  "deleteSkillSuccess": "Đã xóa skill thành công",
+  "deleteSkillError": "Không thể xóa skill",
+  "loadingSkills": "Đang tải skills...",
+  "noSkillsFound": "Không tìm thấy skill nào.",
+  "cannotUndone": "Không thể hoàn tác.",
+  "openSkillsFolder": "Mở thư mục Skills",
+  "openFolderError": "Không thể mở thư mục skills",
+  "importFromGithub": "Nhập từ GitHub",
+  "importFromGithubDescription": "Dán URL tree GitHub hoặc link zip archive để nhập skill.",
+  "githubUrl": "URL GitHub",
+  "githubUrlPlaceholder": "https://github.com/owner/repo/tree/main/skills/my-skill",
+  "githubUrlHint": "Chỉ hỗ trợ repo công khai. Thư mục phải có file SKILL.md.",
+  "githubUrlRequired": "Vui lòng nhập URL GitHub",
+  "importSkillSuccess": "Đã nhập skill thành công",
+  "importSkillError": "Không thể nhập skill",
+  "importingSkill": "Đang nhập...",
+  "emptyStateDescription": "Chưa có skill nào. Thêm skill bằng cách mở thư mục skills hoặc nhập từ GitHub.",
+  "emptyStateHint": "Tạo thư mục dạng my-skill/SKILL.md với YAML frontmatter (name, description) theo Agent Skills spec."
 }

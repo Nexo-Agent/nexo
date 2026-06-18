@@ -4,6 +4,10 @@ import { useAppDispatch } from '@/app/hooks';
 import { showError } from '@/features/notifications/state/notificationSlice';
 import { logger } from '@/lib/logger';
 import { FlowData } from '@/features/chat/types';
+import {
+  type InsertedSkill,
+  buildSkillAttachmentMetadata,
+} from '../lib/skillAttachment';
 
 interface ProcessingResult {
   input: string;
@@ -15,26 +19,49 @@ interface UseChatSubmitProps {
   onSend: (content?: string, images?: string[], metadata?: string) => void;
   attachedFiles: File[];
   attachedFlow: FlowData | null;
-  selectedAgentIds: string[];
-  setInsertedPrompt: (prompt: { name: string; content: string } | null) => void;
-  setSelectedAgentIds: (ids: string[]) => void;
+  setInsertedSkill: (skill: InsertedSkill | null) => void;
   setFlow: (flow: FlowData | null) => void;
   handleFileUpload: (files: File[]) => void;
   input: string;
-  insertedPrompt: { name: string; content: string } | null;
+  insertedSkill: InsertedSkill | null;
+}
+
+function buildOutgoingMetadata(
+  insertedSkill: InsertedSkill | null,
+  attachedFlow: FlowData | null
+): string | undefined {
+  if (!insertedSkill && !attachedFlow) {
+    return undefined;
+  }
+
+  if (attachedFlow) {
+    const flowMeta = JSON.stringify({
+      type: 'flow_attachment',
+      flow: attachedFlow,
+      timestamp: Date.now(),
+      ...(insertedSkill
+        ? {
+            skillId: insertedSkill.skillId,
+            skillName: insertedSkill.skillName,
+            description: insertedSkill.description,
+          }
+        : {}),
+    });
+    return flowMeta;
+  }
+
+  return buildSkillAttachmentMetadata(insertedSkill);
 }
 
 export function useChatSubmit({
   onSend,
   attachedFiles,
   attachedFlow,
-  selectedAgentIds,
-  setInsertedPrompt,
-  setSelectedAgentIds,
+  setInsertedSkill,
   setFlow,
   handleFileUpload,
   input,
-  insertedPrompt,
+  insertedSkill,
 }: UseChatSubmitProps) {
   const { t } = useTranslation('chat');
   const dispatch = useAppDispatch();
@@ -42,45 +69,13 @@ export function useChatSubmit({
 
   const processAttachments =
     useCallback(async (): Promise<ProcessingResult | null> => {
-      // Construct the prefix for agents
-      const agentPrefix =
-        selectedAgentIds.length > 0
-          ? selectedAgentIds.map((id) => `@${id}`).join(' ') + ' '
-          : '';
+      const userText = input.trim();
+      const metadata = buildOutgoingMetadata(insertedSkill, attachedFlow);
 
-      // Construct prompt content
-      const promptContent = insertedPrompt ? insertedPrompt.content : '';
-
-      let combinedInput = '';
-
-      // 1. Add agents
-      if (agentPrefix) {
-        combinedInput += agentPrefix;
-      }
-
-      // 2. Add prompt
-      if (promptContent) {
-        combinedInput += promptContent;
-      }
-
-      // 3. Add user input
-      if (input) {
-        if (combinedInput && !combinedInput.endsWith('\n')) {
-          combinedInput += '\n\n';
-        }
-        combinedInput += input;
-      }
-
-      // Only proceed if we have something to send, attached files, or flow
-      if (
-        !combinedInput.trim() &&
-        attachedFiles.length === 0 &&
-        !attachedFlow
-      ) {
+      if (!userText && attachedFiles.length === 0 && !metadata) {
         return null;
       }
 
-      // Process attached files
       let images: string[] = [];
       if (attachedFiles.length > 0) {
         try {
@@ -101,30 +96,12 @@ export function useChatSubmit({
         }
       }
 
-      // If we have a flow attachment, we need to add it to metadata
-      let metadata: string | undefined;
-      if (attachedFlow) {
-        metadata = JSON.stringify({
-          type: 'flow_attachment',
-          flow: attachedFlow,
-          timestamp: Date.now(),
-        });
-      }
-
       return {
-        input: combinedInput,
+        input: userText,
         images,
         metadata,
       };
-    }, [
-      attachedFiles,
-      attachedFlow,
-      input,
-      insertedPrompt,
-      selectedAgentIds,
-      dispatch,
-      t,
-    ]);
+    }, [attachedFiles, attachedFlow, input, insertedSkill, dispatch, t]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitting) return;
@@ -133,13 +110,10 @@ export function useChatSubmit({
     try {
       const result = await processAttachments();
       if (result) {
-        // Clear states
-        setInsertedPrompt(null);
-        setSelectedAgentIds([]);
+        setInsertedSkill(null);
         setFlow(null);
         handleFileUpload([]);
 
-        // Send
         onSend(result.input, result.images, result.metadata);
       }
     } finally {
@@ -148,8 +122,7 @@ export function useChatSubmit({
   }, [
     isSubmitting,
     processAttachments,
-    setInsertedPrompt,
-    setSelectedAgentIds,
+    setInsertedSkill,
     setFlow,
     handleFileUpload,
     onSend,

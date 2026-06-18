@@ -59,8 +59,14 @@ export function SkillsList() {
       </div>
 
       {skills?.length === 0 && (
-        <div className="text-center text-muted-foreground py-12 border-2 border-dashed rounded-lg">
-          {t('noSkillsFound')}
+        <div className="text-center py-12 border-2 border-dashed rounded-lg space-y-4">
+          <p className="text-muted-foreground max-w-md mx-auto">
+            {t('emptyStateDescription')}
+          </p>
+
+          <p className="text-xs text-muted-foreground max-w-lg mx-auto">
+            {t('emptyStateHint')}
+          </p>
         </div>
       )}
 

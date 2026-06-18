@@ -4,6 +4,19 @@
   "deleteSkillSuccess": "Skill deleted successfully",
   "deleteSkillError": "Failed to delete skill",
   "loadingSkills": "Loading skills...",
-  "noSkillsFound": "No skills found. Import a skill directory to get started.",
-  "cannotUndone": "This action cannot be undone."
+  "noSkillsFound": "No skills found.",
+  "cannotUndone": "This action cannot be undone.",
+  "openSkillsFolder": "Open Skills Folder",
+  "openFolderError": "Failed to open skills folder",
+  "importFromGithub": "Import from GitHub",
+  "importFromGithubDescription": "Paste a GitHub tree URL or direct zip archive link to import a skill.",
+  "githubUrl": "GitHub URL",
+  "githubUrlPlaceholder": "https://github.com/owner/repo/tree/main/skills/my-skill",
+  "githubUrlHint": "Public repositories only. The folder must contain a SKILL.md file.",
+  "githubUrlRequired": "Please enter a GitHub URL",
+  "importSkillSuccess": "Skill imported successfully",
+  "importSkillError": "Failed to import skill",
+  "importingSkill": "Importing...",
+  "emptyStateDescription": "No skills installed yet. Add skills by opening the skills folder or importing from GitHub.",
+  "emptyStateHint": "Create a folder like my-skill/SKILL.md with YAML frontmatter (name, description) following the Agent Skills spec."
 }

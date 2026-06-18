@@ -231,7 +231,7 @@
   "showOnlyConnected": "Chỉ hiển thị đã kết nối",
   "solarizedDarkTheme": "Solarized Dark",
   "solarizedLightTheme": "Solarized Light",
-  "sseType": "SSE (Server-Sent Events)",
+  "sseType": "SSE",
   "sseUrlPlaceholder": "http://localhost:3000/mcp",
   "stdioType": "STDIO",
   "stdioUrlPlaceholder": "/path/to/command hoặc command",

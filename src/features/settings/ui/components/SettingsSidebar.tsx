@@ -2,11 +2,8 @@ import {
   Settings as SettingsIcon,
   Network,
   Server,
-  FileText,
   Info,
   BarChart,
-  Bot,
-  Globe,
   Wand2,
   Search,
 } from 'lucide-react';
@@ -18,13 +15,11 @@ import {
   type SettingsSection,
 } from '@/features/ui/state/uiSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { useAppSettings } from '@/hooks/useAppSettings';
 
 export function SettingsSidebar() {
   const { t } = useTranslation(['settings', 'common']);
   const dispatch = useAppDispatch();
   const selectedSection = useAppSelector((state) => state.ui.settingsSection);
-  const { enableAgents } = useAppSettings();
 
   const sections = [
     {
@@ -48,28 +43,9 @@ export function SettingsSidebar() {
       icon: <Search className="size-4" />,
     },
     {
-      id: 'prompts' as const,
-      label: t('promptManagement'),
-      icon: <FileText className="size-4" />,
-    },
-    ...(enableAgents
-      ? [
-          {
-            id: 'agent' as const,
-            label: t('agents'),
-            icon: <Bot className="size-4" />,
-          },
-        ]
-      : []),
-    {
       id: 'skills' as const,
       label: t('skills'),
       icon: <Wand2 className="size-4" />,
-    },
-    {
-      id: 'hub' as const,
-      label: 'Hub',
-      icon: <Globe className="size-4" />,
     },
     {
       id: 'usage' as const,

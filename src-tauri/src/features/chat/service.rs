@@ -1,11 +1,9 @@
-use super::agent_mention::try_route_agent_mention;
 use super::models::Chat;
 use super::repository::ChatRepository;
 use crate::error::AppError;
 use crate::features::harness::{HarnessFactory, MessageTurnRequest};
 use crate::features::llm_connection::LLMConnectionService;
 use crate::features::message::{MessageEmitter, MessageService};
-use crate::features::agent::manager::AgentManager;
 use crate::features::workspace::settings::WorkspaceSettingsService;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -17,7 +15,6 @@ pub struct ChatService {
     pub(crate) message_service: Arc<MessageService>,
     workspace_settings_service: Arc<WorkspaceSettingsService>,
     llm_connection_service: Arc<LLMConnectionService>,
-    pub(crate) agent_manager: Arc<AgentManager>,
     harness_factory: Arc<HarnessFactory>,
     cancellation_senders: Arc<Mutex<HashMap<String, tokio::sync::broadcast::Sender<()>>>>,
 }
@@ -28,7 +25,6 @@ impl ChatService {
         message_service: Arc<MessageService>,
         workspace_settings_service: Arc<WorkspaceSettingsService>,
         llm_connection_service: Arc<LLMConnectionService>,
-        agent_manager: Arc<AgentManager>,
         harness_factory: Arc<HarnessFactory>,
     ) -> Self {
         Self {
@@ -36,7 +32,6 @@ impl ChatService {
             message_service,
             workspace_settings_service,
             llm_connection_service,
-            agent_manager,
             harness_factory,
             cancellation_senders: Arc::new(Mutex::new(HashMap::new())),
         }
@@ -102,16 +97,7 @@ impl ChatService {
             return Ok(chat);
         }
 
-        let agents = self
-            .agent_manager
-            .list_installed()
-            .map_err(|e| AppError::Generic(e.to_string()))?;
-        let agent = agents
-            .iter()
-            .find(|a| a.manifest.id == agent_id)
-            .ok_or_else(|| AppError::NotFound(format!("Agent not installed: {agent_id}")))?;
-
-        let title = format!("Specialist: {}", agent.manifest.name);
+        let title = format!("Specialist: {agent_id}");
         self.create(
             uuid::Uuid::new_v4().to_string(),
             workspace_id,
@@ -242,18 +228,6 @@ impl ChatService {
                 Some(model.clone()),
                 Some(llm_connection_id.clone()),
             );
-        }
-
-        if let Some(result) = try_route_agent_mention(
-            self,
-            &chat_id,
-            &workspace_id,
-            &content,
-            &user_message_id,
-            user_timestamp,
-            &app,
-        )? {
-            return Ok(result);
         }
 
         let assistant_message_id = uuid::Uuid::new_v4().to_string();

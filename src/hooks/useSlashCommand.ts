@@ -1,125 +1,101 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { invokeCommand, TauriCommands } from '@/lib/tauri';
-import type { Prompt } from '@/app/types';
+import { skillsApi } from '@/features/skill/state/skillsApi';
+import type { SkillRecord } from '@/features/skill/types';
+import { store } from '@/app/store';
 import { logger } from '@/lib/logger';
 
 interface UseSlashCommandOptions {
   input: string;
-  onSelectPrompt?: (prompt: Prompt) => void;
+  workspaceSelectedSkillIds: string[];
+  onSelectSkill?: (skill: SkillRecord) => void;
 }
 
 interface UseSlashCommandReturn {
   isActive: boolean;
   query: string;
   selectedIndex: number;
-  filteredPrompts: Prompt[];
-  handleKeyDown: (e: React.KeyboardEvent) => boolean; // Returns true if handled
-  handleSelect: (prompt: Prompt) => void;
+  filteredSkills: SkillRecord[];
+  isEmptyWorkspace: boolean;
+  handleKeyDown: (e: React.KeyboardEvent) => boolean;
+  handleSelect: (skill: SkillRecord) => void;
   close: () => void;
 }
 
-// Module-level cache to store prompts across unmounts
-let cachedPrompts: Prompt[] | null = null;
-let isFetchingPrompts = false;
+function getSlashQuery(value: string): string {
+  const afterSlash = value.substring(1);
+  const spaceIndex = afterSlash.indexOf(' ');
+  return spaceIndex === -1 ? afterSlash : afterSlash.substring(0, spaceIndex);
+}
+
+function hasValidSlashCommand(value: string): boolean {
+  return value.startsWith('/') && (value.length === 1 || !/\s/.test(value[1]));
+}
 
 export function useSlashCommand({
   input,
-  onSelectPrompt,
+  workspaceSelectedSkillIds,
+  onSelectSkill,
 }: UseSlashCommandOptions): UseSlashCommandReturn {
-  // Initialize with cache if available
-  const [prompts, setPrompts] = useState<Prompt[]>(cachedPrompts || []);
+  const [skills, setSkills] = useState<SkillRecord[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [, setIsLoading] = useState(false);
   const [forceClosed, setForceClosed] = useState(false);
-  const prevInputRef = useRef<string>('');
+  const [prevInput, setPrevInput] = useState(input);
+  const prevIsActiveRef = useRef(false);
+  const isLoadingRef = useRef(false);
 
-  // Track checked loaded state locally to avoid duplicate requests in this instance
-  // Note: cachedPrompts check handles the global caching
-  const hasAttemptedLoadRef = useRef(!!cachedPrompts);
+  if (input !== prevInput) {
+    const prevHasValidSlash = hasValidSlashCommand(prevInput);
+    const hasValidSlash = hasValidSlashCommand(input);
+    const isNewSlashCommand = !prevHasValidSlash && hasValidSlash;
+    const slashQueryChanged =
+      hasValidSlash &&
+      prevHasValidSlash &&
+      getSlashQuery(input) !== getSlashQuery(prevInput);
 
-  // Load prompts function
-  const loadPrompts = useCallback(async () => {
-    // Return immediately if we have cache
-    if (cachedPrompts) {
-      if (prompts.length === 0) {
-        setPrompts(cachedPrompts);
-      }
-      return;
+    if (forceClosed && (isNewSlashCommand || slashQueryChanged)) {
+      setForceClosed(false);
     }
+    setPrevInput(input);
+  }
 
-    // prevent race conditions/duplicate fetches
-    if (isFetchingPrompts) return;
-
-    isFetchingPrompts = true;
-    setIsLoading(true);
+  const loadSkills = useCallback(async () => {
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
     try {
-      const data = await invokeCommand<Prompt[]>(TauriCommands.GET_PROMPTS);
-      cachedPrompts = data; // Update cache
-      setPrompts(data);
-      hasAttemptedLoadRef.current = true;
-    } catch (error) {
-      logger.error('Error loading prompts:', error);
-    } finally {
-      setIsLoading(false);
-      isFetchingPrompts = false;
-    }
-  }, [prompts.length]);
-
-  // Load prompts on mount - only once
-  useEffect(() => {
-    if (!hasAttemptedLoadRef.current) {
-      loadPrompts();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
-
-  // Reset forceClosed when input changes and starts with "/" followed by non-whitespace
-  // Only reset if this is a NEW slash command (input changed from not having valid slash to having valid slash)
-  useEffect(() => {
-    if (forceClosed) {
-      const prevInput = prevInputRef.current;
-      // Check if previous input has valid slash command (starts with "/" and not followed by whitespace)
-      const prevHasValidSlash =
-        prevInput.startsWith('/') &&
-        (prevInput.length === 1 || !/\s/.test(prevInput[1]));
-
-      // Check if current input has valid slash command
-      const hasValidSlash =
-        input.startsWith('/') && (input.length === 1 || !/\s/.test(input[1]));
-
-      const inputChanged = input !== prevInput;
-      const isNewSlashCommand =
-        inputChanged && !prevHasValidSlash && hasValidSlash;
-
-      if (isNewSlashCommand) {
-        setForceClosed(false);
+      const result = await store.dispatch(
+        skillsApi.endpoints.getAllSkills.initiate(undefined, {
+          forceRefetch: true,
+        })
+      );
+      if ('data' in result && result.data) {
+        const selected = new Set(workspaceSelectedSkillIds);
+        setSkills(result.data.filter((s) => selected.has(s.id)));
       }
+    } catch (error) {
+      logger.error('Error loading skills for slash command:', error);
+    } finally {
+      isLoadingRef.current = false;
     }
-    // Update prevInputRef after checking
-    prevInputRef.current = input;
-  }, [input, forceClosed]);
+  }, [workspaceSelectedSkillIds]);
 
-  // Detect slash command and extract query
+  useEffect(() => {
+    loadSkills();
+  }, [loadSkills]);
+
   const { isActive, query } = useMemo(() => {
-    // If force closed, don't activate
     if (forceClosed) {
       return { isActive: false, query: '' };
     }
 
-    // Only activate if input starts with "/"
     if (!input.startsWith('/')) {
       return { isActive: false, query: '' };
     }
 
-    // Check if there's a character after "/" and it's not whitespace
-    // Allow just "/" to trigger it
     if (input.length > 1 && /\s/.test(input[1])) {
       return { isActive: false, query: '' };
     }
 
-    // Extract query after "/"
     const afterSlash = input.substring(1);
-    // Stop at next space or end of input
     const spaceIndex = afterSlash.indexOf(' ');
     const query =
       spaceIndex === -1 ? afterSlash : afterSlash.substring(0, spaceIndex);
@@ -127,57 +103,52 @@ export function useSlashCommand({
     return { isActive: true, query };
   }, [input, forceClosed]);
 
-  // Only load prompts if not loaded yet and slash command becomes active
   useEffect(() => {
-    if (isActive && !hasAttemptedLoadRef.current) {
-      loadPrompts();
+    if (isActive && !prevIsActiveRef.current) {
+      loadSkills();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive]); // Only depend on isActive, not loadPrompts
+    prevIsActiveRef.current = isActive;
+  }, [isActive, loadSkills]);
 
-  // Filter prompts based on query
-  const filteredPrompts = useMemo(() => {
-    if (!isActive) {
-      return [];
-    }
+  const filteredSkills = useMemo(() => {
+    if (!isActive) return [];
 
     if (!query.trim()) {
-      return prompts;
+      return skills;
     }
 
     const queryLower = query.toLowerCase();
-    return prompts.filter((prompt) =>
-      prompt.name.toLowerCase().includes(queryLower)
+    return skills.filter(
+      (skill) =>
+        skill.name.toLowerCase().includes(queryLower) ||
+        skill.description.toLowerCase().includes(queryLower)
     );
-  }, [prompts, query, isActive]);
+  }, [skills, query, isActive]);
 
-  // Reset selected index when filtered prompts change
+  const isEmptyWorkspace = isActive && workspaceSelectedSkillIds.length === 0;
+
   useEffect(() => {
-    if (filteredPrompts.length > 0) {
+    if (filteredSkills.length > 0) {
       setSelectedIndex(0);
     }
-  }, [filteredPrompts.length]);
+  }, [filteredSkills.length]);
 
-  // Handle prompt selection
   const handleSelect = useCallback(
-    (prompt: Prompt) => {
-      onSelectPrompt?.(prompt);
+    (skill: SkillRecord) => {
+      onSelectSkill?.(skill);
     },
-    [onSelectPrompt]
+    [onSelectSkill]
   );
 
-  // Handle keyboard navigation
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent): boolean => {
-      if (!isActive) {
-        return false;
-      }
+      if (!isActive) return false;
 
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
           setSelectedIndex((prev) =>
-            Math.min(prev + 1, filteredPrompts.length - 1)
+            Math.min(prev + 1, filteredSkills.length - 1)
           );
           return true;
 
@@ -187,25 +158,24 @@ export function useSlashCommand({
           return true;
 
         case 'Enter':
-          if (filteredPrompts[selectedIndex]) {
+          if (filteredSkills[selectedIndex]) {
             e.preventDefault();
-            handleSelect(filteredPrompts[selectedIndex]);
+            handleSelect(filteredSkills[selectedIndex]);
             return true;
           }
           return false;
 
         case 'Escape':
           e.preventDefault();
-          return true; // Signal to close, but don't handle here
+          return true;
 
         default:
           return false;
       }
     },
-    [isActive, filteredPrompts, selectedIndex, handleSelect]
+    [isActive, filteredSkills, selectedIndex, handleSelect]
   );
 
-  // Close slash command
   const close = useCallback(() => {
     setSelectedIndex(0);
     setForceClosed(true);
@@ -215,7 +185,8 @@ export function useSlashCommand({
     isActive,
     query,
     selectedIndex,
-    filteredPrompts,
+    filteredSkills,
+    isEmptyWorkspace,
     handleKeyDown,
     handleSelect,
     close,

@@ -6,7 +6,7 @@ use super::traits::ToolSource;
 use super::context::ToolExecutionContext;
 use crate::error::AppError;
 use crate::features::tool::builtin::BuiltinToolSource;
-use crate::features::tool::mcp::{AgentMcpSource, McpConnectionSource};
+use crate::features::tool::mcp::McpConnectionSource;
 use crate::features::tool::models::UnifiedToolInfo;
 use crate::features::web_search::WebSearchService;
 use crate::models::llm_types::ChatCompletionTool;
@@ -19,10 +19,6 @@ use tokio::sync::broadcast;
 pub enum ResolveMode<'a> {
     Workspace {
         workspace_id: &'a str,
-    },
-    Agent {
-        agent_id: &'a str,
-        app: &'a AppHandle,
     },
 }
 
@@ -117,23 +113,6 @@ impl ToolRuntime {
                         )));
                     }
                 }
-            }
-            ResolveMode::Agent { agent_id, app } => {
-                let client = deps
-                    .agent_manager
-                    .get_agent_client(app, agent_id)
-                    .await
-                    .map_err(|e| AppError::Generic(e.to_string()))?;
-
-                let agent_source = AgentMcpSource::with_tools(
-                    agent_id.to_string(),
-                    "Agent".to_string(),
-                    client,
-                )
-                .await?;
-
-                sources.push(Arc::new(agent_source));
-                sources.push(Arc::new(BuiltinToolSource::ask_user_only()));
             }
         }
 
