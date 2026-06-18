@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -13,16 +13,22 @@ export function BrowserPanel() {
   const browserPendingUrl = useAppSelector(
     (state) => state.ui.browserPendingUrl
   );
-  const { panelTabs, loading, navigateToUrl } = useBrowserTabs();
+  const { panelTabs, loading, openUrlInPanel } = useBrowserTabs();
+  const openingPendingRef = useRef(false);
 
   useEffect(() => {
-    if (!browserPendingUrl) return;
+    if (!browserPendingUrl || openingPendingRef.current) return;
+    openingPendingRef.current = true;
     const url = browserPendingUrl;
     dispatch(clearBrowserPendingUrl());
-    navigateToUrl(url).catch((error) => {
-      notifyBrowserError(error);
-    });
-  }, [browserPendingUrl, dispatch, navigateToUrl]);
+    openUrlInPanel(url)
+      .catch((error) => {
+        notifyBrowserError(error);
+      })
+      .finally(() => {
+        openingPendingRef.current = false;
+      });
+  }, [browserPendingUrl, dispatch, openUrlInPanel]);
 
   if (!loading && panelTabs.length === 0 && !browserPendingUrl) {
     return (

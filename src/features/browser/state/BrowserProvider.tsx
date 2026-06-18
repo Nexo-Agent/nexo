@@ -28,6 +28,7 @@ import {
   setActiveBrowserTab,
 } from './browserApi';
 import { notifyBrowserError } from '../lib/handleBrowserError';
+import { findPanelTabByUrl } from '../lib/browserUrl';
 
 interface BrowserContextValue {
   panelTabs: BrowserTabSummary[];
@@ -38,6 +39,7 @@ interface BrowserContextValue {
   destroyTab: (tabId: string) => Promise<void>;
   setActiveTab: (tabId: string) => Promise<void>;
   navigateToUrl: (url: string) => Promise<void>;
+  openUrlInPanel: (url: string) => Promise<void>;
 }
 
 const BrowserContext = createContext<BrowserContextValue | null>(null);
@@ -145,6 +147,8 @@ export function BrowserProvider({ children }: { children: ReactNode }) {
   const createTab = useCallback(
     async (url?: string) => {
       const result = await createBrowserTab({ url: url ?? null });
+      await setActiveBrowserTab(result.tab_id);
+      setActiveTabId(result.tab_id);
       await refreshTabs();
       return result.tab_id;
     },
@@ -169,14 +173,42 @@ export function BrowserProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const openUrlInPanel = useCallback(
+    async (url: string) => {
+      try {
+        const tabs = await listBrowserTabs();
+        const existing = findPanelTabByUrl(tabs, url);
+        if (existing) {
+          await setActiveBrowserTab(existing.tab_id);
+          setActiveTabId(existing.tab_id);
+          setPanelTabs(tabs);
+          return;
+        }
+        await createTab(url);
+      } catch (error) {
+        notifyBrowserError(error);
+        throw error;
+      }
+    },
+    [createTab]
+  );
+
   const navigateToUrl = useCallback(
     async (url: string) => {
       try {
         if (activeTabId) {
           await navigateBrowserTab(url, activeTabId);
         } else {
-          const tabId = await createTab(url);
-          await setActiveTab(tabId);
+          const tabs = await listBrowserTabs();
+          const existing = findPanelTabByUrl(tabs, url);
+          if (existing) {
+            await setActiveBrowserTab(existing.tab_id);
+            setActiveTabId(existing.tab_id);
+            setPanelTabs(tabs);
+          } else {
+            const tabId = await createTab(url);
+            await setActiveTab(tabId);
+          }
         }
         await refreshTabs();
       } catch (error) {
@@ -197,6 +229,7 @@ export function BrowserProvider({ children }: { children: ReactNode }) {
       destroyTab,
       setActiveTab,
       navigateToUrl,
+      openUrlInPanel,
     }),
     [
       panelTabs,
@@ -207,6 +240,7 @@ export function BrowserProvider({ children }: { children: ReactNode }) {
       destroyTab,
       setActiveTab,
       navigateToUrl,
+      openUrlInPanel,
     ]
   );
 

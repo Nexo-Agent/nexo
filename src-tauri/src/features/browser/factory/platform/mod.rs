@@ -1,5 +1,6 @@
 pub mod macos_probe;
 use crate::error::AppError;
+use crate::features::browser::factory::window_access;
 use std::sync::Mutex;
 use tauri::webview::WebviewBuilder;
 use tauri::{AppHandle, Manager, Runtime};
@@ -116,9 +117,7 @@ fn read_macos_config_ptr<R: Runtime>(app: &AppHandle<R>) -> Result<usize, AppErr
     use objc2_web_kit::WKWebView;
     use std::sync::mpsc::channel;
 
-    let main = app
-        .get_webview_window("main")
-        .ok_or_else(|| AppError::Generic("Main webview window not found".into()))?;
+    let main = window_access::main_webview(app)?;
 
     let (tx, rx) = channel();
     main.with_webview(move |wv| {
@@ -177,9 +176,7 @@ fn read_linux_related_view<R: Runtime>(
 ) -> Result<webkit2gtk::WebView, AppError> {
     use std::sync::mpsc::channel;
 
-    let main = app
-        .get_webview_window("main")
-        .ok_or_else(|| AppError::Generic("Main webview window not found".into()))?;
+    let main = window_access::main_webview(app)?;
 
     let (tx, rx) = channel();
     main.with_webview(move |wv| {

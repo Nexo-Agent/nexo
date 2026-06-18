@@ -7,9 +7,10 @@ use crate::events::{
 use crate::features::browser::eval_helper;
 use crate::features::browser::factory::history::HistoryState;
 use crate::features::browser::factory::instance::{TabKind, TabSummary, WebviewInstance};
-use crate::features::browser::factory::lease::{ViewportId, ViewportLeaseManager};
+use crate::features::browser::factory::lease::{ViewportId, ViewportKind, ViewportLeaseManager};
 use crate::features::browser::factory::lifecycle::WebviewLifecycle;
 use crate::features::browser::factory::platform::macos_probe;
+use crate::features::browser::factory::window_access;
 use crate::features::browser::factory::platform::{ParentPlatformState, SharedPlatformState};
 use crate::features::browser::factory::safe_child;
 use crate::features::browser::factory::registry::WebviewRegistry;
@@ -115,12 +116,30 @@ impl WebviewFactory {
     }
 
     pub async fn set_active_tab(&self, tab_id: &str) -> Result<(), AppError> {
-        let mut registry = self.registry.lock().await;
-        if !registry.set_active_tab(tab_id) {
-            return Err(AppError::NotFound(format!(
-                "Panel tab not found: {tab_id}"
-            )));
+        let other_panel_tabs: Vec<String> = {
+            let registry = self.registry.lock().await;
+            if !registry
+                .get(tab_id)
+                .is_some_and(|tab| tab.kind == TabKind::Panel)
+            {
+                return Err(AppError::NotFound(format!(
+                    "Panel tab not found: {tab_id}"
+                )));
+            }
+            registry
+                .panel_tab_ids()
+                .iter()
+                .filter(|id| id.as_str() != tab_id)
+                .cloned()
+                .collect()
+        };
+
+        for other_id in other_panel_tabs {
+            self.hide_tab_webview(&other_id).await;
         }
+
+        let mut registry = self.registry.lock().await;
+        registry.set_active_tab(tab_id);
         let _ = self.app.emit(
             TauriEvents::BROWSER_ACTIVE_TAB_CHANGED,
             BrowserActiveTabChangedEvent {
@@ -225,10 +244,31 @@ impl WebviewFactory {
         let webview = self.get_webview(&tab)?;
 
         if visible && width >= 1.0 && height >= 1.0 {
-            self.leases
+            let previous_lease = self
+                .leases
                 .lock()
                 .await
-                .set_lease(viewport, tab_id.to_string());
+                .set_lease(viewport.clone(), tab_id.to_string());
+
+            if viewport.kind == ViewportKind::MainPanel
+            {
+                let other_panel_tabs: Vec<String> = self
+                    .registry
+                    .lock()
+                    .await
+                    .panel_tab_ids()
+                    .iter()
+                    .filter(|id| id.as_str() != tab_id)
+                    .cloned()
+                    .collect();
+                for other_id in other_panel_tabs {
+                    self.hide_tab_webview(&other_id).await;
+                }
+            } else if let Some(previous) = previous_lease {
+                if previous != tab_id {
+                    self.hide_tab_webview(&previous).await;
+                }
+            }
         }
 
         if !visible || width < 1.0 || height < 1.0 {
@@ -400,12 +440,7 @@ impl WebviewFactory {
         }));
         let history = Arc::new(Mutex::new(HistoryState::new(initial_url.clone())));
 
-        let window = self
-            .app
-            .get_webview_window("main")
-            .ok_or_else(|| AppError::Generic("Main window not found".into()))?
-            .as_ref()
-            .window();
+        let window = window_access::main_window(&self.app)?;
 
         let app_handle = self.app.clone();
         let tab_id_for_events = tab_id.clone();
@@ -597,6 +632,21 @@ impl WebviewFactory {
             .await
             .get(tab_id)
             .ok_or_else(|| AppError::NotFound(format!("Browser tab not found: {tab_id}")))
+    }
+
+    async fn hide_tab_webview(&self, tab_id: &str) {
+        let tab = {
+            let registry = self.registry.lock().await;
+            registry.get(tab_id)
+        };
+        let Some(tab) = tab else {
+            return;
+        };
+        if let Ok(webview) = self.get_webview(&tab) {
+            let _ = webview.hide();
+            let mut life = tab.lifecycle.lock().await;
+            *life = WebviewLifecycle::Hidden;
+        }
     }
 
     fn get_webview(&self, tab: &WebviewInstance) -> Result<Webview, AppError> {

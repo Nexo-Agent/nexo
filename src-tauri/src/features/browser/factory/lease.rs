@@ -36,8 +36,8 @@ pub struct ViewportLeaseManager {
 }
 
 impl ViewportLeaseManager {
-    pub fn set_lease(&mut self, viewport: ViewportId, tab_id: String) {
-        self.leases.insert(viewport, tab_id);
+    pub fn set_lease(&mut self, viewport: ViewportId, tab_id: String) -> Option<String> {
+        self.leases.insert(viewport, tab_id)
     }
 
     pub fn release(&mut self, viewport: &ViewportId) -> Option<String> {

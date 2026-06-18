@@ -6,6 +6,7 @@ pub mod platform;
 pub mod registry;
 pub mod safe_child;
 pub mod webview_factory;
+pub mod window_access;
 
 pub use instance::{TabKind, TabSummary};
 pub use lease::{ViewportId, ViewportKind};

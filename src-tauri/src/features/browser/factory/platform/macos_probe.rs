@@ -1,3 +1,4 @@
+use crate::features::browser::factory::window_access;
 use crate::error::AppError;
 use tauri::{AppHandle, Manager, Runtime};
 
@@ -10,9 +11,7 @@ pub fn validate_child_webview_capability<R: Runtime>(
 ) -> Result<(), AppError> {
     use std::sync::mpsc::channel;
 
-    let main = app
-        .get_webview_window("main")
-        .ok_or_else(|| AppError::Generic("Main webview window not found".into()))?;
+    let main = window_access::main_window(app)?;
 
     let (tx, rx) = channel();
     main.run_on_main_thread(move || {

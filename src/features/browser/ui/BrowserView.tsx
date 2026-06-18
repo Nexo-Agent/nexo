@@ -1,11 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, Plus, RotateCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,6 +6,7 @@ import { Button } from '@/ui/atoms/button/button';
 import { Input } from '@/ui/atoms/input';
 import { useBrowserNavigation } from '../hooks/useBrowserNavigation';
 import { useBrowserTabs } from '../hooks/useBrowserTabs';
+import { notifyBrowserError } from '../lib/handleBrowserError';
 import { BrowserStreamSkeleton } from './BrowserStreamSkeleton';
 
 const BrowserWebviewHost = lazy(() =>
@@ -66,11 +60,6 @@ export function BrowserView({
 
   const activeTab = panelTabs.find((tab) => tab.tab_id === activeTabId);
 
-  useEffect(() => {
-    if (!showChrome || tabsLoading || panelTabs.length > 0) return;
-    createTab(initialUrl).catch(() => undefined);
-  }, [showChrome, tabsLoading, panelTabs.length, createTab, initialUrl]);
-
   const syncChromeFromNav = useCallback(
     (state: { url: string; title: string }) => {
       if (!state.url || !showChrome) return;
@@ -120,8 +109,15 @@ export function BrowserView({
   );
 
   const handleNewTab = useCallback(() => {
-    createTab(DEFAULT_URL).catch(() => undefined);
-  }, [createTab]);
+    createTab(DEFAULT_URL)
+      .then((tabId) => {
+        setAddressUrl(DEFAULT_URL);
+        return setActiveTab(tabId);
+      })
+      .catch((error) => {
+        notifyBrowserError(error);
+      });
+  }, [createTab, setActiveTab]);
 
   const stream = useMemo(() => {
     if (!displayTabId) {
