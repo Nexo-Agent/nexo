@@ -1,4 +1,5 @@
 mod ask_user;
+mod create_artifact;
 mod list_dir;
 mod read_file;
 mod run_command;
@@ -7,12 +8,14 @@ mod write_file;
 
 use crate::error::AppError;
 use crate::features::app_settings::service::AppSettingsService;
+use crate::features::artifacts::ArtifactService;
 use crate::features::tool::core::context::ToolExecutionContext;
 use crate::features::tool::core::result::ToolResult;
 use crate::features::tool::core::spec::ToolSpec;
 use crate::features::tool::core::traits::{Tool, ToolSource};
 use ask_user::AskUserTool;
 use async_trait::async_trait;
+use create_artifact::CreateArtifactTool;
 use list_dir::ListDirTool;
 use read_file::ReadFileTool;
 use run_command::RunCommandTool;
@@ -40,7 +43,7 @@ pub struct BuiltinToolSource {
 
 impl BuiltinToolSource {
     pub fn new() -> Self {
-        Self::with_tools(default_tools(None, false))
+        Self::with_tools(default_tools(None, false, None))
     }
 
     /// Builtin source containing only ask_user (for agent mode).
@@ -51,10 +54,12 @@ impl BuiltinToolSource {
     pub fn with_web_search(
         app_settings_service: Arc<AppSettingsService>,
         web_search_available: bool,
+        artifact_service: Arc<ArtifactService>,
     ) -> Self {
         Self::with_tools(default_tools(
             Some(app_settings_service),
             web_search_available,
+            Some(artifact_service),
         ))
     }
 
@@ -108,6 +113,7 @@ impl ToolSource for BuiltinToolSource {
 fn default_tools(
     app_settings_service: Option<Arc<AppSettingsService>>,
     web_search_available: bool,
+    artifact_service: Option<Arc<ArtifactService>>,
 ) -> Vec<Arc<dyn Tool>> {
     let mut tools: Vec<Arc<dyn Tool>> = vec![
         Arc::new(ReadFileTool),
@@ -116,6 +122,10 @@ fn default_tools(
         Arc::new(RunCommandTool),
         Arc::new(AskUserTool),
     ];
+
+    if let Some(service) = artifact_service {
+        tools.push(Arc::new(CreateArtifactTool::new(service)));
+    }
 
     if web_search_available {
         if let Some(service) = app_settings_service {

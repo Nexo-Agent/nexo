@@ -1,36 +1,44 @@
-import { FileText, Layout, Info, Code2 } from 'lucide-react';
+import { FileText, Info, Code2, Package } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { NotesPanel } from '@/features/notes/ui/NotesPanel';
+import { ArtifactsPanel } from '@/features/artifacts/ui/ArtifactsPanel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/atoms/tooltip';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { setRightPanelTab } from '@/features/ui/state/uiSlice';
 
 export function ChatRightPanel() {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation(['artifacts', 'common']);
   const activeTab = useAppSelector((state) => state.ui.rightPanelTab);
 
   const tabs = [
-    { id: 'notes' as const, icon: FileText, label: 'Notes' },
-    { id: 'skills' as const, icon: Code2, label: 'Skills' },
-    { id: 'info' as const, icon: Info, label: 'Chat Info' },
+    { id: 'notes' as const, icon: FileText, label: t('common:notes') },
+    { id: 'artifacts' as const, icon: Package, label: t('artifacts:tabLabel') },
+    { id: 'skills' as const, icon: Code2, label: t('common:skills') },
+    { id: 'info' as const, icon: Info, label: t('common:chatInfo') },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
       case 'notes':
         return <NotesPanel />;
+      case 'artifacts':
+        return <ArtifactsPanel />;
       default:
         return (
           <div className="flex flex-1 flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-300">
             <div className="mb-4 rounded-full bg-primary/10 p-4">
-              <Layout className="size-8 text-primary" />
+              <Package className="size-8 text-primary" />
             </div>
             <h3 className="mb-2 text-lg font-medium text-foreground">
-              {tabs.find((t) => t.id === activeTab)?.label} coming soon
+              {tabs.find((tab) => tab.id === activeTab)?.label}{' '}
+              {t('common:comingSoon')}
             </h3>
             <p className="max-w-[200px] text-sm text-muted-foreground">
-              This area will contain secondary tools, context, or visualizations
-              for {activeTab}.
+              {t('common:rightPanelComingSoonDescription', {
+                tab: tabs.find((tab) => tab.id === activeTab)?.label,
+              })}
             </p>
           </div>
         );

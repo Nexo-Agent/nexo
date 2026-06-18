@@ -5,6 +5,7 @@ import uiReducer, {
   toggleSidebar,
   setLanguage,
   setTheme,
+  setRightPanelTab,
   loadAppSettings,
   UIState,
 } from './uiSlice';
@@ -88,6 +89,11 @@ describe('uiSlice', () => {
         key: 'theme',
         value: 'dark',
       });
+    });
+
+    it('should handle setRightPanelTab for artifacts', () => {
+      const state = uiReducer(initialState, setRightPanelTab('artifacts'));
+      expect(state.rightPanelTab).toBe('artifacts');
     });
   });
 

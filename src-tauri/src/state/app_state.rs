@@ -18,6 +18,10 @@ use crate::features::notes::{
     repository::{NoteRepository, SqliteNoteRepository},
     service::NoteService,
 };
+use crate::features::artifacts::{
+    repository::{ArtifactRepository, SqliteArtifactRepository},
+    service::ArtifactService,
+};
 use crate::features::skill::SkillService;
 use crate::features::tool::{mcp::MCPToolRefreshService, core::ToolDeps};
 use crate::features::harness::HarnessFactory;
@@ -58,6 +62,7 @@ pub struct AppState {
     pub tool_deps: Arc<ToolDeps>,
     pub app_settings_service: Arc<AppSettingsService>,
     pub note_service: Arc<NoteService>,
+    pub artifact_service: Arc<ArtifactService>,
 
     pub pending_tool_permissions: Arc<Mutex<HashMap<String, oneshot::Sender<PermissionDecision>>>>,
     pub pending_user_questions:
@@ -120,11 +125,16 @@ impl AppState {
 
         let app_settings_service = Arc::new(AppSettingsService::new(app_settings_repo));
 
+        let artifact_repo: Arc<dyn ArtifactRepository> =
+            Arc::new(SqliteArtifactRepository::new(app.clone()));
+        let artifact_service = Arc::new(ArtifactService::new(artifact_repo, app.clone()));
+
         let tool_deps = Arc::new(ToolDeps::new(
             (*app).clone(),
             mcp_connection_service.clone(),
             workspace_settings_service.clone(),
             app_settings_service.clone(),
+            artifact_service.clone(),
         ));
 
         let skill_service = Arc::new(SkillService::new((*app).clone()));
@@ -150,6 +160,7 @@ impl AppState {
             workspace_settings_service,
             llm_connection_service.clone(),
             harness_factory,
+            artifact_service.clone(),
         ));
 
         let chat_input_settings_service =
@@ -176,6 +187,7 @@ impl AppState {
             tool_deps,
             app_settings_service,
             note_service,
+            artifact_service,
             pending_tool_permissions: Arc::new(Mutex::new(HashMap::new())),
             pending_user_questions: Arc::new(Mutex::new(HashMap::new())),
             skill_service,

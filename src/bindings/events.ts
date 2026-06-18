@@ -49,6 +49,9 @@ export const TauriEvents = {
 
   // Skill events
   SKILLS_CHANGED: 'skills-changed',
+
+  // Artifact events
+  ARTIFACT_CREATED: 'artifact-created',
 } as const;
 
 export type TauriEvent = (typeof TauriEvents)[keyof typeof TauriEvents];

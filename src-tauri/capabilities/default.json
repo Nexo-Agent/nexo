@@ -29,6 +29,9 @@
         },
         {
           "path": "$APPDATA/skills"
+        },
+        {
+          "path": "$APPDATA/artifacts/**"
         }
       ]
     },
@@ -82,6 +85,9 @@
         },
         {
           "path": "$APPDATA/mermaid_cache/**"
+        },
+        {
+          "path": "$APPDATA/artifacts/**"
         }
       ]
     },
@@ -102,6 +108,9 @@
         },
         {
           "path": "$APPDATA/mermaid_cache/**"
+        },
+        {
+          "path": "$APPDATA/artifacts/**"
         }
       ]
     },
@@ -122,6 +131,9 @@
         },
         {
           "path": "$APPDATA/mermaid_cache/**"
+        },
+        {
+          "path": "$APPDATA/artifacts/**"
         }
       ]
     },
@@ -142,6 +154,9 @@
         },
         {
           "path": "$APPDATA/mermaid_cache/**"
+        },
+        {
+          "path": "$APPDATA/artifacts/**"
         }
       ]
     },
@@ -161,7 +176,10 @@
           "path": "$APPDATA/mermaid_cache"
         },
         {
-          "path": "$APPDATA/mermaid_cache/**"
+          "path": "$APPDATA/artifacts"
+        },
+        {
+          "path": "$APPDATA/artifacts/**"
         }
       ]
     },
@@ -179,6 +197,9 @@
         },
         {
           "path": "$APPDATA/mermaid_cache"
+        },
+        {
+          "path": "$APPDATA/artifacts"
         }
       ]
     }

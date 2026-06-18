@@ -57,6 +57,7 @@ export const baseApi = createApi({
     'ChatInputSettings',
     'WorkspaceActiveTool',
     'Skill',
+    'Artifact',
   ],
   endpoints: () => ({}),
 });

@@ -7,12 +7,14 @@ import enChat from './locales/en/chat.json';
 import enSettings from './locales/en/settings.json';
 import enFlow from './locales/en/flow.json';
 import enSkills from './locales/en/skills.json';
+import enArtifacts from './locales/en/artifacts.json';
 
 import viCommon from './locales/vi/common.json';
 import viChat from './locales/vi/chat.json';
 import viSettings from './locales/vi/settings.json';
 import viFlow from './locales/vi/flow.json';
 import viSkills from './locales/vi/skills.json';
+import viArtifacts from './locales/vi/artifacts.json';
 
 const resources = {
   en: {
@@ -21,6 +23,7 @@ const resources = {
     settings: enSettings,
     flow: enFlow,
     skills: enSkills,
+    artifacts: enArtifacts,
   },
   vi: {
     common: viCommon,
@@ -28,6 +31,7 @@ const resources = {
     settings: viSettings,
     flow: viFlow,
     skills: viSkills,
+    artifacts: viArtifacts,
   },
 };
 

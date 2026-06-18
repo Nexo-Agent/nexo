@@ -349,5 +349,28 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
     // Drop legacy prompts table (feature removed)
     conn.execute("DROP TABLE IF EXISTS prompts", [])?;
 
+    // Create artifacts table
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS artifacts (
+            id TEXT PRIMARY KEY,
+            chat_id TEXT NOT NULL,
+            message_id TEXT,
+            tool_call_id TEXT,
+            title TEXT NOT NULL,
+            filename TEXT NOT NULL,
+            path TEXT NOT NULL,
+            mime_type TEXT,
+            size_bytes INTEGER,
+            created_at INTEGER NOT NULL,
+            FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
+        )",
+        [],
+    )?;
+
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_artifacts_chat_id ON artifacts(chat_id)",
+        [],
+    )?;
+
     Ok(())
 }

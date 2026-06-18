@@ -51,4 +51,7 @@ impl TauriEvents {
 
     // Skill events
     pub const SKILLS_CHANGED: &'static str = "skills-changed";
+
+    // Artifact events
+    pub const ARTIFACT_CREATED: &'static str = "artifact-created";
 }

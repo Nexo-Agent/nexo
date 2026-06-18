@@ -10,6 +10,7 @@ import { useNotificationListener } from '@/hooks/useNotificationListener';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useMenuEvents } from '@/hooks/useMenuEvents';
 import { useChatStreaming } from '@/features/chat/hooks/useChatStreaming';
+import { useArtifactCreatedListener } from '@/features/artifacts/hooks/useArtifactCreatedListener';
 import { loadAppSettings } from '@/features/ui/state/uiSlice';
 import i18n from '@/i18n/config';
 import { useAutoUpdate } from '@/features/updater/hooks/useAutoUpdate';
@@ -31,6 +32,9 @@ function AppContent() {
 
   // Listen for chat streaming events from Rust core
   useChatStreaming();
+
+  // Refresh artifacts panel when assistant creates a new artifact
+  useArtifactCreatedListener();
 
   // Load all app settings from database on mount
   useEffect(() => {

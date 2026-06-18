@@ -55,6 +55,23 @@ impl PromptProvider for NexoPromptProvider {
             }
         }
 
+        if !final_system_message.is_empty() {
+            final_system_message.push_str("\n\n");
+        }
+        final_system_message.push_str("## ARTIFACTS\n");
+        final_system_message.push_str(
+            "When producing standalone deliverables (HTML pages, SVG diagrams, Markdown docs, source code, CSV, JSON), \
+            use the `create_artifact` tool. Do NOT paste full file content in chat.\n\n",
+        );
+        final_system_message.push_str("Artifact directory for this conversation:\n");
+        final_system_message.push_str(&format!("  {}\n\n", ctx.artifact_dir));
+        final_system_message.push_str(
+            "Rules:\n\
+            - Use descriptive filenames: revenue-chart.html, not output.html\n\
+            - For quick inline previews in chat, ```html fences are still OK for small visuals\n\
+            - For full pages or files the user will open externally, always use create_artifact\n",
+        );
+
         Ok(final_system_message)
     }
 }
@@ -313,6 +330,8 @@ mod tests {
                 workspace_settings: &settings,
                 system_prompt_override: None,
                 provider: Some("openai"),
+                chat_id: "c1",
+                artifact_dir: "/tmp/artifacts/c1".to_string(),
             },
             existing_messages: &existing,
             user_content: "hi",
@@ -388,6 +407,8 @@ mod tests {
                 workspace_settings: &settings,
                 system_prompt_override: None,
                 provider: Some("openai"),
+                chat_id: "c1",
+                artifact_dir: "/tmp/artifacts/c1".to_string(),
             },
             existing_messages: &existing,
             user_content: "ve bieu do",

@@ -46,7 +46,7 @@ export interface UIState {
   imagePreviewOpen: boolean;
   imagePreviewUrl: string | null;
   isRightPanelOpen: boolean;
-  rightPanelTab: 'notes' | 'skills' | 'info';
+  rightPanelTab: 'notes' | 'skills' | 'info' | 'artifacts';
   experiments: {
     showUsage: boolean;
     enableWorkflowEditor: boolean;

@@ -81,6 +81,7 @@ impl ToolRuntime {
                 sources.push(Arc::new(BuiltinToolSource::with_web_search(
                     deps.app_settings_service.clone(),
                     web_search_available,
+                    deps.artifact_service.clone(),
                 )));
 
                 if !mcp_tool_map.is_empty() {

@@ -88,4 +88,8 @@ impl TauriCommands {
     pub const GET_NOTES: &'static str = "get_notes";
     pub const UPDATE_NOTE: &'static str = "update_note";
     pub const DELETE_NOTE: &'static str = "delete_note";
+
+    // Artifact commands
+    pub const GET_ARTIFACTS: &'static str = "get_artifacts";
+    pub const DELETE_ARTIFACT: &'static str = "delete_artifact";
 }

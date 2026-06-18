@@ -255,6 +255,9 @@ pub fn run() {
             features::notes::commands::get_notes,
             features::notes::commands::update_note,
             features::notes::commands::delete_note,
+            // Artifact commands
+            features::artifacts::commands::get_artifacts,
+            features::artifacts::commands::delete_artifact,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

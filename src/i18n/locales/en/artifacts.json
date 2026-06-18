@@ -1,0 +1,10 @@
+{
+  "tabLabel": "Artifacts",
+  "panelDescription": "Files created by the assistant in this conversation.",
+  "loading": "Loading artifacts...",
+  "emptyTitle": "No artifacts yet",
+  "emptyDescription": "When the assistant creates HTML pages, documents, or code files, they will appear here.",
+  "noChatTitle": "No chat selected",
+  "noChatDescription": "Select a chat to view its artifacts.",
+  "deleteConfirm": "Delete this artifact? The file will be removed from disk."
+}

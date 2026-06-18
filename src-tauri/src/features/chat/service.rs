@@ -1,6 +1,7 @@
 use super::models::Chat;
 use super::repository::ChatRepository;
 use crate::error::AppError;
+use crate::features::artifacts::ArtifactService;
 use crate::features::harness::{HarnessFactory, MessageTurnRequest};
 use crate::features::llm_connection::LLMConnectionService;
 use crate::features::message::{MessageEmitter, MessageService};
@@ -16,6 +17,7 @@ pub struct ChatService {
     workspace_settings_service: Arc<WorkspaceSettingsService>,
     llm_connection_service: Arc<LLMConnectionService>,
     harness_factory: Arc<HarnessFactory>,
+    artifact_service: Arc<ArtifactService>,
     cancellation_senders: Arc<Mutex<HashMap<String, tokio::sync::broadcast::Sender<()>>>>,
 }
 
@@ -26,6 +28,7 @@ impl ChatService {
         workspace_settings_service: Arc<WorkspaceSettingsService>,
         llm_connection_service: Arc<LLMConnectionService>,
         harness_factory: Arc<HarnessFactory>,
+        artifact_service: Arc<ArtifactService>,
     ) -> Self {
         Self {
             repository,
@@ -33,6 +36,7 @@ impl ChatService {
             workspace_settings_service,
             llm_connection_service,
             harness_factory,
+            artifact_service,
             cancellation_senders: Arc::new(Mutex::new(HashMap::new())),
         }
     }
@@ -127,10 +131,15 @@ impl ChatService {
     }
 
     pub fn delete(&self, id: String) -> Result<(), AppError> {
+        self.artifact_service.delete_by_chat(&id)?;
         self.repository.delete(&id)
     }
 
     pub fn delete_by_workspace_id(&self, workspace_id: String) -> Result<(), AppError> {
+        let chats = self.repository.get_by_workspace_id(&workspace_id)?;
+        for chat in &chats {
+            self.artifact_service.delete_by_chat(&chat.id)?;
+        }
         self.repository.delete_by_workspace_id(&workspace_id)
     }
 

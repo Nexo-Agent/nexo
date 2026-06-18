@@ -50,6 +50,8 @@ pub struct PromptContext<'a> {
     pub workspace_settings: &'a WorkspaceSettings,
     pub system_prompt_override: Option<&'a str>,
     pub provider: Option<&'a str>,
+    pub chat_id: &'a str,
+    pub artifact_dir: String,
 }
 
 /// Context for building the full message list sent to the LLM.

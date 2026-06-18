@@ -1,4 +1,5 @@
 use crate::features::app_settings::service::AppSettingsService;
+use crate::features::artifacts::service::ArtifactService;
 use crate::features::mcp_connection::MCPConnectionService;
 use crate::features::workspace::settings::WorkspaceSettingsService;
 use std::sync::Arc;
@@ -10,6 +11,7 @@ pub struct ToolDeps {
     pub mcp_connection_service: Arc<MCPConnectionService>,
     pub workspace_settings_service: Arc<WorkspaceSettingsService>,
     pub app_settings_service: Arc<AppSettingsService>,
+    pub artifact_service: Arc<ArtifactService>,
 }
 
 impl ToolDeps {
@@ -18,12 +20,14 @@ impl ToolDeps {
         mcp_connection_service: Arc<MCPConnectionService>,
         workspace_settings_service: Arc<WorkspaceSettingsService>,
         app_settings_service: Arc<AppSettingsService>,
+        artifact_service: Arc<ArtifactService>,
     ) -> Self {
         Self {
             app,
             mcp_connection_service,
             workspace_settings_service,
             app_settings_service,
+            artifact_service,
         }
     }
 }

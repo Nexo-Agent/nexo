@@ -96,6 +96,10 @@ export const TauriCommands = {
   GET_NOTES: 'get_notes',
   UPDATE_NOTE: 'update_note',
   DELETE_NOTE: 'delete_note',
+
+  // Artifact commands
+  GET_ARTIFACTS: 'get_artifacts',
+  DELETE_ARTIFACT: 'delete_artifact',
 } as const;
 
 export type TauriCommand = (typeof TauriCommands)[keyof typeof TauriCommands];

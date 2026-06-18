@@ -163,3 +163,9 @@ pub struct UserQuestionRequestEvent {
     pub title: Option<String>,
     pub questions: Vec<crate::state::UserQuestionDefinition>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ArtifactCreatedEvent {
+    pub chat_id: String,
+    pub artifact: crate::features::artifacts::Artifact,
+}

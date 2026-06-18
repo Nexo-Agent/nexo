@@ -1,4 +1,5 @@
 use crate::error::AppError;
+use crate::features::artifacts::ArtifactService;
 use crate::features::harness::tools_resolver::resolve_tool_context;
 use crate::features::harness::turn::ConversationTurnController;
 use crate::features::harness::types::{
@@ -57,10 +58,16 @@ impl AgentSession {
         let stream_enabled = workspace_settings.stream_enabled.is_none_or(|v| v == 1);
         let max_iterations = workspace_settings.max_agent_iterations.unwrap_or(25) as usize;
 
+        let artifact_dir = ArtifactService::ensure_artifact_dir(&app, &chat_id)?
+            .to_string_lossy()
+            .to_string();
+
         let prompt_ctx = PromptContext {
             workspace_settings: &workspace_settings,
             system_prompt_override: tool_ctx.system_prompt_override.as_deref(),
             provider: Some(llm_connection.provider.as_str()),
+            chat_id: &chat_id,
+            artifact_dir,
         };
 
         let build_ctx = MessageBuildContext {
