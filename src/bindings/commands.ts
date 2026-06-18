@@ -102,17 +102,21 @@ export const TauriCommands = {
   DELETE_ARTIFACT: 'delete_artifact',
 
   // Browser commands
-  BROWSER_GET_RUNTIME_STATUS: 'browser_get_runtime_status',
-  BROWSER_ENSURE_RUNTIME: 'browser_ensure_runtime',
-  BROWSER_CREATE_SESSION: 'browser_create_session',
+  BROWSER_CREATE_TAB: 'browser_create_tab',
+  BROWSER_DESTROY_TAB: 'browser_destroy_tab',
+  BROWSER_LIST_TABS: 'browser_list_tabs',
+  BROWSER_GET_ACTIVE_TAB: 'browser_get_active_tab',
+  BROWSER_SET_ACTIVE_TAB: 'browser_set_active_tab',
+  BROWSER_CREATE_FENCE_TAB: 'browser_create_fence_tab',
+  BROWSER_RELEASE_FENCE_TAB: 'browser_release_fence_tab',
+  BROWSER_RELEASE_FENCES_FOR_CHAT: 'browser_release_fences_for_chat',
+  BROWSER_SYNC_BOUNDS: 'browser_sync_bounds',
+  BROWSER_RELEASE_VIEWPORT: 'browser_release_viewport',
   BROWSER_NAVIGATE: 'browser_navigate',
-  BROWSER_DESTROY_SESSION: 'browser_destroy_session',
-  BROWSER_SEND_INPUT: 'browser_send_input',
-  BROWSER_RESIZE: 'browser_resize',
-  BROWSER_SET_VIEWER_ACTIVE: 'browser_set_viewer_active',
   BROWSER_GET_NAVIGATION_STATE: 'browser_get_navigation_state',
   BROWSER_GO_BACK: 'browser_go_back',
   BROWSER_GO_FORWARD: 'browser_go_forward',
+  BROWSER_RELOAD: 'browser_reload',
 } as const;
 
 export type TauriCommand = (typeof TauriCommands)[keyof typeof TauriCommands];

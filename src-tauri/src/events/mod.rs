@@ -171,50 +171,38 @@ pub struct ArtifactCreatedEvent {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct BrowserFrameEvent {
-    pub session_id: String,
-    pub data: String,
-    pub timestamp: u64,
-    pub viewport_width: u32,
-    pub viewport_height: u32,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct BrowserSessionStartedEvent {
-    pub session_id: String,
+pub struct BrowserTabCreatedEvent {
+    pub tab_id: String,
+    pub kind: crate::features::browser::factory::TabKind,
+    pub url: Option<String>,
+    pub anchor_id: Option<String>,
     pub chat_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct BrowserSessionStoppedEvent {
-    pub session_id: String,
+pub struct BrowserTabDestroyedEvent {
+    pub tab_id: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct BrowserActiveTabChangedEvent {
+    pub tab_id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BrowserNavigatedEvent {
-    pub session_id: String,
+    pub tab_id: String,
     pub url: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct BrowserTitleChangedEvent {
+    pub tab_id: String,
+    pub title: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BrowserErrorEvent {
-    pub session_id: String,
-    pub error: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct BrowserRuntimeDownloadProgressEvent {
-    pub percent: Option<f64>,
-    pub bytes_downloaded: u64,
-    pub total_bytes: Option<u64>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct BrowserRuntimeReadyEvent {
-    pub version: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct BrowserRuntimeErrorEvent {
+    pub tab_id: String,
     pub error: String,
 }

@@ -130,7 +130,8 @@ impl AppState {
         let artifact_repo: Arc<dyn ArtifactRepository> =
             Arc::new(SqliteArtifactRepository::new(app.clone()));
         let artifact_service = Arc::new(ArtifactService::new(artifact_repo, app.clone()));
-        let browser_service = Arc::new(BrowserService::new(app.clone()));
+        let browser_factory = Arc::new(crate::features::browser::WebviewFactory::new(app.clone()));
+        let browser_service = Arc::new(BrowserService::new(browser_factory));
 
         let tool_deps = Arc::new(ToolDeps::new(
             (*app).clone(),

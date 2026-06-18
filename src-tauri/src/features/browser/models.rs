@@ -9,57 +9,18 @@ pub struct BrowserNavigationState {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CreateSessionResponse {
-    pub session_id: String,
+pub struct CreateTabResponse {
+    pub tab_id: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BrowserRuntimeStatus {
-    pub installed: bool,
-    pub version: Option<String>,
-    pub downloading: bool,
+pub struct ListTabsResponse {
+    pub tabs: Vec<crate::features::browser::factory::TabSummary>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "camelCase")]
-pub enum BrowserInputEvent {
-    MousePressed {
-        x: f64,
-        y: f64,
-        button: String,
-        #[serde(rename = "clickCount")]
-        click_count: u32,
-    },
-    MouseReleased {
-        x: f64,
-        y: f64,
-        button: String,
-        #[serde(rename = "clickCount")]
-        click_count: u32,
-    },
-    MouseMoved {
-        x: f64,
-        y: f64,
-    },
-    MouseWheel {
-        x: f64,
-        y: f64,
-        #[serde(rename = "deltaX")]
-        delta_x: f64,
-        #[serde(rename = "deltaY")]
-        delta_y: f64,
-    },
-    KeyDown {
-        key: String,
-        code: String,
-    },
-    KeyUp {
-        key: String,
-        code: String,
-    },
-    InsertText {
-        text: String,
-    },
+pub struct GetActiveTabResponse {
+    pub tab_id: Option<String>,
 }
 
 pub fn validate_url(url: &str) -> Result<String, crate::error::AppError> {
@@ -135,32 +96,12 @@ mod tests {
     }
 
     #[test]
-    fn create_session_response_uses_snake_case() {
-        let response = CreateSessionResponse {
-            session_id: "abc".to_string(),
+    fn create_tab_response_uses_snake_case() {
+        let response = CreateTabResponse {
+            tab_id: "abc".to_string(),
         };
         let json = serde_json::to_value(&response).unwrap();
-        assert_eq!(json["session_id"], "abc");
-        assert!(json.get("sessionId").is_none());
-    }
-
-    #[test]
-    fn deserializes_frontend_mouse_event() {
-        let json = r#"{"type":"mousePressed","x":10.0,"y":20.0,"button":"left","clickCount":1}"#;
-        let event: BrowserInputEvent = serde_json::from_str(json).unwrap();
-        match event {
-            BrowserInputEvent::MousePressed { click_count, .. } => assert_eq!(click_count, 1),
-            _ => panic!("expected mousePressed"),
-        }
-    }
-
-    #[test]
-    fn deserializes_frontend_insert_text_event() {
-        let json = r#"{"type":"insertText","text":"hello"}"#;
-        let event: BrowserInputEvent = serde_json::from_str(json).unwrap();
-        match event {
-            BrowserInputEvent::InsertText { text } => assert_eq!(text, "hello"),
-            _ => panic!("expected insertText"),
-        }
+        assert_eq!(json["tab_id"], "abc");
+        assert!(json.get("tabId").is_none());
     }
 }

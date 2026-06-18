@@ -129,6 +129,13 @@ pub fn run() {
 
             app.manage(app_state);
 
+            // Cache parent webview platform state for child browser webviews (macOS/Linux).
+            if let Some(managed) = app.try_state::<state::AppState>() {
+                if let Err(e) = managed.browser_service.init_platform() {
+                    log::error!("Failed to initialize browser platform state: {e}");
+                }
+            }
+
             // Start skill filesystem watcher
             let managed = app.state::<state::AppState>();
             if let Ok(skills_dir) = managed.skill_service.skills_dir_path() {
@@ -155,19 +162,6 @@ pub fn run() {
                 if let Err(e) = features::sandbox::SandboxService::ensure_ready(&bootstrap_handle).await
                 {
                     tracing::error!("Sandbox bootstrap failed: {e}");
-                }
-            });
-
-            // Bootstrap Chromium runtime in background on first launch
-            let chrome_handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                let state = chrome_handle.state::<state::AppState>();
-                if let Err(e) = state.browser_service.ensure_runtime().await {
-                    tracing::error!("Chromium runtime bootstrap failed: {e}");
-                    features::browser::install::ChromeRuntimeInstaller::emit_install_error(
-                        &chrome_handle,
-                        &e.to_string(),
-                    );
                 }
             });
 
@@ -272,17 +266,21 @@ pub fn run() {
             features::artifacts::commands::get_artifacts,
             features::artifacts::commands::delete_artifact,
             // Browser commands
-            features::browser::commands::browser_get_runtime_status,
-            features::browser::commands::browser_ensure_runtime,
-            features::browser::commands::browser_create_session,
+            features::browser::commands::browser_create_tab,
+            features::browser::commands::browser_destroy_tab,
+            features::browser::commands::browser_list_tabs,
+            features::browser::commands::browser_get_active_tab,
+            features::browser::commands::browser_set_active_tab,
+            features::browser::commands::browser_create_fence_tab,
+            features::browser::commands::browser_release_fence_tab,
+            features::browser::commands::browser_release_fences_for_chat,
+            features::browser::commands::browser_sync_bounds,
+            features::browser::commands::browser_release_viewport,
             features::browser::commands::browser_navigate,
-            features::browser::commands::browser_destroy_session,
-            features::browser::commands::browser_send_input,
-            features::browser::commands::browser_resize,
-            features::browser::commands::browser_set_viewer_active,
             features::browser::commands::browser_get_navigation_state,
             features::browser::commands::browser_go_back,
             features::browser::commands::browser_go_forward,
+            features::browser::commands::browser_reload,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -14,9 +14,12 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
+tauri-plugin-updater = "2"
+tauri-plugin-log = "2"
+tauri-plugin-process = "2"
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["unstable"] }
 tauri-plugin-opener = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
@@ -53,11 +56,23 @@ tracing-log = "0.2"
 sentry-tracing = "0.34"
 tempfile = "3.24.0"
 base64 = "0.22.1"
-chromiumoxide = "0.9"
+url = "2"
 tauri-plugin-updater = "2.9.0"
 tauri-plugin-process = "2.3.1"
 tauri-plugin-log = "2.2.1"
 log = "0.4.29"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+block2 = "0.6"
+objc2 = { version = "0.6", features = ["exception"] }
+objc2-foundation = "0.3"
+objc2-web-kit = "0.3"
+
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.38"
+
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))'.dependencies]
+webkit2gtk = "2.0"
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }

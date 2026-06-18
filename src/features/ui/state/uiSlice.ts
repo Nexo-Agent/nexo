@@ -48,7 +48,6 @@ export interface UIState {
   isRightPanelOpen: boolean;
   rightPanelTab: 'notes' | 'skills' | 'info' | 'artifacts' | 'browser';
   browserPendingUrl: string | null;
-  browserNavigationSeq: number;
   experiments: {
     showUsage: boolean;
     enableWorkflowEditor: boolean;
@@ -201,7 +200,6 @@ const initialState: UIState = {
   isRightPanelOpen: false,
   rightPanelTab: 'notes',
   browserPendingUrl: null,
-  browserNavigationSeq: 0,
   experiments: {
     showUsage: false,
     enableWorkflowEditor: false,
@@ -307,12 +305,14 @@ const uiSlice = createSlice({
     },
     openBrowserInRightPanel: (
       state,
-      action: PayloadAction<{ url: string }>
+      action: PayloadAction<{ url: string | null }>
     ) => {
       state.browserPendingUrl = action.payload.url;
-      state.browserNavigationSeq += 1;
       state.rightPanelTab = 'browser';
       state.isRightPanelOpen = true;
+    },
+    clearBrowserPendingUrl: (state) => {
+      state.browserPendingUrl = null;
     },
     setShowUsage: (state, action: PayloadAction<boolean>) => {
       state.experiments.showUsage = action.payload;
@@ -398,6 +398,7 @@ export const {
   setRightPanelOpen,
   setRightPanelTab,
   openBrowserInRightPanel,
+  clearBrowserPendingUrl,
   setShowUsage,
   setEnableWorkflowEditor,
   setEnableRawText,

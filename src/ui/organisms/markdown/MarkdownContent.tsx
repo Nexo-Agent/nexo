@@ -15,6 +15,7 @@ import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { logger } from '@/lib/logger';
 import { shouldBypassStreamBuffer } from '@/features/chat/lib/html-preview';
 import { CustomCodeComponent } from './CustomCodeComponent';
+import { MarkdownMessageProvider } from './MarkdownMessageContext';
 import { MarkdownImage } from './MarkdownImage';
 import type { BundledTheme } from 'shiki';
 
@@ -165,20 +166,22 @@ export function MarkdownContent({
       )}
     >
       <div className={cn('markdown-content', className)}>
-        <Streamdown
-          mode="streaming"
-          isAnimating={isStreaming}
-          parseIncompleteMarkdown={true}
-          controls
-          components={components}
-          shikiTheme={shikiTheme}
-          className={cn(
-            isStreaming &&
-              '[&>*]:animate-in [&>*]:fade-in [&>*]:slide-in-from-bottom-1 [&>*]:duration-1000'
-          )}
-        >
-          {displayedContent}
-        </Streamdown>
+        <MarkdownMessageProvider messageId={messageId}>
+          <Streamdown
+            mode="streaming"
+            isAnimating={isStreaming}
+            parseIncompleteMarkdown={true}
+            controls
+            components={components}
+            shikiTheme={shikiTheme}
+            className={cn(
+              isStreaming &&
+                '[&>*]:animate-in [&>*]:fade-in [&>*]:slide-in-from-bottom-1 [&>*]:duration-1000'
+            )}
+          >
+            {displayedContent}
+          </Streamdown>
+        </MarkdownMessageProvider>
       </div>
     </MarkdownErrorBoundary>
   );

@@ -39,7 +39,6 @@ describe('uiSlice', () => {
     isRightPanelOpen: false,
     rightPanelTab: 'notes',
     browserPendingUrl: null,
-    browserNavigationSeq: 0,
     experiments: {
       showUsage: false,
       enableWorkflowEditor: false,

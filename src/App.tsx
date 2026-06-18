@@ -11,11 +11,11 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useMenuEvents } from '@/hooks/useMenuEvents';
 import { useChatStreaming } from '@/features/chat/hooks/useChatStreaming';
 import { useArtifactCreatedListener } from '@/features/artifacts/hooks/useArtifactCreatedListener';
-import { ChromiumDownloadModal } from '@/features/browser/ui/ChromiumDownloadModal';
 import { loadAppSettings } from '@/features/ui/state/uiSlice';
 import i18n from '@/i18n/config';
 import { useAutoUpdate } from '@/features/updater/hooks/useAutoUpdate';
 import { UpdateModal } from '@/features/updater/ui/UpdateModal';
+import { BrowserProvider } from '@/features/browser/state/BrowserProvider';
 import { FirstRunSetup } from '@/features/ui/setup/FirstRunSetup';
 
 function AppContent() {
@@ -128,7 +128,6 @@ function AppContent() {
         downloadProgress={downloadProgress}
       />
       <FirstRunSetup open={!loading && !setupCompleted} />
-      <ChromiumDownloadModal />
     </>
   );
 }
@@ -141,7 +140,9 @@ function App() {
       <DialogOriginProvider>
         <ModalStackProvider>
           <ErrorBoundary>
-            <AppContent />
+            <BrowserProvider>
+              <AppContent />
+            </BrowserProvider>
           </ErrorBoundary>
         </ModalStackProvider>
       </DialogOriginProvider>

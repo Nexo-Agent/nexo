@@ -14,6 +14,7 @@ import { cn } from '@/ui/atoms/streamdown/lib/utils';
 import { MermaidComponent } from '@/ui/atoms/streamdown/lib/mermaid-component';
 import { HTML_PREVIEW_FENCE_LANGUAGE } from '@/features/chat/lib/html-preview';
 import { BROWSER_FENCE_LANGUAGE } from '@/features/chat/lib/html-preview/constants';
+import { useMarkdownMessageId } from './MarkdownMessageContext';
 import { HtmlPreviewSkeleton } from '@/features/chat/ui/html-preview/HtmlPreviewSkeleton';
 import { BrowserStreamSkeleton } from '@/features/browser/ui/BrowserStreamSkeleton';
 import { RunCodeButton } from './RunCodeButton';
@@ -115,6 +116,7 @@ export const CustomCodeComponent = ({
   const [output, setOutput] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isRunning, setIsRunning] = useState(false);
+  const messageId = useMarkdownMessageId();
 
   const handleOutput = useCallback((out: string, err: string) => {
     setOutput(out);
@@ -171,7 +173,11 @@ export const CustomCodeComponent = ({
   if (language === BROWSER_FENCE_LANGUAGE) {
     return (
       <Suspense fallback={<BrowserStreamSkeleton className={className} />}>
-        <BrowserFenceComponent code={code} className={className} />
+        <BrowserFenceComponent
+          code={code}
+          messageId={messageId ?? code}
+          className={className}
+        />
       </Suspense>
     );
   }

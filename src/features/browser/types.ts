@@ -1,19 +1,12 @@
-/** Rust event/command payloads use snake_case; invoke args use camelCase via browserApi. */
-export interface BrowserFrameEvent {
-  session_id: string;
-  data: string;
-  timestamp: number;
-  viewport_width: number;
-  viewport_height: number;
-}
+export type BrowserTabKind = 'panel' | 'fence';
 
-export interface BrowserSessionStartedEvent {
-  session_id: string;
+export interface BrowserTabSummary {
+  tab_id: string;
+  kind: BrowserTabKind;
+  url: string;
+  title: string;
+  anchor_id?: string | null;
   chat_id?: string | null;
-}
-
-export interface BrowserSessionStoppedEvent {
-  session_id: string;
 }
 
 export interface BrowserNavigationState {
@@ -24,62 +17,41 @@ export interface BrowserNavigationState {
 }
 
 export interface BrowserNavigatedEvent {
-  session_id: string;
+  tab_id: string;
   url: string;
 }
 
-export interface BrowserErrorEvent {
-  session_id: string;
-  error: string;
+export interface BrowserTabCreatedEvent {
+  tab_id: string;
+  kind: BrowserTabKind;
+  url?: string | null;
+  anchor_id?: string | null;
+  chat_id?: string | null;
 }
 
-export interface BrowserRuntimeDownloadProgressEvent {
-  percent?: number | null;
-  bytes_downloaded: number;
-  total_bytes?: number | null;
+export interface BrowserTabDestroyedEvent {
+  tab_id: string;
 }
 
-export interface BrowserRuntimeReadyEvent {
-  version: string;
+export interface BrowserActiveTabChangedEvent {
+  tab_id: string;
 }
 
-export interface BrowserRuntimeErrorEvent {
-  error: string;
+export interface BrowserTitleChangedEvent {
+  tab_id: string;
+  title: string;
 }
 
-export type BrowserInputEvent =
-  | {
-      type: 'mousePressed';
-      x: number;
-      y: number;
-      button: string;
-      clickCount: number;
-    }
-  | {
-      type: 'mouseReleased';
-      x: number;
-      y: number;
-      button: string;
-      clickCount: number;
-    }
-  | { type: 'mouseMoved'; x: number; y: number }
-  | {
-      type: 'mouseWheel';
-      x: number;
-      y: number;
-      deltaX: number;
-      deltaY: number;
-    }
-  | { type: 'keyDown'; key: string; code: string }
-  | { type: 'keyUp'; key: string; code: string }
-  | { type: 'insertText'; text: string };
-
-export interface BrowserRuntimeStatus {
-  installed: boolean;
-  version?: string | null;
-  downloading: boolean;
+export interface CreateTabResponse {
+  tab_id: string;
 }
 
-export interface CreateSessionResponse {
-  session_id: string;
+export interface ListTabsResponse {
+  tabs: BrowserTabSummary[];
 }
+
+export interface GetActiveTabResponse {
+  tab_id: string | null;
+}
+
+export type BrowserViewport = 'main_panel' | 'fence';

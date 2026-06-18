@@ -24,8 +24,7 @@ impl Tool for BrowserNavigateTool {
         ToolSpec::new(
             "browser_navigate",
             Some(
-                "Open a URL in the embedded Chromium browser for this chat. \
-                Reuses the chat browser session when possible. \
+                "Open a URL in the app browser. Reuses the active tab when possible. \
                 Example: { \"url\": \"https://example.com\" }"
                     .to_string(),
             ),
@@ -45,31 +44,22 @@ impl Tool for BrowserNavigateTool {
     async fn execute(
         &self,
         arguments: Value,
-        ctx: &ToolExecutionContext,
+        _ctx: &ToolExecutionContext,
     ) -> Result<ToolResult, AppError> {
         let url = arguments["url"]
             .as_str()
             .ok_or_else(|| AppError::Validation("Missing 'url' parameter".to_string()))?;
 
-        let session_id = if let Some(existing) = self
+        let tab_id = self.browser_service.navigate_or_create_tab(url).await?;
+        let title = self
             .browser_service
-            .session_for_chat(&ctx.chat_id)
-            .await
-        {
-            self.browser_service.navigate(&existing, url).await?;
-            existing
-        } else {
-            self.browser_service
-                .create_session(Some(ctx.chat_id.clone()), Some(url.to_string()), None, None)
-                .await?
-        };
-
-        let title = self.browser_service.get_page_title(&session_id).await?;
+            .get_page_title(Some(&tab_id))
+            .await?;
 
         Ok(ToolResult::ok(
             "browser_navigate",
             serde_json::to_string(&json!({
-                "session_id": session_id,
+                "tab_id": tab_id,
                 "url": url,
                 "title": title,
             }))?,
@@ -93,7 +83,7 @@ impl Tool for BrowserClickTool {
         ToolSpec::new(
             "browser_click",
             Some(
-                "Click an element in the chat browser session using a CSS selector. \
+                "Click an element in the active browser tab using a CSS selector. \
                 Example: { \"selector\": \"button.submit\" }"
                     .to_string(),
             ),
@@ -113,24 +103,14 @@ impl Tool for BrowserClickTool {
     async fn execute(
         &self,
         arguments: Value,
-        ctx: &ToolExecutionContext,
+        _ctx: &ToolExecutionContext,
     ) -> Result<ToolResult, AppError> {
         let selector = arguments["selector"]
             .as_str()
             .ok_or_else(|| AppError::Validation("Missing 'selector' parameter".to_string()))?;
 
-        let session_id = self
-            .browser_service
-            .session_for_chat(&ctx.chat_id)
-            .await
-            .ok_or_else(|| {
-                AppError::Validation(
-                    "No browser session for this chat. Call browser_navigate first.".to_string(),
-                )
-            })?;
-
         self.browser_service
-            .click_selector(&session_id, selector)
+            .click_selector(None, selector)
             .await?;
 
         Ok(ToolResult::ok(
@@ -156,7 +136,7 @@ impl Tool for BrowserTypeTool {
         ToolSpec::new(
             "browser_type",
             Some(
-                "Type text into the focused element in the chat browser session. \
+                "Type text into the focused element in the active browser tab. \
                 Example: { \"text\": \"hello\" }"
                     .to_string(),
             ),
@@ -176,30 +156,13 @@ impl Tool for BrowserTypeTool {
     async fn execute(
         &self,
         arguments: Value,
-        ctx: &ToolExecutionContext,
+        _ctx: &ToolExecutionContext,
     ) -> Result<ToolResult, AppError> {
         let text = arguments["text"]
             .as_str()
             .ok_or_else(|| AppError::Validation("Missing 'text' parameter".to_string()))?;
 
-        let session_id = self
-            .browser_service
-            .session_for_chat(&ctx.chat_id)
-            .await
-            .ok_or_else(|| {
-                AppError::Validation(
-                    "No browser session for this chat. Call browser_navigate first.".to_string(),
-                )
-            })?;
-
-        self.browser_service
-            .send_input(
-                &session_id,
-                crate::features::browser::models::BrowserInputEvent::InsertText {
-                    text: text.to_string(),
-                },
-            )
-            .await?;
+        self.browser_service.type_text(None, text).await?;
 
         Ok(ToolResult::ok(
             "browser_type",
@@ -224,7 +187,7 @@ impl Tool for BrowserScreenshotTool {
         ToolSpec::new(
             "browser_screenshot",
             Some(
-                "Capture a JPEG screenshot of the current chat browser session (base64). \
+                "Capture a JPEG screenshot of the active browser tab (base64). \
                 Example: {}"
                     .to_string(),
             ),
@@ -238,19 +201,9 @@ impl Tool for BrowserScreenshotTool {
     async fn execute(
         &self,
         _arguments: Value,
-        ctx: &ToolExecutionContext,
+        _ctx: &ToolExecutionContext,
     ) -> Result<ToolResult, AppError> {
-        let session_id = self
-            .browser_service
-            .session_for_chat(&ctx.chat_id)
-            .await
-            .ok_or_else(|| {
-                AppError::Validation(
-                    "No browser session for this chat. Call browser_navigate first.".to_string(),
-                )
-            })?;
-
-        let data = self.browser_service.capture_screenshot(&session_id).await?;
+        let data = self.browser_service.capture_screenshot(None).await?;
 
         Ok(ToolResult::ok(
             "browser_screenshot",
@@ -278,7 +231,7 @@ impl Tool for BrowserGetContentTool {
         ToolSpec::new(
             "browser_get_content",
             Some(
-                "Extract visible text from the current chat browser page. \
+                "Extract visible text from the active browser tab. \
                 Example: { \"max_chars\": 8000 }"
                     .to_string(),
             ),
@@ -300,23 +253,13 @@ impl Tool for BrowserGetContentTool {
     async fn execute(
         &self,
         arguments: Value,
-        ctx: &ToolExecutionContext,
+        _ctx: &ToolExecutionContext,
     ) -> Result<ToolResult, AppError> {
         let max_chars = arguments["max_chars"].as_u64().unwrap_or(8000) as usize;
 
-        let session_id = self
-            .browser_service
-            .session_for_chat(&ctx.chat_id)
-            .await
-            .ok_or_else(|| {
-                AppError::Validation(
-                    "No browser session for this chat. Call browser_navigate first.".to_string(),
-                )
-            })?;
-
         let text = self
             .browser_service
-            .get_page_text(&session_id, max_chars)
+            .get_page_text(None, max_chars)
             .await?;
 
         Ok(ToolResult::ok(

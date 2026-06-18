@@ -1,12 +1,18 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import {
+  createBrowserTab,
+  listBrowserTabs,
+  syncBrowserBounds,
+} from './browserApi';
 import { TauriCommands } from '@/lib/tauri';
-import { createBrowserSession, setBrowserViewerActive } from './browserApi';
+import { invokeCommand } from '@/lib/tauri';
 
 vi.mock('@/lib/tauri', () => ({
   invokeCommand: vi.fn(),
   TauriCommands: {
-    BROWSER_CREATE_SESSION: 'browser_create_session',
-    BROWSER_SET_VIEWER_ACTIVE: 'browser_set_viewer_active',
+    BROWSER_CREATE_TAB: 'browser_create_tab',
+    BROWSER_SYNC_BOUNDS: 'browser_sync_bounds',
+    BROWSER_LIST_TABS: 'browser_list_tabs',
   },
 }));
 
@@ -15,28 +21,50 @@ describe('browserApi', () => {
     vi.clearAllMocks();
   });
 
-  it('reads session_id from create session response', async () => {
-    const { invokeCommand } = await import('@/lib/tauri');
-    vi.mocked(invokeCommand).mockResolvedValueOnce({ session_id: 'sess-1' });
+  it('reads tab_id from create tab response', async () => {
+    vi.mocked(invokeCommand).mockResolvedValueOnce({ tab_id: 'tab-1' });
 
-    const result = await createBrowserSession({ url: 'https://example.com' });
+    const result = await createBrowserTab({ url: 'https://example.com' });
 
-    expect(result.session_id).toBe('sess-1');
+    expect(result.tab_id).toBe('tab-1');
     expect(invokeCommand).toHaveBeenCalledWith(
-      TauriCommands.BROWSER_CREATE_SESSION,
-      expect.objectContaining({ url: 'https://example.com' })
+      TauriCommands.BROWSER_CREATE_TAB,
+      { url: 'https://example.com' }
     );
   });
 
-  it('passes camelCase args to set viewer active', async () => {
-    const { invokeCommand } = await import('@/lib/tauri');
+  it('syncs bounds with viewport and tab id', async () => {
     vi.mocked(invokeCommand).mockResolvedValueOnce(undefined);
 
-    await setBrowserViewerActive('sess-1', true);
+    await syncBrowserBounds('tab-1', 'main_panel', {
+      x: 1,
+      y: 2,
+      width: 100,
+      height: 200,
+      visible: true,
+    });
 
     expect(invokeCommand).toHaveBeenCalledWith(
-      TauriCommands.BROWSER_SET_VIEWER_ACTIVE,
-      { sessionId: 'sess-1', active: true }
+      TauriCommands.BROWSER_SYNC_BOUNDS,
+      expect.objectContaining({
+        tabId: 'tab-1',
+        viewport: 'main_panel',
+        x: 1,
+        y: 2,
+        width: 100,
+        height: 200,
+        visible: true,
+      })
     );
+  });
+
+  it('lists panel tabs', async () => {
+    vi.mocked(invokeCommand).mockResolvedValueOnce({
+      tabs: [{ tab_id: 'tab-1', kind: 'panel', url: '', title: '' }],
+    });
+
+    const tabs = await listBrowserTabs();
+    expect(tabs).toHaveLength(1);
+    expect(tabs[0]?.tab_id).toBe('tab-1');
   });
 });

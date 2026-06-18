@@ -94,15 +94,19 @@ impl TauriCommands {
     pub const DELETE_ARTIFACT: &'static str = "delete_artifact";
 
     // Browser commands
-    pub const BROWSER_GET_RUNTIME_STATUS: &'static str = "browser_get_runtime_status";
-    pub const BROWSER_ENSURE_RUNTIME: &'static str = "browser_ensure_runtime";
-    pub const BROWSER_CREATE_SESSION: &'static str = "browser_create_session";
+    pub const BROWSER_CREATE_TAB: &'static str = "browser_create_tab";
+    pub const BROWSER_DESTROY_TAB: &'static str = "browser_destroy_tab";
+    pub const BROWSER_LIST_TABS: &'static str = "browser_list_tabs";
+    pub const BROWSER_GET_ACTIVE_TAB: &'static str = "browser_get_active_tab";
+    pub const BROWSER_SET_ACTIVE_TAB: &'static str = "browser_set_active_tab";
+    pub const BROWSER_CREATE_FENCE_TAB: &'static str = "browser_create_fence_tab";
+    pub const BROWSER_RELEASE_FENCE_TAB: &'static str = "browser_release_fence_tab";
+    pub const BROWSER_RELEASE_FENCES_FOR_CHAT: &'static str = "browser_release_fences_for_chat";
+    pub const BROWSER_SYNC_BOUNDS: &'static str = "browser_sync_bounds";
+    pub const BROWSER_RELEASE_VIEWPORT: &'static str = "browser_release_viewport";
     pub const BROWSER_NAVIGATE: &'static str = "browser_navigate";
-    pub const BROWSER_DESTROY_SESSION: &'static str = "browser_destroy_session";
-    pub const BROWSER_SEND_INPUT: &'static str = "browser_send_input";
-    pub const BROWSER_RESIZE: &'static str = "browser_resize";
-    pub const BROWSER_SET_VIEWER_ACTIVE: &'static str = "browser_set_viewer_active";
     pub const BROWSER_GET_NAVIGATION_STATE: &'static str = "browser_get_navigation_state";
     pub const BROWSER_GO_BACK: &'static str = "browser_go_back";
     pub const BROWSER_GO_FORWARD: &'static str = "browser_go_forward";
+    pub const BROWSER_RELOAD: &'static str = "browser_reload";
 }

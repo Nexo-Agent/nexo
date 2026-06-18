@@ -1,35 +1,35 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, Plus, RotateCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/ui/atoms/button/button';
 import { Input } from '@/ui/atoms/input';
 import { useBrowserNavigation } from '../hooks/useBrowserNavigation';
-import { useBrowserSession } from '../hooks/useBrowserSession';
+import { useBrowserTabs } from '../hooks/useBrowserTabs';
 import { BrowserStreamSkeleton } from './BrowserStreamSkeleton';
 
-const BrowserStreamView = lazy(() =>
-  import('./BrowserStreamView').then((mod) => ({
-    default: mod.BrowserStreamView,
+const BrowserWebviewHost = lazy(() =>
+  import('./BrowserWebviewHost').then((mod) => ({
+    default: mod.BrowserWebviewHost,
   }))
 );
 
-interface BrowserTab {
-  id: string;
-  url: string;
-  title: string;
-}
-
 export interface BrowserViewProps {
-  chatId?: string;
   initialUrl?: string;
-  autoStart?: boolean;
   /** Show tab bar and navigation toolbar. Set false for fence/embed. */
   showChrome?: boolean;
   className?: string;
   streamClassName?: string;
-  width?: number;
-  height?: number;
+  /** Fence embed: tab id from useBrowserFence */
+  fenceTabId?: string | null;
+  fenceAnchorId?: string;
 }
 
 const DEFAULT_URL = 'https://example.com';
@@ -43,95 +43,57 @@ function tabTitleFromUrl(url: string, fallback: string): string {
   }
 }
 
-function createTab(url: string, fallbackTitle: string): BrowserTab {
-  const id = crypto.randomUUID();
-  return {
-    id,
-    url,
-    title: tabTitleFromUrl(url, fallbackTitle),
-  };
-}
-
 export function BrowserView({
-  chatId,
   initialUrl = DEFAULT_URL,
-  autoStart = false,
   showChrome = true,
   className,
   streamClassName,
-  width,
-  height,
+  fenceTabId = null,
+  fenceAnchorId,
 }: BrowserViewProps) {
   const { t } = useTranslation('browser');
-  const [tabs, setTabs] = useState<BrowserTab[]>(() => [
-    createTab(initialUrl, 'Tab'),
-  ]);
-  const [activeTabId, setActiveTabId] = useState(() => tabs[0]?.id ?? '');
+  const {
+    panelTabs,
+    activeTabId,
+    loading: tabsLoading,
+    createTab,
+    destroyTab,
+    setActiveTab,
+  } = useBrowserTabs();
+
+  const displayTabId = showChrome ? activeTabId : fenceTabId;
   const [addressUrl, setAddressUrl] = useState(initialUrl);
+
+  const activeTab = panelTabs.find((tab) => tab.tab_id === activeTabId);
+
+  useEffect(() => {
+    if (!showChrome || tabsLoading || panelTabs.length > 0) return;
+    createTab(initialUrl).catch(() => undefined);
+  }, [showChrome, tabsLoading, panelTabs.length, createTab, initialUrl]);
 
   const syncChromeFromNav = useCallback(
     (state: { url: string; title: string }) => {
-      if (!state.url) return;
+      if (!state.url || !showChrome) return;
       setAddressUrl(state.url);
-      setTabs((prev) =>
-        prev.map((tab) =>
-          tab.id === activeTabId
-            ? {
-                ...tab,
-                url: state.url,
-                title: state.title || tabTitleFromUrl(state.url, t('newTab')),
-              }
-            : tab
-        )
-      );
     },
-    [activeTabId, t]
+    [showChrome]
   );
 
-  const {
-    sessionId,
-    loading: sessionLoading,
-    error,
-    createSession,
-    navigate: navigateSession,
-  } = useBrowserSession({
-    chatId,
-    url: initialUrl,
-    width,
-    height,
-    autoStart,
-  });
-
   const { navState, navigating, navigate, goBack, goForward, reload } =
-    useBrowserNavigation(sessionId, syncChromeFromNav);
+    useBrowserNavigation(displayTabId, syncChromeFromNav);
 
-  const displayUrl = showChrome ? addressUrl : navState.url || initialUrl;
-
-  const ensureSession = useCallback(async () => {
-    if (sessionId) return sessionId;
-    return createSession();
-  }, [sessionId, createSession]);
+  const displayUrl = showChrome
+    ? addressUrl || activeTab?.url || initialUrl
+    : navState.url || initialUrl;
 
   const handleNavigate = useCallback(
     async (url: string) => {
       const trimmed = url.trim();
-      if (!trimmed) return;
-      await ensureSession();
+      if (!trimmed || !displayTabId) return;
       await navigate(trimmed);
       setAddressUrl(trimmed);
-      setTabs((prev) =>
-        prev.map((tab) =>
-          tab.id === activeTabId
-            ? {
-                ...tab,
-                url: trimmed,
-                title: tabTitleFromUrl(trimmed, t('newTab')),
-              }
-            : tab
-        )
-      );
     },
-    [ensureSession, navigate, activeTabId, t]
+    [displayTabId, navigate]
   );
 
   const handleAddressSubmit = (e: React.FormEvent) => {
@@ -141,46 +103,28 @@ export function BrowserView({
 
   const handleSelectTab = useCallback(
     async (tabId: string) => {
-      const tab = tabs.find((item) => item.id === tabId);
+      const tab = panelTabs.find((item) => item.tab_id === tabId);
       if (!tab) return;
-      setActiveTabId(tabId);
+      await setActiveTab(tabId);
       setAddressUrl(tab.url);
-      await ensureSession();
-      await navigateSession(tab.url);
     },
-    [tabs, ensureSession, navigateSession]
+    [panelTabs, setActiveTab]
   );
 
   const handleCloseTab = useCallback(
     (tabId: string) => {
-      if (tabs.length <= 1) return;
-      setTabs((prev) => {
-        const next = prev.filter((tab) => tab.id !== tabId);
-        if (tabId === activeTabId && next[0]) {
-          setActiveTabId(next[0].id);
-          setAddressUrl(next[0].url);
-          ensureSession()
-            .then(() => navigateSession(next[0].url))
-            .catch(() => undefined);
-        }
-        return next;
-      });
+      if (panelTabs.length <= 1) return;
+      destroyTab(tabId).catch(() => undefined);
     },
-    [tabs.length, activeTabId, ensureSession, navigateSession]
+    [panelTabs.length, destroyTab]
   );
 
   const handleNewTab = useCallback(() => {
-    const tab = createTab(DEFAULT_URL, t('newTab'));
-    setTabs((prev) => [...prev, tab]);
-    setActiveTabId(tab.id);
-    setAddressUrl(tab.url);
-    ensureSession()
-      .then(() => navigate(tab.url))
-      .catch(() => undefined);
-  }, [ensureSession, navigate, t]);
+    createTab(DEFAULT_URL).catch(() => undefined);
+  }, [createTab]);
 
   const stream = useMemo(() => {
-    if (!sessionId) {
+    if (!displayTabId) {
       return (
         <BrowserStreamSkeleton className={cn('min-h-64', streamClassName)} />
       );
@@ -191,13 +135,15 @@ export function BrowserView({
           <BrowserStreamSkeleton className={cn('min-h-64', streamClassName)} />
         }
       >
-        <BrowserStreamView
-          sessionId={sessionId}
+        <BrowserWebviewHost
+          tabId={displayTabId}
+          viewport={showChrome ? 'main_panel' : 'fence'}
+          anchorId={fenceAnchorId}
           className={cn('min-h-64 rounded-none border-0', streamClassName)}
         />
       </Suspense>
     );
-  }, [sessionId, streamClassName]);
+  }, [displayTabId, showChrome, fenceAnchorId, streamClassName]);
 
   if (!showChrome) {
     return (
@@ -207,15 +153,12 @@ export function BrowserView({
           className
         )}
       >
-        {error && (
-          <p className="border-b px-3 py-2 text-sm text-destructive">{error}</p>
-        )}
         {stream}
       </div>
     );
   }
 
-  const busy = sessionLoading || navigating;
+  const busy = tabsLoading || navigating;
 
   return (
     <div
@@ -225,11 +168,11 @@ export function BrowserView({
       )}
     >
       <div className="flex items-center gap-1 overflow-x-auto border-b bg-muted/40 px-2 py-1.5">
-        {tabs.map((tab) => {
-          const active = tab.id === activeTabId;
+        {panelTabs.map((tab) => {
+          const active = tab.tab_id === activeTabId;
           return (
             <div
-              key={tab.id}
+              key={tab.tab_id}
               className={cn(
                 'group flex max-w-[180px] shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs',
                 active
@@ -240,16 +183,18 @@ export function BrowserView({
               <button
                 type="button"
                 className="min-w-0 flex-1 truncate text-left"
-                onClick={() => handleSelectTab(tab.id).catch(() => undefined)}
+                onClick={() =>
+                  handleSelectTab(tab.tab_id).catch(() => undefined)
+                }
                 title={tab.url}
               >
                 {tab.title || tabTitleFromUrl(tab.url, t('newTab'))}
               </button>
-              {tabs.length > 1 && (
+              {panelTabs.length > 1 && (
                 <button
                   type="button"
                   className="rounded p-0.5 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
-                  onClick={() => handleCloseTab(tab.id)}
+                  onClick={() => handleCloseTab(tab.tab_id)}
                   aria-label={t('closeTab')}
                 >
                   <X className="size-3" />
@@ -308,17 +253,13 @@ export function BrowserView({
           variant="ghost"
           size="icon"
           className="size-8 shrink-0"
-          disabled={!sessionId || busy}
+          disabled={!displayTabId || busy}
           onClick={() => reload().catch(() => undefined)}
           aria-label={t('reload')}
         >
           <RotateCw className={cn('size-4', busy && 'animate-spin')} />
         </Button>
       </form>
-
-      {error && (
-        <p className="border-b px-3 py-2 text-sm text-destructive">{error}</p>
-      )}
 
       <div className="min-h-0 flex-1 bg-black">{stream}</div>
     </div>

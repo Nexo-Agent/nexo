@@ -4,7 +4,8 @@ import {
   getBrowserNavigationState,
   goBrowserBack,
   goBrowserForward,
-  navigateBrowserSession,
+  navigateBrowserTab,
+  reloadBrowserTab,
 } from '../state/browserApi';
 import type { BrowserNavigationState } from '../types';
 
@@ -16,7 +17,7 @@ const EMPTY_STATE: BrowserNavigationState = {
 };
 
 export function useBrowserNavigation(
-  sessionId: string | null,
+  tabId: string | null,
   onNavStateChange?: (state: BrowserNavigationState) => void
 ) {
   const [navState, setNavState] = useState<BrowserNavigationState>(EMPTY_STATE);
@@ -31,17 +32,17 @@ export function useBrowserNavigation(
   );
 
   const refresh = useCallback(async () => {
-    if (!sessionId) return;
+    if (!tabId) return;
     try {
-      const state = await getBrowserNavigationState(sessionId);
+      const state = await getBrowserNavigationState(tabId);
       applyNavState(state);
     } catch {
-      // Session may not be ready yet.
+      // Tab may not be ready yet.
     }
-  }, [sessionId, applyNavState]);
+  }, [tabId, applyNavState]);
 
   useEffect(() => {
-    if (!sessionId) {
+    if (!tabId) {
       applyNavState(EMPTY_STATE);
       return;
     }
@@ -49,10 +50,10 @@ export function useBrowserNavigation(
     refresh().catch(() => undefined);
 
     let unlisten: (() => void) | undefined;
-    listenToEvent<{ session_id: string; url: string }>(
+    listenToEvent<{ tab_id: string; url: string }>(
       TauriEvents.BROWSER_NAVIGATED,
       (payload) => {
-        if (payload.session_id !== sessionId) return;
+        if (payload.tab_id !== tabId) return;
         refresh().catch(() => undefined);
       }
     ).then((fn) => {
@@ -62,48 +63,54 @@ export function useBrowserNavigation(
     return () => {
       unlisten?.();
     };
-  }, [sessionId, refresh, applyNavState]);
+  }, [tabId, refresh, applyNavState]);
 
   const navigate = useCallback(
     async (url: string) => {
-      if (!sessionId) return;
+      if (!tabId) return;
       setNavigating(true);
       try {
-        await navigateBrowserSession(sessionId, url);
+        await navigateBrowserTab(url, tabId);
         await refresh();
       } finally {
         setNavigating(false);
       }
     },
-    [sessionId, refresh]
+    [tabId, refresh]
   );
 
   const goBack = useCallback(async () => {
-    if (!sessionId || !navState.can_go_back) return;
+    if (!tabId || !navState.can_go_back) return;
     setNavigating(true);
     try {
-      const state = await goBrowserBack(sessionId);
+      const state = await goBrowserBack(tabId);
       applyNavState(state);
     } finally {
       setNavigating(false);
     }
-  }, [sessionId, navState.can_go_back, applyNavState]);
+  }, [tabId, navState.can_go_back, applyNavState]);
 
   const goForward = useCallback(async () => {
-    if (!sessionId || !navState.can_go_forward) return;
+    if (!tabId || !navState.can_go_forward) return;
     setNavigating(true);
     try {
-      const state = await goBrowserForward(sessionId);
+      const state = await goBrowserForward(tabId);
       applyNavState(state);
     } finally {
       setNavigating(false);
     }
-  }, [sessionId, navState.can_go_forward, applyNavState]);
+  }, [tabId, navState.can_go_forward, applyNavState]);
 
   const reload = useCallback(async () => {
-    if (!sessionId || !navState.url) return;
-    await navigate(navState.url);
-  }, [sessionId, navState.url, navigate]);
+    if (!tabId) return;
+    setNavigating(true);
+    try {
+      await reloadBrowserTab(tabId);
+      await refresh();
+    } finally {
+      setNavigating(false);
+    }
+  }, [tabId, refresh]);
 
   return {
     navState,
