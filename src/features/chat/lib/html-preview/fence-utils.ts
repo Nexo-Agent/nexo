@@ -1,7 +1,13 @@
-import { HTML_PREVIEW_FENCE_LANGUAGE } from './constants';
+import {
+  BROWSER_FENCE_LANGUAGE,
+  HTML_PREVIEW_FENCE_LANGUAGE,
+} from './constants';
 
 /** Languages that bypass stream smoothing while their fence is open. */
-export const STREAM_BYPASS_LANGUAGES = [HTML_PREVIEW_FENCE_LANGUAGE] as const;
+export const STREAM_BYPASS_LANGUAGES = [
+  HTML_PREVIEW_FENCE_LANGUAGE,
+  BROWSER_FENCE_LANGUAGE,
+] as const;
 
 const FENCE_OPEN_REGEX = /^```(\w+)?\s*$/;
 const FENCE_CLOSE_REGEX = /^```\s*$/;

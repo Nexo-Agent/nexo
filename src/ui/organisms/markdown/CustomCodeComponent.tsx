@@ -13,10 +13,18 @@ import type { ExtraProps } from '@/ui/atoms/streamdown/lib/markdown';
 import { cn } from '@/ui/atoms/streamdown/lib/utils';
 import { MermaidComponent } from '@/ui/atoms/streamdown/lib/mermaid-component';
 import { HTML_PREVIEW_FENCE_LANGUAGE } from '@/features/chat/lib/html-preview';
+import { BROWSER_FENCE_LANGUAGE } from '@/features/chat/lib/html-preview/constants';
 import { HtmlPreviewSkeleton } from '@/features/chat/ui/html-preview/HtmlPreviewSkeleton';
+import { BrowserStreamSkeleton } from '@/features/browser/ui/BrowserStreamSkeleton';
 import { RunCodeButton } from './RunCodeButton';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+const BrowserFenceComponent = lazy(() =>
+  import('@/features/browser/ui/BrowserFenceComponent').then((mod) => ({
+    default: mod.BrowserFenceComponent,
+  }))
+);
 
 const HtmlPreviewComponent = lazy(() =>
   import('@/features/chat/ui/html-preview/HtmlPreviewComponent').then(
@@ -158,6 +166,14 @@ export const CustomCodeComponent = ({
   // For mermaid, use original component
   if (language === 'mermaid') {
     return <MermaidComponent code={code} className={className} />;
+  }
+
+  if (language === BROWSER_FENCE_LANGUAGE) {
+    return (
+      <Suspense fallback={<BrowserStreamSkeleton className={className} />}>
+        <BrowserFenceComponent code={code} className={className} />
+      </Suspense>
+    );
   }
 
   if (language === HTML_PREVIEW_FENCE_LANGUAGE) {

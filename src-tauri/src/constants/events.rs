@@ -54,4 +54,14 @@ impl TauriEvents {
 
     // Artifact events
     pub const ARTIFACT_CREATED: &'static str = "artifact-created";
+
+    // Browser events
+    pub const BROWSER_FRAME: &'static str = "browser-frame";
+    pub const BROWSER_SESSION_STARTED: &'static str = "browser-session-started";
+    pub const BROWSER_SESSION_STOPPED: &'static str = "browser-session-stopped";
+    pub const BROWSER_NAVIGATED: &'static str = "browser-navigated";
+    pub const BROWSER_ERROR: &'static str = "browser-error";
+    pub const BROWSER_RUNTIME_DOWNLOAD_PROGRESS: &'static str = "browser-runtime-download-progress";
+    pub const BROWSER_RUNTIME_READY: &'static str = "browser-runtime-ready";
+    pub const BROWSER_RUNTIME_ERROR: &'static str = "browser-runtime-error";
 }

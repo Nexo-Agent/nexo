@@ -86,7 +86,7 @@ impl Default for SandboxManifest {
             },
             nodejs: RuntimeSpec {
                 version: "22.21.1".to_string(),
-                packages: vec!["agent-browser".to_string()],
+                packages: vec![],
             },
         }
     }

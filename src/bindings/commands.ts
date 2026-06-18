@@ -100,6 +100,19 @@ export const TauriCommands = {
   // Artifact commands
   GET_ARTIFACTS: 'get_artifacts',
   DELETE_ARTIFACT: 'delete_artifact',
+
+  // Browser commands
+  BROWSER_GET_RUNTIME_STATUS: 'browser_get_runtime_status',
+  BROWSER_ENSURE_RUNTIME: 'browser_ensure_runtime',
+  BROWSER_CREATE_SESSION: 'browser_create_session',
+  BROWSER_NAVIGATE: 'browser_navigate',
+  BROWSER_DESTROY_SESSION: 'browser_destroy_session',
+  BROWSER_SEND_INPUT: 'browser_send_input',
+  BROWSER_RESIZE: 'browser_resize',
+  BROWSER_SET_VIEWER_ACTIVE: 'browser_set_viewer_active',
+  BROWSER_GET_NAVIGATION_STATE: 'browser_get_navigation_state',
+  BROWSER_GO_BACK: 'browser_go_back',
+  BROWSER_GO_FORWARD: 'browser_go_forward',
 } as const;
 
 export type TauriCommand = (typeof TauriCommands)[keyof typeof TauriCommands];

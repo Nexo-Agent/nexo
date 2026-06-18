@@ -52,6 +52,16 @@ export const TauriEvents = {
 
   // Artifact events
   ARTIFACT_CREATED: 'artifact-created',
+
+  // Browser events
+  BROWSER_FRAME: 'browser-frame',
+  BROWSER_SESSION_STARTED: 'browser-session-started',
+  BROWSER_SESSION_STOPPED: 'browser-session-stopped',
+  BROWSER_NAVIGATED: 'browser-navigated',
+  BROWSER_ERROR: 'browser-error',
+  BROWSER_RUNTIME_DOWNLOAD_PROGRESS: 'browser-runtime-download-progress',
+  BROWSER_RUNTIME_READY: 'browser-runtime-ready',
+  BROWSER_RUNTIME_ERROR: 'browser-runtime-error',
 } as const;
 
 export type TauriEvent = (typeof TauriEvents)[keyof typeof TauriEvents];

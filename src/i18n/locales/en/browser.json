@@ -1,0 +1,21 @@
+{
+  "loading": "Loading browser...",
+  "error": "Browser error",
+  "sessionEnded": "Browser session ended",
+  "streamAlt": "Browser stream",
+  "downloadTitle": "Downloading Chromium",
+  "downloadDescription": "Nexo is downloading the browser runtime (~150MB). This only happens once.",
+  "demoTitle": "Browser (dev)",
+  "open": "Open",
+  "tabLabel": "Browser",
+  "panelDescription": "Embedded Chromium browser",
+  "noChatTitle": "No chat selected",
+  "noChatDescription": "Select a chat to use the browser",
+  "fenceInvalidUrl": "Invalid URL in browser fence",
+  "back": "Back",
+  "forward": "Forward",
+  "reload": "Reload",
+  "newTab": "New tab",
+  "closeTab": "Close tab",
+  "addressPlaceholder": "Enter URL"
+}

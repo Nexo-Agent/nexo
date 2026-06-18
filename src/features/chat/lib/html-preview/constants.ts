@@ -18,3 +18,6 @@ export const HTML_PREVIEW_CDN_WHITELIST = [
 
 /** Markdown fence language for interactive HTML previews. */
 export const HTML_PREVIEW_FENCE_LANGUAGE = 'html';
+
+/** Markdown fence language for live browser stream (URL on first line). */
+export const BROWSER_FENCE_LANGUAGE = 'browser';

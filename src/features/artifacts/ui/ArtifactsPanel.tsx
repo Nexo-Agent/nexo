@@ -1,16 +1,23 @@
 import { useTranslation } from 'react-i18next';
 import * as opener from '@tauri-apps/plugin-opener';
-import { useAppSelector } from '@/app/hooks';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { openBrowserInRightPanel } from '@/features/ui/state/uiSlice';
+import {
+  absolutePathToFileUrl,
+  isBrowserPreviewableFilename,
+} from '@/features/browser/lib/fileUrl';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { logger } from '@/lib/logger';
 import {
   useDeleteArtifactMutation,
   useGetArtifactsQuery,
 } from '../state/artifactsApi';
+import type { Artifact } from '../types';
 import { ArtifactItem, ArtifactsEmptyState } from './ArtifactItem';
 
 export function ArtifactsPanel() {
   const { t } = useTranslation(['artifacts', 'common']);
+  const dispatch = useAppDispatch();
   const selectedChatId = useAppSelector((state) => state.chats.selectedChatId);
 
   const { data: artifacts = [], isLoading } = useGetArtifactsQuery(
@@ -20,9 +27,17 @@ export function ArtifactsPanel() {
 
   const [deleteArtifact] = useDeleteArtifactMutation();
 
-  const handleOpen = async (path: string) => {
+  const handleOpen = async (artifact: Artifact) => {
+    if (isBrowserPreviewableFilename(artifact.filename)) {
+      dispatch(
+        openBrowserInRightPanel({
+          url: absolutePathToFileUrl(artifact.path),
+        })
+      );
+      return;
+    }
     try {
-      await opener.openPath(path);
+      await opener.openPath(artifact.path);
     } catch (error) {
       logger.error('[ArtifactsPanel] Failed to open artifact:', error);
     }
@@ -47,13 +62,6 @@ export function ArtifactsPanel() {
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
-      <div className="shrink-0">
-        <h3 className="text-sm font-medium text-foreground">{t('tabLabel')}</h3>
-        <p className="text-[11px] text-muted-foreground">
-          {t('panelDescription')}
-        </p>
-      </div>
-
       <ScrollArea className="-mx-1 flex-1 px-1">
         <div className="flex flex-col gap-2 pb-4">
           {isLoading ? (
@@ -65,7 +73,7 @@ export function ArtifactsPanel() {
               <ArtifactItem
                 key={artifact.id}
                 artifact={artifact}
-                onOpen={() => handleOpen(artifact.path)}
+                onOpen={() => handleOpen(artifact)}
                 onDelete={(e) => {
                   e.stopPropagation();
                   void handleDelete(artifact.id);

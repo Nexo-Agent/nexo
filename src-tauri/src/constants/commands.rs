@@ -92,4 +92,17 @@ impl TauriCommands {
     // Artifact commands
     pub const GET_ARTIFACTS: &'static str = "get_artifacts";
     pub const DELETE_ARTIFACT: &'static str = "delete_artifact";
+
+    // Browser commands
+    pub const BROWSER_GET_RUNTIME_STATUS: &'static str = "browser_get_runtime_status";
+    pub const BROWSER_ENSURE_RUNTIME: &'static str = "browser_ensure_runtime";
+    pub const BROWSER_CREATE_SESSION: &'static str = "browser_create_session";
+    pub const BROWSER_NAVIGATE: &'static str = "browser_navigate";
+    pub const BROWSER_DESTROY_SESSION: &'static str = "browser_destroy_session";
+    pub const BROWSER_SEND_INPUT: &'static str = "browser_send_input";
+    pub const BROWSER_RESIZE: &'static str = "browser_resize";
+    pub const BROWSER_SET_VIEWER_ACTIVE: &'static str = "browser_set_viewer_active";
+    pub const BROWSER_GET_NAVIGATION_STATE: &'static str = "browser_get_navigation_state";
+    pub const BROWSER_GO_BACK: &'static str = "browser_go_back";
+    pub const BROWSER_GO_FORWARD: &'static str = "browser_go_forward";
 }

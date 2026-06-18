@@ -82,6 +82,7 @@ impl ToolRuntime {
                     deps.app_settings_service.clone(),
                     web_search_available,
                     deps.artifact_service.clone(),
+                    deps.browser_service.clone(),
                 )));
 
                 if !mcp_tool_map.is_empty() {

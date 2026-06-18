@@ -1,0 +1,21 @@
+{
+  "loading": "Đang tải trình duyệt...",
+  "error": "Lỗi trình duyệt",
+  "sessionEnded": "Phiên trình duyệt đã kết thúc",
+  "streamAlt": "Luồng trình duyệt",
+  "downloadTitle": "Đang tải Chromium",
+  "downloadDescription": "Nexo đang tải runtime trình duyệt (~150MB). Chỉ cần tải một lần.",
+  "demoTitle": "Trình duyệt (dev)",
+  "open": "Mở",
+  "tabLabel": "Trình duyệt",
+  "panelDescription": "Trình duyệt Chromium nhúng",
+  "noChatTitle": "Chưa chọn cuộc trò chuyện",
+  "noChatDescription": "Chọn một cuộc trò chuyện để dùng trình duyệt",
+  "fenceInvalidUrl": "URL không hợp lệ trong fence browser",
+  "back": "Quay lại",
+  "forward": "Tiến",
+  "reload": "Tải lại",
+  "newTab": "Tab mới",
+  "closeTab": "Đóng tab",
+  "addressPlaceholder": "Nhập URL"
+}

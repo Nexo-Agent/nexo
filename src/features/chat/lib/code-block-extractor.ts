@@ -18,7 +18,12 @@ export function extractCodeBlocks(content: string): CodeBlock[] {
     const lang = (language || '').toLowerCase().trim();
     const codeContent = code.trim();
 
-    if (lang === 'python' || lang === 'mermaid' || lang === 'html') {
+    if (
+      lang === 'python' ||
+      lang === 'mermaid' ||
+      lang === 'html' ||
+      lang === 'browser'
+    ) {
       codeBlocks.push({
         id: String(blockIndex), // Use index as id
         content: codeContent,

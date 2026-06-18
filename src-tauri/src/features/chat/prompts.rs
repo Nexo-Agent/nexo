@@ -47,6 +47,7 @@ Technical rules:
 - Self-contained document with inline CSS/JS or libraries from trusted CDNs only (https://cdn.jsdelivr.net, https://unpkg.com, https://cdnjs.cloudflare.com, https://esm.sh, https://cdn.skypack.dev)
 - Prefer Chart.js for charts; no external API calls
 - For simple static diagrams (flowchart, sequence), prefer ```mermaid over HTML
+- To show a live external webpage in chat, use a ```browser fence with the URL on the first line, e.g. ```browser\nhttps://example.com\n```
 - Keep under 50KB; use responsive layout
 "#;
 

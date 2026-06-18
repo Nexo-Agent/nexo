@@ -124,6 +124,27 @@ impl ArtifactService {
         Ok(())
     }
 
+    /// Use the LLM-provided filename on disk. On collision, suffix with a short id before the extension.
+    fn resolve_disk_filename(filename: &str, artifact_id: &str, ext: &str) -> String {
+        let sanitized = filename.trim();
+        let path = Path::new(sanitized);
+        let stem = path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("artifact");
+        let short_id = &artifact_id[..8];
+        format!("{stem}-{short_id}.{ext}")
+    }
+
+    fn resolve_disk_path(chat_dir: &Path, filename: &str, artifact_id: &str, ext: &str) -> PathBuf {
+        let sanitized = filename.trim();
+        let preferred = chat_dir.join(sanitized);
+        if !preferred.exists() {
+            return preferred;
+        }
+        chat_dir.join(Self::resolve_disk_filename(filename, artifact_id, ext))
+    }
+
     pub async fn create(
         &self,
         ctx: &ToolExecutionContext,
@@ -140,8 +161,7 @@ impl ArtifactService {
         let chat_dir = Self::ensure_artifact_dir(&ctx.app, &ctx.chat_id)?;
 
         let artifact_id = uuid::Uuid::new_v4().to_string();
-        let disk_filename = format!("{artifact_id}.{ext}");
-        let file_path = chat_dir.join(&disk_filename);
+        let file_path = Self::resolve_disk_path(&chat_dir, filename, &artifact_id, &ext);
 
         Self::ensure_path_within_chat_dir(&chat_dir, &file_path)?;
 
@@ -247,5 +267,40 @@ mod tests {
     #[test]
     fn validate_filename_requires_extension() {
         assert!(ArtifactService::validate_filename("noext").is_err());
+    }
+
+    #[test]
+    fn resolve_disk_path_uses_filename_when_available() {
+        let dir = std::env::temp_dir().join(format!("nexo-artifact-test-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = ArtifactService::resolve_disk_path(
+            &dir,
+            "3d-contour-threejs.html",
+            "36a80f74-eeaf-4915-9eef-c6b230be1441",
+            "html",
+        );
+        assert_eq!(
+            path,
+            dir.join("3d-contour-threejs.html")
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_disk_path_suffixes_on_collision() {
+        let dir = std::env::temp_dir().join(format!("nexo-artifact-test-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("chart.html"), "v1").unwrap();
+        let path = ArtifactService::resolve_disk_path(
+            &dir,
+            "chart.html",
+            "36a80f74-eeaf-4915-9eef-c6b230be1441",
+            "html",
+        );
+        assert_eq!(
+            path,
+            dir.join("chart-36a80f74.html")
+        );
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

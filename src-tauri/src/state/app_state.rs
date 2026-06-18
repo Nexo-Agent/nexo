@@ -22,6 +22,7 @@ use crate::features::artifacts::{
     repository::{ArtifactRepository, SqliteArtifactRepository},
     service::ArtifactService,
 };
+use crate::features::browser::BrowserService;
 use crate::features::skill::SkillService;
 use crate::features::tool::{mcp::MCPToolRefreshService, core::ToolDeps};
 use crate::features::harness::HarnessFactory;
@@ -63,6 +64,7 @@ pub struct AppState {
     pub app_settings_service: Arc<AppSettingsService>,
     pub note_service: Arc<NoteService>,
     pub artifact_service: Arc<ArtifactService>,
+    pub browser_service: Arc<BrowserService>,
 
     pub pending_tool_permissions: Arc<Mutex<HashMap<String, oneshot::Sender<PermissionDecision>>>>,
     pub pending_user_questions:
@@ -128,6 +130,7 @@ impl AppState {
         let artifact_repo: Arc<dyn ArtifactRepository> =
             Arc::new(SqliteArtifactRepository::new(app.clone()));
         let artifact_service = Arc::new(ArtifactService::new(artifact_repo, app.clone()));
+        let browser_service = Arc::new(BrowserService::new(app.clone()));
 
         let tool_deps = Arc::new(ToolDeps::new(
             (*app).clone(),
@@ -135,6 +138,7 @@ impl AppState {
             workspace_settings_service.clone(),
             app_settings_service.clone(),
             artifact_service.clone(),
+            browser_service.clone(),
         ));
 
         let skill_service = Arc::new(SkillService::new((*app).clone()));
@@ -188,6 +192,7 @@ impl AppState {
             app_settings_service,
             note_service,
             artifact_service,
+            browser_service,
             pending_tool_permissions: Arc::new(Mutex::new(HashMap::new())),
             pending_user_questions: Arc::new(Mutex::new(HashMap::new())),
             skill_service,

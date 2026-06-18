@@ -1,20 +1,22 @@
-import { FileText, Info, Code2, Package } from 'lucide-react';
+import { FileText, Info, Code2, Package, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { NotesPanel } from '@/features/notes/ui/NotesPanel';
 import { ArtifactsPanel } from '@/features/artifacts/ui/ArtifactsPanel';
+import { BrowserPanel } from '@/features/browser/ui/BrowserPanel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/atoms/tooltip';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { setRightPanelTab } from '@/features/ui/state/uiSlice';
 
 export function ChatRightPanel() {
   const dispatch = useAppDispatch();
-  const { t } = useTranslation(['artifacts', 'common']);
+  const { t } = useTranslation(['artifacts', 'browser', 'common']);
   const activeTab = useAppSelector((state) => state.ui.rightPanelTab);
 
   const tabs = [
     { id: 'notes' as const, icon: FileText, label: t('common:notes') },
     { id: 'artifacts' as const, icon: Package, label: t('artifacts:tabLabel') },
+    { id: 'browser' as const, icon: Globe, label: t('browser:tabLabel') },
     { id: 'skills' as const, icon: Code2, label: t('common:skills') },
     { id: 'info' as const, icon: Info, label: t('common:chatInfo') },
   ];
@@ -25,6 +27,8 @@ export function ChatRightPanel() {
         return <NotesPanel />;
       case 'artifacts':
         return <ArtifactsPanel />;
+      case 'browser':
+        return <BrowserPanel />;
       default:
         return (
           <div className="flex flex-1 flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-300">

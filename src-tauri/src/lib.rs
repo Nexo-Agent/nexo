@@ -158,6 +158,19 @@ pub fn run() {
                 }
             });
 
+            // Bootstrap Chromium runtime in background on first launch
+            let chrome_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                let state = chrome_handle.state::<state::AppState>();
+                if let Err(e) = state.browser_service.ensure_runtime().await {
+                    tracing::error!("Chromium runtime bootstrap failed: {e}");
+                    features::browser::install::ChromeRuntimeInstaller::emit_install_error(
+                        &chrome_handle,
+                        &e.to_string(),
+                    );
+                }
+            });
+
             // Create and set menu
             let menu = menu::create_menu(app.handle())?;
             app.set_menu(menu)?;
@@ -258,6 +271,18 @@ pub fn run() {
             // Artifact commands
             features::artifacts::commands::get_artifacts,
             features::artifacts::commands::delete_artifact,
+            // Browser commands
+            features::browser::commands::browser_get_runtime_status,
+            features::browser::commands::browser_ensure_runtime,
+            features::browser::commands::browser_create_session,
+            features::browser::commands::browser_navigate,
+            features::browser::commands::browser_destroy_session,
+            features::browser::commands::browser_send_input,
+            features::browser::commands::browser_resize,
+            features::browser::commands::browser_set_viewer_active,
+            features::browser::commands::browser_get_navigation_state,
+            features::browser::commands::browser_go_back,
+            features::browser::commands::browser_go_forward,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
