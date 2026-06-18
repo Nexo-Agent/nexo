@@ -13,6 +13,5 @@ export interface WorkspaceSettings {
   defaultModel?: string; // Default model ID for this workspace
   toolPermissionConfig?: Record<string, 'require' | 'auto'>; // Per-tool permission configuration
   maxAgentIterations?: number;
-  internalToolsEnabled?: boolean;
   selectedSkillIds?: string[];
 }

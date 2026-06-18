@@ -30,7 +30,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' ipc: http://ipc.localhost asset: http://asset.localhost https://asset.localhost data: blob: *"
+      "csp": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://esm.sh https://cdn.skypack.dev"
     }
   },
   "bundle": {

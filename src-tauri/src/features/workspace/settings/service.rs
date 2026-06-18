@@ -68,7 +68,7 @@ impl WorkspaceSettingsService {
                 None,
                 None,
                 Some(10),
-                Some(false),
+                None,
                 None,
             )?;
             return self.repository.get_by_workspace_id(workspace_id);

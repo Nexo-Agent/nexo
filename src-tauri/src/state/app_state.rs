@@ -141,11 +141,15 @@ impl AppState {
             Arc::new(SqliteMCPConnectionRepository::new(app.clone()));
         let mcp_connection_service =
             Arc::new(MCPConnectionService::new(mcp_connection_repo.clone()));
+
+        let app_settings_service = Arc::new(AppSettingsService::new(app_settings_repo));
+
         let tool_deps = Arc::new(ToolDeps::new(
             (*app).clone(),
             mcp_connection_service.clone(),
             workspace_settings_service.clone(),
             agent_manager.clone(),
+            app_settings_service.clone(),
         ));
 
         let skill_service = Arc::new(SkillService::new((*app).clone()));
@@ -170,7 +174,6 @@ impl AppState {
             harness_factory,
         ));
 
-        let app_settings_service = Arc::new(AppSettingsService::new(app_settings_repo));
         let prompt_service = Arc::new(PromptService::new(prompt_repo));
         let chat_input_settings_service =
             Arc::new(ChatInputSettingsService::new(chat_input_settings_repo));

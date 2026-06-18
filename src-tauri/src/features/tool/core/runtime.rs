@@ -8,6 +8,7 @@ use crate::error::AppError;
 use crate::features::tool::builtin::BuiltinToolSource;
 use crate::features::tool::mcp::{AgentMcpSource, McpConnectionSource};
 use crate::features::tool::models::UnifiedToolInfo;
+use crate::features::web_search::WebSearchService;
 use crate::models::llm_types::ChatCompletionTool;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -78,9 +79,13 @@ impl ToolRuntime {
                         HashMap::new()
                     };
 
-                if workspace_settings.internal_tools_enabled == Some(1) {
-                    sources.push(Arc::new(BuiltinToolSource::new()));
-                }
+                let web_search_service =
+                    WebSearchService::from_app_settings(&deps.app_settings_service)?;
+                let web_search_available = web_search_service.is_tool_available();
+                sources.push(Arc::new(BuiltinToolSource::with_web_search(
+                    deps.app_settings_service.clone(),
+                    web_search_available,
+                )));
 
                 if !mcp_tool_map.is_empty() {
                     let connection_ids: HashSet<String> =

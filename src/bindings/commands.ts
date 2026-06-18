@@ -61,6 +61,9 @@ export const TauriCommands = {
   GET_APP_SETTING: 'get_app_setting',
   GET_ALL_APP_SETTINGS: 'get_all_app_settings',
 
+  // Web Search commands
+  TEST_WEB_SEARCH_CONNECTION: 'test_web_search_connection',
+
   // Prompt commands
   CREATE_PROMPT: 'create_prompt',
   GET_PROMPTS: 'get_prompts',

@@ -51,6 +51,9 @@ impl TauriCommands {
     pub const GET_APP_SETTING: &'static str = "get_app_setting";
     pub const GET_ALL_APP_SETTINGS: &'static str = "get_all_app_settings";
 
+    // Web Search commands
+    pub const TEST_WEB_SEARCH_CONNECTION: &'static str = "test_web_search_connection";
+
     // Prompt commands
     pub const CREATE_PROMPT: &'static str = "create_prompt";
     pub const GET_PROMPTS: &'static str = "get_prompts";

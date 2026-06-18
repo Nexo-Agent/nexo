@@ -49,6 +49,11 @@ const SkillsManager = lazy(() =>
     default: module.SkillsManager,
   }))
 );
+const WebSearchSettings = lazy(() =>
+  import('@/features/web-search').then((module) => ({
+    default: module.WebSearchSettings,
+  }))
+);
 
 // Local Components (Fix Circular Dependencies by strict local import)
 import { AppSettings } from './AppSettings';
@@ -79,6 +84,8 @@ export function SettingsScreen() {
         return <LLMConnections />;
       case 'mcp':
         return <MCPServerConnections />;
+      case 'web_search':
+        return <WebSearchSettings />;
       case 'prompts':
         return <PromptManagement />;
       case 'agent':
@@ -98,6 +105,7 @@ export function SettingsScreen() {
     { id: 'general', label: t('generalSetting') },
     { id: 'llm', label: t('llmConnections') },
     { id: 'mcp', label: t('mcpServerConnections') },
+    { id: 'web_search', label: t('webSearch') },
     { id: 'prompts', label: t('promptManagement') },
     { id: 'agent', label: t('agents') },
     { id: 'skills', label: t('skills') },

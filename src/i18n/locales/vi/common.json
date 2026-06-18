@@ -280,7 +280,7 @@
   "systemMessageDescription": "System message sẽ được sử dụng làm context cho các cuộc trò chuyện trong workspace này",
   "systemTheme": "Theo hệ thống",
   "takeTheTour": "Take a Tour",
-  "testConnection": "Kiểm tra kết nối và lấy danh sách models",
+  "testConnection": "Kiểm tra kết nối",
   "testing": "Đang kiểm tra...",
   "theme": "Giao diện",
   "title": "Cài đặt",

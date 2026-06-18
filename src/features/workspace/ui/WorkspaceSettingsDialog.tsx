@@ -259,14 +259,6 @@ export function WorkspaceSettingsDialog({
                   saveSettings({ streamEnabled: checked })
                 }
               />
-              <SettingToggleItem
-                icon={<Wrench className="h-4 w-4" />}
-                label={t('internalTools', { ns: 'settings' })}
-                checked={settings.internalToolsEnabled === true}
-                onCheckedChange={(checked) =>
-                  saveSettings({ internalToolsEnabled: checked })
-                }
-              />
               <SettingInputItem
                 icon={<Cpu className="h-4 w-4" />}
                 label={t('maxIterations', { ns: 'common' })}
@@ -380,13 +372,6 @@ export function WorkspaceSettingsDialog({
                 checked={settings.streamEnabled !== false}
                 onCheckedChange={(checked) =>
                   saveSettings({ streamEnabled: checked })
-                }
-              />
-              <SettingToggleItem
-                label={t('internalTools', { ns: 'settings' })}
-                checked={settings.internalToolsEnabled === true}
-                onCheckedChange={(checked) =>
-                  saveSettings({ internalToolsEnabled: checked })
                 }
               />
               <SettingInputItem

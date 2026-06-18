@@ -9,6 +9,7 @@ export type SettingsSection =
   | 'general'
   | 'llm'
   | 'mcp'
+  | 'web_search'
   | 'prompts'
   | 'usage'
   | 'agent'

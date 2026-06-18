@@ -15,3 +15,4 @@ pub mod sandbox;
 pub mod app_settings;
 pub mod harness;
 pub mod notes;
+pub mod web_search;

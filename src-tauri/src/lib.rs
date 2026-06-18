@@ -203,6 +203,8 @@ pub fn run() {
             features::app_settings::commands::save_app_setting,
             features::app_settings::commands::get_app_setting,
             features::app_settings::commands::get_all_app_settings,
+            // Web Search commands
+            features::web_search::commands::test_web_search_connection,
             // Prompt commands
             features::prompt::commands::create_prompt,
             features::prompt::commands::get_prompts,
