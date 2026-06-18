@@ -81,27 +81,29 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.24
+            # Nexo v1.0.0
 
-            ## What's New
+            The first stable release of Nexo — an all-in-one desktop AI workspace for macOS, Windows, and Linux.
 
-            - Added per-chat file artifacts with a `create_artifact` tool and a dedicated artifacts panel.
-            - Added an in-app browser for HTML artifact preview and web content, powered by native Tauri webviews.
-            - Browser supports multiple tabs and focuses an existing tab when opening a URL that is already open.
+            ## Highlights
 
-            ## Improvements
+            - Multi-provider LLM chat with your own API keys and workspace-level prompts
+            - Model Context Protocol (MCP) integration for extensible tools
+            - Skills and sandboxed Python / Node runtimes
+            - Per-chat file artifacts with built-in browser preview
+            - Web search with configurable providers
+            - Local-first SQLite storage for conversations and settings
+            - One-command installers for macOS, Windows, and Linux
 
-            - Removed the obsolete browser demo panel from general settings.
+            ## Website
 
-            ## Notes
-
-            - This is a prerelease build intended for beta testing.
+            - New product landing page at https://nexo.nkthanh.dev
 
             ---
 
             Report issues at: https://github.com/Nexo-Agent/nexo/issues
           releaseDraft: false
-          prerelease: true
+          prerelease: false
           args: ${{ matrix.args }}
 
       - name: Trigger Homebrew update
