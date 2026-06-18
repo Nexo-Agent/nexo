@@ -81,13 +81,17 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v0.1.0-beta.22
+            # Nexo v0.1.0-beta.24
 
             ## What's New
 
-            - Added one-command installers for macOS and Linux via `installer.sh`.
-            - Added one-command installer for Windows 10+ via `installer-windows.ps1`.
-            - Updated installation docs with quick install commands and version pinning examples.
+            - Added per-chat file artifacts with a `create_artifact` tool and a dedicated artifacts panel.
+            - Added an in-app browser for HTML artifact preview and web content, powered by native Tauri webviews.
+            - Browser supports multiple tabs and focuses an existing tab when opening a URL that is already open.
+
+            ## Improvements
+
+            - Removed the obsolete browser demo panel from general settings.
 
             ## Notes
 
