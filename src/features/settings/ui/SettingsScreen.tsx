@@ -26,7 +26,9 @@ const MCPServerConnections = lazy(() =>
   }))
 );
 const UsagePage = lazy(() =>
-  import('@/features/usage').then((module) => ({ default: module.UsagePage }))
+  import('@/features/usage/ui/UsagePage').then((module) => ({
+    default: module.UsagePage,
+  }))
 );
 const UpdateSection = lazy(() =>
   import('@/features/updater/ui/UpdateSection').then((module) => ({

@@ -18,10 +18,8 @@ export interface UsageStat {
 
 export interface UsageFilter {
   workspace_id?: string;
-  provider?: string;
-  model?: string;
-  date_from?: number;
-  date_to?: number;
+  start_date?: number;
+  end_date?: number;
 }
 
 export interface UsageSummary {
@@ -30,12 +28,4 @@ export interface UsageSummary {
   total_cost: number;
   total_requests: number;
   average_latency: number;
-}
-
-export interface UsageChartPoint {
-  timestamp: number;
-  requests: number;
-  cost: number;
-  input_tokens: number;
-  output_tokens: number;
 }

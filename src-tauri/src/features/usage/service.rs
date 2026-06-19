@@ -1,4 +1,4 @@
-use super::models::{UsageChartPoint, UsageFilter, UsageStat, UsageSummary};
+use super::models::{UsageFilter, UsageStat, UsageSummary};
 use super::repository::UsageRepository;
 use crate::models::llm_types::TokenUsage;
 use rusqlite::Result;
@@ -89,14 +89,6 @@ impl UsageService {
 
     pub fn get_summary(&self, filter: UsageFilter) -> Result<UsageSummary> {
         self.repo.get_summary(filter)
-    }
-
-    pub fn get_chart_data(
-        &self,
-        filter: UsageFilter,
-        interval: &str,
-    ) -> Result<Vec<UsageChartPoint>> {
-        self.repo.get_chart_data(filter, interval)
     }
 
     pub fn get_logs(&self, filter: UsageFilter, page: u32, limit: u32) -> Result<Vec<UsageStat>> {

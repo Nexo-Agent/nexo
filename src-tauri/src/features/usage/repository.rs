@@ -1,4 +1,4 @@
-use super::models::{UsageChartPoint, UsageFilter, UsageStat, UsageSummary};
+use super::models::{UsageFilter, UsageStat, UsageSummary};
 use rusqlite::{params, Result};
 use std::sync::Arc;
 use tauri::AppHandle;
@@ -7,7 +7,6 @@ pub trait UsageRepository: Send + Sync {
     fn create(&self, stat: UsageStat) -> Result<()>;
     fn get_logs(&self, filter: UsageFilter, limit: u32, offset: u32) -> Result<Vec<UsageStat>>;
     fn get_summary(&self, filter: UsageFilter) -> Result<UsageSummary>;
-    fn get_chart_data(&self, filter: UsageFilter, interval: &str) -> Result<Vec<UsageChartPoint>>;
     fn delete_all(&self) -> Result<()>;
 }
 
@@ -150,63 +149,6 @@ impl UsageRepository for SqliteUsageRepository {
         })
     }
 
-    fn get_chart_data(&self, filter: UsageFilter, interval: &str) -> Result<Vec<UsageChartPoint>> {
-        let conn = crate::db::get_connection(&self.app)
-            .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
-
-        let interval_seconds = match interval {
-            "hour" => 3600,
-            "day" => 86400,
-            _ => 3600,
-        };
-
-        let mut query = format!(
-            "SELECT 
-                (timestamp / {interval_seconds}) * {interval_seconds} as bucket,
-                COUNT(*) as requests,
-                COALESCE(SUM(input_tokens), 0) as input,
-                COALESCE(SUM(output_tokens), 0) as output,
-                COALESCE(SUM(cost), 0.0) as cost
-             FROM usage_stats WHERE 1=1"
-        );
-
-        let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
-
-        if let Some(ws_id) = filter.workspace_id {
-            query.push_str(" AND workspace_id = ?");
-            params.push(Box::new(ws_id));
-        }
-        if let Some(start) = filter.start_date {
-            query.push_str(" AND timestamp >= ?");
-            params.push(Box::new(start));
-        }
-        if let Some(end) = filter.end_date {
-            query.push_str(" AND timestamp <= ?");
-            params.push(Box::new(end));
-        }
-
-        query.push_str(" GROUP BY bucket ORDER BY bucket ASC");
-
-        let params_ref: Vec<&dyn rusqlite::ToSql> =
-            params.iter().map(std::convert::AsRef::as_ref).collect();
-
-        let mut stmt = conn.prepare(&query)?;
-        let rows = stmt.query_map(params_ref.as_slice(), |row| {
-            Ok(UsageChartPoint {
-                timestamp: row.get(0)?,
-                requests: row.get(1)?,
-                input_tokens: row.get(2)?,
-                output_tokens: row.get(3)?,
-                cost: row.get(4)?,
-            })
-        })?;
-
-        let mut points = Vec::new();
-        for row in rows {
-            points.push(row?);
-        }
-        Ok(points)
-    }
     fn delete_all(&self) -> Result<()> {
         let conn = crate::db::get_connection(&self.app)
             .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;

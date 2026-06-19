@@ -250,7 +250,6 @@ pub fn run() {
             features::runtime::node::commands::install_node_packages,
             // Usage commands
             features::usage::commands::get_usage_summary,
-            features::usage::commands::get_usage_chart,
             features::usage::commands::get_usage_logs,
             features::usage::commands::clear_usage,
             // Skill commands

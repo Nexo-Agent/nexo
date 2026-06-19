@@ -8,7 +8,6 @@ import {
 import {
   type UsageFilter,
   type UsageSummary,
-  type UsageChartPoint,
   type UsageStat,
 } from '@/models/usage';
 import { logger } from '@/lib/logger';
@@ -17,11 +16,8 @@ export interface UseUsageReturn {
   filter: UsageFilter;
   setFilter: (filter: UsageFilter) => void;
   summary: UsageSummary | null;
-  chartData: UsageChartPoint[];
   logs: UsageStat[];
   loading: boolean;
-  interval: string;
-  setInterval: (interval: string) => void;
   page: number;
   setPage: (page: number) => void;
   LIMIT: number;
@@ -34,10 +30,8 @@ export function useUsage(): UseUsageReturn {
 
   const [filter, setFilter] = useState<UsageFilter>({});
   const [summary, setSummary] = useState<UsageSummary | null>(null);
-  const [chartData, setChartData] = useState<UsageChartPoint[]>([]);
   const [logs, setLogs] = useState<UsageStat[]>([]);
   const [loading, setLoading] = useState(true);
-  const [interval, setInterval] = useState('day');
   const [page, setPage] = useState(1);
   const LIMIT = 20;
 
@@ -45,15 +39,9 @@ export function useUsage(): UseUsageReturn {
     setLoading(true);
     try {
       const summaryData = await invoke<UsageSummary>('get_usage_summary', {
-        filter,
+        filter: {},
       });
       setSummary(summaryData);
-
-      const chartDataRes = await invoke<UsageChartPoint[]>('get_usage_chart', {
-        filter,
-        interval,
-      });
-      setChartData(chartDataRes);
 
       const logsRes = await invoke<UsageStat[]>('get_usage_logs', {
         filter,
@@ -66,7 +54,7 @@ export function useUsage(): UseUsageReturn {
     } finally {
       setLoading(false);
     }
-  }, [filter, interval, page]);
+  }, [filter, page]);
 
   useEffect(() => {
     fetchData();
@@ -87,11 +75,8 @@ export function useUsage(): UseUsageReturn {
     filter,
     setFilter,
     summary,
-    chartData,
     logs,
     loading,
-    interval,
-    setInterval,
     page,
     setPage,
     LIMIT,

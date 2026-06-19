@@ -47,7 +47,9 @@ vi.mock('@/features/mcp', () => ({
 vi.mock('./AppSettings', () => ({
   AppSettings: () => <div>App Settings</div>,
 }));
-vi.mock('@/features/usage', () => ({ UsagePage: () => <div>Usage Page</div> }));
+vi.mock('@/features/usage/ui/UsagePage', () => ({
+  UsagePage: () => <div>Usage Page</div>,
+}));
 vi.mock('@/features/updater/ui/UpdateSection', () => ({
   UpdateSection: () => <div>Update Section</div>,
 }));

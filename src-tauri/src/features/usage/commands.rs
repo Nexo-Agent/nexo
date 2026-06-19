@@ -1,4 +1,4 @@
-use super::models::{UsageChartPoint, UsageFilter, UsageStat, UsageSummary};
+use super::models::{UsageFilter, UsageStat, UsageSummary};
 use crate::error::AppError;
 use crate::state::AppState;
 use tauri::State;
@@ -11,18 +11,6 @@ pub fn get_usage_summary(
     state
         .usage_service
         .get_summary(filter)
-        .map_err(|e| AppError::Generic(e.to_string()))
-}
-
-#[tauri::command]
-pub fn get_usage_chart(
-    filter: UsageFilter,
-    interval: String,
-    state: State<'_, AppState>,
-) -> Result<Vec<UsageChartPoint>, AppError> {
-    state
-        .usage_service
-        .get_chart_data(filter, &interval)
         .map_err(|e| AppError::Generic(e.to_string()))
 }
 

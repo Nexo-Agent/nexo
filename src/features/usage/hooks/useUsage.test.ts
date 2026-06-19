@@ -4,17 +4,14 @@ import { useUsage } from './useUsage';
 import { invoke } from '@tauri-apps/api/core';
 import { useAppDispatch } from '@/app/hooks';
 
-// Mock Tauri invoke
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
 
-// Mock app hooks
 vi.mock('@/app/hooks', () => ({
   useAppDispatch: vi.fn(),
 }));
 
-// Mock useLogger
 vi.mock('@/hooks/useLogger', () => ({
   useLogger: () => ({
     info: vi.fn(),
@@ -25,7 +22,6 @@ vi.mock('@/hooks/useLogger', () => ({
   }),
 }));
 
-// Mock notification actions
 vi.mock('@/features/notifications/state/notificationSlice', () => ({
   showSuccess: vi.fn((msg) => ({ type: 'success', payload: msg })),
   showError: vi.fn((msg) => ({ type: 'error', payload: msg })),
@@ -39,11 +35,9 @@ describe('useUsage', () => {
     vi.clearAllMocks();
     (useAppDispatch as unknown as Mock).mockReturnValue(mockDispatch);
 
-    // Default mock responses
     mockInvoke.mockImplementation((cmd: string) => {
       if (cmd === 'get_usage_summary')
         return Promise.resolve({ total_cost: 0 });
-      if (cmd === 'get_usage_chart') return Promise.resolve([]);
       if (cmd === 'get_usage_logs') return Promise.resolve([]);
       return Promise.resolve();
     });
@@ -61,10 +55,6 @@ describe('useUsage', () => {
     expect(mockInvoke).toHaveBeenCalledWith('get_usage_summary', {
       filter: {},
     });
-    expect(mockInvoke).toHaveBeenCalledWith('get_usage_chart', {
-      filter: {},
-      interval: 'day',
-    });
     expect(mockInvoke).toHaveBeenCalledWith('get_usage_logs', {
       filter: {},
       page: 1,
@@ -77,28 +67,14 @@ describe('useUsage', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     act(() => {
-      result.current.setFilter({ model: 'gpt-4' });
+      result.current.setFilter({ start_date: 1000 });
     });
 
     await waitFor(() => {
-      expect(mockInvoke).toHaveBeenCalledWith('get_usage_summary', {
-        filter: { model: 'gpt-4' },
-      });
-    });
-  });
-
-  it('updates data when interval changes', async () => {
-    const { result } = renderHook(() => useUsage());
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
-    act(() => {
-      result.current.setInterval('hour');
-    });
-
-    await waitFor(() => {
-      expect(mockInvoke).toHaveBeenCalledWith('get_usage_chart', {
-        filter: {},
-        interval: 'hour',
+      expect(mockInvoke).toHaveBeenCalledWith('get_usage_logs', {
+        filter: { start_date: 1000 },
+        page: 1,
+        limit: 20,
       });
     });
   });
@@ -126,10 +102,8 @@ describe('useUsage', () => {
 
     mockInvoke.mockImplementation((cmd: string) => {
       if (cmd === 'clear_usage') return Promise.reject(new Error('Failed'));
-      // Re-mock other calls to avoid issues during re-fetch triggered by error handling logic if any
       if (cmd === 'get_usage_summary')
         return Promise.resolve({ total_cost: 0 });
-      if (cmd === 'get_usage_chart') return Promise.resolve([]);
       if (cmd === 'get_usage_logs') return Promise.resolve([]);
       return Promise.resolve([]);
     });

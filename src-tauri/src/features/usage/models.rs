@@ -34,12 +34,3 @@ pub struct UsageSummary {
     pub total_cost: f64,
     pub average_latency: f64,
 }
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct UsageChartPoint {
-    pub timestamp: i64,
-    pub requests: u32,
-    pub input_tokens: u32,
-    pub output_tokens: u32,
-    pub cost: f64,
-}
