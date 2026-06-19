@@ -3,6 +3,7 @@ import { type ComponentProps, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StreamdownContext } from '@/ui/atoms/streamdown/lib/context';
 import { cn } from '@/ui/atoms/streamdown/lib/utils';
+import { CODE_BLOCK_ACTION_CLASS } from '@/ui/atoms/streamdown/lib/code-block/constants';
 import { useCodeBlockContext } from '@/ui/atoms/streamdown/lib/code-block/context';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { logger } from '@/lib/logger';
@@ -75,10 +76,7 @@ export const RunCodeButton = ({
 
   return (
     <button
-      className={cn(
-        'cursor-pointer p-1 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
-        className
-      )}
+      className={cn(CODE_BLOCK_ACTION_CLASS, className)}
       data-streamdown="code-block-run-button"
       disabled={isAnimating || isRunning || !code.trim()}
       onClick={handleRun}

@@ -1,22 +1,17 @@
 // @ts-nocheck
-import {
-  type HTMLAttributes,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import type { TokensResult } from 'shiki';
-import { StreamdownContext } from '../context';
+import { type HTMLAttributes, type ReactNode } from 'react';
 import { CodeBlockBody } from './body';
 import { CodeBlockContainer } from './container';
 import { CodeBlockContext } from './context';
 import { CodeBlockHeader } from './header';
-import { getHighlightedTokens } from './highlight';
+import { CodeBlockCopyButton } from './copy-button';
+import { PreviewCodeBlock } from './preview-code-block';
+import { useHighlightedCode } from './use-highlighted-code';
 
 type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   code: string;
   language: string;
+  headerActions?: ReactNode;
 };
 
 export const CodeBlock = ({
@@ -24,62 +19,19 @@ export const CodeBlock = ({
   language,
   className,
   children,
+  headerActions,
   ...rest
 }: CodeBlockProps) => {
-  const { shikiTheme, cdnUrl } = useContext(StreamdownContext);
-
-  // Memoize the raw fallback tokens to avoid recomputing on every render
-  const raw: TokensResult = useMemo(
-    () => ({
-      bg: 'transparent',
-      fg: 'inherit',
-      tokens: code.split('\n').map((line) => [
-        {
-          content: line,
-          color: 'inherit',
-          bgColor: 'transparent',
-          htmlStyle: {},
-          offset: 0,
-        },
-      ]),
-    }),
-    [code]
-  );
-
-  // Use raw as initial state
-  const [result, setResult] = useState<TokensResult>(raw);
-
-  // Try to get cached result or subscribe to highlighting
-  useEffect(() => {
-    const cachedResult = getHighlightedTokens({
-      code,
-      language,
-      shikiTheme,
-      cdnUrl,
-    });
-
-    if (cachedResult) {
-      // Already cached, use it immediately
-      setResult(cachedResult);
-      return;
-    }
-
-    // Not cached, subscribe to updates
-    getHighlightedTokens({
-      code,
-      language,
-      shikiTheme,
-      cdnUrl,
-      callback: (highlightedResult) => {
-        setResult(highlightedResult);
-      },
-    });
-  }, [code, language, shikiTheme, cdnUrl]);
+  const result = useHighlightedCode(code, language);
 
   return (
     <CodeBlockContext.Provider value={{ code }}>
       <CodeBlockContainer language={language}>
-        <CodeBlockHeader language={language}>{children}</CodeBlockHeader>
+        <CodeBlockHeader language={language}>
+          <CodeBlockCopyButton />
+          {headerActions}
+          {children}
+        </CodeBlockHeader>
         <CodeBlockBody
           className={className}
           language={language}
@@ -90,3 +42,6 @@ export const CodeBlock = ({
     </CodeBlockContext.Provider>
   );
 };
+
+export { PreviewCodeBlock, useHighlightedCode };
+export type { CodeBlockView } from './view-tabs';

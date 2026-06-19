@@ -66,5 +66,9 @@
   "htmlPreview.fullscreen": "Xem toàn màn hình",
   "htmlPreview.fullscreenDescription": "Đang xem HTML preview ở chế độ toàn màn hình",
   "htmlPreview.viewSource": "Xem mã nguồn",
+  "htmlPreview.viewPreview": "Xem preview",
+  "htmlPreview.tabCode": "Code",
+  "htmlPreview.tabPreview": "Preview",
+  "htmlPreview.previewUnavailable": "Preview chưa sẵn sàng",
   "htmlPreview.renderError": "Không thể hiển thị HTML preview"
 }

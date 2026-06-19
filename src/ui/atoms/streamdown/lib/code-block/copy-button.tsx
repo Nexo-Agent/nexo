@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { StreamdownContext } from '../context';
 import { cn } from '../utils';
+import { CODE_BLOCK_ACTION_CLASS } from './constants';
 import { useCodeBlockContext } from './context';
 
 export type CodeBlockCopyButtonProps = ComponentProps<'button'> & {
@@ -64,10 +65,7 @@ export const CodeBlockCopyButton = ({
 
   return (
     <button
-      className={cn(
-        'cursor-pointer p-1 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
-        className
-      )}
+      className={cn(CODE_BLOCK_ACTION_CLASS, className)}
       data-streamdown="code-block-copy-button"
       disabled={isAnimating}
       onClick={copyToClipboard}

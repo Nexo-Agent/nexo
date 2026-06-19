@@ -25,7 +25,7 @@ export const CodeComponent = ({
     return (
       <code
         className={cn(
-          'rounded bg-muted px-1.5 py-0.5 font-mono text-sm',
+          'rounded-md border border-border/50 bg-muted/45 px-1.5 py-0.5 font-mono text-[0.875em] text-foreground',
           className
         )}
         data-streamdown="inline-code"
@@ -60,7 +60,7 @@ export const CodeComponent = ({
   return (
     <Suspense fallback={<CodeBlockSkeleton />}>
       <CodeBlock
-        className={cn('overflow-x-auto border-border border-t', className)}
+        className={cn('overflow-x-auto', className)}
         code={code}
         language={language}
       >

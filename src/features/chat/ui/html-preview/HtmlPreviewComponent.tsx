@@ -1,5 +1,5 @@
 import { Suspense, lazy, useContext, useMemo } from 'react';
-import { AlertCircle, Code2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/app/hooks';
 import { StreamdownContext } from '@/ui/atoms/streamdown/lib/context';
@@ -14,10 +14,12 @@ import {
 import { HtmlPreviewControls, HtmlPreviewFrame } from './HtmlPreviewControls';
 import { HtmlPreviewSkeleton } from './HtmlPreviewSkeleton';
 
-const CodeBlock = lazy(() =>
-  import('@/ui/atoms/streamdown/lib/code-block').then((mod) => ({
-    default: mod.CodeBlock,
-  }))
+const PreviewCodeBlock = lazy(() =>
+  import('@/ui/atoms/streamdown/lib/code-block/preview-code-block').then(
+    (mod) => ({
+      default: mod.PreviewCodeBlock,
+    })
+  )
 );
 
 interface HtmlPreviewComponentProps {
@@ -38,6 +40,10 @@ export function HtmlPreviewComponent({
     isAnimating && !isCompleteHtmlDocument(trimmedCode);
 
   const previewState = useMemo(() => {
+    if (!trimmedCode || isStreamingIncomplete) {
+      return { srcdoc: null, error: null as string | null };
+    }
+
     try {
       return {
         srcdoc: buildSandboxSrcdoc(trimmedCode),
@@ -50,71 +56,54 @@ export function HtmlPreviewComponent({
           : t('htmlPreview.renderError');
       return { srcdoc: null, error: message };
     }
-  }, [trimmedCode, t, currentTheme]);
+  }, [trimmedCode, t, currentTheme, isStreamingIncomplete]);
 
-  if (isStreamingIncomplete) {
-    return (
-      <div
-        className={cn('my-2', className)}
-        data-streamdown="html-preview-block"
-      >
-        <HtmlPreviewSkeleton />
-      </div>
-    );
-  }
-
-  if (previewState.error || !previewState.srcdoc) {
-    return (
-      <div
-        className={cn('group relative my-2', className)}
-        data-streamdown="html-preview-block"
-      >
-        <div className="mb-2 flex items-start gap-2 text-sm text-destructive">
-          <AlertCircle className="mt-0.5 size-4 shrink-0" />
-          <span>{previewState.error}</span>
-        </div>
-        <Suspense fallback={<CodeBlockSkeleton />}>
-          <CodeBlock
-            className="overflow-x-auto border-border border-t"
-            code={trimmedCode}
-            language="html"
-          />
-        </Suspense>
-      </div>
-    );
-  }
+  const previewAvailable = Boolean(previewState.srcdoc) && !previewState.error;
 
   return (
-    <div
-      className={cn('group relative my-2', className)}
-      data-streamdown="html-preview-block"
-    >
-      <HtmlPreviewControls
-        code={trimmedCode}
-        srcdoc={previewState.srcdoc}
-        disabled={isAnimating}
-        className="absolute right-0 top-0 z-10 flex items-center gap-1 rounded-md bg-background/80 p-0.5 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover:opacity-100"
-      />
-      <HtmlPreviewFrame
-        srcdoc={previewState.srcdoc}
-        title={t('htmlPreview.title')}
-        height={DEFAULT_HTML_PREVIEW_HEIGHT}
-      />
-      <details className="mt-2">
-        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-          <Code2 className="size-3.5" />
-          {t('htmlPreview.viewSource')}
-        </summary>
-        <div className="mt-2">
-          <Suspense fallback={<CodeBlockSkeleton />}>
-            <CodeBlock
-              className="overflow-x-auto border-border border-t"
-              code={trimmedCode}
-              language="html"
-            />
-          </Suspense>
+    <div className={cn('my-1', className)} data-streamdown="html-preview-block">
+      <Suspense fallback={<CodeBlockSkeleton />}>
+        <PreviewCodeBlock
+          code={trimmedCode}
+          language="html"
+          codeLabel={t('htmlPreview.tabCode')}
+          previewLabel={t('htmlPreview.tabPreview')}
+          previewAvailable={previewAvailable}
+          previewLoading={
+            <HtmlPreviewSkeleton className="my-0 rounded-none border-0 shadow-none ring-0" />
+          }
+          previewHeaderActions={
+            previewState.srcdoc ? (
+              <HtmlPreviewControls
+                code={trimmedCode}
+                srcdoc={previewState.srcdoc}
+                disabled={isAnimating}
+              />
+            ) : null
+          }
+          preview={
+            previewState.srcdoc ? (
+              <HtmlPreviewFrame
+                srcdoc={previewState.srcdoc}
+                title={t('htmlPreview.title')}
+                height={DEFAULT_HTML_PREVIEW_HEIGHT}
+                className="rounded-none"
+              />
+            ) : (
+              <div className="px-3 py-2 text-xs text-muted-foreground">
+                {t('htmlPreview.previewUnavailable')}
+              </div>
+            )
+          }
+        />
+      </Suspense>
+
+      {previewState.error ? (
+        <div className="mt-1.5 flex items-start gap-2 rounded-md border border-destructive/20 bg-destructive/5 px-2.5 py-1.5 text-xs text-destructive">
+          <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
+          <span>{previewState.error}</span>
         </div>
-      </details>
+      ) : null}
     </div>
   );
 }

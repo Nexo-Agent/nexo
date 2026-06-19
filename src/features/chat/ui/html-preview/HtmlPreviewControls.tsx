@@ -7,7 +7,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from '@/ui/atoms/dialog';
-import { CodeBlockCopyButton } from '@/ui/atoms/streamdown/lib/code-block/copy-button';
+import { CODE_BLOCK_ACTION_CLASS } from '@/ui/atoms/streamdown/lib/code-block/constants';
 import { cn } from '@/lib/utils';
 import {
   DEFAULT_HTML_PREVIEW_HEIGHT,
@@ -42,20 +42,19 @@ export function HtmlPreviewControls({
 
   return (
     <>
-      <div className={cn('flex items-center justify-end gap-2', className)}>
+      <div className={cn('flex items-center gap-0.5', className)}>
         <button
           type="button"
-          className="cursor-pointer p-1 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className={CODE_BLOCK_ACTION_CLASS}
           disabled={disabled}
           onClick={() => downloadHtmlFile('preview.html', code)}
           title={t('htmlPreview.download')}
         >
           <Download size={14} />
         </button>
-        <CodeBlockCopyButton code={code} disabled={disabled} />
         <button
           type="button"
-          className="cursor-pointer p-1 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className={CODE_BLOCK_ACTION_CLASS}
           disabled={disabled}
           onClick={() => setIsFullscreen(true)}
           title={t('htmlPreview.fullscreen')}

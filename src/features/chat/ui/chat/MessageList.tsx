@@ -1,32 +1,16 @@
-import { useMemo, useCallback, forwardRef, Fragment } from 'react';
+import { useMemo, useCallback, forwardRef } from 'react';
 import type { Message } from '../../types';
 import type { PermissionRequest } from '@/features/tools/state/toolPermissionSlice';
-import { ToolCallItem } from './ToolCallItem';
-import { ThinkingItem } from './ThinkingItem';
 import { MessageItem } from './MessageItem';
+import { AgentActivityTimeline } from './AgentActivityTimeline';
 import { useComponentPerformance } from '@/hooks/useComponentPerformance';
-import {
-  getAssistantMessageIdsWithToolCalls,
-  sortMessages,
-} from './utils/messageSorting';
+import { sortMessages } from './utils/messageSorting';
+import { buildMessageRenderUnits } from './utils/messageGrouping';
 import { cn } from '@/lib/utils';
 import { useMessageListState } from '../../hooks/useMessageListState';
 
-/**
- * Helper function to create a composite key for tool calls
- * This prevents conflicts between different types of tool calls
- * @param id - The tool call ID
- * @param type - The type of tool call ('message' | 'permission')
- */
-function createToolCallKey(id: string, type: 'message' | 'permission'): string {
-  return `${type}:${id}`;
-}
-
 interface MessageListProps {
-  // Data
   messages: Message[];
-
-  // State (optional - if not provided, MessageList manages internally)
   markdownEnabled?: Record<string, boolean>;
   copiedId?: string | null;
   expandedToolCalls?: Record<string, boolean>;
@@ -37,16 +21,10 @@ interface MessageListProps {
   onExpandedToolCallsChange?: (
     expandedToolCalls: Record<string, boolean>
   ) => void;
-
-  // Feature flags (optional - default from ChatMessages behavior)
-  enableStreaming?: boolean; // default: true
-  enableThinkingItem?: boolean; // default: true
-  enablePendingPermissions?: boolean; // default: true
+  enableStreaming?: boolean;
+  enablePendingPermissions?: boolean;
   streamingMessageId?: string | null;
   pendingRequests?: Record<string, PermissionRequest>;
-
-  // Callbacks (optional - MessageList provides default implementations)
-  // Default no-op handler if not provided
   onPermissionRespond?: (
     messageId: string,
     toolId: string,
@@ -55,13 +33,11 @@ interface MessageListProps {
   ) => void | Promise<void>;
   onViewAgentDetails?: (sessionId: string, agentId: string) => void;
   onCancelToolExecution?: () => void;
-
-  // Other
   showUsage?: boolean;
   t: (key: string) => string;
   isLoading?: boolean;
   className?: string;
-  permissionTimeLeft?: Record<string, number>; // Countdown for pending permissions
+  permissionTimeLeft?: Record<string, number>;
 }
 
 export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
@@ -77,14 +53,12 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
       onEditingContentChange,
       onExpandedToolCallsChange,
       enableStreaming = true,
-      enableThinkingItem = true,
       enablePendingPermissions = true,
       streamingMessageId = null,
       pendingRequests = {},
       onPermissionRespond,
       onViewAgentDetails,
       onCancelToolExecution,
-
       showUsage = false,
       t,
       className,
@@ -92,13 +66,11 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
     },
     ref
   ) => {
-    // Track render performance
     useComponentPerformance({
       componentName: 'MessageList',
       threshold: 100,
     });
 
-    // Delegated state management
     const {
       markdownEnabled,
       copiedId,
@@ -126,155 +98,113 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
       [messages, onEditingMessageIdChange, onEditingContentChange]
     );
 
-    // Memoize sorted messages - only recalculate when messages array changes
     const sortedMessages = useMemo(() => sortMessages(messages), [messages]);
 
-    const assistantIdsWithToolCalls = useMemo(
-      () => getAssistantMessageIdsWithToolCalls(messages),
-      [messages]
+    const renderUnits = useMemo(
+      () =>
+        buildMessageRenderUnits(sortedMessages, {
+          streamingMessageId: enableStreaming ? streamingMessageId : null,
+          pendingRequests: enablePendingPermissions ? pendingRequests : {},
+        }),
+      [
+        sortedMessages,
+        enableStreaming,
+        streamingMessageId,
+        enablePendingPermissions,
+        pendingRequests,
+      ]
     );
 
-    // Find the last message that will be rendered (not skipped)
     const lastRenderableMessageId = useMemo(() => {
-      for (let i = sortedMessages.length - 1; i >= 0; i--) {
-        const msg = sortedMessages[i];
-        // Skip tool messages, but include tool_call and regular messages
-        if (msg.role !== 'tool') {
-          // For assistant messages, also check if they have content
-          if (msg.role === 'assistant' && !msg.content) {
-            continue;
+      for (let i = renderUnits.length - 1; i >= 0; i--) {
+        const unit = renderUnits[i];
+        if (unit.kind === 'user') return unit.message.id;
+        if (unit.kind === 'assistant_turn') {
+          const { message } = unit;
+          if (message.content.trim() || streamingMessageId === message.id) {
+            return message.id;
           }
-          return msg.id;
         }
       }
       return null;
-    }, [sortedMessages]);
+    }, [renderUnits, streamingMessageId]);
 
     return (
       <div ref={ref} className={cn('flex flex-col gap-4', className)}>
-        {sortedMessages.map((message) => {
-          // Skip tool result messages (role="tool") - they are only used internally
-          // Tool results are displayed within tool_call messages
-          if (message.role === 'tool') {
-            return null;
-          }
+        {renderUnits.map((unit) => {
+          if (unit.kind === 'user') {
+            const message = unit.message;
+            const isMarkdownEnabled = markdownEnabled[message.id] !== false;
 
-          // Handle tool_call messages separately (completed/executing)
-          if (message.role === 'tool_call') {
-            const toolCallKey = createToolCallKey(message.id, 'message');
             return (
-              <ToolCallItem
+              <MessageItem
                 key={message.id}
                 message={message}
-                isExpanded={expandedToolCalls[toolCallKey] ?? false}
-                onToggle={() => toggleToolCall(toolCallKey, false)}
-                onCancel={onCancelToolExecution}
+                showUsage={false}
+                markdownEnabled={isMarkdownEnabled}
+                isCopied={copiedId === message.id}
+                onToggleMarkdown={toggleMarkdown}
+                onCopy={handleCopy}
+                onEdit={handleEdit}
+                onViewAgentDetails={onViewAgentDetails}
+                isStreaming={false}
+                isLastMessage={message.id === lastRenderableMessageId}
                 t={t}
               />
             );
           }
 
-          // Regular messages (user/assistant)
+          const { message, activity, pending } = unit;
           const isMarkdownEnabled = markdownEnabled[message.id] !== false;
-          const pending =
-            enablePendingPermissions && message.role === 'assistant'
-              ? pendingRequests[message.id]
-              : null;
-
-          const isIntermediateAssistantStep =
-            message.role === 'assistant' &&
-            assistantIdsWithToolCalls.has(message.id);
-
-          const showThinking = Boolean(
-            enableThinkingItem &&
-            message.role === 'assistant' &&
-            (message.reasoning ||
-              (enableStreaming &&
-                streamingMessageId === message.id &&
-                !message.content))
-          );
-          const hasMeaningfulContent = message.content.trim().length > 0;
-          const showMessage = Boolean(
-            message.role !== 'assistant' ||
-            (isIntermediateAssistantStep
-              ? hasMeaningfulContent
-              : message.content)
-          );
-
-          const showTokenUsage = showUsage && !isIntermediateAssistantStep;
+          const isStreaming =
+            enableStreaming && streamingMessageId === message.id;
+          const hasContent = message.content.trim().length > 0;
+          const showMessage = hasContent || isStreaming;
 
           return (
-            <Fragment key={message.id}>
-              {(showThinking || showMessage) && (
-                <div className="flex flex-col gap-1">
-                  {showThinking && (
-                    <ThinkingItem
-                      key={`thinking-${message.id}`}
-                      content={message.reasoning || ''}
-                      isStreaming={
-                        enableStreaming &&
-                        streamingMessageId === message.id &&
-                        !message.content
-                      }
-                    />
-                  )}
-                  {showMessage && (
-                    <MessageItem
-                      key={`content-${message.id}`}
-                      message={message}
-                      showUsage={showTokenUsage}
-                      markdownEnabled={isMarkdownEnabled}
-                      isCopied={copiedId === message.id}
-                      onToggleMarkdown={toggleMarkdown}
-                      onCopy={handleCopy}
-                      onEdit={handleEdit}
-                      onViewAgentDetails={onViewAgentDetails}
-                      isStreaming={
-                        enableStreaming && streamingMessageId === message.id
-                      }
-                      isLastMessage={message.id === lastRenderableMessageId}
-                      t={t}
-                    />
-                  )}
-                </div>
-              )}
+            <div key={message.id} className="flex flex-col">
+              {activity ? (
+                <AgentActivityTimeline
+                  activity={activity}
+                  expandedToolCalls={expandedToolCalls}
+                  onToggleToolCall={toggleToolCall}
+                  permissionTimeLeft={permissionTimeLeft}
+                  onPermissionRespond={onPermissionRespond}
+                  onCancelToolExecution={onCancelToolExecution}
+                  pending={pending}
+                  pendingMessageId={message.id}
+                  t={t}
+                />
+              ) : pending ? (
+                <AgentActivityTimeline
+                  activity={{ steps: [], defaultExpanded: true }}
+                  expandedToolCalls={expandedToolCalls}
+                  onToggleToolCall={toggleToolCall}
+                  permissionTimeLeft={permissionTimeLeft}
+                  onPermissionRespond={onPermissionRespond}
+                  onCancelToolExecution={onCancelToolExecution}
+                  pending={pending}
+                  pendingMessageId={message.id}
+                  t={t}
+                />
+              ) : null}
 
-              {/* Render Pending Tool Calls */}
-              {enablePendingPermissions &&
-                pending &&
-                pending.toolCalls.map((tc) => {
-                  const timeLeftValue = permissionTimeLeft[message.id];
-                  const toolCallKey = createToolCallKey(tc.id, 'permission');
-
-                  return (
-                    <ToolCallItem
-                      key={`permission-${tc.id}`}
-                      data={{
-                        id: tc.id,
-                        name: tc.name,
-                        arguments: tc.arguments,
-                        status: 'pending_permission',
-                      }}
-                      isExpanded={expandedToolCalls[toolCallKey] ?? true} // Default to expanded
-                      onToggle={() => toggleToolCall(toolCallKey, true)}
-                      onCancel={onCancelToolExecution}
-                      timeLeft={timeLeftValue}
-                      t={t}
-                      onRespond={
-                        onPermissionRespond
-                          ? (allow: boolean) =>
-                              onPermissionRespond(
-                                message.id,
-                                tc.id,
-                                tc.name,
-                                allow
-                              )
-                          : undefined
-                      }
-                    />
-                  );
-                })}
-            </Fragment>
+              {showMessage ? (
+                <MessageItem
+                  message={message}
+                  showUsage={showUsage}
+                  markdownEnabled={isMarkdownEnabled}
+                  isCopied={copiedId === message.id}
+                  onToggleMarkdown={toggleMarkdown}
+                  onCopy={handleCopy}
+                  onEdit={handleEdit}
+                  onViewAgentDetails={onViewAgentDetails}
+                  isStreaming={isStreaming}
+                  isLastMessage={message.id === lastRenderableMessageId}
+                  t={t}
+                />
+              ) : null}
+            </div>
           );
         })}
       </div>

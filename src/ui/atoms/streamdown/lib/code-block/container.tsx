@@ -14,16 +14,15 @@ export const CodeBlockContainer = ({
 }: CodeBlockContainerProps) => (
   <div
     className={cn(
-      'my-4 w-full overflow-hidden rounded-xl border border-border',
+      'my-2 w-full overflow-hidden rounded-lg',
+      'border border-border/60 bg-card/70 shadow-xs',
+      'ring-1 ring-black/3 dark:border-border/50 dark:bg-card/30 dark:ring-white/5',
       className
     )}
     data-language={language}
     data-streamdown="code-block"
     style={{
-      // Use content-visibility to skip rendering off-screen blocks
-      // This can significantly improve performance for large documents
       contentVisibility: 'auto',
-      // Provide a hint for layout to prevent layout shifts
       containIntrinsicSize: 'auto 200px',
       ...style,
     }}

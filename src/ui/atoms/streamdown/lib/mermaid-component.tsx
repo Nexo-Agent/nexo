@@ -2,8 +2,8 @@
 import { Suspense, useContext } from 'react';
 import { lazy } from 'react';
 import { StreamdownContext } from './context';
-import { CodeBlockCopyButton } from './code-block/copy-button';
 import { CodeBlockSkeleton } from './code-block/skeleton';
+import { PreviewCodeBlock } from './code-block/preview-code-block';
 import { MermaidDownloadDropdown } from './mermaid/download-button';
 import { MermaidFullscreenButton } from './mermaid/fullscreen-button';
 import { cn } from './utils';
@@ -27,46 +27,48 @@ export const MermaidComponent = ({
 
   const showMermaidControls = shouldShowControls(controlsConfig, 'mermaid');
   const showDownload = shouldShowMermaidControl(controlsConfig, 'download');
-  const showCopy = shouldShowMermaidControl(controlsConfig, 'copy');
   const showFullscreen = shouldShowMermaidControl(controlsConfig, 'fullscreen');
   const showPanZoomControls = shouldShowMermaidControl(
     controlsConfig,
     'panZoom'
   );
 
-  const shouldShowMermaidControls =
-    showMermaidControls && (showDownload || showCopy || showFullscreen);
+  const previewHeaderActions =
+    showMermaidControls && (showDownload || showFullscreen) ? (
+      <>
+        {showDownload ? (
+          <MermaidDownloadDropdown
+            chart={code}
+            config={mermaidContext?.config}
+          />
+        ) : null}
+        {showFullscreen ? (
+          <MermaidFullscreenButton
+            chart={code}
+            config={mermaidContext?.config}
+          />
+        ) : null}
+      </>
+    ) : null;
 
   return (
     <Suspense fallback={<CodeBlockSkeleton />}>
-      <div
-        className={cn(
-          'group relative my-4 h-auto rounded-xl border p-4',
-          className
-        )}
-        data-streamdown="mermaid-block"
-      >
-        {shouldShowMermaidControls ? (
-          <div className="flex items-center justify-end gap-2">
-            {showDownload ? (
-              <MermaidDownloadDropdown
+      <div className={cn('my-1', className)} data-streamdown="mermaid-block">
+        <PreviewCodeBlock
+          code={code}
+          language="mermaid"
+          defaultView="preview"
+          previewAvailable
+          previewHeaderActions={previewHeaderActions}
+          preview={
+            <div className="p-2">
+              <Mermaid
                 chart={code}
                 config={mermaidContext?.config}
+                showControls={showPanZoomControls}
               />
-            ) : null}
-            {showCopy ? <CodeBlockCopyButton code={code} /> : null}
-            {showFullscreen ? (
-              <MermaidFullscreenButton
-                chart={code}
-                config={mermaidContext?.config}
-              />
-            ) : null}
-          </div>
-        ) : null}
-        <Mermaid
-          chart={code}
-          config={mermaidContext?.config}
-          showControls={showPanZoomControls}
+            </div>
+          }
         />
       </div>
     </Suspense>

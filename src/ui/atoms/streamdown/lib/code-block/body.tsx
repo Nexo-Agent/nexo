@@ -2,80 +2,81 @@
 import { type ComponentProps, memo, useMemo } from 'react';
 import type { TokensResult } from 'shiki';
 import { cn } from '../utils';
+import { parseShikiRootStyle } from './shiki-styles';
 
 type CodeBlockBodyProps = ComponentProps<'pre'> & {
   result: TokensResult;
   language: string;
 };
 
-// Memoize line numbers class string since it's constant
-const LINE_NUMBER_CLASSES = cn(
-  'block',
-  'before:content-[counter(line)]',
-  'before:inline-block',
-  'before:[counter-increment:line]',
-  'before:w-6',
-  'before:mr-4',
-  'before:text-[13px]',
-  'before:text-right',
-  'before:text-muted-foreground/50',
-  'before:font-mono',
-  'before:select-none'
+const LINE_NUMBER_CLASS = cn(
+  'sticky left-0 z-[1] w-11 shrink-0 select-none',
+  'border-r border-border/35 bg-muted/20 px-2.5',
+  'text-right font-mono text-[11px] leading-[1.65] tabular-nums text-muted-foreground/45'
 );
+
+const LINE_CONTENT_CLASS = 'min-w-0 flex-1 px-4 py-0 leading-[1.65] whitespace-pre';
 
 export const CodeBlockBody = memo(
   ({ children, result, language, className, ...rest }: CodeBlockBodyProps) => {
-    // Memoize the pre style object
     const preStyle = useMemo(
-      () => ({
-        backgroundColor: result.bg,
-        color: result.fg,
-      }),
-      [result.bg, result.fg]
+      () => parseShikiRootStyle(String(result.fg ?? ''), String(result.bg ?? '')),
+      [result.fg, result.bg]
     );
 
     return (
-      <pre
-        className={cn(className, 'p-4 text-sm dark:bg-(--shiki-dark-bg)!')}
-        data-language={language}
-        data-streamdown="code-block-body"
-        style={preStyle}
-        {...rest}
+      <div
+        className={cn(
+          'overflow-x-auto',
+          '[scrollbar-width:thin] [scrollbar-color:var(--color-border)_transparent]'
+        )}
       >
-        <code className="[counter-increment:line_0] [counter-reset:line]">
-          {result.tokens.map((row, index) => (
-            <span
-              className={LINE_NUMBER_CLASSES}
-              // biome-ignore lint/suspicious/noArrayIndexKey: "This is a stable key."
-              key={index}
-            >
-              {row.map((token, tokenIndex) => (
-                <span
-                  className="dark:bg-(--shiki-dark-bg)! dark:text-(--shiki-dark)!"
-                  // biome-ignore lint/suspicious/noArrayIndexKey: "This is a stable key."
-                  key={tokenIndex}
-                  style={{
-                    color: token.color,
-                    backgroundColor: token.bgColor,
-                    ...token.htmlStyle,
-                  }}
-                  {...token.htmlAttrs}
-                >
-                  {token.content}
+        <pre
+          className={cn(
+            className,
+            'shiki m-0 min-w-full bg-[#f6f8fa] py-2 text-[13px] font-mono text-foreground dark:bg-[#0d1117]'
+          )}
+          data-language={language}
+          data-streamdown="code-block-body"
+          style={preStyle}
+          {...rest}
+        >
+          <code className="block min-w-max">
+            {result.tokens.map((row, lineIndex) => (
+              <div
+                className="flex min-w-max"
+                // biome-ignore lint/suspicious/noArrayIndexKey: line order is stable for static code blocks
+                key={lineIndex}
+              >
+                <span aria-hidden className={LINE_NUMBER_CLASS}>
+                  {lineIndex + 1}
                 </span>
-              ))}
-            </span>
-          ))}
-        </code>
-      </pre>
+                <span className={LINE_CONTENT_CLASS}>
+                  {row.map((token, tokenIndex) => (
+                    <span
+                      className="dark:bg-(--shiki-dark-bg)! dark:text-(--shiki-dark)!"
+                      // biome-ignore lint/suspicious/noArrayIndexKey: token order is stable within a line
+                      key={tokenIndex}
+                      style={{
+                        color: token.color,
+                        backgroundColor: token.bgColor,
+                        ...token.htmlStyle,
+                      }}
+                      {...token.htmlAttrs}
+                    >
+                      {token.content}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            ))}
+          </code>
+        </pre>
+      </div>
     );
   },
-  (prevProps, nextProps) => {
-    // Custom comparison: only re-render if result tokens actually changed
-    return (
-      prevProps.result === nextProps.result &&
-      prevProps.language === nextProps.language &&
-      prevProps.className === nextProps.className
-    );
-  }
+  (prevProps, nextProps) =>
+    prevProps.result === nextProps.result &&
+    prevProps.language === nextProps.language &&
+    prevProps.className === nextProps.className
 );

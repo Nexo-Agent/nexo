@@ -43,7 +43,6 @@ export function ChatMessages({
         ref={contentRef}
         messages={messages}
         enableStreaming={true}
-        enableThinkingItem={true}
         enablePendingPermissions={true}
         streamingMessageId={streamingMessageId}
         pendingRequests={pendingRequests}

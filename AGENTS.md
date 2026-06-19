@@ -1,0 +1,5 @@
+- This is cross-platform application (MacOS, Linux, Windows) so always care about this when coding
+- Always search more information via context7 MCP to avoid errors
+- Following workflow and tauri coding best practices of tauri-apps-development skill
+- Following best practices of react-best-practices skill when implementing frontend (@src)
+- Performance first

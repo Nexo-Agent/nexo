@@ -452,21 +452,38 @@
 }
 
 /* Code blocks */
-.markdown-content pre {
+.markdown-content pre:not([data-streamdown='code-block-body']) {
   @apply bg-secondary/30 rounded-lg p-4 overflow-x-auto border-none;
   line-height: 1.5;
 }
 
 .markdown-content code {
-  @apply bg-secondary/50 rounded px-1.5 py-0.5 text-inherit font-mono;
-  font-size: 0.9em;
+  @apply rounded-md border border-border/40 bg-muted/45 px-1.5 py-0.5 font-mono text-inherit;
+  font-size: 0.875em;
 }
 
-.markdown-content pre code {
-  @apply bg-transparent p-0 rounded-none;
+.markdown-content pre:not([data-streamdown='code-block-body']) code {
+  @apply border-0 bg-transparent p-0 rounded-none;
   font-size: 0.9em;
   display: block;
   white-space: pre;
+}
+
+.markdown-content [data-streamdown='inline-code'] {
+  @apply border-border/50 bg-muted/45;
+}
+
+.markdown-content [data-streamdown='code-block-body'] {
+  @apply rounded-none border-0 bg-transparent p-0 shadow-none;
+}
+
+.markdown-content [data-streamdown='code-block'] {
+  @apply my-2;
+}
+
+.dark .markdown-content [data-streamdown='code-block'] .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 /* Inline code specifically in paragraphs/lists */

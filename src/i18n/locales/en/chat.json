@@ -66,5 +66,9 @@
   "htmlPreview.fullscreen": "View fullscreen",
   "htmlPreview.fullscreenDescription": "Viewing HTML preview in fullscreen mode",
   "htmlPreview.viewSource": "View source",
+  "htmlPreview.viewPreview": "View preview",
+  "htmlPreview.tabCode": "Code",
+  "htmlPreview.tabPreview": "Preview",
+  "htmlPreview.previewUnavailable": "Preview is not ready yet",
   "htmlPreview.renderError": "Failed to render HTML preview"
 }
