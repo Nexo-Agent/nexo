@@ -12,6 +12,8 @@ interface BrowserWebviewHostProps {
   className?: string;
 }
 
+const PANEL_OPEN_RESYNC_DELAYS_MS = [50, 350, 500] as const;
+
 function isElementVisible(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect();
   if (rect.width < 1 || rect.height < 1) return false;
@@ -21,43 +23,13 @@ function isElementVisible(element: HTMLElement): boolean {
   return true;
 }
 
-function measureAncestorPanelState(el: HTMLElement): {
-  ancestorWidthZero: boolean;
-  ancestorOpacityZero: boolean;
-  ancestorPointerEventsNone: boolean;
-} {
-  let node: HTMLElement | null = el.parentElement;
-  let ancestorWidthZero = false;
-  let ancestorOpacityZero = false;
-  let ancestorPointerEventsNone = false;
-
-  while (node) {
-    const rect = node.getBoundingClientRect();
-    if (rect.width < 1) ancestorWidthZero = true;
-    const style = window.getComputedStyle(node);
-    if (parseFloat(style.opacity) === 0) ancestorOpacityZero = true;
-    if (style.pointerEvents === 'none') ancestorPointerEventsNone = true;
-    node = node.parentElement;
-  }
-
-  return {
-    ancestorWidthZero,
-    ancestorOpacityZero,
-    ancestorPointerEventsNone,
-  };
-}
-
-function resolveWebviewVisible(
+export function resolveWebviewVisible(
   viewport: BrowserViewport,
   geometryVisible: boolean,
   isRightPanelOpen: boolean,
-  rightPanelTab: string,
-  ancestors: ReturnType<typeof measureAncestorPanelState>
+  rightPanelTab: string
 ): boolean {
   if (!geometryVisible) return false;
-  if (ancestors.ancestorOpacityZero || ancestors.ancestorWidthZero) {
-    return false;
-  }
 
   if (viewport === 'main_panel') {
     return isRightPanelOpen && rightPanelTab === 'browser';
@@ -83,13 +55,11 @@ export function BrowserWebviewHost({
 
     const rect = el.getBoundingClientRect();
     const geometryVisible = isElementVisible(el);
-    const ancestors = measureAncestorPanelState(el);
     const effectiveVisible = resolveWebviewVisible(
       viewport,
       geometryVisible,
       isRightPanelOpen,
-      rightPanelTab,
-      ancestors
+      rightPanelTab
     );
 
     syncBrowserBounds(
@@ -106,16 +76,22 @@ export function BrowserWebviewHost({
     ).catch(() => undefined);
   }, [tabId, viewport, anchorId, isRightPanelOpen, rightPanelTab]);
 
+  const reportBoundsRef = useRef(reportBounds);
+
+  useEffect(() => {
+    reportBoundsRef.current = reportBounds;
+  }, [reportBounds]);
+
   const scheduleReport = useCallback(() => {
     if (rafRef.current != null) return;
     rafRef.current = window.requestAnimationFrame(() => {
       rafRef.current = null;
-      reportBounds();
+      reportBoundsRef.current();
     });
-  }, [reportBounds]);
+  }, []);
 
   useEffect(() => {
-    reportBounds();
+    scheduleReport();
 
     const el = containerRef.current;
     if (!el) return undefined;
@@ -144,7 +120,11 @@ export function BrowserWebviewHost({
       ).catch(() => undefined);
       releaseBrowserViewport(viewport, anchorId).catch(() => undefined);
     };
-  }, [tabId, viewport, anchorId, reportBounds, scheduleReport]);
+  }, [tabId, viewport, anchorId, scheduleReport]);
+
+  useEffect(() => {
+    reportBoundsRef.current();
+  }, [reportBounds]);
 
   useEffect(() => {
     if (viewport !== 'main_panel') return;
@@ -161,19 +141,14 @@ export function BrowserWebviewHost({
       return;
     }
 
-    // Layout size stays fixed while the panel is clipped closed, so ResizeObserver
-    // does not fire on reopen — re-sync after the panel open transition.
-    scheduleReport();
-    const timeout = window.setTimeout(() => scheduleReport(), 350);
-    return () => window.clearTimeout(timeout);
-  }, [
-    tabId,
-    viewport,
-    anchorId,
-    isRightPanelOpen,
-    rightPanelTab,
-    scheduleReport,
-  ]);
+    reportBoundsRef.current();
+    const timeouts = PANEL_OPEN_RESYNC_DELAYS_MS.map((delay) =>
+      window.setTimeout(() => reportBoundsRef.current(), delay)
+    );
+    return () => {
+      timeouts.forEach((timeout) => window.clearTimeout(timeout));
+    };
+  }, [tabId, viewport, anchorId, isRightPanelOpen, rightPanelTab]);
 
   return (
     <div
