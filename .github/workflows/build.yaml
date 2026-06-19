@@ -81,23 +81,17 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v1.0.0
+            # Nexo v1.0.2
 
-            The first stable release of Nexo — an all-in-one desktop AI workspace for macOS, Windows, and Linux.
+            ## What's New
 
-            ## Highlights
+            - Per-chat conversation jobs so multiple chats can stream and run tools independently without blocking each other
 
-            - Multi-provider LLM chat with your own API keys and workspace-level prompts
-            - Model Context Protocol (MCP) integration for extensible tools
-            - Skills and sandboxed Python / Node runtimes
-            - Per-chat file artifacts with built-in browser preview
-            - Web search with configurable providers
-            - Local-first SQLite storage for conversations and settings
-            - One-command installers for macOS, Windows, and Linux
+            ## Bug Fixes
 
-            ## Website
-
-            - New product landing page at https://nexo.nkthanh.dev
+            - Fixed message order jumping while a turn is still streaming or running tools
+            - Fixed artifact browser preview staying on "Loading browser..." after closing and reopening the right panel
+            - Fixed Linux webview JavaScript evaluation for browser artifacts
 
             ---
 
