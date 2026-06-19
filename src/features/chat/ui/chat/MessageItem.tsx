@@ -165,156 +165,155 @@ export const MessageItem = memo(
       >
         <div
           className={cn(
-            'flex min-w-0 w-full flex-col gap-2',
-            message.role === 'user' && 'items-end'
+            'relative w-fit max-w-full',
+            message.role === 'assistant' ? 'w-full' : 'ml-auto'
           )}
         >
-          <div className="relative flex flex-col gap-1 group">
-            <div
-              className={cn(
-                'relative min-w-0 wrap-break-words rounded-lg px-3 py-2 text-sm leading-relaxed',
-                isStreaming && 'will-change-contents',
-                message.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-none px-0'
-              )}
-              style={
-                isStreaming
-                  ? {
-                      contain: 'layout style',
-                    }
-                  : undefined
-              }
-            >
-              <div className="relative">
-                <div
-                  ref={contentRef}
-                  className={cn(
-                    'overflow-hidden transition-[max-height] duration-300 ease-in-out select-text',
-                    canCollapse && isCollapsed
-                      ? 'max-h-[300px]'
-                      : 'max-h-[9999px]'
-                  )}
-                >
-                  {/* Mentions */}
-                  {mentions.length > 0 && (
-                    <MessageMentions
-                      mentions={mentions}
-                      role={message.role}
-                      className={cn(
-                        message.role === 'user' ? 'opacity-90' : ''
-                      )}
-                    />
-                  )}
-
-                  {/* Attachments */}
-                  {parsedMetadata && (
-                    <MessageAttachments
-                      files={parsedMetadata.files}
-                      images={parsedMetadata.images}
-                    />
-                  )}
-
-                  {/* Flow Attachment */}
-                  {flowData && (
-                    <div className="mb-2">
-                      <FlowAttachment
-                        flow={flowData}
-                        mode="message"
-                        onClick={() => setIsFlowDialogOpen(true)}
-                      />
-                      <FlowEditorDialog
-                        open={isFlowDialogOpen}
-                        initialFlow={flowData}
-                        availableNodes={FLOW_NODES}
-                        onClose={() => setIsFlowDialogOpen(false)}
-                        readOnly={true}
-                      />
-                    </div>
-                  )}
-
-                  {skillData && (
-                    <div className="mb-2">
-                      <SkillChip
-                        name={skillData.skillName}
-                        description={skillData.description}
-                        mode="message"
-                      />
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  {cleanedContent && (
-                    <div className="whitespace-pre-wrap wrap-break-words">
-                      {message.role === 'assistant' && markdownEnabled ? (
-                        <MarkdownContent
-                          content={cleanedContent}
-                          messageId={message.id}
-                          isStreaming={isStreaming}
-                        />
-                      ) : (
-                        cleanedContent
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Gradient fade overlay when collapsed */}
-                {canCollapse && isCollapsed && (
-                  <div
-                    className={cn(
-                      'absolute bottom-0 left-0 right-0 h-16 pointer-events-none',
-                      message.role === 'user'
-                        ? 'bg-linear-to-t from-primary to-transparent'
-                        : 'bg-linear-to-t from-muted to-transparent'
-                    )}
+          <div
+            className={cn(
+              'relative min-w-0 wrap-break-words rounded-lg px-3 py-2 text-sm leading-relaxed',
+              isStreaming && 'will-change-contents',
+              message.role === 'user'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-none px-0 py-0'
+            )}
+            style={
+              isStreaming
+                ? {
+                    contain: 'layout style',
+                  }
+                : undefined
+            }
+          >
+            <div className="relative">
+              <div
+                ref={contentRef}
+                className={cn(
+                  'overflow-hidden transition-[max-height] duration-300 ease-in-out select-text',
+                  canCollapse && isCollapsed
+                    ? 'max-h-[300px]'
+                    : 'max-h-[9999px]'
+                )}
+              >
+                {/* Mentions */}
+                {mentions.length > 0 && (
+                  <MessageMentions
+                    mentions={mentions}
+                    role={message.role}
+                    className={cn(message.role === 'user' ? 'opacity-90' : '')}
                   />
+                )}
+
+                {/* Attachments */}
+                {parsedMetadata && (
+                  <MessageAttachments
+                    files={parsedMetadata.files}
+                    images={parsedMetadata.images}
+                  />
+                )}
+
+                {/* Flow Attachment */}
+                {flowData && (
+                  <div className="mb-2">
+                    <FlowAttachment
+                      flow={flowData}
+                      mode="message"
+                      onClick={() => setIsFlowDialogOpen(true)}
+                    />
+                    <FlowEditorDialog
+                      open={isFlowDialogOpen}
+                      initialFlow={flowData}
+                      availableNodes={FLOW_NODES}
+                      onClose={() => setIsFlowDialogOpen(false)}
+                      readOnly={true}
+                    />
+                  </div>
+                )}
+
+                {skillData && (
+                  <div className="mb-2">
+                    <SkillChip
+                      name={skillData.skillName}
+                      description={skillData.description}
+                      mode="message"
+                    />
+                  </div>
+                )}
+
+                {/* Content */}
+                {cleanedContent && (
+                  <div className="whitespace-pre-wrap wrap-break-words">
+                    {message.role === 'assistant' && markdownEnabled ? (
+                      <MarkdownContent
+                        content={cleanedContent}
+                        messageId={message.id}
+                        isStreaming={isStreaming}
+                      />
+                    ) : (
+                      cleanedContent
+                    )}
+                  </div>
                 )}
               </div>
 
-              {/* Collapse/Expand button */}
-              {canCollapse && (
+              {/* Gradient fade overlay when collapsed */}
+              {canCollapse && isCollapsed && (
                 <div
                   className={cn(
-                    'flex items-center mt-2 pt-2',
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                    'absolute bottom-0 left-0 right-0 h-16 pointer-events-none',
+                    message.role === 'user'
+                      ? 'bg-linear-to-t from-primary to-transparent'
+                      : 'bg-linear-to-t from-muted to-transparent'
                   )}
-                >
-                  <button
-                    className="text-xs opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 px-2 py-1 rounded hover:bg-black/5 dark:hover:bg-white/5"
-                    onClick={handleToggleCollapse}
-                  >
-                    {isCollapsed ? (
-                      <>
-                        <ChevronDown className="h-3 w-3" />
-                        {t('showMore')}
-                      </>
-                    ) : (
-                      <>
-                        <ChevronUp className="h-3 w-3" />
-                        {t('showLess')}
-                      </>
-                    )}
-                  </button>
-                </div>
+                />
               )}
             </div>
 
-            {/* Controls - positioned below message bubble */}
-            <div className="flex justify-end m-0 p-0 -translate-y-[12px]">
-              <MessageControls
-                role={message.role}
-                content={message.content}
-                isCopied={isCopied}
-                markdownEnabled={markdownEnabled}
-                enableRawText={enableRawText}
-                onEdit={handleEdit}
-                onCopy={handleCopy}
-                onToggleMarkdown={handleToggleMarkdown}
-                t={t}
-              />
-            </div>
+            {/* Collapse/Expand button */}
+            {canCollapse && (
+              <div
+                className={cn(
+                  'flex items-center mt-2 pt-2',
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                )}
+              >
+                <button
+                  className="text-xs opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 px-2 py-1 rounded hover:bg-black/5 dark:hover:bg-white/5"
+                  onClick={handleToggleCollapse}
+                >
+                  {isCollapsed ? (
+                    <>
+                      <ChevronDown className="h-3 w-3" />
+                      {t('showMore')}
+                    </>
+                  ) : (
+                    <>
+                      <ChevronUp className="h-3 w-3" />
+                      {t('showLess')}
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
+
+          <MessageControls
+            role={message.role}
+            content={message.content}
+            isCopied={isCopied}
+            markdownEnabled={markdownEnabled}
+            enableRawText={enableRawText}
+            onEdit={handleEdit}
+            onCopy={handleCopy}
+            onToggleMarkdown={handleToggleMarkdown}
+            t={t}
+            className={cn(
+              'absolute z-10',
+              message.role === 'user'
+                ? 'right-1 bottom-1'
+                : 'right-0 top-full mt-0.5'
+            )}
+          />
         </div>
       </div>
     );

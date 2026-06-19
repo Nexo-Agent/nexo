@@ -128,26 +128,35 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
     }, [renderUnits, streamingMessageId]);
 
     return (
-      <div ref={ref} className={cn('flex flex-col gap-4', className)}>
-        {renderUnits.map((unit) => {
+      <div ref={ref} className={cn('flex flex-col', className)}>
+        {renderUnits.map((unit, index) => {
+          const spacingClass =
+            index === 0
+              ? undefined
+              : renderUnits[index - 1]?.kind === 'user' &&
+                  unit.kind === 'assistant_turn'
+                ? 'my-2'
+                : 'my-4';
+
           if (unit.kind === 'user') {
             const message = unit.message;
             const isMarkdownEnabled = markdownEnabled[message.id] !== false;
 
             return (
-              <MessageItem
-                key={message.id}
-                message={message}
-                markdownEnabled={isMarkdownEnabled}
-                isCopied={copiedId === message.id}
-                onToggleMarkdown={toggleMarkdown}
-                onCopy={handleCopy}
-                onEdit={handleEdit}
-                onViewAgentDetails={onViewAgentDetails}
-                isStreaming={false}
-                isLastMessage={message.id === lastRenderableMessageId}
-                t={t}
-              />
+              <div key={message.id} className={spacingClass}>
+                <MessageItem
+                  message={message}
+                  markdownEnabled={isMarkdownEnabled}
+                  isCopied={copiedId === message.id}
+                  onToggleMarkdown={toggleMarkdown}
+                  onCopy={handleCopy}
+                  onEdit={handleEdit}
+                  onViewAgentDetails={onViewAgentDetails}
+                  isStreaming={false}
+                  isLastMessage={message.id === lastRenderableMessageId}
+                  t={t}
+                />
+              </div>
             );
           }
 
@@ -159,7 +168,10 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
           const showMessage = hasContent || isStreaming;
 
           return (
-            <div key={message.id} className="flex flex-col">
+            <div
+              key={message.id}
+              className={cn('flex flex-col gap-3', spacingClass)}
+            >
               {activity ? (
                 <AgentActivityTimeline
                   activity={activity}

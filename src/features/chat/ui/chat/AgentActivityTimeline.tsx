@@ -109,7 +109,7 @@ export const AgentActivityTimeline = memo(function AgentActivityTimeline({
   if (activity.steps.length === 0 && !pending) return null;
 
   return (
-    <div className="mb-1.5">
+    <div>
       {activity.steps.length > 0 ? (
         <details
           open={open}
