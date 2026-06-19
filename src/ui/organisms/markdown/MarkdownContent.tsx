@@ -168,7 +168,7 @@ export function MarkdownContent({
             mode="streaming"
             isAnimating={isStreaming}
             parseIncompleteMarkdown={true}
-            controls
+            controls={{ table: false, mermaid: true }}
             components={components}
             shikiTheme={shikiTheme}
             className={cn(

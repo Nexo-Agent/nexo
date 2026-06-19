@@ -10,8 +10,10 @@ import { Button } from '@/ui/atoms/button/button';
 import { WorkspaceSelector } from '@/features/workspace';
 import { About } from '@/features/settings';
 import { ChatSearchDialog } from '@/features/chat/ui/ChatSearchDialog';
+import { ChatRightPanel } from '@/features/chat/ui/ChatRightPanel';
 import { KeyboardShortcutsDialog } from '@/features/shortcuts/ui/KeyboardShortcutsDialog';
 import { TitleBar } from '@/features/ui/ui/TitleBar';
+import { ResizableRightPanel } from '@/features/ui/ui/ResizableRightPanel';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   toggleSidebar,
@@ -84,33 +86,36 @@ export function MainLayout() {
           ) : null
         }
         rightContent={
-          <>
-            {activePage === 'chat' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => dispatch(toggleRightPanel())}
-                aria-label={
-                  isRightPanelOpen
-                    ? t('collapseRightPanel', { ns: 'common' })
-                    : t('expandRightPanel', { ns: 'common' })
-                }
-                className="h-7 w-7"
-              >
-                {isRightPanelOpen ? (
-                  <PanelRightClose className="size-4" />
-                ) : (
-                  <PanelRightOpen className="size-4" />
-                )}
-              </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => dispatch(toggleRightPanel())}
+            aria-label={
+              isRightPanelOpen
+                ? t('collapseRightPanel', { ns: 'common' })
+                : t('expandRightPanel', { ns: 'common' })
+            }
+            className="h-7 w-7"
+          >
+            {isRightPanelOpen ? (
+              <PanelRightClose className="size-4" />
+            ) : (
+              <PanelRightOpen className="size-4" />
             )}
-          </>
+          </Button>
         }
       />
 
       {/* Main Content Area */}
-      {activePage === 'chat' && <ChatScreen />}
-      {activePage === 'settings' && <SettingsScreen />}
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {activePage === 'chat' && <ChatScreen />}
+          {activePage === 'settings' && <SettingsScreen />}
+        </div>
+        <ResizableRightPanel>
+          <ChatRightPanel />
+        </ResizableRightPanel>
+      </div>
 
       {/* About Dialog */}
       <About

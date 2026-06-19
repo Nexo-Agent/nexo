@@ -9,8 +9,6 @@
   "open": "Open",
   "tabLabel": "Browser",
   "panelDescription": "Embedded Chromium browser",
-  "noChatTitle": "No chat selected",
-  "noChatDescription": "Select a chat to use the browser",
   "fenceInvalidUrl": "Invalid URL in browser fence",
   "back": "Back",
   "forward": "Forward",

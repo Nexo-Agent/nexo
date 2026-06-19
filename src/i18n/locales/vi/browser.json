@@ -9,8 +9,6 @@
   "open": "Mở",
   "tabLabel": "Trình duyệt",
   "panelDescription": "Trình duyệt Chromium nhúng",
-  "noChatTitle": "Chưa chọn cuộc trò chuyện",
-  "noChatDescription": "Chọn một cuộc trò chuyện để dùng trình duyệt",
   "fenceInvalidUrl": "URL không hợp lệ trong fence browser",
   "back": "Quay lại",
   "forward": "Tiến",
