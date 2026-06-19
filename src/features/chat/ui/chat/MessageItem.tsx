@@ -19,7 +19,6 @@ import { MessageControls } from './components/MessageControls';
 
 export interface MessageItemProps {
   message: Message;
-  showUsage?: boolean;
   markdownEnabled: boolean;
   isCopied: boolean;
   isStreaming: boolean;
@@ -34,7 +33,6 @@ export interface MessageItemProps {
 export const MessageItem = memo(
   function MessageItem({
     message,
-    showUsage = false,
     markdownEnabled,
     isCopied,
     isStreaming,
@@ -316,38 +314,6 @@ export const MessageItem = memo(
                 t={t}
               />
             </div>
-
-            {/* Footer: Only show token usage if showUsage is enabled */}
-            {showUsage &&
-              message.role === 'assistant' &&
-              message.tokenUsage && (
-                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-1 select-text mt-1 pl-2">
-                  {message.tokenUsage.promptTokens !== undefined && (
-                    <span>
-                      {t('promptTokens')}:{' '}
-                      {message.tokenUsage.promptTokens.toLocaleString()}
-                    </span>
-                  )}
-                  {message.tokenUsage.completionTokens !== undefined && (
-                    <span>
-                      {t('completionTokens')}:{' '}
-                      {message.tokenUsage.completionTokens.toLocaleString()}
-                    </span>
-                  )}
-                  {message.tokenUsage.totalTokens !== undefined && (
-                    <span>
-                      {t('totalTokens')}:{' '}
-                      {message.tokenUsage.totalTokens.toLocaleString()}
-                    </span>
-                  )}
-                  {message.tokenUsage.tokensPerSecond !== undefined && (
-                    <span>
-                      {t('tokensPerSecond')}:{' '}
-                      {message.tokenUsage.tokensPerSecond.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-              )}
           </div>
         </div>
       </div>
@@ -360,9 +326,7 @@ export const MessageItem = memo(
       prevProps.message.content === nextProps.message.content &&
       prevProps.message.reasoning === nextProps.message.reasoning &&
       prevProps.message.codeBlocks === nextProps.message.codeBlocks &&
-      prevProps.message.tokenUsage === nextProps.message.tokenUsage &&
       prevProps.message.metadata === nextProps.message.metadata && // Include metadata for agent card updates
-      prevProps.showUsage === nextProps.showUsage &&
       prevProps.markdownEnabled === nextProps.markdownEnabled &&
       prevProps.isCopied === nextProps.isCopied &&
       prevProps.isStreaming === nextProps.isStreaming &&

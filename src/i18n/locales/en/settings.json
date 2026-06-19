@@ -265,7 +265,7 @@
   "skills": "Agent Skills",
   "experiments": "Experiments",
   "showUsage": "Show token usage",
-  "showUsageDescription": "If enabled, token usage details will be displayed below each AI response.",
+  "showUsageDescription": "If enabled, total token usage for the conversation will be displayed above the chat input.",
   "enableWorkflowEditor": "Enable Workflow Editor",
   "enableWorkflowEditorDescription": "If enabled, the workflow button will be shown in the chat input to create and attach workflows.",
   "enableRawText": "Enable Raw Text Option",

@@ -1,6 +1,5 @@
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
-import { useAppSettings } from '@/hooks/useAppSettings';
 import { MessageList } from './MessageList';
 import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import type { Message } from '../../types';
@@ -31,7 +30,6 @@ export function ChatMessages({
   });
 
   const { t } = useTranslation('chat');
-  const { showUsage } = useAppSettings();
 
   const { pendingRequests, permissionTimeLeft, handlePermissionRespond } =
     useToolPermission();
@@ -50,7 +48,6 @@ export function ChatMessages({
         onCancelToolExecution={onCancelToolExecution}
         onEditingMessageIdChange={onEditMessage}
         permissionTimeLeft={permissionTimeLeft}
-        showUsage={showUsage}
         t={t}
         isLoading={isLoading && !streamingMessageId}
         className={cn(CHAT_WIDTH_CLASSES, 'py-4')}

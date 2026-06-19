@@ -60,6 +60,7 @@ import { ChatAttachments } from './components/ChatAttachments';
 import { ChatDragOverlay } from './components/ChatDragOverlay';
 import { useTextareaAutoResize } from '../../hooks/useTextareaAutoResize';
 import { CHAT_WIDTH_CLASSES } from '../ChatLayout';
+import { aggregateConversationTokenUsage } from '../../lib/tokenUsage';
 
 interface ChatInputProps {
   selectedWorkspaceId: string | null;
@@ -123,7 +124,7 @@ export function ChatInput({
   } = useChatInput(selectedWorkspaceId);
 
   // Get app settings for experimental features
-  const { enableWorkflowEditor } = useAppSettings();
+  const { enableWorkflowEditor, showUsage } = useAppSettings();
 
   // Calculate active tools from workspace settings - fetching from backend for unified source of truth
   const { data: activeTools = [] } = useGetActiveToolsForWorkspaceQuery(
@@ -132,7 +133,13 @@ export function ChatInput({
   );
 
   // Use messages hook for streaming state
-  const { handleStopStreaming, isStreaming } = useMessages(selectedChatId);
+  const { handleStopStreaming, isStreaming, messages } =
+    useMessages(selectedChatId);
+
+  const conversationTokenUsage = useMemo(
+    () => aggregateConversationTokenUsage(messages),
+    [messages]
+  );
 
   const effectiveIsStreaming = isStreaming;
 
@@ -344,6 +351,29 @@ export function ChatInput({
     <>
       <div className="bg-background">
         <div className={cn(CHAT_WIDTH_CLASSES, 'py-2')}>
+          {showUsage && conversationTokenUsage && (
+            <div className="mb-1.5 flex flex-wrap gap-x-3 gap-y-1 px-1 text-xs text-muted-foreground select-text">
+              {conversationTokenUsage.promptTokens !== undefined && (
+                <span>
+                  {t('promptTokens')}:{' '}
+                  {conversationTokenUsage.promptTokens.toLocaleString()}
+                </span>
+              )}
+              {conversationTokenUsage.completionTokens !== undefined && (
+                <span>
+                  {t('completionTokens')}:{' '}
+                  {conversationTokenUsage.completionTokens.toLocaleString()}
+                </span>
+              )}
+              {conversationTokenUsage.totalTokens !== undefined && (
+                <span>
+                  {t('totalTokens')}:{' '}
+                  {conversationTokenUsage.totalTokens.toLocaleString()}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Edit Mode Bar - Above ChatInput */}
           {isEditing && (
             <div className="flex items-center justify-between rounded-t-lg bg-primary/10 px-3 py-1 border-x border-t border-primary/20">

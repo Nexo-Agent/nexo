@@ -33,7 +33,6 @@ interface MessageListProps {
   ) => void | Promise<void>;
   onViewAgentDetails?: (sessionId: string, agentId: string) => void;
   onCancelToolExecution?: () => void;
-  showUsage?: boolean;
   t: (key: string) => string;
   isLoading?: boolean;
   className?: string;
@@ -59,7 +58,6 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
       onPermissionRespond,
       onViewAgentDetails,
       onCancelToolExecution,
-      showUsage = false,
       t,
       className,
       permissionTimeLeft = {},
@@ -140,7 +138,6 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
               <MessageItem
                 key={message.id}
                 message={message}
-                showUsage={false}
                 markdownEnabled={isMarkdownEnabled}
                 isCopied={copiedId === message.id}
                 onToggleMarkdown={toggleMarkdown}
@@ -192,7 +189,6 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
               {showMessage ? (
                 <MessageItem
                   message={message}
-                  showUsage={showUsage}
                   markdownEnabled={isMarkdownEnabled}
                   isCopied={copiedId === message.id}
                   onToggleMarkdown={toggleMarkdown}
