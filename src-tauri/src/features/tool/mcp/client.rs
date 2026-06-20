@@ -1,6 +1,7 @@
 use crate::error::AppError;
 use crate::features::sandbox::{RuntimeKind, SandboxService};
 use crate::features::tool::models::MCPTool;
+use crate::path_util;
 use rust_mcp_sdk::{
     mcp_client::{client_runtime, ClientHandler, ClientRuntime},
     schema::{
@@ -15,6 +16,8 @@ use rust_mcp_transport::{
 };
 use std::collections::HashMap;
 use std::sync::Arc;
+#[cfg(windows)]
+use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 
 // Simple client handler - we don't need to handle any server messages for this use case
@@ -332,27 +335,59 @@ impl MCPClientService {
         if let Some(kind) = Self::runtime_kind_for_command(command) {
             let rt = SandboxService::get(app, kind)?;
 
-            if command == "uv" {
-                if let Some(path) = explicit_path {
-                    env.insert("UV_PYTHON".to_string(), path.to_string());
-                    let resolved = rt.resolve("uv", None).to_string_lossy().to_string();
-                    env = SandboxService::env(app, kind, env)?;
-                    return Ok((resolved, env));
+            #[cfg(windows)]
+            {
+                // rust-mcp-transport spawns via `cmd.exe /c <command> <args>`, which fails for
+                // absolute paths (notably `\\?\` verbatim prefixes). Use bare command names and
+                // prepend the runtime directory to PATH instead.
+                if command == "uv" {
+                    if let Some(path) = explicit_path {
+                        env.insert(
+                            "UV_PYTHON".to_string(),
+                            path_util::normalize_path_string(path),
+                        );
+                    }
                 }
+
+                let executable = match (command, explicit_path) {
+                    ("uv", _) => rt.resolve("uv", None),
+                    (_, Some(path)) => PathBuf::from(path_util::normalize_path_string(path)),
+                    _ => rt.resolve(command, None),
+                };
+
+                if let Some(parent) = executable.parent() {
+                    env = path_util::prepend_path_dir(env, parent);
+                }
+
+                env = SandboxService::env(app, kind, env)?;
+                env = path_util::normalize_env_paths(env);
+                return Ok((command.to_string(), env));
             }
 
-            let resolved = if let Some(path) = explicit_path {
+            #[cfg(not(windows))]
+            {
                 if command == "uv" {
-                    rt.resolve("uv", None).to_string_lossy().to_string()
-                } else {
-                    path.to_string()
+                    if let Some(path) = explicit_path {
+                        env.insert("UV_PYTHON".to_string(), path.to_string());
+                        let resolved = rt.resolve("uv", None).to_string_lossy().to_string();
+                        env = SandboxService::env(app, kind, env)?;
+                        return Ok((resolved, env));
+                    }
                 }
-            } else {
-                rt.resolve(command, None).to_string_lossy().to_string()
-            };
 
-            env = SandboxService::env(app, kind, env)?;
-            return Ok((resolved, env));
+                let resolved = if let Some(path) = explicit_path {
+                    if command == "uv" {
+                        rt.resolve("uv", None).to_string_lossy().to_string()
+                    } else {
+                        path.to_string()
+                    }
+                } else {
+                    rt.resolve(command, None).to_string_lossy().to_string()
+                };
+
+                env = SandboxService::env(app, kind, env)?;
+                return Ok((resolved, env));
+            }
         }
 
         Ok((command.to_string(), env))

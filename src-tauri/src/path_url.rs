@@ -1,21 +1,7 @@
 use crate::error::AppError;
-use std::path::{Path, PathBuf};
+use crate::path_util;
+use std::path::Path;
 use url::Url;
-
-/// Strip Windows verbatim/extended-length prefixes so paths are safe for `Url::from_file_path`.
-fn normalize_path_for_file_url(path: &Path) -> PathBuf {
-    let lossy = path.to_string_lossy();
-    #[cfg(windows)]
-    {
-        if let Some(stripped) = lossy.strip_prefix(r"\\?\") {
-            return PathBuf::from(stripped);
-        }
-        if let Some(stripped) = lossy.strip_prefix(r"\\?\UNC\") {
-            return PathBuf::from(format!(r"\\{}", stripped.replace('/', "\\")));
-        }
-    }
-    path.to_path_buf()
-}
 
 /// Convert an absolute filesystem path to a `file:` URL using `std::path::Path` and `url::Url::from_file_path`.
 pub fn absolute_path_to_file_url(path: impl AsRef<Path>) -> Result<String, AppError> {
@@ -30,7 +16,7 @@ pub fn absolute_path_to_file_url(path: impl AsRef<Path>) -> Result<String, AppEr
         return Ok(trimmed);
     }
 
-    let normalized = normalize_path_for_file_url(path);
+    let normalized = path_util::strip_verbatim_prefix(path);
     Url::from_file_path(&normalized)
         .map(|url| url.to_string())
         .map_err(|()| {

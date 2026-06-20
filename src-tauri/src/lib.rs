@@ -6,6 +6,7 @@ mod features;
 mod menu;
 mod models;
 mod path_url;
+mod path_util;
 
 mod services;
 mod state;
