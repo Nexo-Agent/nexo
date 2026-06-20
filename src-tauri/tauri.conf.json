@@ -3,13 +3,13 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://raw.githubusercontent.com/Nexo-Agent/nexo-releases/refs/heads/main/latest.json"
+        "https://github.com/Nexo-Agent/nexo/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU0OEY3MDlCNzVBOUIzODcKUldTSHM2bDFtM0NQVkc0VWhwbFRoZ1pYRFdXaEpQRWllZ2NaejBGd2x1ejBaWDlSQUtGdWc1SDEK"
     }
   },
   "productName": "Nexo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "identifier": "com.nexo.app",
   "build": {
     "beforeDevCommand": "yarn ui:dev",
@@ -58,7 +58,7 @@
     "resources": ["binaries/*"],
     "windows": {
       "wix": {
-        "version": "1.0.2"
+        "version": "1.0.3"
       }
     }
   }
