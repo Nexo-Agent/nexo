@@ -119,7 +119,7 @@ impl ParentPlatformState {
                     )
                 })?;
             let config = macos_config_from_ptr(config_ptr)?;
-            return Ok(builder.with_webview_configuration(config));
+            Ok(builder.with_webview_configuration(config))
         }
 
         #[cfg(any(
