@@ -167,3 +167,8 @@ pub async fn browser_reload(
 ) -> Result<(), AppError> {
     state.browser_service.reload(tab_id.as_deref()).await
 }
+
+#[tauri::command]
+pub fn path_to_file_url(path: String) -> Result<String, AppError> {
+    crate::path_url::absolute_path_to_file_url(path)
+}

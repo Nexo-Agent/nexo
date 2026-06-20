@@ -119,6 +119,7 @@ export const TauriCommands = {
   BROWSER_GO_BACK: 'browser_go_back',
   BROWSER_GO_FORWARD: 'browser_go_forward',
   BROWSER_RELOAD: 'browser_reload',
+  PATH_TO_FILE_URL: 'path_to_file_url',
 } as const;
 
 export type TauriCommand = (typeof TauriCommands)[keyof typeof TauriCommands];

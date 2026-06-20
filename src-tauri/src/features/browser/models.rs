@@ -1,3 +1,4 @@
+use crate::path_url;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -41,7 +42,7 @@ pub fn validate_url(url: &str) -> Result<String, crate::error::AppError> {
         return Ok(trimmed.to_string());
     }
     if is_absolute_filesystem_path(trimmed) {
-        return Ok(absolute_path_to_file_url(trimmed));
+        return path_url::absolute_path_to_file_url(trimmed);
     }
     Err(crate::error::AppError::Validation(
         "URL must use http, https, or file scheme".to_string(),
@@ -58,14 +59,6 @@ fn looks_like_windows_drive_path(path: &str) -> bool {
         && bytes[0].is_ascii_alphabetic()
         && bytes[1] == b':'
         && (bytes[2] == b'\\' || bytes[2] == b'/')
-}
-
-fn absolute_path_to_file_url(path: &str) -> String {
-    let mut posix = path.replace('\\', "/");
-    if looks_like_windows_drive_path(path) && !posix.starts_with('/') {
-        posix = format!("/{posix}");
-    }
-    format!("file://{posix}")
 }
 
 #[cfg(test)]

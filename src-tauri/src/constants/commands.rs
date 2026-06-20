@@ -111,4 +111,5 @@ impl TauriCommands {
     pub const BROWSER_GO_BACK: &'static str = "browser_go_back";
     pub const BROWSER_GO_FORWARD: &'static str = "browser_go_forward";
     pub const BROWSER_RELOAD: &'static str = "browser_reload";
+    pub const PATH_TO_FILE_URL: &'static str = "path_to_file_url";
 }

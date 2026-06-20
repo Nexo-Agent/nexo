@@ -1,24 +1,16 @@
+import { invokeCommand, TauriCommands } from '@/lib/tauri';
+
 /**
  * Convert an absolute filesystem path to a file:// URL for Chromium CDP navigation.
+ * Delegates to Rust (`Url::from_file_path`) for cross-platform correctness.
  * Do not use convertFileSrc — that yields Tauri's asset protocol, which headless Chrome rejects.
  */
-export function absolutePathToFileUrl(absolutePath: string): string {
-  const trimmed = absolutePath.trim();
-  if (trimmed.toLowerCase().startsWith('file://')) {
-    return trimmed;
-  }
-
-  let posix = trimmed.replace(/\\/g, '/');
-  if (/^[A-Za-z]:\//.test(posix)) {
-    posix = `/${posix}`;
-  }
-
-  const encoded = posix
-    .split('/')
-    .map((segment) => encodeURIComponent(segment))
-    .join('/');
-
-  return `file://${encoded}`;
+export async function absolutePathToFileUrl(
+  absolutePath: string
+): Promise<string> {
+  return invokeCommand<string>(TauriCommands.PATH_TO_FILE_URL, {
+    path: absolutePath.trim(),
+  });
 }
 
 /** Extensions previewable in the embedded Chromium browser. */

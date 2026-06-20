@@ -1,27 +1,37 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { absolutePathToFileUrl } from './fileUrl';
 
+const invokeCommand = vi.fn();
+
+vi.mock('@/lib/tauri', () => ({
+  invokeCommand: (...args: unknown[]) => invokeCommand(...args),
+  TauriCommands: { PATH_TO_FILE_URL: 'path_to_file_url' },
+}));
+
 describe('absolutePathToFileUrl', () => {
-  it('converts unix absolute paths', () => {
-    expect(absolutePathToFileUrl('/Users/me/artifacts/chart.html')).toBe(
-      'file:///Users/me/artifacts/chart.html'
-    );
+  beforeEach(() => {
+    invokeCommand.mockReset();
   });
 
-  it('encodes spaces', () => {
-    expect(absolutePathToFileUrl('/Users/me/my chart.html')).toBe(
-      'file:///Users/me/my%20chart.html'
-    );
+  it('delegates to the Rust path_to_file_url command', async () => {
+    invokeCommand.mockResolvedValue('file:///Users/me/artifacts/chart.html');
+
+    await expect(
+      absolutePathToFileUrl('/Users/me/artifacts/chart.html')
+    ).resolves.toBe('file:///Users/me/artifacts/chart.html');
+
+    expect(invokeCommand).toHaveBeenCalledWith('path_to_file_url', {
+      path: '/Users/me/artifacts/chart.html',
+    });
   });
 
-  it('passes through existing file URLs', () => {
-    const url = 'file:///Users/me/chart.html';
-    expect(absolutePathToFileUrl(url)).toBe(url);
-  });
+  it('trims whitespace before invoking', async () => {
+    invokeCommand.mockResolvedValue('file:///Users/me/chart.html');
 
-  it('converts windows paths', () => {
-    expect(absolutePathToFileUrl('C:\\Users\\me\\chart.html')).toBe(
-      'file:///C%3A/Users/me/chart.html'
-    );
+    await absolutePathToFileUrl('  /Users/me/chart.html  ');
+
+    expect(invokeCommand).toHaveBeenCalledWith('path_to_file_url', {
+      path: '/Users/me/chart.html',
+    });
   });
 });

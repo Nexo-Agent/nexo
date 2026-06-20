@@ -5,6 +5,7 @@ mod events;
 mod features;
 mod menu;
 mod models;
+mod path_url;
 
 mod services;
 mod state;
@@ -286,6 +287,7 @@ pub fn run() {
             features::browser::commands::browser_go_back,
             features::browser::commands::browser_go_forward,
             features::browser::commands::browser_reload,
+            features::browser::commands::path_to_file_url,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

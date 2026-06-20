@@ -29,11 +29,8 @@ export function ArtifactsPanel() {
 
   const handleOpen = async (artifact: Artifact) => {
     if (isBrowserPreviewableFilename(artifact.filename)) {
-      dispatch(
-        openBrowserInRightPanel({
-          url: absolutePathToFileUrl(artifact.path),
-        })
-      );
+      const url = await absolutePathToFileUrl(artifact.path);
+      dispatch(openBrowserInRightPanel({ url }));
       return;
     }
     try {
