@@ -60,6 +60,7 @@
   "toolsNotSupported": "Tools not supported for this model",
   "totalTokens": "Total tokens",
   "visionNotSupported": "Image upload not supported for this model",
+  "fileUploadNotSupported": "File upload not supported for this model",
   "htmlPreview.title": "HTML preview",
   "htmlPreview.loading": "Loading preview...",
   "htmlPreview.download": "Download HTML",

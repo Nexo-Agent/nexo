@@ -58,6 +58,8 @@ pub struct PromptContext<'a> {
 #[derive(Debug, Clone)]
 pub struct MessageBuildContext<'a> {
     pub prompt_ctx: PromptContext<'a>,
+    pub model_id: &'a str,
+    pub provider: &'a str,
     pub existing_messages: &'a [crate::features::message::Message],
     pub user_content: &'a str,
     pub user_files: Option<&'a [String]>,

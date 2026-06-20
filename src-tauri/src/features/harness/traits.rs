@@ -16,6 +16,22 @@ pub trait FileContentLoader: Send + Sync {
     fn load_file_content(&self, file_path: &str) -> Result<(String, String), AppError>;
 }
 
+/// Context for resolving user attachments (native vs extract-to-text).
+pub struct AttachmentResolveContext<'a> {
+    pub model_id: &'a str,
+    pub provider: &'a str,
+    pub user_text: &'a str,
+    pub file_paths: &'a [String],
+}
+
+/// Resolves attachments into provider-safe `UserContent`.
+pub trait AttachmentResolver: Send + Sync {
+    fn resolve(
+        &self,
+        ctx: &AttachmentResolveContext<'_>,
+    ) -> Result<crate::features::harness::attachment::ResolvedUserContent, AppError>;
+}
+
 /// Builds system prompts from workspace settings, skills, and overrides.
 pub trait PromptProvider: Send + Sync {
     fn build_system_prompt(&self, ctx: &PromptContext<'_>) -> Result<String, AppError>;
@@ -68,6 +84,7 @@ pub trait SessionStore: Send + Sync {
 pub struct HarnessDeps {
     pub prompt_provider: Arc<dyn PromptProvider>,
     pub message_builder: Arc<dyn MessageBuilder>,
+    pub attachment_resolver: Arc<dyn AttachmentResolver>,
     pub session_store: Arc<dyn SessionStore>,
     pub llm_client: Arc<dyn LlmClient>,
     pub hooks: Arc<dyn HarnessHooks>,

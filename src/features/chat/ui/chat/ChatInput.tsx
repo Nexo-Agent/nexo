@@ -10,11 +10,7 @@ import {
   Workflow,
 } from 'lucide-react';
 import { Input } from '@/ui/atoms/input';
-import {
-  MAX_MESSAGE_LENGTH,
-  MAX_FILE_SIZE,
-  ALLOWED_FILE_TYPES,
-} from '@/lib/constants';
+import { MAX_MESSAGE_LENGTH, MAX_FILE_SIZE } from '@/lib/constants';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 
@@ -42,7 +38,12 @@ import { useAppDispatch } from '@/app/hooks';
 import type { LLMConnection } from '@/features/llm/types';
 import { cn, formatFileSize } from '@/lib/utils';
 import { showError } from '@/features/notifications/state/notificationSlice';
-import { isVisionModel } from '@/features/llm/lib/model-utils';
+import {
+  canAttachFiles,
+  getFileAcceptForCapabilities,
+  isFileAllowedForCapabilities,
+  resolveModelCapabilities,
+} from '@/features/llm/lib/model-utils';
 import { useChatInput } from '../../hooks/useChatInput';
 import { useMessages } from '../../hooks/useMessages';
 import { useSlashCommand } from '@/hooks/useSlashCommand';
@@ -217,9 +218,18 @@ export function ChatInput({
     };
   }, [selectedModel, selectedLLMConnectionId, llmConnections]);
 
-  const supportsVision = isVisionModel(currentModelName);
-  const supportsToolCalling = currentModel?.supportsTools ?? false;
-  const supportsThinking = currentModel?.supportsThinking ?? false;
+  const modelCapabilities = useMemo(
+    () => resolveModelCapabilities(currentModel, currentModelName),
+    [currentModel, currentModelName]
+  );
+
+  const supportsFileUpload = canAttachFiles(modelCapabilities);
+  const fileAccept = useMemo(
+    () => getFileAcceptForCapabilities(modelCapabilities),
+    [modelCapabilities]
+  );
+  const supportsToolCalling = modelCapabilities.tools;
+  const supportsThinking = modelCapabilities.thinking;
 
   const [modelSearchTerm, setModelSearchTerm] = useState('');
 
@@ -289,8 +299,8 @@ export function ChatInput({
           continue;
         }
 
-        // Validate type
-        if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        // Validate type against model input capabilities
+        if (!isFileAllowedForCapabilities(file, modelCapabilities)) {
           dispatch(
             showError(
               t('fileTypeNotSupported', { type: file.type, ns: 'chat' })
@@ -323,16 +333,16 @@ export function ChatInput({
   );
 
   const handleUploadClick = () => {
-    if (supportsVision) {
+    if (supportsFileUpload) {
       fileInputRef.current?.click();
     }
   };
 
   useEffect(() => {
-    if (!supportsVision && attachedFiles.length > 0) {
+    if (!supportsFileUpload && attachedFiles.length > 0) {
       handleFileUpload([]);
     }
-  }, [attachedFiles.length, handleFileUpload, supportsVision]);
+  }, [attachedFiles.length, handleFileUpload, supportsFileUpload]);
 
   // Use Drag & Drop hook
   const {
@@ -344,7 +354,7 @@ export function ChatInput({
   } = useChatDragDrop({
     attachedFiles,
     handleFileUpload,
-    supportsVision,
+    modelCapabilities,
   });
 
   return (
@@ -421,10 +431,10 @@ export function ChatInput({
               ref={fileInputRef}
               type="file"
               multiple
-              accept="image/*"
+              accept={fileAccept}
               className="hidden"
               onChange={handleFileSelect}
-              disabled={disabled || !supportsVision}
+              disabled={disabled || !supportsFileUpload}
             />
 
             {/* Row 1: Text Input Only */}
@@ -470,14 +480,13 @@ export function ChatInput({
                   variant="ghost"
                   size="icon"
                   onClick={handleUploadClick}
-                  disabled={disabled || !supportsVision}
+                  disabled={disabled || !supportsFileUpload}
                   className="h-7 w-7 text-muted-foreground hover:text-foreground border-0 shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label={t('uploadFile', { ns: 'common' })}
                   title={
-                    supportsVision
+                    supportsFileUpload
                       ? t('uploadFile', { ns: 'common' })
-                      : t('visionNotSupported', { ns: 'chat' }) ||
-                        'Image upload not supported for this model'
+                      : t('fileUploadNotSupported', { ns: 'chat' })
                   }
                 >
                   <Paperclip className="size-4" />

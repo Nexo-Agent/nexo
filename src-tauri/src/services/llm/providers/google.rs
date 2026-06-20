@@ -2,8 +2,9 @@ use super::LLMProvider;
 use crate::error::AppError;
 use crate::events::{MessageEmitter, TokenUsage as EventTokenUsage};
 use crate::models::llm_types::{
-    AssistantContent, ChatMessage, ContentPart, InlineData, LLMChatRequest, LLMChatResponse,
-    LLMModel, TokenUsage, ToolCall, ToolCallFunction, UserContent,
+    detect_model_capabilities, is_image_generation_model, AssistantContent, ChatMessage,
+    ContentPart, InlineData, LLMChatRequest, LLMChatResponse, LLMModel, TokenUsage, ToolCall,
+    ToolCallFunction, UserContent,
 };
 use async_trait::async_trait;
 use base64::Engine as _;
@@ -255,96 +256,24 @@ impl GoogleProvider {
         ))
     }
 
-    fn is_image_generation_model(model_id: &str) -> bool {
-        let model_lower = model_id.to_lowercase();
-        // Image generation models: gemini-2.5-flash-image, gemini-3-pro-image, imagen-2, imagen-3, mono-banana, nano-banana
-        model_lower.contains("image")
-            || model_lower.contains("imagen")
-            || model_lower.contains("banana")
-    }
-
-    fn check_model_capabilities(model_id: &str) -> (bool, bool, bool) {
-        // Check if model supports image generation
-        let supports_image_generation = Self::is_image_generation_model(model_id);
-
-        // Image generation models don't support tools or thinking
-        if supports_image_generation {
-            return (false, false, true);
-        }
-
-        let model_lower = model_id.to_lowercase();
-
-        // Tool Calling Support:
-        // All Gemini models (1.0, 1.5, 2.0, 2.5, 3.0) support tool calling
-        let supports_tools = model_lower.starts_with("gemini");
-
-        // Thinking/Reasoning Support:
-        // - Gemini 2.5 Pro: advanced reasoning
-        // - Gemini 2.5 Flash: thinking capabilities
-        // - Gemini 3 Pro: Deep Think mode
-        // - Gemini 3 Flash: improved reasoning
-        // Note: Gemini 2.0 and earlier do NOT have advanced thinking
-        let supports_thinking = if model_lower.starts_with("gemini") {
-            // Gemini 2.5 or 3.x series
-            model_lower.starts_with("gemini-2.5")
-                || model_lower.starts_with("gemini-3")
-                || model_lower.starts_with("gemini_2.5")
-                || model_lower.starts_with("gemini_3")
-        } else {
-            false
-        };
-
-        (supports_tools, supports_thinking, supports_image_generation)
-    }
-
     fn get_fallback_models() -> Vec<LLMModel> {
-        vec![
-            LLMModel {
-                id: "gemini-1.5-pro".to_string(),
-                name: "Gemini 1.5 Pro".to_string(),
-                created: None,
-                owned_by: Some("Google".to_string()),
-                supports_tools: true,
-                supports_thinking: false,
-                supports_image_generation: false,
-            },
-            LLMModel {
-                id: "gemini-1.5-flash".to_string(),
-                name: "Gemini 1.5 Flash".to_string(),
-                created: None,
-                owned_by: Some("Google".to_string()),
-                supports_tools: true,
-                supports_thinking: false,
-                supports_image_generation: false,
-            },
-            LLMModel {
-                id: "gemini-pro".to_string(),
-                name: "Gemini Pro".to_string(),
-                created: None,
-                owned_by: Some("Google".to_string()),
-                supports_tools: true,
-                supports_thinking: false,
-                supports_image_generation: false,
-            },
-            LLMModel {
-                id: "gemini-2.5-flash-image".to_string(),
-                name: "Gemini 2.5 Flash Image".to_string(),
-                created: None,
-                owned_by: Some("Google".to_string()),
-                supports_tools: false,
-                supports_thinking: false,
-                supports_image_generation: true,
-            },
-            LLMModel {
-                id: "gemini-3-pro-image-preview".to_string(),
-                name: "Gemini 3 Pro Image Preview".to_string(),
-                created: None,
-                owned_by: Some("Google".to_string()),
-                supports_tools: false,
-                supports_thinking: false,
-                supports_image_generation: true,
-            },
+        [
+            ("gemini-1.5-pro", "Gemini 1.5 Pro"),
+            ("gemini-1.5-flash", "Gemini 1.5 Flash"),
+            ("gemini-pro", "Gemini Pro"),
+            ("gemini-2.5-flash-image", "Gemini 2.5 Flash Image"),
+            ("gemini-3-pro-image-preview", "Gemini 3 Pro Image Preview"),
         ]
+        .into_iter()
+        .map(|(id, name)| {
+            LLMModel::new_with_capabilities(
+                id.to_string(),
+                name.to_string(),
+                None,
+                Some("Google".to_string()),
+            )
+        })
+        .collect()
     }
 
     async fn handle_streaming(
@@ -795,19 +724,12 @@ impl LLMProvider for GoogleProvider {
                                 let clean_id =
                                     id.strip_prefix("models/").unwrap_or(&id).to_string();
 
-                                // Check model capabilities
-                                let (supports_tools, supports_thinking, supports_image_generation) =
-                                    Self::check_model_capabilities(&clean_id);
-
-                                Some(LLMModel {
-                                    id: clean_id,
+                                Some(LLMModel::new_with_capabilities(
+                                    clean_id,
                                     name,
-                                    created: None,
-                                    owned_by: Some("Google".to_string()),
-                                    supports_tools,
-                                    supports_thinking,
-                                    supports_image_generation,
-                                })
+                                    None,
+                                    Some("Google".to_string()),
+                                ))
                             })
                             .collect();
 
@@ -836,9 +758,9 @@ impl LLMProvider for GoogleProvider {
         cancellation_rx: Option<tokio::sync::broadcast::Receiver<()>>,
     ) -> Result<LLMChatResponse, AppError> {
         // Auto-detect and configure for image generation models
-        let is_image_generation_model = Self::is_image_generation_model(&request.model);
+        let is_image_gen = is_image_generation_model(&request.model);
 
-        if is_image_generation_model {
+        if is_image_gen {
             // Image generation models require specific configuration
             // 1. Enable both TEXT and IMAGE response modalities
             if request.response_modalities.is_none() {
@@ -1152,7 +1074,8 @@ impl LLMProvider for GoogleProvider {
         // - Gemini 3: thinkingLevel (low, medium, high)
         // - Gemini 2.5: thinkingBudget (number of tokens)
         // Image generation models don't support thinking
-        let (_, supports_thinking, _) = Self::check_model_capabilities(&model);
+        let caps = detect_model_capabilities(&model);
+        let supports_thinking = caps.thinking;
 
         if let Some(effort) = request.reasoning_effort.as_ref() {
             if !effort.is_empty() && supports_thinking {
@@ -1197,7 +1120,7 @@ impl LLMProvider for GoogleProvider {
 
         if let Some(sys) = system_instruction {
             // Image generation models don't support systemInstruction
-            if !Self::is_image_generation_model(&model) {
+            if !is_image_generation_model(&model) {
                 // Only add systemInstruction for non-image generation models
                 if let Some(obj) = body.as_object_mut() {
                     obj.insert("systemInstruction".to_string(), sys);
@@ -1208,7 +1131,7 @@ impl LLMProvider for GoogleProvider {
         // Add tools if present
         if let Some(tools) = request.tools {
             // Image generation models don't support tools
-            if !Self::is_image_generation_model(&model) {
+            if !is_image_generation_model(&model) {
                 // Map tools to Google format if needed.
                 // Start simple without tools or implement mapping.
                 // Google tools format: function_declarations inside 'tools' array.

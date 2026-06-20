@@ -3,9 +3,16 @@ export interface LLMModel {
   name: string;
   created?: number;
   owned_by?: string;
-  supportsTools: boolean;
-  supportsThinking: boolean;
-  supportsImageGeneration: boolean;
+  /** @deprecated Use supportsImageInput */
+  supportsVision?: boolean;
+  supportsImageInput?: boolean;
+  supportsDocumentInput?: boolean;
+  supportsAudioInput?: boolean;
+  supportsVideoInput?: boolean;
+  supportsTextExtraction?: boolean;
+  supportsTools?: boolean;
+  supportsThinking?: boolean;
+  supportsImageGeneration?: boolean;
 }
 
 export interface LLMConnection {

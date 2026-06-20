@@ -4,6 +4,7 @@
 #![allow(dead_code)] // mock/stub components retained for future implementation
 
 pub mod adapters;
+pub mod attachment;
 pub mod context;
 pub mod factory;
 pub mod intent_router;

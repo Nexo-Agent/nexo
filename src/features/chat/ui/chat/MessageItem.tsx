@@ -201,6 +201,8 @@ export const MessageItem = memo(
                   <MessageAttachments
                     files={parsedMetadata.files}
                     images={parsedMetadata.images}
+                    fileEntries={parsedMetadata.fileEntries}
+                    role={message.role === 'user' ? 'user' : 'assistant'}
                   />
                 )}
 

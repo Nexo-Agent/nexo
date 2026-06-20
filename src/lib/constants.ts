@@ -7,27 +7,43 @@ export const MAX_INPUT_HEIGHT = 200;
 
 // File upload limits
 export const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB (increased for videos)
-export const ALLOWED_FILE_TYPES = [
-  // Images
+
+export const IMAGE_FILE_TYPES = [
   'image/jpeg',
   'image/jpg',
   'image/png',
   'image/gif',
   'image/webp',
-  // Documents
+] as const;
+
+export const DOCUMENT_FILE_TYPES = [
   'application/pdf',
   'text/plain',
   'text/markdown',
   'text/csv',
-  // Audio
+  'application/json',
+] as const;
+
+export const AUDIO_FILE_TYPES = [
   'audio/mpeg',
   'audio/mp3',
   'audio/wav',
   'audio/ogg',
   'audio/webm',
-  // Video
+] as const;
+
+export const VIDEO_FILE_TYPES = [
   'video/mp4',
   'video/mpeg',
   'video/webm',
   'video/quicktime',
+] as const;
+
+export const EXTRACTABLE_FILE_TYPES = [...DOCUMENT_FILE_TYPES] as const;
+
+export const ALLOWED_FILE_TYPES = [
+  ...IMAGE_FILE_TYPES,
+  ...DOCUMENT_FILE_TYPES,
+  ...AUDIO_FILE_TYPES,
+  ...VIDEO_FILE_TYPES,
 ];

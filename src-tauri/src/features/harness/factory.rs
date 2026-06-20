@@ -3,12 +3,13 @@ use crate::features::chat::repository::ChatRepository;
 use crate::features::harness::adapters::incoming_files::{merge_file_metadata, process_incoming_files};
 use crate::features::harness::adapters::title::TitleGenerator;
 use crate::features::harness::adapters::files::DefaultFileContentLoader;
+use crate::features::harness::attachment::DefaultAttachmentResolver;
 use crate::features::harness::adapters::hooks_tauri::TauriHarnessHooks;
 use crate::features::harness::adapters::llm::LlmServiceAdapter;
 use crate::features::harness::adapters::prompt::{NexoMessageBuilder, NexoPromptProvider};
 use crate::features::harness::adapters::session::SqliteSessionStore;
 use crate::features::harness::session::AgentSession;
-use crate::features::harness::traits::{HarnessDeps, PromptProvider};
+use crate::features::harness::traits::{AttachmentResolver, HarnessDeps, PromptProvider};
 use crate::features::harness::types::{HarnessMessages, MessageBuildContext, MessageTurnRequest, TurnOutput};
 use crate::features::llm_connection::LLMConnectionService;
 use crate::features::message::MessageService;
@@ -40,9 +41,11 @@ impl HarnessFactory {
         let prompt_provider: Arc<dyn PromptProvider> =
             Arc::new(NexoPromptProvider::new(skill_service.clone()));
         let file_loader = Arc::new(DefaultFileContentLoader);
+        let attachment_resolver: Arc<dyn AttachmentResolver> =
+            Arc::new(DefaultAttachmentResolver::new(file_loader.clone()));
         let message_builder = Arc::new(NexoMessageBuilder::new(
             prompt_provider.clone(),
-            file_loader,
+            attachment_resolver.clone(),
             skill_service.clone(),
         ));
         let session_store = Arc::new(SqliteSessionStore::new(
@@ -55,6 +58,7 @@ impl HarnessFactory {
         let deps = Arc::new(HarnessDeps {
             prompt_provider,
             message_builder,
+            attachment_resolver,
             session_store,
             llm_client: llm_client.clone(),
             hooks,

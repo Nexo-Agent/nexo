@@ -2,9 +2,14 @@ import { describe, it, expect } from 'vitest';
 import {
   getEnabledLLMConnections,
   isVisionModel,
-  getVisionModelPatterns,
+  detectModelCapabilities,
+  resolveModelCapabilities,
+  supportsAnyFileInput,
+  canAttachFiles,
+  getFileAcceptForCapabilities,
+  isFileAllowedForCapabilities,
 } from './model-utils';
-import type { LLMConnection } from '../types';
+import type { LLMConnection, LLMModel } from '../types';
 
 describe('model-utils', () => {
   describe('getEnabledLLMConnections', () => {
@@ -59,149 +64,310 @@ describe('model-utils', () => {
         },
       ];
 
-      const enabled = getEnabledLLMConnections(connections);
-
-      expect(enabled).toHaveLength(0);
-    });
-
-    it('should return empty array for empty input', () => {
-      const enabled = getEnabledLLMConnections([]);
-      expect(enabled).toHaveLength(0);
+      expect(getEnabledLLMConnections(connections)).toHaveLength(0);
     });
   });
 
-  describe('isVisionModel', () => {
+  describe('detectModelCapabilities', () => {
     describe('OpenAI models', () => {
-      it('should detect GPT-4o models as vision', () => {
-        expect(isVisionModel('gpt-4o')).toBe(true);
-        expect(isVisionModel('gpt-4o-mini')).toBe(true);
-        expect(isVisionModel('gpt-4o-2024-05-13')).toBe(true);
-        expect(isVisionModel('GPT-4O')).toBe(true);
+      it('detects GPT-4o image, document, and tools', () => {
+        const caps = detectModelCapabilities('gpt-4o');
+        expect(caps.input.image).toBe(true);
+        expect(caps.input.document).toBe(true);
+        expect(caps.tools).toBe(true);
+        expect(caps.thinking).toBe(false);
+        expect(caps.imageGeneration).toBe(false);
       });
 
-      it('should detect GPT-4 Turbo as vision', () => {
-        expect(isVisionModel('gpt-4-turbo')).toBe(true);
-        expect(isVisionModel('gpt-4-turbo-preview')).toBe(true);
-        expect(isVisionModel('GPT-4-TURBO')).toBe(true);
+      it('detects GPT-4.1 document without image', () => {
+        const caps = detectModelCapabilities('gpt-4.1');
+        expect(caps.input.image).toBe(false);
+        expect(caps.input.document).toBe(true);
+        expect(caps.tools).toBe(true);
       });
 
-      it('should detect specific GPT-4 vision versions', () => {
-        expect(isVisionModel('gpt-4-vision-preview')).toBe(true);
-        expect(isVisionModel('gpt-4-0125-preview')).toBe(true);
-        expect(isVisionModel('gpt-4-1106-preview')).toBe(true);
-        expect(isVisionModel('gpt-4-2024-04-09')).toBe(true);
-        expect(isVisionModel('gpt-4-2024-08-06')).toBe(true);
-        expect(isVisionModel('gpt-4-2024-11-20')).toBe(true);
+      it('detects GPT-5 thinking', () => {
+        const caps = detectModelCapabilities('gpt-5.5');
+        expect(caps.input.image).toBe(true);
+        expect(caps.input.document).toBe(true);
+        expect(caps.thinking).toBe(true);
       });
 
-      it('should detect O1 models as vision', () => {
-        expect(isVisionModel('o1')).toBe(true);
-        expect(isVisionModel('o1-preview')).toBe(true);
-        expect(isVisionModel('o1-mini')).toBe(true);
+      it('detects DALL-E as image generation only', () => {
+        const caps = detectModelCapabilities('dall-e-3');
+        expect(caps.imageGeneration).toBe(true);
+        expect(caps.tools).toBe(false);
+        expect(caps.thinking).toBe(false);
+        expect(caps.input.document).toBe(false);
       });
 
-      it('should detect GPT-5 models as vision', () => {
-        expect(isVisionModel('gpt-5')).toBe(true);
-        expect(isVisionModel('gpt-5-turbo')).toBe(true);
-      });
-
-      it('should not detect non-vision GPT models', () => {
-        expect(isVisionModel('gpt-3.5-turbo')).toBe(false);
-        expect(isVisionModel('gpt-4')).toBe(false);
+      it('does not treat plain gpt-4 as image input', () => {
+        expect(detectModelCapabilities('gpt-4').input.image).toBe(false);
+        expect(detectModelCapabilities('gpt-4').input.document).toBe(true);
       });
     });
 
-    describe('Anthropic Claude models', () => {
-      it('should detect Claude 3 models as vision', () => {
-        expect(isVisionModel('claude-3-opus')).toBe(true);
-        expect(isVisionModel('claude-3-sonnet')).toBe(true);
-        expect(isVisionModel('claude-3-haiku')).toBe(true);
-        expect(isVisionModel('claude-3-opus-20240229')).toBe(true);
+    describe('Anthropic models', () => {
+      it('detects Claude Opus 4.8 capabilities', () => {
+        const caps = detectModelCapabilities('claude-opus-4-8');
+        expect(caps.input.image).toBe(true);
+        expect(caps.input.document).toBe(true);
+        expect(caps.tools).toBe(true);
+        expect(caps.thinking).toBe(true);
       });
 
-      it('should detect Claude 3.5 models as vision', () => {
-        expect(isVisionModel('claude-3-5-sonnet')).toBe(true);
-        expect(isVisionModel('claude-3-5-opus')).toBe(true);
-        expect(isVisionModel('claude-3-5-sonnet-20241022')).toBe(true);
-      });
-
-      it('should not detect older Claude models', () => {
-        expect(isVisionModel('claude-2')).toBe(false);
-        expect(isVisionModel('claude-instant')).toBe(false);
+      it('does not detect claude-2', () => {
+        const caps = detectModelCapabilities('claude-2');
+        expect(caps.input.image).toBe(false);
+        expect(caps.input.document).toBe(false);
+        expect(caps.tools).toBe(false);
       });
     });
 
     describe('Google Gemini models', () => {
-      it('should detect all Gemini models as vision', () => {
-        expect(isVisionModel('gemini-pro')).toBe(true);
-        expect(isVisionModel('gemini-pro-vision')).toBe(true);
-        expect(isVisionModel('gemini-1.5-pro')).toBe(true);
-        expect(isVisionModel('gemini-1.5-flash')).toBe(true);
-        expect(isVisionModel('gemini-2.0-flash')).toBe(true);
+      it('detects gemini 2.5 flash thinking with audio/video', () => {
+        const caps = detectModelCapabilities('gemini-2.5-flash');
+        expect(caps.input.image).toBe(true);
+        expect(caps.input.document).toBe(true);
+        expect(caps.input.audio).toBe(true);
+        expect(caps.input.video).toBe(true);
+        expect(caps.tools).toBe(true);
+        expect(caps.thinking).toBe(true);
+      });
+
+      it('detects gemini image models', () => {
+        const caps = detectModelCapabilities('gemini-2.5-flash-image');
+        expect(caps.imageGeneration).toBe(true);
+        expect(caps.tools).toBe(false);
+        expect(caps.input.document).toBe(false);
       });
     });
 
-    describe('Ollama vision models', () => {
-      it('should detect LLaVA models as vision', () => {
-        expect(isVisionModel('llava')).toBe(true);
-        expect(isVisionModel('llava:7b')).toBe(true);
-        expect(isVisionModel('bakllava')).toBe(true);
+    describe('Local vision models', () => {
+      it('detects llava image-only and qwen-vl', () => {
+        expect(detectModelCapabilities('llava:7b').input.image).toBe(true);
+        expect(detectModelCapabilities('llava:7b').input.document).toBe(false);
+        expect(detectModelCapabilities('qwen2.5-vl:7b').input.image).toBe(true);
+        expect(detectModelCapabilities('qwen2.5-vl:7b').input.document).toBe(
+          false
+        );
+      });
+    });
+
+    describe('DeepSeek', () => {
+      it('detects deepseek v4 without file input but with text extraction', () => {
+        const caps = detectModelCapabilities('deepseek-v4-pro');
+        expect(caps.input.image).toBe(false);
+        expect(caps.input.document).toBe(false);
+        expect(caps.tools).toBe(true);
+        expect(caps.thinking).toBe(true);
+        expect(caps.textExtraction).toBe(true);
+      });
+    });
+
+    describe('Text extraction', () => {
+      it('enables text extraction when native document is unavailable', () => {
+        expect(detectModelCapabilities('deepseek-v4-pro').textExtraction).toBe(
+          true
+        );
+        expect(detectModelCapabilities('llava:7b').textExtraction).toBe(true);
       });
 
-      it('should detect other vision models', () => {
-        expect(isVisionModel('minicpm-v')).toBe(true);
-        expect(isVisionModel('moondream')).toBe(true);
-        expect(isVisionModel('custom-vision-model')).toBe(true);
+      it('disables text extraction when native document is supported', () => {
+        expect(detectModelCapabilities('gpt-4o').textExtraction).toBe(false);
+        expect(detectModelCapabilities('gpt-4.1').textExtraction).toBe(false);
       });
     });
 
     describe('Edge cases', () => {
-      it('should return false for null or undefined', () => {
-        expect(isVisionModel(null)).toBe(false);
-        expect(isVisionModel(undefined)).toBe(false);
+      it('returns false for null, undefined, empty', () => {
+        expect(detectModelCapabilities(null).input.image).toBe(false);
+        expect(detectModelCapabilities(undefined).input.image).toBe(false);
+        expect(detectModelCapabilities('').input.image).toBe(false);
       });
 
-      it('should return false for empty string', () => {
-        expect(isVisionModel('')).toBe(false);
-      });
-
-      it('should be case-insensitive', () => {
-        expect(isVisionModel('GPT-4O')).toBe(true);
-        expect(isVisionModel('Claude-3-Opus')).toBe(true);
-        expect(isVisionModel('GEMINI-PRO')).toBe(true);
-      });
-
-      it('should return false for unknown models', () => {
-        expect(isVisionModel('unknown-model')).toBe(false);
-        expect(isVisionModel('text-davinci-003')).toBe(false);
+      it('strips openrouter prefix', () => {
+        const caps = detectModelCapabilities(
+          'openrouter/anthropic/claude-opus-4-8'
+        );
+        expect(caps.thinking).toBe(true);
       });
     });
   });
 
-  describe('getVisionModelPatterns', () => {
-    it('should return array of vision model patterns', () => {
-      const patterns = getVisionModelPatterns();
+  describe('canAttachFiles', () => {
+    it('allows attach when native input or text extraction is available', () => {
+      expect(
+        canAttachFiles({
+          input: { image: false, document: false, audio: false, video: false },
+          tools: true,
+          thinking: true,
+          imageGeneration: false,
+          textExtraction: true,
+        })
+      ).toBe(true);
+      expect(
+        canAttachFiles({
+          input: { image: true, document: false, audio: false, video: false },
+          tools: true,
+          thinking: false,
+          imageGeneration: false,
+          textExtraction: false,
+        })
+      ).toBe(true);
+      expect(
+        canAttachFiles({
+          input: { image: false, document: false, audio: false, video: false },
+          tools: true,
+          thinking: false,
+          imageGeneration: false,
+          textExtraction: false,
+        })
+      ).toBe(false);
+    });
+  });
 
-      expect(Array.isArray(patterns)).toBe(true);
-      expect(patterns.length).toBeGreaterThan(0);
+  describe('file gate for extract-only models', () => {
+    const deepseekCaps = detectModelCapabilities('deepseek-v4-pro');
+    const gpt4oCaps = detectModelCapabilities('gpt-4o');
+    const llavaCaps = detectModelCapabilities('llava:7b');
+
+    it('accepts extractable types for deepseek', () => {
+      expect(getFileAcceptForCapabilities(deepseekCaps)).toContain(
+        'application/pdf'
+      );
+      expect(getFileAcceptForCapabilities(deepseekCaps)).toContain(
+        'application/json'
+      );
+      expect(
+        isFileAllowedForCapabilities(
+          new File(['{}'], 'config.json', { type: 'application/json' }),
+          deepseekCaps
+        )
+      ).toBe(true);
+      expect(
+        isFileAllowedForCapabilities(
+          new File(['{}'], 'config.json', { type: '' }),
+          deepseekCaps
+        )
+      ).toBe(true);
+      expect(
+        isFileAllowedForCapabilities(
+          new File(['x'], 'report.pdf', { type: 'application/pdf' }),
+          deepseekCaps
+        )
+      ).toBe(true);
+      expect(
+        isFileAllowedForCapabilities(
+          new File(['x'], 'photo.png', { type: 'image/png' }),
+          deepseekCaps
+        )
+      ).toBe(false);
     });
 
-    it('should include common vision model patterns', () => {
-      const patterns = getVisionModelPatterns();
-
-      expect(patterns).toContain('gpt-4-vision');
-      expect(patterns).toContain('gpt-4-turbo');
-      expect(patterns).toContain('gpt-4o');
-      expect(patterns).toContain('claude-3');
-      expect(patterns).toContain('gemini-pro-vision');
-      expect(patterns).toContain('llava');
+    it('uses native document accept for gpt-4o', () => {
+      expect(gpt4oCaps.textExtraction).toBe(false);
+      expect(
+        isFileAllowedForCapabilities(
+          new File(['x'], 'report.pdf', { type: 'application/pdf' }),
+          gpt4oCaps
+        )
+      ).toBe(true);
     });
 
-    it('should return consistent results', () => {
-      const patterns1 = getVisionModelPatterns();
-      const patterns2 = getVisionModelPatterns();
+    it('allows hybrid image native + pdf extract for llava', () => {
+      expect(
+        isFileAllowedForCapabilities(
+          new File(['x'], 'photo.png', { type: 'image/png' }),
+          llavaCaps
+        )
+      ).toBe(true);
+      expect(
+        isFileAllowedForCapabilities(
+          new File(['x'], 'report.pdf', { type: 'application/pdf' }),
+          llavaCaps
+        )
+      ).toBe(true);
+    });
+  });
 
-      expect(patterns1).toEqual(patterns2);
+  describe('supportsAnyFileInput', () => {
+    it('returns true when any input modality is supported', () => {
+      expect(
+        supportsAnyFileInput({
+          image: true,
+          document: false,
+          audio: false,
+          video: false,
+        })
+      ).toBe(true);
+      expect(
+        supportsAnyFileInput({
+          image: false,
+          document: true,
+          audio: false,
+          video: false,
+        })
+      ).toBe(true);
+      expect(
+        supportsAnyFileInput({
+          image: false,
+          document: false,
+          audio: false,
+          video: false,
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe('isVisionModel', () => {
+    it('delegates to detectModelCapabilities image input', () => {
+      expect(isVisionModel('gpt-4o')).toBe(true);
+      expect(isVisionModel('gpt-3.5-turbo')).toBe(false);
+      expect(isVisionModel('gpt-4.1')).toBe(false);
+    });
+  });
+
+  describe('resolveModelCapabilities', () => {
+    it('prefers backend flags when present', () => {
+      const model: LLMModel = {
+        id: 'custom-model',
+        name: 'Custom',
+        supportsImageInput: true,
+        supportsDocumentInput: false,
+        supportsTools: false,
+        supportsThinking: true,
+        supportsImageGeneration: false,
+      };
+
+      const caps = resolveModelCapabilities(model);
+      expect(caps.input.image).toBe(true);
+      expect(caps.input.document).toBe(false);
+      expect(caps.tools).toBe(false);
+      expect(caps.thinking).toBe(true);
+    });
+
+    it('migrates legacy supportsVision to image input', () => {
+      const model: LLMModel = {
+        id: 'legacy-model',
+        name: 'Legacy',
+        supportsVision: true,
+      };
+
+      const caps = resolveModelCapabilities(model);
+      expect(caps.input.image).toBe(true);
+    });
+
+    it('falls back to heuristics when flags missing', () => {
+      const model = {
+        id: 'gpt-4o',
+        name: 'GPT-4o',
+      } as LLMModel;
+
+      const caps = resolveModelCapabilities(model);
+      expect(caps.input.image).toBe(true);
+      expect(caps.input.document).toBe(true);
+      expect(caps.tools).toBe(true);
     });
   });
 });

@@ -1,3 +1,4 @@
+pub mod extractors;
 pub mod files;
 pub mod hooks_tauri;
 pub mod incoming_files;

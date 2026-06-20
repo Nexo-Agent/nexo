@@ -2,8 +2,8 @@ use super::LLMProvider;
 use crate::error::AppError;
 use crate::events::{MessageEmitter, TokenUsage as EventTokenUsage, ToolEmitter};
 use crate::models::llm_types::{
-    AssistantContent, ChatMessage, ContentPart, LLMChatRequest, LLMChatResponse, LLMModel,
-    TokenUsage, ToolCall, ToolCallFunction, UserContent,
+    AssistantContent, ChatMessage, ContentPart, LLMChatRequest,
+    LLMChatResponse, LLMModel, TokenUsage, ToolCall, ToolCallFunction, UserContent,
 };
 use async_trait::async_trait;
 use futures::StreamExt;
@@ -19,45 +19,6 @@ pub struct OpenAIProvider {
 impl OpenAIProvider {
     pub const fn new(client: Arc<Client>) -> Self {
         Self { client }
-    }
-
-    fn check_model_capabilities(model_id: &str) -> (bool, bool, bool) {
-        // Remove provider prefix if exists (e.g., "openai/gpt-4" -> "gpt-4")
-        let clean_id = model_id.split('/').next_back().unwrap_or(model_id);
-        let model_lower = clean_id.to_lowercase();
-
-        // Image Generation Support:
-        // - DALL-E series
-        let supports_image_generation = model_lower.contains("dall-e");
-
-        // Image generation models don't support tools or thinking in a chat context
-        if supports_image_generation {
-            return (false, false, true);
-        }
-
-        // Tool Calling Support:
-        // - GPT-3.5-turbo and all variants (from June 2023)
-        // - All GPT-4 variants (from June 2023)
-        // - GPT-4o and variants (from May 2024)
-        // - O1 series (from Dec 2024)
-        // - O3 series (from Feb 2025)
-        // - GPT-5 series (future)
-        let supports_tools = (model_lower.starts_with("gpt-4")
-            && !model_lower.starts_with("gpt-4o"))
-            || model_lower.starts_with("gpt-3.5")
-            || model_lower.starts_with("gpt-5")
-            || model_lower.starts_with("o1")
-            || model_lower.starts_with("o3");
-
-        // Thinking/Reasoning Support:
-        // - O1 series: specialized reasoning models with chain-of-thought
-        // - O3 series: next-gen reasoning models
-        // - GPT-5 series: improved reasoning capabilities
-        let supports_thinking = model_lower.starts_with("o1")
-            || model_lower.starts_with("o3")
-            || model_lower.starts_with("gpt-5");
-
-        (supports_tools, supports_thinking, supports_image_generation)
     }
 
     /// Transform messages to the new generalized 'input' format for Responses API
@@ -486,22 +447,15 @@ impl LLMProvider for OpenAIProvider {
             // OpenAI models typically only have "id" which acts as the name
             let name = item.get("id")?.as_str()?.to_string();
 
-            // Check model capabilities
-            let (supports_tools, supports_thinking, supports_image_generation) =
-                Self::check_model_capabilities(&id);
-
-            Some(LLMModel {
+            Some(LLMModel::new_with_capabilities(
                 id,
                 name,
-                created: item.get("created").and_then(serde_json::Value::as_u64),
-                owned_by: item
+                item.get("created").and_then(serde_json::Value::as_u64),
+                item
                     .get("owned_by")
                     .and_then(|v| v.as_str())
                     .map(std::string::ToString::to_string),
-                supports_tools,
-                supports_thinking,
-                supports_image_generation,
-            })
+            ))
         };
 
         // Handle OpenAI response format: { "object": "list", "data": [...] }

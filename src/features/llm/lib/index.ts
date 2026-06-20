@@ -1,8 +1,17 @@
 // Model utilities
 export {
   getEnabledLLMConnections,
+  detectModelCapabilities,
+  canAttachFiles,
+  getFileAcceptForCapabilities,
+  getFileAcceptForInput,
+  isFileAllowedForCapabilities,
+  isFileAllowedForInput,
   isVisionModel,
-  getVisionModelPatterns,
+  resolveModelCapabilities,
+  supportsAnyFileInput,
+  type ModelCapabilities,
+  type ModelInputCapabilities,
 } from './model-utils';
 
 // Constants

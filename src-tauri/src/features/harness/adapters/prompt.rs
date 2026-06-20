@@ -1,8 +1,10 @@
 use crate::error::AppError;
 use crate::features::harness::adapters::files::{
-    append_skill_from_metadata, build_user_content_from_parts, extract_flow_description,
+    append_skill_from_metadata, extract_flow_description,
 };
-use crate::features::harness::traits::{MessageBuilder, PromptProvider};
+use crate::features::harness::traits::{
+    AttachmentResolveContext, AttachmentResolver, MessageBuilder, PromptProvider,
+};
 use crate::features::harness::types::{HarnessMessages, MessageBuildContext, PromptContext};
 use crate::features::skill::SkillService;
 use crate::models::llm_types::{AssistantContent, ChatMessage, ToolCall, ToolCallFunction};
@@ -78,19 +80,19 @@ impl PromptProvider for NexoPromptProvider {
 
 pub struct NexoMessageBuilder {
     prompt_provider: Arc<dyn PromptProvider>,
-    file_loader: Arc<dyn crate::features::harness::traits::FileContentLoader>,
+    attachment_resolver: Arc<dyn AttachmentResolver>,
     skill_service: Option<Arc<SkillService>>,
 }
 
 impl NexoMessageBuilder {
     pub fn new(
         prompt_provider: Arc<dyn PromptProvider>,
-        file_loader: Arc<dyn crate::features::harness::traits::FileContentLoader>,
+        attachment_resolver: Arc<dyn AttachmentResolver>,
         skill_service: Arc<SkillService>,
     ) -> Self {
         Self {
             prompt_provider,
-            file_loader,
+            attachment_resolver,
             skill_service: Some(skill_service),
         }
     }
@@ -98,13 +100,30 @@ impl NexoMessageBuilder {
     #[cfg(test)]
     fn new_for_test(
         prompt_provider: Arc<dyn PromptProvider>,
-        file_loader: Arc<dyn crate::features::harness::traits::FileContentLoader>,
+        attachment_resolver: Arc<dyn AttachmentResolver>,
     ) -> Self {
         Self {
             prompt_provider,
-            file_loader,
+            attachment_resolver,
             skill_service: None,
         }
+    }
+
+    fn resolve_user_content(
+        &self,
+        model_id: &str,
+        provider: &str,
+        user_text: &str,
+        file_paths: Option<&[String]>,
+    ) -> Result<crate::models::llm_types::UserContent, AppError> {
+        let paths = file_paths.unwrap_or(&[]);
+        let resolved = self.attachment_resolver.resolve(&AttachmentResolveContext {
+            model_id,
+            provider,
+            user_text,
+            file_paths: paths,
+        })?;
+        Ok(resolved.content)
     }
 
     fn append_skill_instructions(
@@ -175,8 +194,9 @@ impl MessageBuilder for NexoMessageBuilder {
                         }
                     }
 
-                    let content = build_user_content_from_parts(
-                        self.file_loader.as_ref(),
+                    let content = self.resolve_user_content(
+                        ctx.model_id,
+                        ctx.provider,
                         &effective_content,
                         files.as_deref(),
                     )?;
@@ -209,8 +229,9 @@ impl MessageBuilder for NexoMessageBuilder {
             self.append_skill_instructions(&mut effective_user_content, metadata)?;
         }
 
-        let content = build_user_content_from_parts(
-            self.file_loader.as_ref(),
+        let content = self.resolve_user_content(
+            ctx.model_id,
+            ctx.provider,
             &effective_user_content,
             ctx.user_files,
         )?;
@@ -280,6 +301,7 @@ fn collect_assistant_tool_calls(
 mod tests {
     use super::*;
     use crate::features::harness::adapters::files::DefaultFileContentLoader;
+    use crate::features::harness::attachment::DefaultAttachmentResolver;
     use crate::features::harness::traits::PromptProvider;
     use crate::features::workspace::settings::WorkspaceSettings;
 
@@ -291,11 +313,17 @@ mod tests {
         }
     }
 
+    fn test_attachment_resolver() -> Arc<dyn AttachmentResolver> {
+        Arc::new(DefaultAttachmentResolver::new(Arc::new(
+            DefaultFileContentLoader,
+        )))
+    }
+
     #[test]
     fn build_messages_skips_tool_call_role() {
         let builder = NexoMessageBuilder::new_for_test(
             Arc::new(StubPrompt),
-            Arc::new(DefaultFileContentLoader),
+            test_attachment_resolver(),
         );
 
         let settings = WorkspaceSettings {
@@ -333,6 +361,8 @@ mod tests {
                 chat_id: "c1",
                 artifact_dir: "/tmp/artifacts/c1".to_string(),
             },
+            model_id: "gpt-4o",
+            provider: "openai",
             existing_messages: &existing,
             user_content: "hi",
             user_files: None,
@@ -347,7 +377,7 @@ mod tests {
     fn build_messages_reconstructs_assistant_tool_calls() {
         let builder = NexoMessageBuilder::new_for_test(
             Arc::new(StubPrompt),
-            Arc::new(DefaultFileContentLoader),
+            test_attachment_resolver(),
         );
 
         let settings = WorkspaceSettings {
@@ -410,6 +440,8 @@ mod tests {
                 chat_id: "c1",
                 artifact_dir: "/tmp/artifacts/c1".to_string(),
             },
+            model_id: "gpt-4o",
+            provider: "openai",
             existing_messages: &existing,
             user_content: "ve bieu do",
             user_files: None,

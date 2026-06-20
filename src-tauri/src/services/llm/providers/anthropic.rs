@@ -4,8 +4,8 @@ use crate::events::{
     MessageEmitter, TokenUsage as EventTokenUsage, ToolCall as EventToolCall, ToolEmitter,
 };
 use crate::models::llm_types::{
-    AssistantContent, ChatMessage, ContentPart, LLMChatRequest, LLMChatResponse, LLMModel,
-    TokenUsage, ToolCall, ToolCallFunction, ToolChoice, UserContent,
+    detect_model_capabilities, AssistantContent, ChatMessage, ContentPart, LLMChatRequest,
+    LLMChatResponse, LLMModel, TokenUsage, ToolCall, ToolCallFunction, ToolChoice, UserContent,
 };
 use async_trait::async_trait;
 use futures::StreamExt;
@@ -118,18 +118,6 @@ struct AnthropicResponse {
 impl AnthropicProvider {
     pub const fn new(client: Arc<Client>) -> Self {
         Self { client }
-    }
-
-    fn check_model_capabilities(model_id: &str) -> (bool, bool, bool) {
-        let clean_id = model_id.split('/').next_back().unwrap_or(model_id);
-        let model_lower = clean_id.to_lowercase();
-
-        let supports_tools = model_lower.contains("claude-3");
-        // Claude 3.5 Sonnet (20241022) and newer support extended thinking
-        let supports_thinking =
-            model_lower.contains("claude-3-5-sonnet") || model_lower.contains("claude-3-7");
-
-        (supports_tools, supports_thinking, false)
     }
 
     async fn handle_streaming(
@@ -519,21 +507,16 @@ impl LLMProvider for AnthropicProvider {
         if let Some(data) = json.get("data").and_then(|d| d.as_array()) {
             for item in data {
                 if let Some(id) = item.get("id").and_then(|s| s.as_str()) {
-                    let (supports_tools, supports_thinking, supports_image_generation) =
-                        Self::check_model_capabilities(id);
-                    models.push(LLMModel {
-                        id: id.to_string(),
-                        name: item
+                    models.push(LLMModel::new_with_capabilities(
+                        id.to_string(),
+                        item
                             .get("display_name")
                             .and_then(|s| s.as_str())
                             .unwrap_or(id)
                             .to_string(),
-                        created: item.get("created_at").and_then(|v| v.as_str()).map(|_| 0),
-                        owned_by: Some("anthropic".to_string()),
-                        supports_tools,
-                        supports_thinking,
-                        supports_image_generation,
-                    });
+                        item.get("created_at").and_then(|v| v.as_str()).map(|_| 0),
+                        Some("anthropic".to_string()),
+                    ));
                 }
             }
         }
@@ -560,8 +543,8 @@ impl LLMProvider for AnthropicProvider {
         req_builder = req_builder.header("anthropic-version", "2023-06-01");
         req_builder = req_builder.header("Content-Type", "application/json");
 
-        // Use helper to check capabilities for dynamic request construction
-        let (_, supports_thinking, _) = Self::check_model_capabilities(&request.model);
+        let caps = detect_model_capabilities(&request.model);
+        let supports_thinking = caps.thinking;
 
         // Convert messages
         let mut messages = Vec::new();

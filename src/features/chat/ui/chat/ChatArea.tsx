@@ -83,6 +83,9 @@ export function ChatArea() {
           const parsed = JSON.parse(message.metadata);
           // Try new format first, fallback to old format
           const fileList = parsed.files || parsed.images;
+          const fileEntries = Array.isArray(parsed.fileEntries)
+            ? parsed.fileEntries
+            : null;
 
           // Restore flow attachment if available
           if (parsed.type === 'flow_attachment' && parsed.flow) {
@@ -93,8 +96,25 @@ export function ChatArea() {
             const promises = fileList.map(
               async (filePath: string, index: number) => {
                 try {
+                  const entryMeta =
+                    fileEntries?.[index] &&
+                    typeof fileEntries[index] === 'object'
+                      ? (fileEntries[index] as {
+                          name?: string;
+                          mimeType?: string;
+                        })
+                      : null;
+                  const preferredName =
+                    typeof entryMeta?.name === 'string'
+                      ? entryMeta.name
+                      : undefined;
+                  const preferredMime =
+                    typeof entryMeta?.mimeType === 'string'
+                      ? entryMeta.mimeType
+                      : undefined;
+
                   let blob: Blob;
-                  let mimeType = 'application/octet-stream';
+                  let mimeType = preferredMime ?? 'application/octet-stream';
                   let extension = 'bin';
 
                   if (filePath.startsWith('data:')) {
@@ -166,9 +186,13 @@ export function ChatArea() {
                     blob = new Blob([bytes], { type: mimeType });
                   }
 
-                  return new File([blob], `file-${index}.${extension}`, {
-                    type: mimeType,
-                  });
+                  return new File(
+                    [blob],
+                    preferredName ?? `file-${index}.${extension}`,
+                    {
+                      type: mimeType,
+                    }
+                  );
                 } catch (e) {
                   logger.error('Failed to restore file', e);
                   return null;

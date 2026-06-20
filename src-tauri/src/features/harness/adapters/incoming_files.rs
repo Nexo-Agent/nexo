@@ -35,6 +35,16 @@ pub fn save_file_to_disk(app: &AppHandle, file_data: &str) -> Result<String, App
         "text/plain" => "txt",
         "text/markdown" => "md",
         "text/csv" => "csv",
+        "application/json" => "json",
+        "application/xml" => "xml",
+        "application/yaml" | "application/x-yaml" => "yaml",
+        "application/javascript" | "text/javascript" => "js",
+        "application/typescript" => "ts",
+        "application/sql" => "sql",
+        "application/toml" => "toml",
+        "application/graphql" => "graphql",
+        "text/html" => "html",
+        "text/css" => "css",
         "audio/mpeg" | "audio/mp3" => "mp3",
         "audio/wav" => "wav",
         "audio/ogg" => "ogg",
@@ -97,6 +107,33 @@ pub fn merge_file_metadata(
         if let Some(file_list) = processed_files {
             if !file_list.is_empty() {
                 meta_obj["files"] = serde_json::json!(file_list);
+
+                let file_details = meta_obj.get("fileDetails").and_then(|v| v.as_array());
+                let entries: Vec<serde_json::Value> = file_list
+                    .iter()
+                    .enumerate()
+                    .map(|(index, path)| {
+                        let detail = file_details.and_then(|details| details.get(index));
+                        let mut entry = serde_json::json!({ "path": path });
+                        if let Some(name) = detail
+                            .and_then(|d| d.get("name"))
+                            .and_then(|n| n.as_str())
+                        {
+                            entry["name"] = serde_json::json!(name);
+                        }
+                        if let Some(mime) = detail
+                            .and_then(|d| d.get("mimeType"))
+                            .and_then(|m| m.as_str())
+                        {
+                            entry["mimeType"] = serde_json::json!(mime);
+                        }
+                        entry
+                    })
+                    .collect();
+                meta_obj["fileEntries"] = serde_json::json!(entries);
+                if let Some(obj) = meta_obj.as_object_mut() {
+                    obj.remove("fileDetails");
+                }
             }
         }
         Some(meta_obj.to_string())

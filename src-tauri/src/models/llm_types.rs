@@ -1,20 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-/// Returns whether a model is known to support tool/function calling.
-pub fn model_supports_tools(model_id: &str) -> bool {
-    let clean_id = model_id.split('/').next_back().unwrap_or(model_id);
-    let model_lower = clean_id.to_lowercase();
+pub use super::model_capabilities::{
+    apply_input_modalities, detect_model_capabilities, is_image_generation_model,
+    model_supports_tools, supports_text_extraction, ModelCapabilities,
+};
 
-    model_lower.contains("gpt")
-        || model_lower.contains("qwen")
-        || model_lower.contains("gemini")
-        || model_lower.contains("claude")
-        || model_lower.contains("minimax")
-        || model_lower.starts_with("abab")
-        || model_lower.contains("deepseek")
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct LLMModel {
     pub id: String,
     pub name: String,
@@ -22,12 +13,51 @@ pub struct LLMModel {
     pub created: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub owned_by: Option<String>,
+    #[serde(default, rename = "supportsImageInput", alias = "supportsVision")]
+    pub supports_image_input: bool,
+    #[serde(default, rename = "supportsDocumentInput")]
+    pub supports_document_input: bool,
+    #[serde(default, rename = "supportsAudioInput")]
+    pub supports_audio_input: bool,
+    #[serde(default, rename = "supportsVideoInput")]
+    pub supports_video_input: bool,
+    #[serde(default, rename = "supportsTextExtraction")]
+    pub supports_text_extraction: bool,
     #[serde(default, rename = "supportsTools")]
     pub supports_tools: bool,
     #[serde(default, rename = "supportsThinking")]
     pub supports_thinking: bool,
     #[serde(default, rename = "supportsImageGeneration")]
     pub supports_image_generation: bool,
+}
+
+impl LLMModel {
+    pub fn new_with_capabilities(
+        id: String,
+        name: String,
+        created: Option<u64>,
+        owned_by: Option<String>,
+    ) -> Self {
+        Self {
+            id: id.clone(),
+            name,
+            created,
+            owned_by,
+            ..Default::default()
+        }
+        .with_detected_capabilities(&id)
+    }
+
+    pub fn with_detected_capabilities(mut self, model_id: &str) -> Self {
+        let caps = detect_model_capabilities(model_id);
+        caps.apply_to_model(&mut self);
+        self
+    }
+
+    pub fn with_capabilities(mut self, caps: ModelCapabilities) -> Self {
+        caps.apply_to_model(&mut self);
+        self
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -247,23 +277,3 @@ pub struct SSEToolCallFunction {
     pub arguments: Option<String>,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::model_supports_tools;
-
-    #[test]
-    fn model_supports_tools_includes_minimax_models() {
-        assert!(model_supports_tools("MiniMax-Text-01"));
-        assert!(model_supports_tools("MiniMax-M1"));
-        assert!(model_supports_tools("abab6.5s-chat"));
-        assert!(model_supports_tools("openrouter/minimax-m1"));
-    }
-
-    #[test]
-    fn model_supports_tools_includes_common_providers() {
-        assert!(model_supports_tools("gpt-4o"));
-        assert!(model_supports_tools("qwen-plus"));
-        assert!(model_supports_tools("gemini-2.0-flash"));
-        assert!(model_supports_tools("deepseek-chat"));
-    }
-}

@@ -2,7 +2,8 @@ use super::LLMProvider;
 use crate::error::AppError;
 use crate::events::{MessageEmitter, TokenUsage as EventTokenUsage, ToolEmitter};
 use crate::models::llm_types::{
-    LLMChatRequest, LLMChatResponse, LLMModel, SSEChunk, TokenUsage, ToolCall, ToolCallFunction,
+    apply_input_modalities, detect_model_capabilities, LLMChatRequest, LLMChatResponse, LLMModel,
+    SSEChunk, TokenUsage, ToolCall, ToolCallFunction,
 };
 use async_trait::async_trait;
 use futures::StreamExt;
@@ -17,26 +18,6 @@ pub struct OpenAICompatProvider {
 impl OpenAICompatProvider {
     pub const fn new(client: Arc<Client>) -> Self {
         Self { client }
-    }
-
-    fn check_model_capabilities(model_id: &str) -> (bool, bool, bool) {
-        // Remove provider prefix if exists (e.g., "openai/gpt-4" -> "gpt-4")
-        let clean_id = model_id.split('/').next_back().unwrap_or(model_id);
-        let model_lower = clean_id.to_lowercase();
-
-        let supports_tools = crate::models::llm_types::model_supports_tools(model_id);
-
-        // Models that support thinking/reasoning:
-        // - GPT-o1 series
-        // - GPT-oss series
-        // - DeepSeek V3 and R1
-        let supports_thinking = model_lower.contains("o1")
-            || model_lower.contains("gpt-oss")
-            || model_lower.contains("gpt_oss")
-            || model_lower.contains("deepseek-v3")
-            || model_lower.contains("deepseek-r1");
-
-        (supports_tools, supports_thinking, false)
     }
 
     async fn handle_streaming(
@@ -520,23 +501,34 @@ impl LLMProvider for OpenAICompatProvider {
 
             // Both id and name are required
             if let (Some(id), Some(name)) = (id_opt, name_opt) {
-                // Check model capabilities
-                let (supports_tools, supports_thinking, supports_image_generation) =
-                    Self::check_model_capabilities(&id);
+                let mut caps = detect_model_capabilities(&id);
 
-                Some(LLMModel {
-                    id,
-                    name,
-                    created: item.get("created").and_then(serde_json::Value::as_u64),
-                    owned_by: item
-                        .get("owned_by")
-                        .or_else(|| item.get("ownedBy"))
-                        .and_then(|v| v.as_str())
-                        .map(std::string::ToString::to_string),
-                    supports_tools,
-                    supports_thinking,
-                    supports_image_generation,
-                })
+                if let Some(modalities) = item
+                    .get("architecture")
+                    .and_then(|a| a.get("input_modalities"))
+                    .and_then(|m| m.as_array())
+                {
+                    let mods: Vec<&str> = modalities
+                        .iter()
+                        .filter_map(|v| v.as_str())
+                        .collect();
+                    apply_input_modalities(&mut caps.input, &mods);
+                }
+
+                Some(
+                    LLMModel {
+                        id,
+                        name,
+                        created: item.get("created").and_then(serde_json::Value::as_u64),
+                        owned_by: item
+                            .get("owned_by")
+                            .or_else(|| item.get("ownedBy"))
+                            .and_then(|v| v.as_str())
+                            .map(std::string::ToString::to_string),
+                        ..Default::default()
+                    }
+                    .with_capabilities(caps),
+                )
             } else {
                 None
             }

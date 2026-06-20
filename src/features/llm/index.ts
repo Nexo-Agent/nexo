@@ -19,8 +19,17 @@ export { LLMConnections } from './ui/LLMConnections';
 // Utilities - Model Utils
 export {
   getEnabledLLMConnections,
+  detectModelCapabilities,
+  canAttachFiles,
+  getFileAcceptForCapabilities,
+  getFileAcceptForInput,
+  isFileAllowedForCapabilities,
+  isFileAllowedForInput,
   isVisionModel,
-  getVisionModelPatterns,
+  resolveModelCapabilities,
+  supportsAnyFileInput,
+  type ModelCapabilities,
+  type ModelInputCapabilities,
 } from './lib';
 
 // Utilities - Constants

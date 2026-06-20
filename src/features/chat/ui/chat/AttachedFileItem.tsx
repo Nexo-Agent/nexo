@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo, memo } from 'react';
 import { useAppDispatch } from '@/app/hooks';
 import { setImagePreviewOpen } from '@/features/ui/state/uiSlice';
+import { FileImage } from 'lucide-react';
+import { formatFileSize, cn } from '@/lib/utils';
+import { getEffectiveFileMime } from '@/lib/text-file';
 import {
-  FileText,
-  FileVideo,
-  FileAudio,
-  FileImage,
-  File as FileIcon,
-} from 'lucide-react';
-import { formatFileSize } from '@/lib/utils';
+  getDisplayFileName,
+  getFileTypeDescriptor,
+  extensionFromPath,
+} from '@/lib/file-display';
 
 interface AttachedFileItemProps {
   file: File;
@@ -40,33 +40,12 @@ export const AttachedFileItem = memo(
     }, [file, isImage]);
 
     const fileInfo = useMemo(() => {
-      const mimeType = file.type;
+      const mimeType = getEffectiveFileMime(file);
+      const ext = extensionFromPath(file.name);
+      return getFileTypeDescriptor(mimeType, ext);
+    }, [file]);
 
-      let Icon;
-      let typeLabel;
-
-      if (mimeType.startsWith('image/')) {
-        Icon = FileImage;
-        typeLabel = 'Image';
-      } else if (mimeType.startsWith('video/')) {
-        Icon = FileVideo;
-        typeLabel = 'Video';
-      } else if (mimeType.startsWith('audio/')) {
-        Icon = FileAudio;
-        typeLabel = 'Audio';
-      } else if (
-        mimeType === 'application/pdf' ||
-        mimeType.startsWith('text/')
-      ) {
-        Icon = FileText;
-        typeLabel = mimeType === 'application/pdf' ? 'PDF' : 'Text';
-      } else {
-        Icon = FileIcon;
-        typeLabel = 'File';
-      }
-
-      return { Icon, typeLabel };
-    }, [file.type]);
+    const displayName = getDisplayFileName(file.name, file.name, file.type);
 
     return (
       <div className="relative group">
@@ -91,13 +70,23 @@ export const AttachedFileItem = memo(
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-xs min-w-[180px] max-w-[220px]">
-            <fileInfo.Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-              <span className="truncate font-medium">{file.name}</span>
-              <span className="text-[10px] text-muted-foreground">
-                {fileInfo.typeLabel} • {formatFileSize(file.size)}
-              </span>
+          <div className="inline-flex max-w-[14rem] items-center gap-2 rounded-lg bg-muted/70 px-2.5 py-2 ring-1 ring-border/50">
+            <div
+              className={cn(
+                'flex h-7 w-7 shrink-0 items-center justify-center rounded-md',
+                fileInfo.iconBgClass
+              )}
+            >
+              <fileInfo.Icon
+                className={cn('h-3.5 w-3.5', fileInfo.accentClass)}
+                strokeWidth={2}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-xs font-medium">{displayName}</div>
+              <div className="text-[10px] text-muted-foreground">
+                {fileInfo.label.toUpperCase()} · {formatFileSize(file.size)}
+              </div>
             </div>
           </div>
         )}

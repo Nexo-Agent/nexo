@@ -2,30 +2,35 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch } from '@/app/hooks';
 import { showError } from '@/features/notifications/state/notificationSlice';
-import { MAX_FILE_SIZE, ALLOWED_FILE_TYPES } from '@/lib/constants';
+import { MAX_FILE_SIZE } from '@/lib/constants';
 import { formatFileSize } from '@/lib/utils';
+import type { ModelCapabilities } from '@/features/llm/lib/model-capabilities';
+import {
+  canAttachFiles,
+  isFileAllowedForCapabilities,
+} from '@/features/llm/lib/model-utils';
 
 export interface UseChatDragDropProps {
   attachedFiles: File[];
   handleFileUpload: (files: File[]) => void;
-  supportsVision: boolean;
+  modelCapabilities: ModelCapabilities;
 }
 
 export function useChatDragDrop({
   attachedFiles,
   handleFileUpload,
-  supportsVision,
+  modelCapabilities,
 }: UseChatDragDropProps) {
   const { t } = useTranslation('chat');
   const dispatch = useAppDispatch();
   const [isDragging, setIsDragging] = useState(false);
+  const supportsFileUpload = canAttachFiles(modelCapabilities);
 
   const validateAndAddFiles = useCallback(
     (files: File[]) => {
       const validFiles: File[] = [];
 
       for (const file of files) {
-        // Validate size
         if (file.size > MAX_FILE_SIZE) {
           dispatch(
             showError(
@@ -39,14 +44,13 @@ export function useChatDragDrop({
           continue;
         }
 
-        // Validate type (if dragging from system, type might be empty or specific)
-        // For drag and drop, we primarily focus on images if supportsVision is true
-        if (
-          !file.type.startsWith('image/') &&
-          !ALLOWED_FILE_TYPES.includes(file.type)
-        ) {
-          // Optional: stricter validation or allow generic files
-          // For now, let's stick to ALLOWED_FILE_TYPES logic
+        if (!isFileAllowedForCapabilities(file, modelCapabilities)) {
+          dispatch(
+            showError(
+              t('fileTypeNotSupported', { type: file.type, ns: 'chat' })
+            )
+          );
+          continue;
         }
 
         validFiles.push(file);
@@ -57,16 +61,16 @@ export function useChatDragDrop({
         handleFileUpload(newFiles);
       }
     },
-    [attachedFiles, dispatch, handleFileUpload, t]
+    [attachedFiles, dispatch, handleFileUpload, modelCapabilities, t]
   );
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      if (!supportsVision) return;
+      if (!supportsFileUpload) return;
       setIsDragging(true);
     },
-    [supportsVision]
+    [supportsFileUpload]
   );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
@@ -79,22 +83,22 @@ export function useChatDragDrop({
       e.preventDefault();
       setIsDragging(false);
 
-      if (!supportsVision) return;
+      if (!supportsFileUpload) return;
 
-      const files = Array.from(e.dataTransfer.files).filter((f) =>
-        f.type.startsWith('image/')
+      const files = Array.from(e.dataTransfer.files).filter((file) =>
+        isFileAllowedForCapabilities(file, modelCapabilities)
       );
 
       if (files.length > 0) {
         validateAndAddFiles(files);
       }
     },
-    [supportsVision, validateAndAddFiles]
+    [supportsFileUpload, modelCapabilities, validateAndAddFiles]
   );
 
   const handleDisplayPaste = useCallback(
     (e: React.ClipboardEvent) => {
-      if (!supportsVision) return;
+      if (!modelCapabilities.input.image) return;
 
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -113,7 +117,7 @@ export function useChatDragDrop({
         validateAndAddFiles(files);
       }
     },
-    [supportsVision, validateAndAddFiles]
+    [modelCapabilities.input.image, validateAndAddFiles]
   );
 
   return {

@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useAppDispatch } from '@/app/hooks';
 import { showError } from '@/features/notifications/state/notificationSlice';
 import { logger } from '@/lib/logger';
+import { normalizeDataUrlMime } from '@/lib/text-file';
 import { FlowData } from '@/features/chat/types';
 import {
   type InsertedSkill,
   buildSkillAttachmentMetadata,
 } from '../lib/skillAttachment';
+import { buildFileDetailsMetadata } from '@/lib/file-display';
 
 interface ProcessingResult {
   input: string;
@@ -70,7 +72,10 @@ export function useChatSubmit({
   const processAttachments =
     useCallback(async (): Promise<ProcessingResult | null> => {
       const userText = input.trim();
-      const metadata = buildOutgoingMetadata(insertedSkill, attachedFlow);
+      const metadata = buildFileDetailsMetadata(
+        attachedFiles,
+        buildOutgoingMetadata(insertedSkill, attachedFlow)
+      );
 
       if (!userText && attachedFiles.length === 0 && !metadata) {
         return null;
@@ -83,7 +88,8 @@ export function useChatSubmit({
             attachedFiles.map((file) => {
               return new Promise<string>((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result as string);
+                reader.onload = () =>
+                  resolve(normalizeDataUrlMime(reader.result as string, file));
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
               });

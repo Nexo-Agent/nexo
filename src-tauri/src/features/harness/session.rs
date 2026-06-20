@@ -72,6 +72,8 @@ impl AgentSession {
 
         let build_ctx = MessageBuildContext {
             prompt_ctx,
+            model_id: &model,
+            provider: llm_connection.provider.as_str(),
             existing_messages: &history_before_user,
             user_content: &user_content,
             user_files: user_files.as_deref(),

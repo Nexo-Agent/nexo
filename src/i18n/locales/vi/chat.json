@@ -60,6 +60,7 @@
   "toolsNotSupported": "Model này không hỗ trợ tools",
   "totalTokens": "Total tokens",
   "visionNotSupported": "Model này không hỗ trợ tải ảnh",
+  "fileUploadNotSupported": "Model này không hỗ trợ tải file",
   "htmlPreview.title": "Xem trước HTML",
   "htmlPreview.loading": "Đang tải preview...",
   "htmlPreview.download": "Tải HTML",

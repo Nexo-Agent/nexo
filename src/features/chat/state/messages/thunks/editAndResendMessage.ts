@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import type { AppDispatch, RootState } from '@/app/store';
+import { resolveModelCapabilities } from '@/features/llm/lib/model-utils';
 import { validateAndExtractState } from '../helpers/sendMessage/stateValidation';
 import { messagesApi } from '../../messagesApi';
 import type { StartTurnResult } from './sendMessageNew';
@@ -47,7 +48,10 @@ export function createEditAndResendMessageThunk() {
       const model = context.llmConnection.models?.find(
         (m) => m.id === context.selectedModel
       );
-      const supportsThinking = model?.supportsThinking ?? false;
+      const supportsThinking = resolveModelCapabilities(
+        model,
+        context.selectedModel
+      ).thinking;
 
       const result = await invokeCommand<StartTurnResult>(
         TauriCommands.EDIT_AND_RESEND_MESSAGE,
