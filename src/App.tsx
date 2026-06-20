@@ -13,8 +13,10 @@ import { useConversationEventProjector } from '@/features/chat/hooks/useConversa
 import { useArtifactCreatedListener } from '@/features/artifacts/hooks/useArtifactCreatedListener';
 import { loadAppSettings } from '@/features/ui/state/uiSlice';
 import i18n from '@/i18n/config';
-import { useAutoUpdate } from '@/features/updater/hooks/useAutoUpdate';
-import { UpdateModal } from '@/features/updater/ui/UpdateModal';
+import {
+  UpdateProvider,
+  useAppUpdate,
+} from '@/features/updater/UpdateProvider';
 import { BrowserProvider } from '@/features/browser/state/BrowserProvider';
 import { FirstRunSetup } from '@/features/ui/setup/FirstRunSetup';
 
@@ -101,16 +103,7 @@ function AppContent() {
     }
   }, [theme]);
 
-  // Handle auto-updates
-  const {
-    modalOpen,
-    setModalOpen,
-    status,
-    update,
-    installUpdate,
-    downloadProgress,
-    checkUpdate,
-  } = useAutoUpdate();
+  const { checkUpdate } = useAppUpdate();
 
   // Handle menu events
   useMenuEvents({ onCheckUpdate: () => checkUpdate(false) });
@@ -119,14 +112,6 @@ function AppContent() {
     <>
       <MainLayout />
       <Toaster />
-      <UpdateModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        status={status}
-        update={update}
-        installUpdate={installUpdate}
-        downloadProgress={downloadProgress}
-      />
       <FirstRunSetup open={!loading && !setupCompleted} />
     </>
   );
@@ -141,7 +126,9 @@ function App() {
         <ModalStackProvider>
           <ErrorBoundary>
             <BrowserProvider>
-              <AppContent />
+              <UpdateProvider>
+                <AppContent />
+              </UpdateProvider>
             </BrowserProvider>
           </ErrorBoundary>
         </ModalStackProvider>

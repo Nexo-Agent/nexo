@@ -50,10 +50,6 @@ vi.mock('./AppSettings', () => ({
 vi.mock('@/features/usage/ui/UsagePage', () => ({
   UsagePage: () => <div>Usage Page</div>,
 }));
-vi.mock('@/features/updater/ui/UpdateSection', () => ({
-  UpdateSection: () => <div>Update Section</div>,
-}));
-
 vi.mock('@/ui/atoms/separator', () => ({ Separator: () => <hr /> }));
 vi.mock('@/ui/atoms/button/button', () => ({
   Button: ({

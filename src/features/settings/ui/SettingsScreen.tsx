@@ -30,11 +30,6 @@ const UsagePage = lazy(() =>
     default: module.UsagePage,
   }))
 );
-const UpdateSection = lazy(() =>
-  import('@/features/updater/ui/UpdateSection').then((module) => ({
-    default: module.UpdateSection,
-  }))
-);
 const SkillsManager = lazy(() =>
   import('@/features/skill/ui/SkillsManager').then((module) => ({
     default: module.SkillsManager,
@@ -122,12 +117,6 @@ export function SettingsScreen() {
               {tSettings('aboutDescription') || tCommon('appDescription')}
             </p>
           </div>
-        </div>
-
-        <div className="max-w-xl mx-auto w-full">
-          <Suspense fallback={<SectionLoader />}>
-            <UpdateSection />
-          </Suspense>
         </div>
 
         <Separator className="opacity-50" />

@@ -44,6 +44,7 @@ import { setSearchOpen } from '../state/chatSearchSlice';
 import { logger } from '@/lib/logger';
 import { isActiveConversationPhase } from '../state/conversationRuntimeSlice';
 import { ConfirmDialog } from '@/ui/molecules/ConfirmDialog';
+import { SidebarUpdateButton } from '@/features/updater/ui/SidebarUpdateButton';
 
 const sidebarActionClass =
   'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] text-sidebar-foreground transition-colors hover:bg-accent hover:text-accent-foreground';
@@ -313,7 +314,8 @@ export function ChatSidebar() {
         </div>
       </ScrollArea>
 
-      <div className="mt-auto border-t border-sidebar-border px-3 py-2">
+      <div className="mt-auto shrink-0 space-y-2 border-t border-sidebar-border px-3 py-2">
+        <SidebarUpdateButton />
         <WorkspaceSelector compact />
       </div>
 
