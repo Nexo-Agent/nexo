@@ -12,6 +12,9 @@ const IGNORED_ACTIONS = [
   'messages/appendToMessage',
   'messages/appendToThinking',
 
+  // Chat input (fires on every keystroke)
+  'chatInput/setInput',
+
   // UI state changes (too frequent)
   'ui/setLoading',
   'ui/setTheme',

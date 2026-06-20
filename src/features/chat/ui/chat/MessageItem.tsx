@@ -8,7 +8,6 @@ import { AgentCard } from './AgentCard';
 import { FlowEditorDialog } from '@/ui/molecules/flow/FlowEditorDialog';
 import { MessageMentions } from './MessageMentions';
 import { parseMessageMentions } from './utils/mentionUtils';
-import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { FLOW_NODES } from '@/ui/molecules/flow/constants';
 import type { Message } from '../../types';
 import { parseSkillAttachment } from '../../lib/skillAttachment';
@@ -40,12 +39,6 @@ export const MessageItem = memo(
     onViewAgentDetails,
     t,
   }: MessageItemProps) {
-    // Track render performance
-    useComponentPerformance({
-      componentName: 'MessageItem',
-      threshold: 30,
-    });
-
     const [isFlowDialogOpen, setIsFlowDialogOpen] = useState(false);
 
     // Determine if message is long (more than 500 characters or more than 10 lines)
@@ -145,7 +138,9 @@ export const MessageItem = memo(
       <div
         ref={messageRef}
         className={cn(
-          'group flex min-w-0 w-full animate-in fade-in slide-in-from-bottom-3 duration-500 ease-out',
+          'group flex min-w-0 w-full',
+          isLastMessage &&
+            'animate-in fade-in slide-in-from-bottom-3 duration-500 ease-out',
           message.role === 'user' ? 'justify-end' : 'justify-start'
         )}
         style={

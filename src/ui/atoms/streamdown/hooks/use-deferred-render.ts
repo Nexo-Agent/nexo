@@ -141,12 +141,10 @@ export function useDeferredRender(options: UseDeferredRenderOptions = {}) {
     const scheduleRender = (obs: IntersectionObserver) => {
       idleCallbackRef.current = requestIdleCallbackWrapper(
         (deadline) => {
-          // If we have time remaining or it's urgent, render
           if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
             setShouldRender(true);
             obs.disconnect();
           } else {
-            // Otherwise, schedule again with shorter timeout
             idleCallbackRef.current = requestIdleCallbackWrapper(
               () => {
                 setShouldRender(true);

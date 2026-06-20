@@ -32,11 +32,23 @@ export function UpdateProvider({ children }: { children: ReactNode }) {
   const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
-    if (!hasChecked) {
-      checkUpdate(true).then(() => {
+    if (hasChecked || typeof window === 'undefined') {
+      return;
+    }
+
+    const runCheck = () => {
+      void checkUpdate(true).then(() => {
         setHasChecked(true);
       });
+    };
+
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(runCheck, { timeout: 5000 });
+      return () => window.cancelIdleCallback(idleId);
     }
+
+    const timeoutId = setTimeout(runCheck, 5000);
+    return () => clearTimeout(timeoutId);
   }, [checkUpdate, hasChecked]);
 
   const value = useMemo(

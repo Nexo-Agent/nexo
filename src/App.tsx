@@ -19,6 +19,7 @@ import {
 } from '@/features/updater/UpdateProvider';
 import { BrowserProvider } from '@/features/browser/state/BrowserProvider';
 import { FirstRunSetup } from '@/features/ui/setup/FirstRunSetup';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 function AppContent() {
   const dispatch = useAppDispatch();
@@ -41,6 +42,26 @@ function AppContent() {
 
   // Load all app settings from database on mount
   useEffect(() => {
+    const focusMainWindow = () => {
+      if (
+        typeof window === 'undefined' ||
+        !(window as Window & { __TAURI_INTERNALS__?: unknown })
+          .__TAURI_INTERNALS__
+      ) {
+        return;
+      }
+      void getCurrentWindow()
+        .setFocus()
+        .catch(() => undefined);
+    };
+
+    focusMainWindow();
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        focusMainWindow();
+      }
+    });
+
     dispatch(loadAppSettings());
   }, [dispatch]);
 
@@ -118,21 +139,24 @@ function AppContent() {
 }
 
 import { ErrorBoundary } from '@/ui/atoms/ErrorBoundary';
+import { TooltipProvider } from '@/ui/atoms/tooltip';
 
 function App() {
   return (
     <Provider store={store}>
-      <DialogOriginProvider>
-        <ModalStackProvider>
-          <ErrorBoundary>
-            <BrowserProvider>
-              <UpdateProvider>
-                <AppContent />
-              </UpdateProvider>
-            </BrowserProvider>
-          </ErrorBoundary>
-        </ModalStackProvider>
-      </DialogOriginProvider>
+      <TooltipProvider>
+        <DialogOriginProvider>
+          <ModalStackProvider>
+            <ErrorBoundary>
+              <BrowserProvider>
+                <UpdateProvider>
+                  <AppContent />
+                </UpdateProvider>
+              </BrowserProvider>
+            </ErrorBoundary>
+          </ModalStackProvider>
+        </DialogOriginProvider>
+      </TooltipProvider>
     </Provider>
   );
 }

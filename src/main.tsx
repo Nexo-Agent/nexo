@@ -23,7 +23,7 @@ Sentry.init({
     }),
   ],
   // Performance Monitoring
-  tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
+  tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
   tracePropagationTargets: ['localhost'],
 
   // Session Replay

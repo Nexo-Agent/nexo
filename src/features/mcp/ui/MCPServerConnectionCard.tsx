@@ -3,12 +3,7 @@ import { Server, AlertCircle, PowerOff, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { EntityCard } from '@/ui/molecules/EntityCard';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/ui/atoms/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/atoms/tooltip';
 import type { MCPServerConnection, MCPToolType } from '../types';
 import { cn } from '@/lib/utils';
 
@@ -47,16 +42,14 @@ export const MCPServerConnectionCard = memo(function MCPServerConnectionCard({
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="truncate">{connection.name}</span>
           {connection.errorMessage && (
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <AlertCircle className="size-4 text-destructive shrink-0 cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="text-sm">{connection.errorMessage}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertCircle className="size-4 text-destructive shrink-0 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p className="text-sm">{connection.errorMessage}</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
       }

@@ -1,8 +1,6 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { skillsApi } from '@/features/skill/state/skillsApi';
+import { useState, useMemo, useCallback } from 'react';
+import { useGetAllSkillsQuery } from '@/features/skill/state/skillsApi';
 import type { SkillRecord } from '@/features/skill/types';
-import { store } from '@/app/store';
-import { logger } from '@/lib/logger';
 
 interface UseSlashCommandOptions {
   input: string;
@@ -36,12 +34,11 @@ export function useSlashCommand({
   workspaceSelectedSkillIds,
   onSelectSkill,
 }: UseSlashCommandOptions): UseSlashCommandReturn {
-  const [skills, setSkills] = useState<SkillRecord[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [forceClosed, setForceClosed] = useState(false);
   const [prevInput, setPrevInput] = useState(input);
-  const prevIsActiveRef = useRef(false);
-  const isLoadingRef = useRef(false);
+  const selectedSkillIdsKey = workspaceSelectedSkillIds.join('\0');
+  const { data: allSkills = [] } = useGetAllSkillsQuery();
 
   if (input !== prevInput) {
     const prevHasValidSlash = hasValidSlashCommand(prevInput);
@@ -58,29 +55,12 @@ export function useSlashCommand({
     setPrevInput(input);
   }
 
-  const loadSkills = useCallback(async () => {
-    if (isLoadingRef.current) return;
-    isLoadingRef.current = true;
-    try {
-      const result = await store.dispatch(
-        skillsApi.endpoints.getAllSkills.initiate(undefined, {
-          forceRefetch: true,
-        })
-      );
-      if ('data' in result && result.data) {
-        const selected = new Set(workspaceSelectedSkillIds);
-        setSkills(result.data.filter((s) => selected.has(s.id)));
-      }
-    } catch (error) {
-      logger.error('Error loading skills for slash command:', error);
-    } finally {
-      isLoadingRef.current = false;
-    }
-  }, [workspaceSelectedSkillIds]);
-
-  useEffect(() => {
-    loadSkills();
-  }, [loadSkills]);
+  const skills = useMemo(() => {
+    const selected = new Set(
+      selectedSkillIdsKey.length > 0 ? selectedSkillIdsKey.split('\0') : []
+    );
+    return allSkills.filter((skill) => selected.has(skill.id));
+  }, [allSkills, selectedSkillIdsKey]);
 
   const { isActive, query } = useMemo(() => {
     if (forceClosed) {
@@ -103,13 +83,6 @@ export function useSlashCommand({
     return { isActive: true, query };
   }, [input, forceClosed]);
 
-  useEffect(() => {
-    if (isActive && !prevIsActiveRef.current) {
-      loadSkills();
-    }
-    prevIsActiveRef.current = isActive;
-  }, [isActive, loadSkills]);
-
   const filteredSkills = useMemo(() => {
     if (!isActive) return [];
 
@@ -127,11 +100,10 @@ export function useSlashCommand({
 
   const isEmptyWorkspace = isActive && workspaceSelectedSkillIds.length === 0;
 
-  useEffect(() => {
-    if (filteredSkills.length > 0) {
-      setSelectedIndex(0);
-    }
-  }, [filteredSkills.length]);
+  const clampedSelectedIndex =
+    filteredSkills.length === 0
+      ? 0
+      : Math.min(selectedIndex, filteredSkills.length - 1);
 
   const handleSelect = useCallback(
     (skill: SkillRecord) => {
@@ -158,9 +130,9 @@ export function useSlashCommand({
           return true;
 
         case 'Enter':
-          if (filteredSkills[selectedIndex]) {
+          if (filteredSkills[clampedSelectedIndex]) {
             e.preventDefault();
-            handleSelect(filteredSkills[selectedIndex]);
+            handleSelect(filteredSkills[clampedSelectedIndex]);
             return true;
           }
           return false;
@@ -173,7 +145,7 @@ export function useSlashCommand({
           return false;
       }
     },
-    [isActive, filteredSkills, selectedIndex, handleSelect]
+    [isActive, filteredSkills, clampedSelectedIndex, handleSelect]
   );
 
   const close = useCallback(() => {
@@ -184,7 +156,7 @@ export function useSlashCommand({
   return {
     isActive,
     query,
-    selectedIndex,
+    selectedIndex: clampedSelectedIndex,
     filteredSkills,
     isEmptyWorkspace,
     handleKeyDown,

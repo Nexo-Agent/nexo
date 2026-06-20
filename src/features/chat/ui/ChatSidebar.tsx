@@ -29,7 +29,6 @@ import {
 } from '@/ui/atoms/dialog/component';
 import { ContextMenu } from '@/ui/atoms/context-menu';
 import { cn } from '@/lib/utils';
-import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import type { Message } from '@/app/types';
 import { useChats } from '../hooks/useChats';
 import { useWorkspaces } from '@/features/workspace';
@@ -50,12 +49,6 @@ const sidebarActionClass =
   'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] text-sidebar-foreground transition-colors hover:bg-accent hover:text-accent-foreground';
 
 export function ChatSidebar() {
-  // Track render performance
-  useComponentPerformance({
-    componentName: 'ChatSidebar',
-    threshold: 100,
-  });
-
   // Use workspaces hook to get selectedWorkspaceId
   const { selectedWorkspaceId } = useWorkspaces();
 

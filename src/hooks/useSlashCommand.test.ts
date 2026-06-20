@@ -3,18 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { useSlashCommand } from './useSlashCommand';
 
 vi.mock('@/features/skill/state/skillsApi', () => ({
-  skillsApi: {
-    endpoints: {
-      getAllSkills: { initiate: vi.fn() },
-      loadSkill: { initiate: vi.fn() },
-    },
-  },
-}));
-
-vi.mock('@/app/store', () => ({
-  store: {
-    dispatch: vi.fn().mockResolvedValue({ data: [] }),
-  },
+  useGetAllSkillsQuery: vi.fn(() => ({ data: [] })),
 }));
 
 describe('useSlashCommand', () => {

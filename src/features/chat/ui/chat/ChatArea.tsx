@@ -26,6 +26,7 @@ import { messagesApi } from '../../state/messagesApi';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
 import { logger } from '@/lib/logger';
 import { CHAT_WIDTH_CLASSES } from '../ChatLayout';
+import { store } from '@/app/store';
 
 export function ChatArea() {
   const { t } = useTranslation(['common', 'settings']);
@@ -42,8 +43,7 @@ export function ChatArea() {
     ? workspaceSettings[selectedWorkspace.id]?.llmConnectionId
     : undefined;
 
-  // Get chat input state for handleSend
-  const input = useAppSelector((state) => state.chatInput.input);
+  // Get chat input state for handleSend (read on demand to avoid re-rendering messages on every keystroke)
   const selectedModel = useAppSelector(
     (state) => state.chatInput.selectedModel
   );
@@ -226,9 +226,11 @@ export function ChatArea() {
     files?: string[],
     metadata?: string
   ) => {
-    // If overrideContent is provided, use it. Otherwise use state input.
+    // If overrideContent is provided, use it. Otherwise read latest input from store.
     const contentToSend =
-      overrideContent !== undefined ? overrideContent : input;
+      overrideContent !== undefined
+        ? overrideContent
+        : store.getState().chatInput.input;
 
     const hasFiles = files && files.length > 0;
     const userInput = contentToSend.trim();

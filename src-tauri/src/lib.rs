@@ -95,6 +95,9 @@ pub fn run() {
                 if let Err(e) = window.maximize() {
                     log::error!("Failed to maximize window: {e}");
                 }
+                if let Err(e) = window.set_focus() {
+                    log::error!("Failed to focus window: {e}");
+                }
                 // On macOS, ensure window is at position (0, 0) to remove any gap
                 #[cfg(target_os = "macos")]
                 {

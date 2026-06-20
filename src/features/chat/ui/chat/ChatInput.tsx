@@ -49,7 +49,6 @@ import { useMessages } from '../../hooks/useMessages';
 import { useSlashCommand } from '@/hooks/useSlashCommand';
 import { skillRecordToInserted } from '@/features/chat/lib/skillAttachment';
 import type { InsertedSkill } from '@/features/chat/lib/skillAttachment';
-import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { SlashCommandDropdown } from '@/ui/molecules/SlashCommandDropdown';
 import { FLOW_NODES, FlowEditorDialog } from '@/ui/molecules/flow';
 
@@ -84,11 +83,6 @@ export function ChatInput({
   isEditing = false,
   onCancelEdit,
 }: ChatInputProps) {
-  // Track render performance
-  useComponentPerformance({
-    componentName: 'ChatInput',
-    threshold: 50,
-  });
   const { t } = useTranslation(['chat', 'common', 'settings']);
   const dispatch = useAppDispatch();
   const fileInputRef = useRef<HTMLInputElement>(null);

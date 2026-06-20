@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next';
 import { Streamdown } from '@/ui/atoms/streamdown';
 import { useAppSelector } from '@/app/hooks';
 import { cn } from '@/lib/utils';
-import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import { logger } from '@/lib/logger';
 import { shouldBypassStreamBuffer } from '@/features/chat/lib/html-preview';
 import { CustomCodeComponent } from './CustomCodeComponent';
@@ -25,12 +24,6 @@ export function MarkdownContent({
   messageId,
   isStreaming = false,
 }: MarkdownContentProps) {
-  // Track render performance for markdown rendering
-  useComponentPerformance({
-    componentName: 'MarkdownContent',
-    threshold: 200,
-  });
-
   const { t } = useTranslation('common');
   const sanitizedContent =
     typeof content === 'string' ? content : String(content || '');
@@ -174,9 +167,9 @@ export function MarkdownContent({
       >
         <MarkdownMessageProvider messageId={messageId}>
           <Streamdown
-            mode="streaming"
+            mode={isStreaming ? 'streaming' : 'static'}
             isAnimating={isStreaming}
-            parseIncompleteMarkdown={true}
+            parseIncompleteMarkdown={isStreaming}
             controls={{ table: false, mermaid: true }}
             components={components}
             shikiTheme={shikiTheme}

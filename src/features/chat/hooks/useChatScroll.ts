@@ -1,34 +1,20 @@
 import { useEffect, useRef } from 'react';
-import { useStickToBottom } from 'use-stick-to-bottom';
 
-export function useChatScroll(isStreaming = false) {
-  // Setup auto scroll hook
-  const { scrollRef, contentRef } = useStickToBottom({
-    resize: isStreaming ? 'instant' : 'smooth',
-    initial: 'smooth',
-    damping: 0.15,
-    stiffness: 0.08,
-    mass: 1,
-  });
-
-  // Refs for ScrollArea
+export function useChatScroll(messageCount: number) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  // Attach scrollRef to ScrollArea viewport
   useEffect(() => {
-    if (scrollAreaRef.current && typeof scrollRef === 'function') {
-      const viewport = scrollAreaRef.current.querySelector(
-        '[data-slot="scroll-area-viewport"]'
-      ) as HTMLElement;
-      if (viewport) {
-        scrollRef(viewport);
-      }
+    const viewport = scrollAreaRef.current?.querySelector(
+      '[data-slot="scroll-area-viewport"]'
+    ) as HTMLElement | null;
+    if (viewport) {
+      viewport.scrollTop = viewport.scrollHeight;
     }
-  }, [scrollRef]);
+  }, [messageCount]);
 
   return {
-    scrollRef,
-    contentRef,
     scrollAreaRef,
+    contentRef,
   };
 }
