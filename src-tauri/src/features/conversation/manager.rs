@@ -173,9 +173,7 @@ impl ConversationJobManager {
         runtimes
             .iter()
             .filter(|(_, runtime)| {
-                runtime.worker_running
-                    || !runtime.queue.is_empty()
-                    || runtime.phase.is_busy()
+                runtime.worker_running || !runtime.queue.is_empty() || runtime.phase.is_busy()
             })
             .map(|(chat_id, runtime)| ConversationSummary {
                 chat_id: chat_id.clone(),
@@ -388,10 +386,7 @@ impl ConversationJobManager {
         }
     }
 
-    pub async fn subscribe_cancellation(
-        &self,
-        chat_id: &str,
-    ) -> broadcast::Receiver<()> {
+    pub async fn subscribe_cancellation(&self, chat_id: &str) -> broadcast::Receiver<()> {
         let mut runtimes = self.runtimes.lock().await;
         let runtime = runtimes
             .entry(chat_id.to_string())

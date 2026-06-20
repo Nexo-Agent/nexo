@@ -31,11 +31,9 @@ use std::sync::Arc;
 use web_search::WebSearchTool;
 use write_file::WriteFileTool;
 
-pub use ask_user::{get_ask_user_tool, resolve_answers_to_llm_format, OTHER_OPTION_ID};
+pub use ask_user::{get_ask_user_tool, resolve_answers_to_llm_format};
 
-pub fn append_ask_user_if_missing(
-    tools: &mut Vec<crate::models::llm_types::ChatCompletionTool>,
-) {
+pub fn append_ask_user_if_missing(tools: &mut Vec<crate::models::llm_types::ChatCompletionTool>) {
     if !tools.iter().any(|t| t.function.name == "ask_user") {
         tools.push(get_ask_user_tool());
     }
@@ -111,9 +109,10 @@ impl ToolSource for BuiltinToolSource {
         arguments: Value,
         ctx: &ToolExecutionContext,
     ) -> Result<ToolResult, AppError> {
-        let tool = self.tools.get(tool_name).ok_or_else(|| {
-            AppError::Validation(format!("Unknown builtin tool: {tool_name}"))
-        })?;
+        let tool = self
+            .tools
+            .get(tool_name)
+            .ok_or_else(|| AppError::Validation(format!("Unknown builtin tool: {tool_name}")))?;
         tool.execute(arguments, ctx).await
     }
 }

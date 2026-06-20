@@ -130,6 +130,9 @@ mod tests {
         }"#;
         let parsed: ExaSearchResponse = serde_json::from_str(json).unwrap();
         assert_eq!(parsed.results.len(), 1);
-        assert_eq!(parsed.results[0].highlights.as_ref().unwrap()[0], "Latest AI developments");
+        assert_eq!(
+            parsed.results[0].highlights.as_ref().unwrap()[0],
+            "Latest AI developments"
+        );
     }
 }

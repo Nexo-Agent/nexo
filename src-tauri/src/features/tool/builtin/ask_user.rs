@@ -1,9 +1,9 @@
 use crate::error::AppError;
 use crate::features::tool::core::context::ToolExecutionContext;
+use crate::features::tool::core::llm_adapter::tool_spec_to_llm_tool;
 use crate::features::tool::core::result::ToolResult;
 use crate::features::tool::core::spec::{ToolBehavior, ToolSpec};
 use crate::features::tool::core::traits::Tool;
-use crate::features::tool::core::llm_adapter::tool_spec_to_llm_tool;
 use crate::models::llm_types::ChatCompletionTool;
 use crate::state::{
     PendingUserQuestion, UserQuestionAnswerInput, UserQuestionDefinition, UserQuestionOption,
@@ -86,10 +86,7 @@ impl Tool for AskUserTool {
         ctx: &ToolExecutionContext,
     ) -> Result<ToolResult, AppError> {
         let result = execute_ask_user(arguments, ctx).await?;
-        Ok(ToolResult::ok(
-            "ask_user",
-            serde_json::to_string(&result)?,
-        ))
+        Ok(ToolResult::ok("ask_user", serde_json::to_string(&result)?))
     }
 }
 
@@ -126,12 +123,9 @@ fn parse_questions(arguments: &Value) -> Result<Vec<UserQuestionDefinition>, App
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
-        let options_val = q
-            .get("options")
-            .and_then(|v| v.as_array())
-            .ok_or_else(|| {
-                AppError::Validation(format!("Question '{id}' missing 'options' array"))
-            })?;
+        let options_val = q.get("options").and_then(|v| v.as_array()).ok_or_else(|| {
+            AppError::Validation(format!("Question '{id}' missing 'options' array"))
+        })?;
 
         if options_val.is_empty() {
             return Err(AppError::Validation(format!(
@@ -157,10 +151,7 @@ fn parse_questions(arguments: &Value) -> Result<Vec<UserQuestionDefinition>, App
                     ))
                 })?
                 .to_string();
-            options.push(UserQuestionOption {
-                id: opt_id,
-                label,
-            });
+            options.push(UserQuestionOption { id: opt_id, label });
         }
 
         questions.push(UserQuestionDefinition {
@@ -184,12 +175,11 @@ pub fn resolve_answers_to_llm_format(
     let mut answers = Vec::new();
 
     for input in inputs {
-        let question = question_map.get(input.question_id.as_str()).ok_or_else(|| {
-            AppError::Validation(format!(
-                "Unknown question_id: {}",
-                input.question_id
-            ))
-        })?;
+        let question = question_map
+            .get(input.question_id.as_str())
+            .ok_or_else(|| {
+                AppError::Validation(format!("Unknown question_id: {}", input.question_id))
+            })?;
 
         let answer_text = if input.option_id == OTHER_OPTION_ID {
             let free_text = input.free_text.as_ref().ok_or_else(|| {
@@ -285,9 +275,10 @@ fn remove_pending_user_question(
     tool_call_id: &str,
 ) -> Result<(), AppError> {
     let app_state: tauri::State<crate::state::AppState> = app.state();
-    let mut pending = app_state.pending_user_questions.lock().map_err(|e| {
-        AppError::Generic(format!("Failed to lock pending_user_questions: {e}"))
-    })?;
+    let mut pending = app_state
+        .pending_user_questions
+        .lock()
+        .map_err(|e| AppError::Generic(format!("Failed to lock pending_user_questions: {e}")))?;
     pending.remove(tool_call_id);
     Ok(())
 }

@@ -1,9 +1,9 @@
+use super::context::ToolExecutionContext;
 use super::deps::ToolDeps;
 use super::llm_adapter::tool_specs_to_llm_tools;
 use super::result::ToolResult;
 use super::spec::{ToolInteraction, ToolSpec};
 use super::traits::ToolSource;
-use super::context::ToolExecutionContext;
 use crate::error::AppError;
 use crate::features::tool::builtin::BuiltinToolSource;
 use crate::features::tool::mcp::McpConnectionSource;
@@ -13,13 +13,10 @@ use crate::models::llm_types::ChatCompletionTool;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use tauri::AppHandle;
 use tokio::sync::broadcast;
 
 pub enum ResolveMode<'a> {
-    Workspace {
-        workspace_id: &'a str,
-    },
+    Workspace { workspace_id: &'a str },
 }
 
 pub struct ToolRuntime {
@@ -64,7 +61,9 @@ impl ToolRuntime {
                 let workspace_settings = deps
                     .workspace_settings_service
                     .get_by_workspace_id(workspace_id)?
-                    .ok_or_else(|| AppError::Validation("Workspace settings not found".to_string()))?;
+                    .ok_or_else(|| {
+                        AppError::Validation("Workspace settings not found".to_string())
+                    })?;
 
                 let mcp_tool_map: HashMap<String, String> =
                     if let Some(ids_json) = &workspace_settings.mcp_tool_ids {
@@ -86,8 +85,7 @@ impl ToolRuntime {
                 )));
 
                 if !mcp_tool_map.is_empty() {
-                    let connection_ids: HashSet<String> =
-                        mcp_tool_map.values().cloned().collect();
+                    let connection_ids: HashSet<String> = mcp_tool_map.values().cloned().collect();
                     let all_connections = deps.mcp_connection_service.get_all()?;
 
                     for connection in all_connections {
@@ -161,11 +159,7 @@ impl ToolRuntime {
         let tool_name_owned = tool_name.to_string();
         let ctx = ctx.clone();
 
-        let exec_future = async move {
-            source
-                .execute(&tool_name_owned, arguments, &ctx)
-                .await
-        };
+        let exec_future = async move { source.execute(&tool_name_owned, arguments, &ctx).await };
 
         match timeout {
             None if spec.behavior.interaction == ToolInteraction::AwaitUser => {

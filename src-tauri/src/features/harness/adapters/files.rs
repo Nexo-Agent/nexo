@@ -30,7 +30,8 @@ pub fn is_text_like_mime(mime: &str) -> bool {
 pub fn is_text_extractable_extension(ext: &str) -> bool {
     matches!(
         ext.to_lowercase().as_str(),
-        "txt" | "md"
+        "txt"
+            | "md"
             | "markdown"
             | "csv"
             | "json"
@@ -267,9 +268,10 @@ pub fn build_native_multimodal_content(
         }
 
         for file_path in files {
-            let (file_content, actual_mime) = file_loader
-                .load_file_content(file_path)
-                .unwrap_or((file_path.to_string(), "application/octet-stream".to_string()));
+            let (file_content, actual_mime) = file_loader.load_file_content(file_path).unwrap_or((
+                file_path.to_string(),
+                "application/octet-stream".to_string(),
+            ));
 
             if actual_mime.starts_with("image/") {
                 parts.push(ContentPart::ImageUrl {

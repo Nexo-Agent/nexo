@@ -29,7 +29,8 @@ impl Tool for ReadFileTool {
                 "Read the content of a file (Absolute path required). \
                 Examples: \
                 - { \"path\": \"/abs/path/to/file.txt\" } \
-                - { \"path\": \"/Users/name/project/src/main.rs\" }".to_string(),
+                - { \"path\": \"/Users/name/project/src/main.rs\" }"
+                    .to_string(),
             ),
             Some(json!({
                 "type": "object",
@@ -87,4 +88,3 @@ mod tests {
         assert!(content.contains("hello nexo"));
     }
 }
-

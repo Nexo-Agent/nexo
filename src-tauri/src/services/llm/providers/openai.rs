@@ -2,8 +2,8 @@ use super::LLMProvider;
 use crate::error::AppError;
 use crate::events::{MessageEmitter, TokenUsage as EventTokenUsage, ToolEmitter};
 use crate::models::llm_types::{
-    AssistantContent, ChatMessage, ContentPart, LLMChatRequest,
-    LLMChatResponse, LLMModel, TokenUsage, ToolCall, ToolCallFunction, UserContent,
+    AssistantContent, ChatMessage, ContentPart, LLMChatRequest, LLMChatResponse, LLMModel,
+    TokenUsage, ToolCall, ToolCallFunction, UserContent,
 };
 use async_trait::async_trait;
 use futures::StreamExt;
@@ -451,8 +451,7 @@ impl LLMProvider for OpenAIProvider {
                 id,
                 name,
                 item.get("created").and_then(serde_json::Value::as_u64),
-                item
-                    .get("owned_by")
+                item.get("owned_by")
                     .and_then(|v| v.as_str())
                     .map(std::string::ToString::to_string),
             ))

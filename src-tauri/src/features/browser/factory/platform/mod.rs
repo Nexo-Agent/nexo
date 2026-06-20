@@ -3,7 +3,7 @@ use crate::error::AppError;
 use crate::features::browser::factory::window_access;
 use std::sync::Mutex;
 use tauri::webview::WebviewBuilder;
-use tauri::{AppHandle, Manager, Runtime};
+use tauri::{AppHandle, Runtime};
 
 pub struct ParentPlatformState {
     #[cfg(target_os = "macos")]
@@ -224,9 +224,8 @@ pub(crate) fn macos_config_from_ptr(
 
     // SAFETY: pointer came from the main webview configuration and is kept alive via leaked retain.
     unsafe {
-        Retained::retain(config_ptr as *mut WKWebViewConfiguration).ok_or_else(|| {
-            AppError::Generic("Failed to retain main WKWebViewConfiguration".into())
-        })
+        Retained::retain(config_ptr as *mut WKWebViewConfiguration)
+            .ok_or_else(|| AppError::Generic("Failed to retain main WKWebViewConfiguration".into()))
     }
 }
 

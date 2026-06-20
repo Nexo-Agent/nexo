@@ -182,9 +182,7 @@ impl ChatService {
             completion: None,
         };
 
-        self.conversation_manager
-            .enqueue_turn(app, work)
-            .await
+        self.conversation_manager.enqueue_turn(app, work).await
     }
 
     async fn send_message_and_wait(
@@ -220,9 +218,7 @@ impl ChatService {
             completion: Some(tx),
         };
 
-        self.conversation_manager
-            .enqueue_turn(app, work)
-            .await?;
+        self.conversation_manager.enqueue_turn(app, work).await?;
 
         rx.await
             .map_err(|_| AppError::Generic("Turn completion channel closed".to_string()))?
@@ -367,7 +363,9 @@ impl ChatService {
         llm_connection_id: Option<String>,
         app: AppHandle,
     ) -> Result<StartTurnResult, AppError> {
-        let processed_new_files = self.harness_factory.process_incoming_files(&app, new_files)?;
+        let processed_new_files = self
+            .harness_factory
+            .process_incoming_files(&app, new_files)?;
 
         if self.message_service.get_by_id(&message_id)?.is_none() {
             self.message_service

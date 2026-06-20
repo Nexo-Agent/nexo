@@ -115,9 +115,8 @@ pub fn merge_file_metadata(
                     .map(|(index, path)| {
                         let detail = file_details.and_then(|details| details.get(index));
                         let mut entry = serde_json::json!({ "path": path });
-                        if let Some(name) = detail
-                            .and_then(|d| d.get("name"))
-                            .and_then(|n| n.as_str())
+                        if let Some(name) =
+                            detail.and_then(|d| d.get("name")).and_then(|n| n.as_str())
                         {
                             entry["name"] = serde_json::json!(name);
                         }

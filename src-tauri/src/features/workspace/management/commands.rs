@@ -18,15 +18,15 @@ pub fn create_workspace(
     // Create default settings for the new workspace
     state.workspace_feature.settings_service.save(
         id,
-        None,        // llm_connection_id
-        None,        // system_message
-        None,        // mcp_tool_ids
-        Some(true),  // stream_enabled
-        None,        // default_model
-        None,        // tool_permission_config
-        Some(10),    // max_agent_iterations
-        None,        // internal_tools_enabled (deprecated, always available)
-        None,        // selected_skill_ids
+        None,       // llm_connection_id
+        None,       // system_message
+        None,       // mcp_tool_ids
+        Some(true), // stream_enabled
+        None,       // default_model
+        None,       // tool_permission_config
+        Some(10),   // max_agent_iterations
+        None,       // internal_tools_enabled (deprecated, always available)
+        None,       // selected_skill_ids
     )?;
 
     Ok(workspace)

@@ -3,7 +3,9 @@ use super::models::{
 };
 use crate::error::AppError;
 use crate::features::runtime::node::service::NodeRuntime;
-use crate::features::runtime::python::service::{get_bundled_uv_path, ExecutionResult, PythonRuntime};
+use crate::features::runtime::python::service::{
+    get_bundled_uv_path, ExecutionResult, PythonRuntime,
+};
 use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
 use tauri::AppHandle;

@@ -1,8 +1,8 @@
 use crate::constants::TauriEvents;
 use crate::error::AppError;
 use crate::events::{
-    ConversationTurnPhaseChangedEvent, ConversationTurnQueuedEvent,
-    ConversationTurnStartedEvent, LlmCallCompleteEvent,
+    ConversationTurnPhaseChangedEvent, ConversationTurnQueuedEvent, ConversationTurnStartedEvent,
+    LlmCallCompleteEvent,
 };
 use crate::features::conversation::types::{ConversationPhase, TurnStartStatus};
 use tauri::{AppHandle, Emitter};
@@ -74,7 +74,9 @@ impl ConversationEmitter {
                 },
             )
             .map_err(|e| {
-                AppError::Generic(format!("Failed to emit conversation-turn-phase-changed: {e}"))
+                AppError::Generic(format!(
+                    "Failed to emit conversation-turn-phase-changed: {e}"
+                ))
             })
     }
 
@@ -102,7 +104,7 @@ impl ConversationEmitter {
         self.app
             .emit(
                 TauriEvents::MESSAGE_COMPLETE,
-                crate::events::                MessageCompleteEvent {
+                crate::events::MessageCompleteEvent {
                     chat_id,
                     turn_id: Some(turn_id),
                     message_id,

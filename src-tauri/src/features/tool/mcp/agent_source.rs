@@ -40,16 +40,19 @@ impl AgentMcpSource {
         let specs = tool_result
             .tools
             .into_iter()
-            .map(|t| ToolSpec::new(
-                t.name,
-                t.description,
-                Some(serde_json::to_value(&t.input_schema).unwrap_or(Value::Object(
-                    serde_json::Map::new(),
-                ))),
-                source_id.clone(),
-                source_label.clone(),
-                ToolBehavior::immediate(),
-            ))
+            .map(|t| {
+                ToolSpec::new(
+                    t.name,
+                    t.description,
+                    Some(
+                        serde_json::to_value(&t.input_schema)
+                            .unwrap_or(Value::Object(serde_json::Map::new())),
+                    ),
+                    source_id.clone(),
+                    source_label.clone(),
+                    ToolBehavior::immediate(),
+                )
+            })
             .collect();
 
         Ok(Self {
@@ -128,8 +131,9 @@ impl ToolSource for AgentMcpSource {
         let extracted = extract_mcp_content(&value);
         let content = match extracted {
             Value::String(s) => s,
-            other => serde_json::to_string(&other)
-                .map_err(|e| AppError::Generic(format!("Failed to serialize tool response: {e}")))?,
+            other => serde_json::to_string(&other).map_err(|e| {
+                AppError::Generic(format!("Failed to serialize tool response: {e}"))
+            })?,
         };
 
         Ok(ToolResult::ok(tool_name, content))

@@ -24,9 +24,7 @@ pub async fn browser_destroy_tab(
 }
 
 #[tauri::command]
-pub async fn browser_list_tabs(
-    state: State<'_, AppState>,
-) -> Result<ListTabsResponse, AppError> {
+pub async fn browser_list_tabs(state: State<'_, AppState>) -> Result<ListTabsResponse, AppError> {
     let tabs = state.browser_service.list_panel_tabs().await?;
     Ok(ListTabsResponse { tabs })
 }
@@ -151,10 +149,7 @@ pub async fn browser_go_back(
     tab_id: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<BrowserNavigationState, AppError> {
-    state
-        .browser_service
-        .go_back(tab_id.as_deref())
-        .await
+    state.browser_service.go_back(tab_id.as_deref()).await
 }
 
 #[tauri::command]
@@ -162,10 +157,7 @@ pub async fn browser_go_forward(
     tab_id: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<BrowserNavigationState, AppError> {
-    state
-        .browser_service
-        .go_forward(tab_id.as_deref())
-        .await
+    state.browser_service.go_forward(tab_id.as_deref()).await
 }
 
 #[tauri::command]
@@ -173,8 +165,5 @@ pub async fn browser_reload(
     tab_id: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<(), AppError> {
-    state
-        .browser_service
-        .reload(tab_id.as_deref())
-        .await
+    state.browser_service.reload(tab_id.as_deref()).await
 }

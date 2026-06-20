@@ -118,10 +118,7 @@ mod tests {
             handle.resolve("python", None),
             PathBuf::from("/sandbox/python/bin/python")
         );
-        assert_eq!(
-            handle.resolve("uv", None),
-            PathBuf::from("/sandbox/bin/uv")
-        );
+        assert_eq!(handle.resolve("uv", None), PathBuf::from("/sandbox/bin/uv"));
     }
 
     #[test]

@@ -10,18 +10,18 @@ use crate::features::browser::factory::instance::{TabKind, TabSummary, WebviewIn
 use crate::features::browser::factory::lease::{ViewportId, ViewportKind, ViewportLeaseManager};
 use crate::features::browser::factory::lifecycle::WebviewLifecycle;
 use crate::features::browser::factory::platform::macos_probe;
-use crate::features::browser::factory::window_access;
 use crate::features::browser::factory::platform::{ParentPlatformState, SharedPlatformState};
-use crate::features::browser::factory::safe_child;
 use crate::features::browser::factory::registry::WebviewRegistry;
+use crate::features::browser::factory::safe_child;
+use crate::features::browser::factory::window_access;
 use crate::features::browser::models::{validate_url, BrowserNavigationState};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use tauri::webview::{NewWindowResponse, PageLoadEvent, WebviewBuilder};
 use tauri::utils::config::WebviewUrl;
+use tauri::webview::{NewWindowResponse, PageLoadEvent, WebviewBuilder};
 use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, Url, Webview};
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 pub struct WebviewFactory {
@@ -108,11 +108,7 @@ impl WebviewFactory {
     }
 
     pub async fn get_active_tab(&self) -> Option<String> {
-        self.registry
-            .lock()
-            .await
-            .active_tab_id()
-            .cloned()
+        self.registry.lock().await.active_tab_id().cloned()
     }
 
     pub async fn set_active_tab(&self, tab_id: &str) -> Result<(), AppError> {
@@ -122,9 +118,7 @@ impl WebviewFactory {
                 .get(tab_id)
                 .is_some_and(|tab| tab.kind == TabKind::Panel)
             {
-                return Err(AppError::NotFound(format!(
-                    "Panel tab not found: {tab_id}"
-                )));
+                return Err(AppError::NotFound(format!("Panel tab not found: {tab_id}")));
             }
             registry
                 .panel_tab_ids()
@@ -250,8 +244,7 @@ impl WebviewFactory {
                 .await
                 .set_lease(viewport.clone(), tab_id.to_string());
 
-            if viewport.kind == ViewportKind::MainPanel
-            {
+            if viewport.kind == ViewportKind::MainPanel {
                 let other_panel_tabs: Vec<String> = self
                     .registry
                     .lock()
@@ -651,14 +644,9 @@ impl WebviewFactory {
     }
 
     fn get_webview(&self, tab: &WebviewInstance) -> Result<Webview, AppError> {
-        self.app
-            .get_webview(&tab.webview_label)
-            .ok_or_else(|| {
-                AppError::NotFound(format!(
-                    "Browser webview not found: {}",
-                    tab.webview_label
-                ))
-            })
+        self.app.get_webview(&tab.webview_label).ok_or_else(|| {
+            AppError::NotFound(format!("Browser webview not found: {}", tab.webview_label))
+        })
     }
 
     fn tab_profile_dir(&self, tab_id: &str) -> Result<PathBuf, AppError> {
@@ -702,12 +690,7 @@ impl WebviewFactory {
         Ok(tab.nav_state.lock().await.clone())
     }
 
-    async fn update_nav_state(
-        &self,
-        tab: &WebviewInstance,
-        url: String,
-        title: Option<String>,
-    ) {
+    async fn update_nav_state(&self, tab: &WebviewInstance, url: String, title: Option<String>) {
         let history = tab.history.lock().await;
         let mut state = tab.nav_state.lock().await;
         state.url = url;

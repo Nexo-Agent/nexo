@@ -11,7 +11,9 @@ pub struct PythonRuntimeStatus {
 }
 
 #[command]
-pub async fn get_python_runtimes_status(app: AppHandle) -> Result<Vec<PythonRuntimeStatus>, AppError> {
+pub async fn get_python_runtimes_status(
+    app: AppHandle,
+) -> Result<Vec<PythonRuntimeStatus>, AppError> {
     let status = SandboxService::status(&app);
     Ok(vec![PythonRuntimeStatus {
         version: status.python.version,

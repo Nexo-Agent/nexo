@@ -278,9 +278,7 @@ impl HarnessHooks for TauriHarnessHooks {
         app: &AppHandle,
     ) -> Result<(), AppError> {
         tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
-        MessageEmitter::new(app.clone()).emit_message_metadata_updated(
-            chat_id.to_string(),
-            assistant_message_id.to_string(),
-        )
+        MessageEmitter::new(app.clone())
+            .emit_message_metadata_updated(chat_id.to_string(), assistant_message_id.to_string())
     }
 }

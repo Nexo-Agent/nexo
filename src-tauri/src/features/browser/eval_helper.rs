@@ -19,7 +19,9 @@ pub fn eval_string(webview: &Webview, script: &str) -> Result<String, AppError> 
     match rx.recv_timeout(EVAL_TIMEOUT) {
         Ok(Ok(value)) => Ok(value),
         Ok(Err(err)) => Err(AppError::Generic(err)),
-        Err(RecvTimeoutError::Timeout) => Err(AppError::Generic("JavaScript eval timed out".into())),
+        Err(RecvTimeoutError::Timeout) => {
+            Err(AppError::Generic("JavaScript eval timed out".into()))
+        }
         Err(RecvTimeoutError::Disconnected) => {
             Err(AppError::Generic("JavaScript eval channel closed".into()))
         }

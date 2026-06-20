@@ -35,9 +35,8 @@ impl ArtifactService {
     /// Create `$APPDATA/artifacts/{chat_id}` (and parent dirs) if missing.
     pub fn ensure_artifact_dir(app: &AppHandle, chat_id: &str) -> Result<PathBuf, AppError> {
         let chat_dir = Self::artifact_dir(app, chat_id)?;
-        std::fs::create_dir_all(&chat_dir).map_err(|e| {
-            AppError::Generic(format!("Cannot create artifact directory: {e}"))
-        })?;
+        std::fs::create_dir_all(&chat_dir)
+            .map_err(|e| AppError::Generic(format!("Cannot create artifact directory: {e}")))?;
         chat_dir
             .canonicalize()
             .map_err(|e| AppError::Generic(format!("Cannot resolve artifact directory: {e}")))
@@ -165,9 +164,9 @@ impl ArtifactService {
 
         Self::ensure_path_within_chat_dir(&chat_dir, &file_path)?;
 
-        fs::write(&file_path, content).await.map_err(|e| {
-            AppError::Generic(format!("Cannot write artifact file: {e}"))
-        })?;
+        fs::write(&file_path, content)
+            .await
+            .map_err(|e| AppError::Generic(format!("Cannot write artifact file: {e}")))?;
 
         let size_bytes = content.len() as i64;
         let now = std::time::SystemTime::now()
@@ -198,7 +197,9 @@ impl ArtifactService {
                     artifact: artifact.clone(),
                 },
             )
-            .map_err(|e| AppError::Generic(format!("Failed to emit artifact-created event: {e}")))?;
+            .map_err(|e| {
+                AppError::Generic(format!("Failed to emit artifact-created event: {e}"))
+            })?;
 
         Ok(artifact)
     }
@@ -210,9 +211,8 @@ impl ArtifactService {
     pub fn delete(&self, id: &str) -> Result<(), AppError> {
         if let Some(artifact) = self.repository.get_by_id(id)? {
             if Path::new(&artifact.path).exists() {
-                std::fs::remove_file(&artifact.path).map_err(|e| {
-                    AppError::Generic(format!("Cannot delete artifact file: {e}"))
-                })?;
+                std::fs::remove_file(&artifact.path)
+                    .map_err(|e| AppError::Generic(format!("Cannot delete artifact file: {e}")))?;
             }
         }
         self.repository.delete(id)
@@ -221,9 +221,8 @@ impl ArtifactService {
     pub fn delete_by_chat(&self, chat_id: &str) -> Result<(), AppError> {
         let chat_dir = Self::artifact_dir(&self.app, chat_id)?;
         if chat_dir.exists() {
-            std::fs::remove_dir_all(&chat_dir).map_err(|e| {
-                AppError::Generic(format!("Cannot remove artifact directory: {e}"))
-            })?;
+            std::fs::remove_dir_all(&chat_dir)
+                .map_err(|e| AppError::Generic(format!("Cannot remove artifact directory: {e}")))?;
         }
         self.repository.delete_by_chat_id(chat_id)
     }
@@ -279,10 +278,7 @@ mod tests {
             "36a80f74-eeaf-4915-9eef-c6b230be1441",
             "html",
         );
-        assert_eq!(
-            path,
-            dir.join("3d-contour-threejs.html")
-        );
+        assert_eq!(path, dir.join("3d-contour-threejs.html"));
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -297,10 +293,7 @@ mod tests {
             "36a80f74-eeaf-4915-9eef-c6b230be1441",
             "html",
         );
-        assert_eq!(
-            path,
-            dir.join("chart-36a80f74.html")
-        );
+        assert_eq!(path, dir.join("chart-36a80f74.html"));
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

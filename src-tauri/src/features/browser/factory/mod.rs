@@ -9,5 +9,5 @@ pub mod webview_factory;
 pub mod window_access;
 
 pub use instance::{TabKind, TabSummary};
-pub use lease::{ViewportId, ViewportKind};
+pub use lease::ViewportId;
 pub use webview_factory::WebviewFactory;

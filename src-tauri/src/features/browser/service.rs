@@ -1,6 +1,6 @@
+use crate::error::AppError;
 use crate::features::browser::factory::{TabSummary, ViewportId, WebviewFactory};
 use crate::features::browser::models::BrowserNavigationState;
-use crate::error::AppError;
 use std::sync::Arc;
 
 pub struct BrowserService {
@@ -34,9 +34,7 @@ impl BrowserService {
         chat_id: Option<String>,
         url: String,
     ) -> Result<String, AppError> {
-        self.factory
-            .create_fence_tab(anchor_id, chat_id, url)
-            .await
+        self.factory.create_fence_tab(anchor_id, chat_id, url).await
     }
 
     pub async fn release_fence_tab(&self, anchor_id: &str) -> Result<(), AppError> {
@@ -59,11 +57,7 @@ impl BrowserService {
         self.factory.set_active_tab(tab_id).await
     }
 
-    pub async fn navigate(
-        &self,
-        tab_id: Option<&str>,
-        url: &str,
-    ) -> Result<(), AppError> {
+    pub async fn navigate(&self, tab_id: Option<&str>, url: &str) -> Result<(), AppError> {
         let id = self.factory.resolve_panel_tab(tab_id).await?;
         self.factory.navigate(&id, url).await
     }
@@ -76,10 +70,7 @@ impl BrowserService {
         self.factory.get_navigation_state(&id).await
     }
 
-    pub async fn go_back(
-        &self,
-        tab_id: Option<&str>,
-    ) -> Result<BrowserNavigationState, AppError> {
+    pub async fn go_back(&self, tab_id: Option<&str>) -> Result<BrowserNavigationState, AppError> {
         let id = self.factory.resolve_panel_tab(tab_id).await?;
         self.factory.go_back(&id).await
     }

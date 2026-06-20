@@ -1,8 +1,6 @@
 use super::models::{Skill, SkillRecord};
-use super::sync_coordinator::SkillSyncCoordinator;
 use crate::error::AppError;
 use crate::state::AppState;
-use std::path::Path;
 use std::sync::Arc;
 use tauri::State;
 use tauri_plugin_opener::OpenerExt;

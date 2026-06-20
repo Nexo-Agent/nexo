@@ -67,13 +67,7 @@ impl ConversationTurnController {
             let is_last_iteration = iteration == max_iterations;
 
             hooks
-                .on_iteration(
-                    &chat_id,
-                    iteration + 1,
-                    max_iterations + 1,
-                    false,
-                    &app,
-                )
+                .on_iteration(&chat_id, iteration + 1, max_iterations + 1, false, &app)
                 .await?;
 
             if iteration > 0 {
@@ -92,12 +86,7 @@ impl ConversationTurnController {
                 assistant_message_id = new_assistant_message_id;
 
                 hooks
-                    .on_message_started(
-                        &chat_id,
-                        &user_message_id,
-                        &assistant_message_id,
-                        &app,
-                    )
+                    .on_message_started(&chat_id, &user_message_id, &assistant_message_id, &app)
                     .await?;
             }
 
@@ -183,13 +172,7 @@ impl ConversationTurnController {
             if let Some(tool_calls) = &llm_response.tool_calls {
                 if !tool_calls.is_empty() {
                     hooks
-                        .on_iteration(
-                            &chat_id,
-                            iteration + 1,
-                            max_iterations + 1,
-                            true,
-                            &app,
-                        )
+                        .on_iteration(&chat_id, iteration + 1, max_iterations + 1, true, &app)
                         .await?;
 
                     let allowed_tools = hooks
@@ -286,12 +269,7 @@ impl ConversationTurnController {
         let message_service = self.deps.message_service.clone();
 
         hooks
-            .on_tool_execution_started(
-                chat_id,
-                assistant_message_id,
-                tool_calls.len(),
-                app,
-            )
+            .on_tool_execution_started(chat_id, assistant_message_id, tool_calls.len(), app)
             .await?;
 
         let mut tool_results: Vec<ChatMessage> = Vec::new();
@@ -358,10 +336,8 @@ impl ConversationTurnController {
                 tool_call_id: tool_call.id.clone(),
             };
 
-            let arguments = parse_tool_arguments(
-                &tool_call.function.name,
-                &tool_call.function.arguments,
-            )?;
+            let arguments =
+                parse_tool_arguments(&tool_call.function.name, &tool_call.function.arguments)?;
 
             let execution_result = tool_runtime
                 .execute(
@@ -517,10 +493,8 @@ impl ConversationTurnController {
         }
 
         if !metadata_obj.as_object().is_some_and(|o| o.is_empty()) {
-            deps.session_store.update_assistant_metadata(
-                assistant_message_id,
-                Some(metadata_obj.to_string()),
-            )?;
+            deps.session_store
+                .update_assistant_metadata(assistant_message_id, Some(metadata_obj.to_string()))?;
 
             let app_clone = app.clone();
             let chat_id_clone = chat_id.to_string();

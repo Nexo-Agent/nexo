@@ -1,16 +1,20 @@
 use crate::error::AppError;
 use crate::features::chat::repository::ChatRepository;
-use crate::features::harness::adapters::incoming_files::{merge_file_metadata, process_incoming_files};
-use crate::features::harness::adapters::title::TitleGenerator;
 use crate::features::harness::adapters::files::DefaultFileContentLoader;
-use crate::features::harness::attachment::DefaultAttachmentResolver;
 use crate::features::harness::adapters::hooks_tauri::TauriHarnessHooks;
+use crate::features::harness::adapters::incoming_files::{
+    merge_file_metadata, process_incoming_files,
+};
 use crate::features::harness::adapters::llm::LlmServiceAdapter;
 use crate::features::harness::adapters::prompt::{NexoMessageBuilder, NexoPromptProvider};
 use crate::features::harness::adapters::session::SqliteSessionStore;
+use crate::features::harness::adapters::title::TitleGenerator;
+use crate::features::harness::attachment::DefaultAttachmentResolver;
 use crate::features::harness::session::AgentSession;
 use crate::features::harness::traits::{AttachmentResolver, HarnessDeps, PromptProvider};
-use crate::features::harness::types::{HarnessMessages, MessageBuildContext, MessageTurnRequest, TurnOutput};
+use crate::features::harness::types::{
+    HarnessMessages, MessageBuildContext, MessageTurnRequest, TurnOutput,
+};
 use crate::features::llm_connection::LLMConnectionService;
 use crate::features::message::MessageService;
 use crate::features::skill::SkillService;

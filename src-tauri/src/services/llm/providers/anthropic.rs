@@ -509,8 +509,7 @@ impl LLMProvider for AnthropicProvider {
                 if let Some(id) = item.get("id").and_then(|s| s.as_str()) {
                     models.push(LLMModel::new_with_capabilities(
                         id.to_string(),
-                        item
-                            .get("display_name")
+                        item.get("display_name")
                             .and_then(|s| s.as_str())
                             .unwrap_or(id)
                             .to_string(),

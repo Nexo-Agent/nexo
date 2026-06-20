@@ -22,8 +22,7 @@ pub fn try_add_child<R: Runtime>(
         Ok(Ok(webview)) => Ok(webview),
         Ok(Err(err)) => Err(map_tauri_error(err)),
         Err(_) => Err(AppError::Generic(
-            "Browser webview creation failed: the native webview layer did not respond"
-                .into(),
+            "Browser webview creation failed: the native webview layer did not respond".into(),
         )),
     }
 }

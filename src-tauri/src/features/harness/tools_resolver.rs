@@ -25,11 +25,7 @@ pub async fn resolve_tool_context(
         });
     }
 
-    let runtime = ToolRuntime::resolve(
-        tool_deps,
-        ResolveMode::Workspace { workspace_id },
-    )
-    .await?;
+    let runtime = ToolRuntime::resolve(tool_deps, ResolveMode::Workspace { workspace_id }).await?;
 
     let runtime = Arc::new(runtime);
     let mut llm_tools = runtime.list_llm_tools();

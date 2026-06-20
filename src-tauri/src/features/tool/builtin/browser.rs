@@ -51,10 +51,7 @@ impl Tool for BrowserNavigateTool {
             .ok_or_else(|| AppError::Validation("Missing 'url' parameter".to_string()))?;
 
         let tab_id = self.browser_service.navigate_or_create_tab(url).await?;
-        let title = self
-            .browser_service
-            .get_page_title(Some(&tab_id))
-            .await?;
+        let title = self.browser_service.get_page_title(Some(&tab_id)).await?;
 
         Ok(ToolResult::ok(
             "browser_navigate",
@@ -109,9 +106,7 @@ impl Tool for BrowserClickTool {
             .as_str()
             .ok_or_else(|| AppError::Validation("Missing 'selector' parameter".to_string()))?;
 
-        self.browser_service
-            .click_selector(None, selector)
-            .await?;
+        self.browser_service.click_selector(None, selector).await?;
 
         Ok(ToolResult::ok(
             "browser_click",
@@ -257,10 +252,7 @@ impl Tool for BrowserGetContentTool {
     ) -> Result<ToolResult, AppError> {
         let max_chars = arguments["max_chars"].as_u64().unwrap_or(8000) as usize;
 
-        let text = self
-            .browser_service
-            .get_page_text(None, max_chars)
-            .await?;
+        let text = self.browser_service.get_page_text(None, max_chars).await?;
 
         Ok(ToolResult::ok(
             "browser_get_content",

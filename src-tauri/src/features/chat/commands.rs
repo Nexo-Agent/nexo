@@ -110,12 +110,8 @@ pub async fn send_message(
         assistant_message_id: result.assistant_message_id,
         user_message_id: result.user_message_id,
         status: match result.status {
-            crate::features::conversation::types::TurnStartStatus::Started => {
-                "started".to_string()
-            }
-            crate::features::conversation::types::TurnStartStatus::Queued => {
-                "queued".to_string()
-            }
+            crate::features::conversation::types::TurnStartStatus::Started => "started".to_string(),
+            crate::features::conversation::types::TurnStartStatus::Queued => "queued".to_string(),
         },
         queue_depth: result.queue_depth,
     })
@@ -155,12 +151,8 @@ pub async fn edit_and_resend_message(
         assistant_message_id: result.assistant_message_id,
         user_message_id: result.user_message_id,
         status: match result.status {
-            crate::features::conversation::types::TurnStartStatus::Started => {
-                "started".to_string()
-            }
-            crate::features::conversation::types::TurnStartStatus::Queued => {
-                "queued".to_string()
-            }
+            crate::features::conversation::types::TurnStartStatus::Started => "started".to_string(),
+            crate::features::conversation::types::TurnStartStatus::Queued => "queued".to_string(),
         },
         queue_depth: result.queue_depth,
     })

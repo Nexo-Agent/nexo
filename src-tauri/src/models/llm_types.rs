@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 pub use super::model_capabilities::{
     apply_input_modalities, detect_model_capabilities, is_image_generation_model,
-    model_supports_tools, supports_text_extraction, ModelCapabilities,
+    model_supports_tools, ModelCapabilities,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -276,4 +276,3 @@ pub struct SSEToolCallFunction {
     pub name: Option<String>,
     pub arguments: Option<String>,
 }
-

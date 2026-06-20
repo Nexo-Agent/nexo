@@ -67,9 +67,11 @@ impl Tool for RunCommandTool {
         #[cfg(windows)]
         cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
 
-        if let Ok(env) =
-            SandboxService::env(&ctx.app, RuntimeKind::NodeJs, std::collections::HashMap::new())
-        {
+        if let Ok(env) = SandboxService::env(
+            &ctx.app,
+            RuntimeKind::NodeJs,
+            std::collections::HashMap::new(),
+        ) {
             if let Some(path) = env.get("PATH") {
                 cmd.env("PATH", path);
             }

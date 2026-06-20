@@ -1,6 +1,6 @@
 use crate::error::AppError;
-use crate::features::chat::ChatEmitter;
 use crate::features::chat::repository::ChatRepository;
+use crate::features::chat::ChatEmitter;
 use crate::features::harness::traits::LlmClient;
 use crate::features::llm_connection::LLMConnectionService;
 use crate::features::message::models::Message;
@@ -121,7 +121,9 @@ impl TitleGenerator {
             let conn = self
                 .llm_connection_service
                 .get_by_id(&conn_id)?
-                .ok_or_else(|| AppError::NotFound(format!("LLM connection not found: {conn_id}")))?;
+                .ok_or_else(|| {
+                    AppError::NotFound(format!("LLM connection not found: {conn_id}"))
+                })?;
             (conn, settings.default_model.clone())
         };
 
@@ -129,7 +131,9 @@ impl TitleGenerator {
             .or(workspace_default_model)
             .or(llm_connection.default_model.clone())
             .filter(|m| !m.is_empty())
-            .ok_or_else(|| AppError::Validation("No model available for title generation".to_string()))?;
+            .ok_or_else(|| {
+                AppError::Validation("No model available for title generation".to_string())
+            })?;
 
         let messages = vec![
             ChatMessage::System {
@@ -176,8 +180,7 @@ impl TitleGenerator {
             return Ok(());
         };
 
-        self.chat_repository
-            .update(&chat_id, Some(&title), None)?;
+        self.chat_repository.update(&chat_id, Some(&title), None)?;
 
         tracing::info!(chat_id = %chat_id, title = %title, "Emitting chat_updated event");
         ChatEmitter::new(app).emit_chat_updated(chat_id, title)?;
@@ -215,7 +218,12 @@ fn is_acceptable_title(title: &str) -> bool {
 }
 
 fn truncate_title(title: &str) -> String {
-    title.chars().take(MAX_TITLE_LEN).collect::<String>().trim().to_string()
+    title
+        .chars()
+        .take(MAX_TITLE_LEN)
+        .collect::<String>()
+        .trim()
+        .to_string()
 }
 
 fn fallback_title_from_user_content(user_content: &str) -> Option<String> {

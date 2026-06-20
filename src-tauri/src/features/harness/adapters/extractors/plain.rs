@@ -1,8 +1,8 @@
 use crate::error::AppError;
-use crate::features::harness::attachment::types::ExtractResult;
 use crate::features::harness::adapters::files::{
     is_text_extractable_path, is_text_like_mime, mime_type_from_path,
 };
+use crate::features::harness::attachment::types::ExtractResult;
 use std::fs;
 use std::path::Path;
 

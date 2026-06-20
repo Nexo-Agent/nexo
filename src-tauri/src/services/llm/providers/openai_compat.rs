@@ -508,10 +508,7 @@ impl LLMProvider for OpenAICompatProvider {
                     .and_then(|a| a.get("input_modalities"))
                     .and_then(|m| m.as_array())
                 {
-                    let mods: Vec<&str> = modalities
-                        .iter()
-                        .filter_map(|v| v.as_str())
-                        .collect();
+                    let mods: Vec<&str> = modalities.iter().filter_map(|v| v.as_str()).collect();
                     apply_input_modalities(&mut caps.input, &mods);
                 }
 

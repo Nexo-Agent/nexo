@@ -55,10 +55,7 @@ pub async fn search(
         .map(|r| NormalizedResultItem {
             title: r.title,
             url: r.url,
-            snippet: r
-                .content
-                .or(r.snippet)
-                .unwrap_or_default(),
+            snippet: r.content.or(r.snippet).unwrap_or_default(),
             score: r.score,
         })
         .collect();

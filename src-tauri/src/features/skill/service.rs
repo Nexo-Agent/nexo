@@ -242,9 +242,8 @@ impl SkillService {
             .map_err(|e| AppError::Generic(format!("Failed to get app data dir: {e}")))?
             .join("tmp");
 
-        fs::create_dir_all(&temp_base).map_err(|e| {
-            AppError::Generic(format!("Failed to create temp directory: {e}"))
-        })?;
+        fs::create_dir_all(&temp_base)
+            .map_err(|e| AppError::Generic(format!("Failed to create temp directory: {e}")))?;
 
         let extract_dir = temp_base.join(format!("skill-import-{}", uuid::Uuid::new_v4()));
         let zip_cleanup = || {
@@ -264,10 +263,7 @@ impl SkillService {
             }
         };
 
-        let skill_dir = match resolve_skill_dir(
-            &archive_root,
-            source.subpath.as_deref(),
-        ) {
+        let skill_dir = match resolve_skill_dir(&archive_root, source.subpath.as_deref()) {
             Ok(dir) => dir,
             Err(e) => {
                 zip_cleanup();

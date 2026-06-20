@@ -4,10 +4,7 @@ use crate::features::harness::adapters::files::{
 };
 use crate::models::model_capabilities::{detect_model_capabilities, ModelInputCapabilities};
 
-pub fn resolve_file_strategy(
-    mime: &str,
-    input: &ModelInputCapabilities,
-) -> FileAttachmentStrategy {
+pub fn resolve_file_strategy(mime: &str, input: &ModelInputCapabilities) -> FileAttachmentStrategy {
     if mime.starts_with("image/") {
         return if input.image {
             FileAttachmentStrategy::Native
@@ -27,10 +24,7 @@ pub fn resolve_file_strategy(
     FileAttachmentStrategy::Skip
 }
 
-pub fn resolve_file_strategy_for_path(
-    path: &str,
-    model_id: &str,
-) -> FileAttachmentStrategy {
+pub fn resolve_file_strategy_for_path(path: &str, model_id: &str) -> FileAttachmentStrategy {
     let caps = detect_model_capabilities(model_id);
     let mime = mime_type_from_path(path);
     if mime == "application/octet-stream" && is_text_extractable_path(path) {

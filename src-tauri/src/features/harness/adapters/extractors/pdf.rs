@@ -1,6 +1,6 @@
 use crate::error::AppError;
-use crate::features::harness::attachment::types::ExtractResult;
 use crate::features::harness::adapters::files::mime_type_from_path;
+use crate::features::harness::attachment::types::ExtractResult;
 use std::path::Path;
 
 pub struct PdfExtractor;

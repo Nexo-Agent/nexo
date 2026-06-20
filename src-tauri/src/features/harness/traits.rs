@@ -1,7 +1,5 @@
 use crate::error::AppError;
-use crate::features::harness::types::{
-    HarnessMessages, MessageBuildContext, PromptContext,
-};
+use crate::features::harness::types::{HarnessMessages, MessageBuildContext, PromptContext};
 use crate::features::message::Message;
 use crate::features::workspace::settings::WorkspaceSettings;
 use crate::models::llm_types::{LLMChatRequest, LLMChatResponse, ToolCall};
@@ -202,4 +200,3 @@ pub trait HarnessHooks: Send + Sync {
         app: &AppHandle,
     ) -> Result<(), AppError>;
 }
-

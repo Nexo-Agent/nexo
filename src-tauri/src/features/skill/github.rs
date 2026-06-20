@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,10 +39,13 @@ pub fn parse_github_url(url: &str) -> Result<GitHubSkillSource, AppError> {
     .unwrap()
     .captures(url)
     {
-        let subpath = caps.get(4).map(|m| {
-            let s = m.as_str().trim_end_matches('/');
-            s.to_string()
-        }).filter(|s| !s.is_empty());
+        let subpath = caps
+            .get(4)
+            .map(|m| {
+                let s = m.as_str().trim_end_matches('/');
+                s.to_string()
+            })
+            .filter(|s| !s.is_empty());
 
         return Ok(GitHubSkillSource {
             owner: caps[1].to_string(),
@@ -53,11 +56,9 @@ pub fn parse_github_url(url: &str) -> Result<GitHubSkillSource, AppError> {
     }
 
     // Repo root: github.com/{owner}/{repo}
-    if let Some(caps) = regex::Regex::new(
-        r"(?i)^https?://(?:www\.)?github\.com/([^/]+)/([^/]+)/?$",
-    )
-    .unwrap()
-    .captures(url)
+    if let Some(caps) = regex::Regex::new(r"(?i)^https?://(?:www\.)?github\.com/([^/]+)/([^/]+)/?$")
+        .unwrap()
+        .captures(url)
     {
         return Ok(GitHubSkillSource {
             owner: caps[1].to_string(),
@@ -133,7 +134,11 @@ pub fn extract_zip(bytes: &[u8], dest: &Path) -> Result<(), AppError> {
 }
 
 /// Find the single top-level directory GitHub creates: `{repo}-{branch}/`
-pub fn find_archive_root(extract_dir: &Path, repo: &str, branch: &str) -> Result<PathBuf, AppError> {
+pub fn find_archive_root(
+    extract_dir: &Path,
+    repo: &str,
+    branch: &str,
+) -> Result<PathBuf, AppError> {
     let expected = format!("{repo}-{branch}");
     let expected_path = extract_dir.join(&expected);
     if expected_path.is_dir() {
@@ -204,10 +209,9 @@ mod tests {
 
     #[test]
     fn parse_tree_url() {
-        let src = parse_github_url(
-            "https://github.com/vercel-labs/skills/tree/main/skills/find-skills",
-        )
-        .unwrap();
+        let src =
+            parse_github_url("https://github.com/vercel-labs/skills/tree/main/skills/find-skills")
+                .unwrap();
         assert_eq!(src.owner, "vercel-labs");
         assert_eq!(src.repo, "skills");
         assert_eq!(src.branch, "main");
@@ -216,9 +220,10 @@ mod tests {
 
     #[test]
     fn parse_zip_url() {
-        let src =
-            parse_github_url("https://github.com/magiskboy/agent-skills/archive/refs/heads/main.zip")
-                .unwrap();
+        let src = parse_github_url(
+            "https://github.com/magiskboy/agent-skills/archive/refs/heads/main.zip",
+        )
+        .unwrap();
         assert_eq!(src.owner, "magiskboy");
         assert_eq!(src.repo, "agent-skills");
         assert_eq!(src.branch, "main");

@@ -24,8 +24,7 @@ impl WebSearchService {
         let provider_raw = service
             .get_by_key(KEY_PROVIDER)?
             .unwrap_or_else(|| DEFAULT_PROVIDER.to_string());
-        let provider = WebSearchProvider::parse(&provider_raw)
-            .map_err(AppError::Validation)?;
+        let provider = WebSearchProvider::parse(&provider_raw).map_err(AppError::Validation)?;
 
         Ok(Self {
             config: WebSearchConfig {
@@ -65,7 +64,11 @@ impl WebSearchService {
         self.config.provider
     }
 
-    pub async fn search(&self, query: &str, max_results: u8) -> Result<NormalizedSearchResult, AppError> {
+    pub async fn search(
+        &self,
+        query: &str,
+        max_results: u8,
+    ) -> Result<NormalizedSearchResult, AppError> {
         let max_results = max_results.clamp(1, 10);
         let api_key = self.active_api_key().ok_or_else(|| {
             AppError::Validation(format!(
@@ -76,8 +79,7 @@ impl WebSearchService {
 
         match self.config.provider {
             WebSearchProvider::Tavily => {
-                let (answer, results) =
-                    tavily_client::search(api_key, query, max_results).await?;
+                let (answer, results) = tavily_client::search(api_key, query, max_results).await?;
                 Ok(NormalizedSearchResult {
                     provider: WebSearchProvider::Tavily.as_str().to_string(),
                     query: query.to_string(),

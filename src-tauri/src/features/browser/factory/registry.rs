@@ -23,8 +23,7 @@ impl WebviewRegistry {
             }
         }
         if let Some(anchor_id) = &instance.anchor_id {
-            self.fence_anchors
-                .insert(anchor_id.clone(), tab_id.clone());
+            self.fence_anchors.insert(anchor_id.clone(), tab_id.clone());
         }
         self.tabs.insert(tab_id, instance);
     }
@@ -56,7 +55,11 @@ impl WebviewRegistry {
     }
 
     pub fn set_active_tab(&mut self, tab_id: &str) -> bool {
-        if !self.tabs.get(tab_id).is_some_and(|t| t.kind == TabKind::Panel) {
+        if !self
+            .tabs
+            .get(tab_id)
+            .is_some_and(|t| t.kind == TabKind::Panel)
+        {
             return false;
         }
         self.active_tab_id = Some(tab_id.to_string());
@@ -94,8 +97,7 @@ impl WebviewRegistry {
         self.tabs
             .values()
             .filter(|t| {
-                t.kind == TabKind::Fence
-                    && t.chat_id.as_deref() == Some(chat_id)
+                t.kind == TabKind::Fence && t.chat_id.as_deref() == Some(chat_id)
                     || t.anchor_id
                         .as_deref()
                         .is_some_and(|a| a.starts_with(&prefix))

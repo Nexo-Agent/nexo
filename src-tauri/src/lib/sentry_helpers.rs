@@ -1,16 +1,18 @@
-/// Sentry helper functions and macros for consistent tracking
+//! Sentry helper functions and macros for consistent tracking.
+
+/// Wrap a Tauri command body with automatic Sentry transaction tracking.
 ///
-/// This module provides utilities for tracking commands, operations, and errors
-/// Macro to wrap Tauri commands with automatic Sentry tracking
+/// # Example
 ///
-/// Usage:
-/// ```rust
-/// #[tauri::command]
-/// pub async fn my_command(param: String) -> Result<String, AppError> {
-///     track_command!("my_command", {
-///         // Your command logic here
-///         Ok(param)
-///     })
+/// ```
+/// use nexo_lib::track_command;
+/// use std::io::Error;
+///
+/// fn main() {
+///     let result: Result<i32, Error> = track_command!("my_command", {
+///         Ok(42)
+///     });
+///     assert_eq!(result.unwrap(), 42);
 /// }
 /// ```
 #[macro_export]

@@ -5,5 +5,4 @@ pub mod models;
 pub mod service;
 pub mod tavily_client;
 
-pub use config::WebSearchProvider;
 pub use service::WebSearchService;

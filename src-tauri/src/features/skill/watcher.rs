@@ -126,10 +126,8 @@ fn is_ignored_path(path: &Path) -> bool {
         return true;
     }
 
-    matches!(
-        name,
-        "Thumbs.db" | ".DS_Store" | "desktop.ini" | "__MACOSX"
-    ) || name.ends_with('~')
+    matches!(name, "Thumbs.db" | ".DS_Store" | "desktop.ini" | "__MACOSX")
+        || name.ends_with('~')
         || name.ends_with(".swp")
         || name.ends_with(".tmp")
 }

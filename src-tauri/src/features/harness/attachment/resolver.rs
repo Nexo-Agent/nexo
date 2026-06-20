@@ -9,7 +9,9 @@ use crate::features::harness::adapters::files::{
     build_native_multimodal_content, mime_type_from_path,
 };
 use crate::features::harness::context::ContextManager;
-use crate::features::harness::traits::{AttachmentResolveContext, AttachmentResolver, FileContentLoader};
+use crate::features::harness::traits::{
+    AttachmentResolveContext, AttachmentResolver, FileContentLoader,
+};
 use crate::models::llm_types::UserContent;
 use std::sync::Arc;
 
@@ -29,9 +31,7 @@ impl DefaultAttachmentResolver {
     }
 
     fn format_attachment_block(source_label: &str, content: &str) -> String {
-        format!(
-            "---\n[Attached: {source_label}]\n---\n\n{content}\n---\n[End attachment]"
-        )
+        format!("---\n[Attached: {source_label}]\n---\n\n{content}\n---\n[End attachment]")
     }
 
     fn extractor_name(mime: &str) -> &'static str {
@@ -44,10 +44,7 @@ impl DefaultAttachmentResolver {
 }
 
 impl AttachmentResolver for DefaultAttachmentResolver {
-    fn resolve(
-        &self,
-        ctx: &AttachmentResolveContext<'_>,
-    ) -> Result<ResolvedUserContent, AppError> {
+    fn resolve(&self, ctx: &AttachmentResolveContext<'_>) -> Result<ResolvedUserContent, AppError> {
         if ctx.file_paths.is_empty() {
             return Ok(ResolvedUserContent {
                 content: UserContent::Text(ctx.user_text.to_string()),

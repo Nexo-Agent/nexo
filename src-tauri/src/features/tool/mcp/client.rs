@@ -1,6 +1,6 @@
-use crate::features::tool::models::MCPTool;
 use crate::error::AppError;
 use crate::features::sandbox::{RuntimeKind, SandboxService};
+use crate::features::tool::models::MCPTool;
 use rust_mcp_sdk::{
     mcp_client::{client_runtime, ClientHandler, ClientRuntime},
     schema::{
@@ -145,22 +145,15 @@ impl MCPClientService {
             let mut command = parts[0].clone();
             let args: Vec<String> = parts[1..].to_vec();
 
-            let (resolved_command, resolved_env) = Self::resolve_stdio_command(
-                app,
-                &command,
-                runtime_path.as_deref(),
-                env_vars,
-            )?;
+            let (resolved_command, resolved_env) =
+                Self::resolve_stdio_command(app, &command, runtime_path.as_deref(), env_vars)?;
             command = resolved_command;
             env_vars = Some(resolved_env);
 
             // Set UV_CACHE_DIR for isolation if command is uv or if UV_PYTHON is set
             if command.ends_with("uv")
                 || command.ends_with("uv.exe")
-                || env_vars
-                    .as_ref()
-                    .and_then(|v| v.get("UV_PYTHON"))
-                    .is_some()
+                || env_vars.as_ref().and_then(|v| v.get("UV_PYTHON")).is_some()
             {
                 if let Ok(cache_dir) = app.path().app_cache_dir() {
                     let uv_cache = cache_dir.join("uv_cache");

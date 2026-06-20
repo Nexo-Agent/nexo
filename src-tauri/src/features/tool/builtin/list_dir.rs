@@ -29,7 +29,8 @@ impl Tool for ListDirTool {
                 "List the contents of a directory (Absolute path required). \
                 Examples: \
                 - { \"path\": \"/abs/path/to/dir\" } \
-                - { \"path\": \"/Users/name/code/nexo\" }".to_string(),
+                - { \"path\": \"/Users/name/code/nexo\" }"
+                    .to_string(),
             ),
             Some(json!({
                 "type": "object",

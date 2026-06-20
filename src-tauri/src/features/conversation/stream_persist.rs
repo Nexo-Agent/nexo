@@ -31,7 +31,12 @@ impl StreamPersistDebouncer {
         self.schedule_append(message_id, chunk, Some(true));
     }
 
-    fn schedule_append(self: &Arc<Self>, message_id: String, chunk: String, is_reasoning: Option<bool>) {
+    fn schedule_append(
+        self: &Arc<Self>,
+        message_id: String,
+        chunk: String,
+        is_reasoning: Option<bool>,
+    ) {
         let should_flush_now = {
             let mut pending = self.pending.lock().unwrap();
             let entry = pending.entry(message_id.clone()).or_insert(PendingFlush {

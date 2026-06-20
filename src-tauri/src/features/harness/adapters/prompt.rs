@@ -117,12 +117,14 @@ impl NexoMessageBuilder {
         file_paths: Option<&[String]>,
     ) -> Result<crate::models::llm_types::UserContent, AppError> {
         let paths = file_paths.unwrap_or(&[]);
-        let resolved = self.attachment_resolver.resolve(&AttachmentResolveContext {
-            model_id,
-            provider,
-            user_text,
-            file_paths: paths,
-        })?;
+        let resolved = self
+            .attachment_resolver
+            .resolve(&AttachmentResolveContext {
+                model_id,
+                provider,
+                user_text,
+                file_paths: paths,
+            })?;
         Ok(resolved.content)
     }
 
@@ -167,8 +169,7 @@ impl MessageBuilder for NexoMessageBuilder {
                         }
                         self.append_skill_instructions(&mut effective_content, metadata)?;
 
-                        if let Ok(meta_json) = serde_json::from_str::<serde_json::Value>(metadata)
-                        {
+                        if let Ok(meta_json) = serde_json::from_str::<serde_json::Value>(metadata) {
                             if let Some(file_array) =
                                 meta_json.get("files").and_then(|f| f.as_array())
                             {
@@ -321,10 +322,8 @@ mod tests {
 
     #[test]
     fn build_messages_skips_tool_call_role() {
-        let builder = NexoMessageBuilder::new_for_test(
-            Arc::new(StubPrompt),
-            test_attachment_resolver(),
-        );
+        let builder =
+            NexoMessageBuilder::new_for_test(Arc::new(StubPrompt), test_attachment_resolver());
 
         let settings = WorkspaceSettings {
             workspace_id: "ws1".to_string(),
@@ -375,10 +374,8 @@ mod tests {
 
     #[test]
     fn build_messages_reconstructs_assistant_tool_calls() {
-        let builder = NexoMessageBuilder::new_for_test(
-            Arc::new(StubPrompt),
-            test_attachment_resolver(),
-        );
+        let builder =
+            NexoMessageBuilder::new_for_test(Arc::new(StubPrompt), test_attachment_resolver());
 
         let settings = WorkspaceSettings {
             workspace_id: "ws1".to_string(),

@@ -115,16 +115,15 @@ impl MessageEmitter {
         let turn_id = self.resolve_turn_id(&chat_id);
 
         if let (Some(turn_id), Some(state)) = (turn_id.clone(), self.app.try_state::<AppState>()) {
-            let _ = crate::features::conversation::emitter::ConversationEmitter::new(
-                self.app.clone(),
-            )
-            .emit_llm_call_complete(
-                chat_id.clone(),
-                turn_id,
-                message_id.clone(),
-                content.clone(),
-                token_usage.clone(),
-            );
+            let _ =
+                crate::features::conversation::emitter::ConversationEmitter::new(self.app.clone())
+                    .emit_llm_call_complete(
+                        chat_id.clone(),
+                        turn_id,
+                        message_id.clone(),
+                        content.clone(),
+                        token_usage.clone(),
+                    );
             return Ok(());
         }
 

@@ -1,6 +1,6 @@
-use crate::features::browser::factory::window_access;
 use crate::error::AppError;
-use tauri::{AppHandle, Manager, Runtime};
+use crate::features::browser::factory::window_access;
+use tauri::{AppHandle, Runtime};
 
 /// Verify on the main thread that WebKit accepts a child WKWebView with the
 /// cached parent configuration, catching Objective-C exceptions before Tauri
@@ -38,10 +38,7 @@ fn probe_on_main_thread(config_ptr: usize) -> Result<(), AppError> {
 
     match objc2::exception::catch(AssertUnwindSafe(|| -> Result<(), AppError> {
         let config = super::macos_config_from_ptr(config_ptr)?;
-        let frame = NSRect::new(
-            NSPoint::new(0.0, 0.0),
-            NSSize::new(1.0, 1.0),
-        );
+        let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(1.0, 1.0));
 
         // SAFETY: create a 1x1 throwaway child to validate the shared configuration.
         let child: Retained<WKWebView> = unsafe {

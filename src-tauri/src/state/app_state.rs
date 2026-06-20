@@ -14,10 +14,6 @@ use crate::features::mcp_connection::{
 };
 use crate::features::message::{MessageRepository, MessageService, SqliteMessageRepository};
 
-use crate::features::notes::{
-    repository::{NoteRepository, SqliteNoteRepository},
-    service::NoteService,
-};
 use crate::features::artifacts::{
     repository::{ArtifactRepository, SqliteArtifactRepository},
     service::ArtifactService,
@@ -26,9 +22,13 @@ use crate::features::browser::BrowserService;
 use crate::features::conversation::{
     manager::ConversationJobManager, stream_persist::StreamPersistDebouncer,
 };
-use crate::features::skill::SkillService;
-use crate::features::tool::{mcp::MCPToolRefreshService, core::ToolDeps};
 use crate::features::harness::HarnessFactory;
+use crate::features::notes::{
+    repository::{NoteRepository, SqliteNoteRepository},
+    service::NoteService,
+};
+use crate::features::skill::SkillService;
+use crate::features::tool::{core::ToolDeps, mcp::MCPToolRefreshService};
 use crate::features::usage::{SqliteUsageRepository, UsageRepository, UsageService};
 use crate::features::workspace::{
     management::{SqliteWorkspaceRepository, WorkspaceRepository, WorkspaceService},
@@ -42,7 +42,7 @@ use crate::services::LLMService;
 use rusqlite::Connection;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 use tokio::sync::oneshot;
 
 #[derive(Debug)]

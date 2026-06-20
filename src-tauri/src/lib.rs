@@ -159,7 +159,8 @@ pub fn run() {
             // Bootstrap sandbox in background (mandatory Python + Node runtimes)
             let bootstrap_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                if let Err(e) = features::sandbox::SandboxService::ensure_ready(&bootstrap_handle).await
+                if let Err(e) =
+                    features::sandbox::SandboxService::ensure_ready(&bootstrap_handle).await
                 {
                     tracing::error!("Sandbox bootstrap failed: {e}");
                 }

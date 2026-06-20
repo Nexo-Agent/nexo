@@ -60,7 +60,9 @@ impl Tool for WebSearchTool {
             .as_str()
             .map(str::trim)
             .filter(|q| !q.is_empty())
-            .ok_or_else(|| AppError::Validation("Missing or empty 'query' parameter".to_string()))?;
+            .ok_or_else(|| {
+                AppError::Validation("Missing or empty 'query' parameter".to_string())
+            })?;
 
         let max_results = arguments["max_results"]
             .as_u64()

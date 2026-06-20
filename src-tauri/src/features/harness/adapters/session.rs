@@ -98,7 +98,6 @@ impl SessionStore for SqliteSessionStore {
     }
 
     fn update_chat_last_message(&self, chat_id: &str, preview: &str) -> Result<(), AppError> {
-        self.chat_repository
-            .update(chat_id, None, Some(preview))
+        self.chat_repository.update(chat_id, None, Some(preview))
     }
 }
