@@ -152,9 +152,8 @@ impl ParentPlatformState {
         )))]
         {
             let _ = app;
+            Ok(builder)
         }
-
-        Ok(builder)
     }
 }
 
