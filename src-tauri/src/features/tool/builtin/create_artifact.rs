@@ -13,7 +13,7 @@ pub struct CreateArtifactTool {
 }
 
 impl CreateArtifactTool {
-    pub fn new(artifact_service: Arc<ArtifactService>) -> Self {
+    pub const fn new(artifact_service: Arc<ArtifactService>) -> Self {
         Self { artifact_service }
     }
 }

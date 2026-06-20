@@ -15,7 +15,7 @@ pub struct ViewportId {
 }
 
 impl ViewportId {
-    pub fn main_panel() -> Self {
+    pub const fn main_panel() -> Self {
         Self {
             kind: ViewportKind::MainPanel,
             anchor_id: None,

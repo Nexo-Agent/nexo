@@ -16,7 +16,7 @@ pub struct SkillService {
 }
 
 impl SkillService {
-    pub fn new(app: AppHandle) -> Self {
+    pub const fn new(app: AppHandle) -> Self {
         Self { app }
     }
 
@@ -43,14 +43,14 @@ impl SkillService {
             .app
             .path()
             .app_data_dir()
-            .map_err(|e| AppError::Generic(format!("Failed to get app data dir: {}", e)))?;
+            .map_err(|e| AppError::Generic(format!("Failed to get app data dir: {e}")))?;
 
         let skills_dir = app_data.join("skills");
 
         // Create directory if not exists
         if !skills_dir.exists() {
             fs::create_dir_all(&skills_dir).map_err(|e| {
-                AppError::Generic(format!("Failed to create skills directory: {}", e))
+                AppError::Generic(format!("Failed to create skills directory: {e}"))
             })?;
         }
 
@@ -64,11 +64,11 @@ impl SkillService {
 
         // Read all subdirectories
         let entries = fs::read_dir(&skills_dir)
-            .map_err(|e| AppError::Generic(format!("Failed to read skills directory: {}", e)))?;
+            .map_err(|e| AppError::Generic(format!("Failed to read skills directory: {e}")))?;
 
         for entry in entries {
             let entry =
-                entry.map_err(|e| AppError::Generic(format!("Failed to read entry: {}", e)))?;
+                entry.map_err(|e| AppError::Generic(format!("Failed to read entry: {e}")))?;
             let path = entry.path();
 
             // Skip if not a directory
@@ -81,7 +81,7 @@ impl SkillService {
                 Ok(skill) => skills.push(skill),
                 Err(e) => {
                     // Log error but continue
-                    log::error!("Failed to parse skill at {:?}: {}", path, e);
+                    log::error!("Failed to parse skill at {path:?}: {e}");
                 }
             }
         }
@@ -101,7 +101,7 @@ impl SkillService {
             discovered_ids.insert(skill.metadata.name.clone());
             let metadata_json = if let Some(metadata) = &skill.metadata.metadata {
                 Some(serde_json::to_string(metadata).map_err(|e| {
-                    AppError::Generic(format!("Failed to serialize metadata: {}", e))
+                    AppError::Generic(format!("Failed to serialize metadata: {e}"))
                 })?)
             } else {
                 None
@@ -141,7 +141,7 @@ impl SkillService {
     pub fn load_skill(&self, skill_id: &str) -> Result<Skill, AppError> {
         let conn = crate::db::connection::get_connection(&self.app)?;
         let record = SkillRepository::get_by_id(&conn, skill_id)?
-            .ok_or_else(|| AppError::NotFound(format!("Skill not found: {}", skill_id)))?;
+            .ok_or_else(|| AppError::NotFound(format!("Skill not found: {skill_id}")))?;
 
         let skill_path = Path::new(&record.path);
         SkillParser::parse_skill(skill_path)
@@ -276,7 +276,7 @@ impl SkillService {
         result
     }
 
-    /// @deprecated Use import_skill_from_path; kept for internal compatibility
+    /// @deprecated Use `import_skill_from_path`; kept for internal compatibility
     pub fn import_skill(&self, source_path: &Path) -> Result<Skill, AppError> {
         let skill = self.import_skill_from_path(source_path)?;
         self.sync_skills_to_db()?;
@@ -287,13 +287,13 @@ impl SkillService {
     pub fn delete_skill(&self, skill_id: &str) -> Result<(), AppError> {
         let conn = crate::db::connection::get_connection(&self.app)?;
         let record = SkillRepository::get_by_id(&conn, skill_id)?
-            .ok_or_else(|| AppError::NotFound(format!("Skill not found: {}", skill_id)))?;
+            .ok_or_else(|| AppError::NotFound(format!("Skill not found: {skill_id}")))?;
 
         // Delete from filesystem
         let skill_path = Path::new(&record.path);
         if skill_path.exists() {
             fs::remove_dir_all(skill_path).map_err(|e| {
-                AppError::Generic(format!("Failed to delete skill directory: {}", e))
+                AppError::Generic(format!("Failed to delete skill directory: {e}"))
             })?;
         }
 
@@ -306,13 +306,13 @@ impl SkillService {
     /// Helper: Copy directory recursively
     fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), AppError> {
         fs::create_dir_all(dst)
-            .map_err(|e| AppError::Generic(format!("Failed to create directory: {}", e)))?;
+            .map_err(|e| AppError::Generic(format!("Failed to create directory: {e}")))?;
 
         for entry in fs::read_dir(src)
-            .map_err(|e| AppError::Generic(format!("Failed to read directory: {}", e)))?
+            .map_err(|e| AppError::Generic(format!("Failed to read directory: {e}")))?
         {
             let entry =
-                entry.map_err(|e| AppError::Generic(format!("Failed to read entry: {}", e)))?;
+                entry.map_err(|e| AppError::Generic(format!("Failed to read entry: {e}")))?;
             let path = entry.path();
             let file_name = entry.file_name();
             let dest_path = dst.join(&file_name);
@@ -321,7 +321,7 @@ impl SkillService {
                 Self::copy_dir_recursive(&path, &dest_path)?;
             } else {
                 fs::copy(&path, &dest_path)
-                    .map_err(|e| AppError::Generic(format!("Failed to copy file: {}", e)))?;
+                    .map_err(|e| AppError::Generic(format!("Failed to copy file: {e}")))?;
             }
         }
 

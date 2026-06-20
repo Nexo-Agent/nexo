@@ -16,7 +16,7 @@ pub struct NexoPromptProvider {
 }
 
 impl NexoPromptProvider {
-    pub fn new(skill_service: Arc<SkillService>) -> Self {
+    pub const fn new(skill_service: Arc<SkillService>) -> Self {
         Self { skill_service }
     }
 }

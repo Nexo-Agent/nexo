@@ -8,7 +8,7 @@ pub enum WebviewLifecycle {
 }
 
 impl WebviewLifecycle {
-    pub fn is_alive(self) -> bool {
+    pub const fn is_alive(self) -> bool {
         !matches!(self, Self::Destroying)
     }
 }

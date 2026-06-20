@@ -14,7 +14,7 @@ pub struct WebSearchTool {
 }
 
 impl WebSearchTool {
-    pub fn new(app_settings_service: Arc<AppSettingsService>) -> Self {
+    pub const fn new(app_settings_service: Arc<AppSettingsService>) -> Self {
         Self {
             app_settings_service,
         }
@@ -66,8 +66,7 @@ impl Tool for WebSearchTool {
 
         let max_results = arguments["max_results"]
             .as_u64()
-            .map(|n| n as u8)
-            .unwrap_or(5);
+            .map_or(5, |n| n as u8);
 
         let service = WebSearchService::from_app_settings(&self.app_settings_service)?;
 

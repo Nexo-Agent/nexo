@@ -154,7 +154,7 @@ impl AppState {
         ));
 
         let harness_factory = Arc::new(HarnessFactory::new(
-            llm_service.clone(),
+            llm_service,
             message_service.clone(),
             chat_repo.clone(),
             tool_deps.clone(),

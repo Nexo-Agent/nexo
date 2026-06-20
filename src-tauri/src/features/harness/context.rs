@@ -18,7 +18,7 @@ impl ContextManager {
     /// Mock: returns messages unchanged.
     ///
     /// TODO(harness): Port `compact_if_needed` and `truncate_tool_result` from `harness.py`.
-    pub fn compact_if_needed(&self, messages: Vec<ChatMessage>) -> Vec<ChatMessage> {
+    pub const fn compact_if_needed(&self, messages: Vec<ChatMessage>) -> Vec<ChatMessage> {
         messages
     }
 

@@ -14,7 +14,7 @@ pub struct ModelInputCapabilities {
 }
 
 impl ModelInputCapabilities {
-    pub fn any(&self) -> bool {
+    pub const fn any(&self) -> bool {
         self.image || self.document || self.audio || self.video
     }
 }
@@ -30,7 +30,7 @@ pub struct ModelCapabilities {
 }
 
 impl ModelCapabilities {
-    pub fn apply_to_model(&self, model: &mut LLMModel) {
+    pub const fn apply_to_model(&self, model: &mut LLMModel) {
         model.supports_image_input = self.input.image;
         model.supports_document_input = self.input.document;
         model.supports_audio_input = self.input.audio;
@@ -42,7 +42,7 @@ impl ModelCapabilities {
     }
 }
 
-/// Override input flags when provider metadata lists supported modalities (e.g. OpenRouter).
+/// Override input flags when provider metadata lists supported modalities (e.g. `OpenRouter`).
 pub fn apply_input_modalities(input: &mut ModelInputCapabilities, modalities: &[&str]) {
     if modalities.is_empty() {
         return;

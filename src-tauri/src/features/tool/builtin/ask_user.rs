@@ -120,7 +120,7 @@ fn parse_questions(arguments: &Value) -> Result<Vec<UserQuestionDefinition>, App
             .to_string();
         let allow_multiple = q
             .get("allow_multiple")
-            .and_then(|v| v.as_bool())
+            .and_then(serde_json::Value::as_bool)
             .unwrap_or(false);
 
         let options_val = q.get("options").and_then(|v| v.as_array()).ok_or_else(|| {
@@ -255,14 +255,11 @@ async fn execute_ask_user(
         questions: event_questions,
     })?;
 
-    let response = match rx.await {
-        Ok(resp) => resp,
-        Err(_) => {
-            let _ = remove_pending_user_question(&context.app, &context.tool_call_id);
-            return Err(AppError::Generic(
-                "User question request cancelled".to_string(),
-            ));
-        }
+    let response = if let Ok(resp) = rx.await { resp } else {
+        let _ = remove_pending_user_question(&context.app, &context.tool_call_id);
+        return Err(AppError::Generic(
+            "User question request cancelled".to_string(),
+        ));
     };
 
     let _ = remove_pending_user_question(&context.app, &context.tool_call_id);

@@ -55,7 +55,7 @@ impl SkillWatcher {
             .watch(&skills_dir, RecursiveMode::Recursive)
             .map_err(|e| AppError::Generic(format!("Failed to watch skills directory: {e}")))?;
 
-        log::info!("Skill filesystem watcher started at {:?}", skills_dir);
+        log::info!("Skill filesystem watcher started at {skills_dir:?}");
 
         Ok(Self {
             _debouncer: debouncer,

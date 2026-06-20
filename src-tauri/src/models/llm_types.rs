@@ -54,7 +54,7 @@ impl LLMModel {
         self
     }
 
-    pub fn with_capabilities(mut self, caps: ModelCapabilities) -> Self {
+    pub const fn with_capabilities(mut self, caps: ModelCapabilities) -> Self {
         caps.apply_to_model(&mut self);
         self
     }

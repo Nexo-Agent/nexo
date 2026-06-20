@@ -62,7 +62,7 @@ impl StreamPersistDebouncer {
         }
 
         let debouncer = Arc::clone(self);
-        let message_id_for_task = message_id.clone();
+        let message_id_for_task = message_id;
         tauri::async_runtime::spawn(async move {
             tokio::time::sleep(Duration::from_millis(FLUSH_DEBOUNCE_MS)).await;
             debouncer.flush_message(&message_id_for_task);

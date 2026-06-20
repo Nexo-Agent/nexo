@@ -18,7 +18,7 @@ pub struct McpConnectionSource {
 }
 
 impl McpConnectionSource {
-    pub fn new(
+    pub const fn new(
         app: AppHandle,
         connection: MCPServerConnection,
         selected_tool_names: HashSet<String>,

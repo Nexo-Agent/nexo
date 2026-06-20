@@ -161,7 +161,7 @@ impl FileContentLoader for DefaultFileContentLoader {
 
                 let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
                 let mime = mime_type_from_extension(ext);
-                Ok((format!("data:{mime};base64,{encoded}"), mime.to_string()))
+                Ok((format!("data:{mime};base64,{encoded}"), mime))
             } else {
                 Ok((
                     path_or_data.to_string(),

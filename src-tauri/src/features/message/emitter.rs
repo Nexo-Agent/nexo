@@ -118,11 +118,11 @@ impl MessageEmitter {
             let _ =
                 crate::features::conversation::emitter::ConversationEmitter::new(self.app.clone())
                     .emit_llm_call_complete(
-                        chat_id.clone(),
+                        chat_id,
                         turn_id,
-                        message_id.clone(),
-                        content.clone(),
-                        token_usage.clone(),
+                        message_id,
+                        content,
+                        token_usage,
                     );
             return Ok(());
         }

@@ -97,7 +97,7 @@ impl ConversationEmitter {
         };
 
         self.app
-            .emit(TauriEvents::LLM_CALL_COMPLETE, payload.clone())
+            .emit(TauriEvents::LLM_CALL_COMPLETE, payload)
             .map_err(|e| AppError::Generic(format!("Failed to emit llm-call-complete: {e}")))?;
 
         // Deprecated alias — remove in phase 4 cleanup window

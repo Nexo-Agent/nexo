@@ -6,7 +6,7 @@ use serde_json::Value;
 
 /// Tracks recent tool calls to detect infinite loops.
 ///
-/// TODO(harness): Port window/repeat_threshold logic from `harness.py` L256–277.
+/// TODO(harness): Port `window/repeat_threshold` logic from `harness.py` L256–277.
 /// When enabled, return `TurnOutcome::NeedsUserInput` on loop detection.
 pub struct LoopDetector;
 
@@ -17,7 +17,7 @@ impl LoopDetector {
     }
 
     /// Mock: no-op.
-    pub fn record(&self, _tool_name: &str, _arguments: &Value) {}
+    pub const fn record(&self, _tool_name: &str, _arguments: &Value) {}
 
     /// Mock: never looping.
     #[must_use]
@@ -26,7 +26,7 @@ impl LoopDetector {
     }
 
     /// Mock: no-op.
-    pub fn reset(&self) {}
+    pub const fn reset(&self) {}
 }
 
 impl Default for LoopDetector {

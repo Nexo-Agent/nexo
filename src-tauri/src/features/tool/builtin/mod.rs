@@ -50,7 +50,7 @@ impl BuiltinToolSource {
         Self::with_tools(default_tools(None, false, None, None))
     }
 
-    /// Builtin source containing only ask_user (for agent mode).
+    /// Builtin source containing only `ask_user` (for agent mode).
     pub fn ask_user_only() -> Self {
         Self::with_tools(vec![Arc::new(AskUserTool)])
     }

@@ -20,7 +20,7 @@ pub struct ConversationTurnController {
 }
 
 impl ConversationTurnController {
-    pub fn new(deps: Arc<HarnessDeps>) -> Self {
+    pub const fn new(deps: Arc<HarnessDeps>) -> Self {
         Self {
             deps,
             intent_router: IntentRouter::new(),
@@ -492,7 +492,7 @@ impl ConversationTurnController {
             }
         }
 
-        if !metadata_obj.as_object().is_some_and(|o| o.is_empty()) {
+        if !metadata_obj.as_object().is_some_and(serde_json::Map::is_empty) {
             deps.session_store
                 .update_assistant_metadata(assistant_message_id, Some(metadata_obj.to_string()))?;
 

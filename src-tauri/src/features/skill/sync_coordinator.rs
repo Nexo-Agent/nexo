@@ -24,7 +24,7 @@ impl SkillSyncCoordinator {
             paused: AtomicBool::new(false),
             sync_in_progress: AtomicBool::new(false),
             sync_pending: AtomicBool::new(false),
-            last_emit: Mutex::new(Instant::now() - EMIT_THROTTLE),
+            last_emit: Mutex::new(Instant::now().checked_sub(EMIT_THROTTLE).unwrap()),
             coalesced_emit: AtomicBool::new(false),
             skill_service,
             app,

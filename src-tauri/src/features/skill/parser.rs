@@ -15,7 +15,7 @@ impl SkillParser {
         }
 
         let content = fs::read_to_string(&skill_md_path)
-            .map_err(|e| AppError::Generic(format!("Failed to read SKILL.md: {}", e)))?;
+            .map_err(|e| AppError::Generic(format!("Failed to read SKILL.md: {e}")))?;
 
         let (metadata, instructions) = Self::parse_frontmatter(&content)?;
 
@@ -59,7 +59,7 @@ impl SkillParser {
 
         // Parse YAML
         let metadata: SkillMetadata = serde_yaml::from_str(yaml_str)
-            .map_err(|e| AppError::Validation(format!("Failed to parse frontmatter: {}", e)))?;
+            .map_err(|e| AppError::Validation(format!("Failed to parse frontmatter: {e}")))?;
 
         // Validate required fields
         Self::validate_metadata(&metadata)?;

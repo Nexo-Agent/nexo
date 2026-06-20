@@ -45,7 +45,7 @@ impl GoogleProvider {
             }
             serde_json::Value::Array(arr) => serde_json::Value::Array(
                 arr.iter()
-                    .map(|v| Self::clean_parameters_for_google(v))
+                    .map(Self::clean_parameters_for_google)
                     .collect(),
             ),
             _ => params.clone(),
@@ -1143,7 +1143,7 @@ impl LLMProvider for GoogleProvider {
                             .function
                             .parameters
                             .as_ref()
-                            .map(|p| Self::clean_parameters_for_google(p));
+                            .map(Self::clean_parameters_for_google);
 
                         json!({
                             "name": t.function.name,

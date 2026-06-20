@@ -20,11 +20,11 @@ impl HistoryState {
         self.index = self.entries.len().saturating_sub(1);
     }
 
-    pub fn can_go_back(&self) -> bool {
+    pub const fn can_go_back(&self) -> bool {
         self.index > 0
     }
 
-    pub fn can_go_forward(&self) -> bool {
+    pub const fn can_go_forward(&self) -> bool {
         self.index + 1 < self.entries.len()
     }
 

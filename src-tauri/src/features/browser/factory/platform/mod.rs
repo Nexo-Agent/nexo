@@ -5,9 +5,10 @@ use std::sync::Mutex;
 use tauri::webview::WebviewBuilder;
 use tauri::{AppHandle, Runtime};
 
+#[derive(Default)]
 pub struct ParentPlatformState {
     #[cfg(target_os = "macos")]
-    /// Stable pointer to the main webview's WKWebViewConfiguration (leaked retain).
+    /// Stable pointer to the main webview's `WKWebViewConfiguration` (leaked retain).
     macos_config_ptr: Option<usize>,
     #[cfg(any(
         target_os = "linux",
@@ -21,23 +22,6 @@ pub struct ParentPlatformState {
     initialized: bool,
 }
 
-impl Default for ParentPlatformState {
-    fn default() -> Self {
-        Self {
-            #[cfg(target_os = "macos")]
-            macos_config_ptr: None,
-            #[cfg(any(
-                target_os = "linux",
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "netbsd",
-                target_os = "openbsd"
-            ))]
-            linux_webview_ptr: None,
-            initialized: false,
-        }
-    }
-}
 
 impl ParentPlatformState {
     pub fn init<R: Runtime>(app: &AppHandle<R>) -> Result<Self, AppError> {
@@ -77,7 +61,7 @@ impl ParentPlatformState {
     }
 
     /// Re-read the main webview handle if startup init ran before the main webview was ready.
-    pub fn ensure_linux_related_view<R: Runtime>(
+    pub const fn ensure_linux_related_view<R: Runtime>(
         &mut self,
         app: &AppHandle<R>,
     ) -> Result<(), AppError> {
@@ -107,7 +91,7 @@ impl ParentPlatformState {
         Ok(())
     }
 
-    pub fn macos_config_ptr(&self) -> Option<usize> {
+    pub const fn macos_config_ptr(&self) -> Option<usize> {
         #[cfg(target_os = "macos")]
         {
             self.macos_config_ptr
@@ -210,7 +194,7 @@ fn read_macos_config_ptr<R: Runtime>(app: &AppHandle<R>) -> Result<usize, AppErr
 }
 
 #[cfg(target_os = "macos")]
-pub(crate) fn macos_config_from_ptr(
+pub fn macos_config_from_ptr(
     config_ptr: usize,
 ) -> Result<objc2::rc::Retained<objc2_web_kit::WKWebViewConfiguration>, AppError> {
     use objc2::rc::Retained;

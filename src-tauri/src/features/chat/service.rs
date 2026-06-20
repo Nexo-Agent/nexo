@@ -273,7 +273,7 @@ impl ChatService {
             })?;
 
         let model = selected_model
-            .clone()
+            
             .or(workspace_settings.default_model.clone())
             .or(llm_connection.default_model.clone())
             .ok_or_else(|| AppError::Validation("No model selected".to_string()))?;
@@ -304,7 +304,7 @@ impl ChatService {
                 chat_id.clone(),
                 content.clone(),
                 Some(model.clone()),
-                Some(llm_connection_id.clone()),
+                Some(llm_connection_id),
             );
         }
 
@@ -328,10 +328,10 @@ impl ChatService {
         )?;
 
         let turn_request = MessageTurnRequest {
-            chat_id: chat_id.clone(),
-            workspace_id: workspace_id.clone(),
+            chat_id,
+            workspace_id,
             user_message_id: user_message_id.clone(),
-            user_content: content.clone(),
+            user_content: content,
             user_metadata: metadata,
             user_files: processed_files,
             assistant_message_id: assistant_message_id.clone(),
@@ -339,8 +339,8 @@ impl ChatService {
             model,
             reasoning_effort,
             llm_connection,
-            workspace_settings: workspace_settings.clone(),
-            agent_id: chat.agent_id.clone(),
+            workspace_settings,
+            agent_id: chat.agent_id,
         };
 
         Ok(PreparedTurn {

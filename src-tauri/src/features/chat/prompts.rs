@@ -67,7 +67,7 @@ pub fn get_app_prompt() -> String {
 
     // Add more environment details if needed (locale, etc.)
     if let Ok(lang) = std::env::var("LANG").or_else(|_| std::env::var("LC_ALL")) {
-        prompt.push_str(&format!("- Locale: {}\n", lang));
+        prompt.push_str(&format!("- Locale: {lang}\n"));
     }
 
     prompt

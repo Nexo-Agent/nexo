@@ -69,8 +69,8 @@ impl Tool for ListDirTool {
             let meta = entry.metadata().await.ok();
             entries.push(json!({
                 "name": entry.file_name().to_string_lossy(),
-                "is_dir": meta.as_ref().map(|m| m.is_dir()).unwrap_or(false),
-                "size": meta.as_ref().map(|m| m.len()).unwrap_or(0),
+                "is_dir": meta.as_ref().is_some_and(std::fs::Metadata::is_dir),
+                "size": meta.as_ref().map_or(0, std::fs::Metadata::len),
             }));
         }
 

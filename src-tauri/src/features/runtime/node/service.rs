@@ -63,7 +63,7 @@ impl NodeRuntime {
 
     /// Get the directory containing the node binary
     pub fn bin_dir(&self) -> Option<PathBuf> {
-        self.node_path.parent().map(|p| p.to_path_buf())
+        self.node_path.parent().map(std::path::Path::to_path_buf)
     }
 
     /// Get path to installed Node executable

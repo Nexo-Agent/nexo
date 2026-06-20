@@ -46,17 +46,17 @@ impl HarnessFactory {
             Arc::new(NexoPromptProvider::new(skill_service.clone()));
         let file_loader = Arc::new(DefaultFileContentLoader);
         let attachment_resolver: Arc<dyn AttachmentResolver> =
-            Arc::new(DefaultAttachmentResolver::new(file_loader.clone()));
+            Arc::new(DefaultAttachmentResolver::new(file_loader));
         let message_builder = Arc::new(NexoMessageBuilder::new(
             prompt_provider.clone(),
             attachment_resolver.clone(),
-            skill_service.clone(),
+            skill_service,
         ));
         let session_store = Arc::new(SqliteSessionStore::new(
             message_service.clone(),
             chat_repository.clone(),
         ));
-        let llm_client = Arc::new(LlmServiceAdapter::new(llm_service.clone()));
+        let llm_client = Arc::new(LlmServiceAdapter::new(llm_service));
         let hooks = Arc::new(TauriHarnessHooks::new(usage_service));
 
         let deps = Arc::new(HarnessDeps {

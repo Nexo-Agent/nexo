@@ -301,7 +301,7 @@ impl WebviewFactory {
     pub async fn capture_screenshot(&self, tab_id: &str) -> Result<String, AppError> {
         let tab = self.get_tab(tab_id).await?;
         let webview = self.get_webview(&tab)?;
-        let script = r#"
+        let script = r"
             (function() {
               const canvas = document.createElement('canvas');
               const width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
@@ -314,7 +314,7 @@ impl WebviewFactory {
               ctx.fillRect(0, 0, width, height);
               return JSON.stringify({ data: canvas.toDataURL('image/jpeg', 0.85).split(',')[1] || '' });
             })()
-        "#;
+        ";
         let raw = eval_helper::eval_json(&webview, script)?;
         let value: serde_json::Value = serde_json::from_str(&raw)
             .map_err(|e| AppError::Generic(format!("Screenshot parse failed: {e}")))?;
@@ -350,13 +350,13 @@ impl WebviewFactory {
         let tab = self.get_tab(tab_id).await?;
         let webview = self.get_webview(&tab)?;
         let script = format!(
-            r#"(function() {{
+            r"(function() {{
                 const el = document.querySelector({selector:?});
                 if (!el) throw new Error('Element not found');
                 el.scrollIntoView({{ block: 'center', inline: 'center' }});
                 el.click();
                 return true;
-            }})()"#
+            }})()"
         );
         webview
             .eval(&script)
@@ -369,7 +369,7 @@ impl WebviewFactory {
         let escaped = serde_json::to_string(text)
             .map_err(|e| AppError::Generic(format!("Text escape failed: {e}")))?;
         let script = format!(
-            r#"(function() {{
+            r"(function() {{
                 const text = {escaped};
                 const el = document.activeElement;
                 if (!el) throw new Error('No focused element');
@@ -386,7 +386,7 @@ impl WebviewFactory {
                 }}
                 document.execCommand('insertText', false, text);
                 return true;
-            }})()"#
+            }})()"
         );
         webview
             .eval(&script)
@@ -665,7 +665,7 @@ impl WebviewFactory {
         let webview = self.get_webview(tab)?;
         let raw = eval_helper::eval_json(
             &webview,
-            r#"({ url: location.href, title: document.title })"#,
+            r"({ url: location.href, title: document.title })",
         )?;
         let value: serde_json::Value = serde_json::from_str(&raw)
             .map_err(|e| AppError::Generic(format!("Navigation state parse failed: {e}")))?;
@@ -706,7 +706,7 @@ impl WebviewFactory {
         registry: &WebviewRegistry,
     ) -> HashMap<String, BrowserNavigationState> {
         let mut map = HashMap::new();
-        for id in registry.panel_tab_ids().iter() {
+        for id in registry.panel_tab_ids() {
             if let Some(tab) = registry.get(id) {
                 map.insert(id.clone(), tab.nav_state.lock().await.clone());
             }

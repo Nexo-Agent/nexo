@@ -31,7 +31,7 @@ pub fn eval_string(webview: &Webview, script: &str) -> Result<String, AppError> 
 fn platform_eval(platform: &PlatformWebview, script: &str) -> Result<String, String> {
     #[cfg(target_os = "macos")]
     {
-        return eval_macos(platform, script);
+        eval_macos(platform, script)
     }
     #[cfg(windows)]
     {

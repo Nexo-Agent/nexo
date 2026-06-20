@@ -12,7 +12,7 @@ pub struct LlmServiceAdapter {
 }
 
 impl LlmServiceAdapter {
-    pub fn new(llm_service: Arc<LLMService>) -> Self {
+    pub const fn new(llm_service: Arc<LLMService>) -> Self {
         Self { llm_service }
     }
 }

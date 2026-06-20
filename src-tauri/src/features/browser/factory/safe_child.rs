@@ -9,7 +9,7 @@ use tauri::{LogicalPosition, LogicalSize, Runtime, Webview, Window};
 /// internal channel (`RecvError`). We catch that panic here and return `AppError`.
 ///
 /// On macOS, call [`super::platform::macos_probe::validate_child_webview_capability`]
-/// before this to catch WebKit `@throw` exceptions early.
+/// before this to catch `WebKit` `@throw` exceptions early.
 pub fn try_add_child<R: Runtime>(
     window: &Window<R>,
     builder: WebviewBuilder<R>,

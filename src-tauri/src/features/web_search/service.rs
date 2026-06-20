@@ -60,7 +60,7 @@ impl WebSearchService {
         }
     }
 
-    pub fn provider(&self) -> WebSearchProvider {
+    pub const fn provider(&self) -> WebSearchProvider {
         self.config.provider
     }
 

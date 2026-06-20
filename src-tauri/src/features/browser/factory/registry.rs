@@ -50,7 +50,7 @@ impl WebviewRegistry {
         self.fence_anchors.get(anchor_id).cloned()
     }
 
-    pub fn active_tab_id(&self) -> Option<&String> {
+    pub const fn active_tab_id(&self) -> Option<&String> {
         self.active_tab_id.as_ref()
     }
 

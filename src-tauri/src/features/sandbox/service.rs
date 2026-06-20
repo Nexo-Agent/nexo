@@ -161,9 +161,7 @@ impl SandboxService {
         let rt = PythonRuntime::detect(app, &spec.version)?;
         let python_path = rt.python_path.clone();
         let bin_dir = python_path
-            .parent()
-            .map(PathBuf::from)
-            .unwrap_or_else(|| PathBuf::from("."));
+            .parent().map_or_else(|| PathBuf::from("."), PathBuf::from);
 
         let mut executables = BTreeMap::new();
         executables.insert("python".to_string(), python_path.clone());
@@ -183,13 +181,11 @@ impl SandboxService {
         let node_path = rt.node_path.clone();
         let bin_dir = rt.bin_dir().unwrap_or_else(|| {
             node_path
-                .parent()
-                .map(PathBuf::from)
-                .unwrap_or_else(|| PathBuf::from("."))
+                .parent().map_or_else(|| PathBuf::from("."), PathBuf::from)
         });
 
         let mut executables = BTreeMap::new();
-        executables.insert("node".to_string(), node_path.clone());
+        executables.insert("node".to_string(), node_path);
 
         let npm_name = if cfg!(windows) { "npm.cmd" } else { "npm" };
         let npx_name = if cfg!(windows) { "npx.cmd" } else { "npx" };

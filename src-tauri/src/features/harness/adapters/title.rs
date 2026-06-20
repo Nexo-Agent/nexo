@@ -63,12 +63,9 @@ impl TitleGenerator {
         llm_connection_id: Option<String>,
     ) {
         tokio::spawn(async move {
-            let user_message_count = match self.message_service.get_by_chat_id(&chat_id) {
-                Ok(messages) => count_user_messages(&messages),
-                Err(_) => {
-                    tracing::error!(chat_id = %chat_id, "Failed to get messages for title generation");
-                    return;
-                }
+            let user_message_count = if let Ok(messages) = self.message_service.get_by_chat_id(&chat_id) { count_user_messages(&messages) } else {
+                tracing::error!(chat_id = %chat_id, "Failed to get messages for title generation");
+                return;
             };
 
             if user_message_count != 1 {
@@ -124,7 +121,7 @@ impl TitleGenerator {
                 .ok_or_else(|| {
                     AppError::NotFound(format!("LLM connection not found: {conn_id}"))
                 })?;
-            (conn, settings.default_model.clone())
+            (conn, settings.default_model)
         };
 
         let model = model

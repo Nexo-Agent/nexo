@@ -17,7 +17,7 @@ pub struct AgentSession {
 }
 
 impl AgentSession {
-    pub fn new(deps: Arc<crate::features::harness::traits::HarnessDeps>) -> Self {
+    pub const fn new(deps: Arc<crate::features::harness::traits::HarnessDeps>) -> Self {
         Self {
             deps,
             verifier: ResponseVerifier::new(),

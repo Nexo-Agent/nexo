@@ -16,7 +16,7 @@ pub struct UserQuestionDefinition {
     pub allow_multiple: bool,
 }
 
-/// Wire payload from frontend — option_id is internal; not sent to LLM.
+/// Wire payload from frontend — `option_id` is internal; not sent to LLM.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserQuestionAnswerInput {

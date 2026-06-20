@@ -56,7 +56,7 @@ impl ArtifactService {
         let ext = Path::new(trimmed)
             .extension()
             .and_then(|e| e.to_str())
-            .map(|e| e.to_lowercase())
+            .map(str::to_lowercase)
             .ok_or_else(|| {
                 AppError::Validation("Filename must include a file extension".to_string())
             })?;

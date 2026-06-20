@@ -18,7 +18,7 @@ pub struct AgentMcpSource {
 }
 
 impl AgentMcpSource {
-    pub fn new(source_id: String, source_label: String, client: Arc<ClientRuntime>) -> Self {
+    pub const fn new(source_id: String, source_label: String, client: Arc<ClientRuntime>) -> Self {
         Self {
             source_id,
             source_label,

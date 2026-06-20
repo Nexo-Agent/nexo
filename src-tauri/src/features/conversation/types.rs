@@ -36,7 +36,7 @@ impl ConversationPhase {
         }
     }
 
-    pub fn is_busy(&self) -> bool {
+    pub const fn is_busy(&self) -> bool {
         matches!(
             self.kind,
             ConversationPhaseKind::Queued

@@ -14,7 +14,7 @@ impl IntentRouter {
         Self
     }
 
-    /// Mock: always `true` when tools exist — matches current ChatService behavior.
+    /// Mock: always `true` when tools exist — matches current `ChatService` behavior.
     #[must_use]
     pub const fn needs_tools(&self, _user_message: &str, has_relevant_tools: bool) -> bool {
         has_relevant_tools

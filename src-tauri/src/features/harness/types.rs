@@ -69,7 +69,7 @@ pub struct MessageBuildContext<'a> {
 /// Re-export harness-facing message type alias.
 pub type HarnessMessages = Vec<ChatMessage>;
 
-/// Full message turn request — used by ChatService facade → harness.
+/// Full message turn request — used by `ChatService` facade → harness.
 #[derive(Debug, Clone)]
 pub struct MessageTurnRequest {
     pub chat_id: String,

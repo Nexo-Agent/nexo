@@ -2,7 +2,7 @@ use crate::error::AppError;
 use crate::features::browser::factory::window_access;
 use tauri::{AppHandle, Runtime};
 
-/// Verify on the main thread that WebKit accepts a child WKWebView with the
+/// Verify on the main thread that `WebKit` accepts a child `WKWebView` with the
 /// cached parent configuration, catching Objective-C exceptions before Tauri
 /// `add_child` can abort the process.
 pub fn validate_child_webview_capability<R: Runtime>(
@@ -50,9 +50,7 @@ fn probe_on_main_thread(config_ptr: usize) -> Result<(), AppError> {
         Ok(Ok(())) => Ok(()),
         Ok(Err(err)) => Err(err),
         Err(exception) => {
-            let message = exception
-                .map(|e| e.to_string())
-                .unwrap_or_else(|| "unknown WebKit exception".into());
+            let message = exception.map_or_else(|| "unknown WebKit exception".into(), |e| e.to_string());
             tracing::error!("macOS WebKit rejected child webview: {message}");
             Err(AppError::Generic(format!(
                 "macOS WebKit rejected child webview: {message}"

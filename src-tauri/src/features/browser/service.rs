@@ -8,11 +8,11 @@ pub struct BrowserService {
 }
 
 impl BrowserService {
-    pub fn new(factory: Arc<WebviewFactory>) -> Self {
+    pub const fn new(factory: Arc<WebviewFactory>) -> Self {
         Self { factory }
     }
 
-    pub fn factory(&self) -> &Arc<WebviewFactory> {
+    pub const fn factory(&self) -> &Arc<WebviewFactory> {
         &self.factory
     }
 

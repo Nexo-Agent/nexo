@@ -17,7 +17,7 @@ pub struct TauriHarnessHooks {
 }
 
 impl TauriHarnessHooks {
-    pub fn new(usage_service: Arc<UsageService>) -> Self {
+    pub const fn new(usage_service: Arc<UsageService>) -> Self {
         Self { usage_service }
     }
 

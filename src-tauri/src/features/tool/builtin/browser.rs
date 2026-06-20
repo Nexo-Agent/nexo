@@ -13,7 +13,7 @@ pub struct BrowserNavigateTool {
 }
 
 impl BrowserNavigateTool {
-    pub fn new(browser_service: Arc<BrowserService>) -> Self {
+    pub const fn new(browser_service: Arc<BrowserService>) -> Self {
         Self { browser_service }
     }
 }
@@ -69,7 +69,7 @@ pub struct BrowserClickTool {
 }
 
 impl BrowserClickTool {
-    pub fn new(browser_service: Arc<BrowserService>) -> Self {
+    pub const fn new(browser_service: Arc<BrowserService>) -> Self {
         Self { browser_service }
     }
 }
@@ -120,7 +120,7 @@ pub struct BrowserTypeTool {
 }
 
 impl BrowserTypeTool {
-    pub fn new(browser_service: Arc<BrowserService>) -> Self {
+    pub const fn new(browser_service: Arc<BrowserService>) -> Self {
         Self { browser_service }
     }
 }
@@ -171,7 +171,7 @@ pub struct BrowserScreenshotTool {
 }
 
 impl BrowserScreenshotTool {
-    pub fn new(browser_service: Arc<BrowserService>) -> Self {
+    pub const fn new(browser_service: Arc<BrowserService>) -> Self {
         Self { browser_service }
     }
 }
@@ -215,7 +215,7 @@ pub struct BrowserGetContentTool {
 }
 
 impl BrowserGetContentTool {
-    pub fn new(browser_service: Arc<BrowserService>) -> Self {
+    pub const fn new(browser_service: Arc<BrowserService>) -> Self {
         Self { browser_service }
     }
 }
