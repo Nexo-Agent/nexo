@@ -396,7 +396,7 @@ export function WorkspaceSettingsDialog({
           onConfirm={handleClearAllChats}
           confirmLabel={t('clear', { ns: 'common' })}
           isLoading={isClearing}
-          icon={<Eraser className="size-6" />}
+          compact
         />
 
         <ConfirmDialog
@@ -407,7 +407,7 @@ export function WorkspaceSettingsDialog({
           onConfirm={handleDelete}
           confirmLabel={t('delete', { ns: 'common' })}
           isLoading={isDeleting}
-          icon={<Trash2 className="size-6" />}
+          compact
         />
       </div>
     </SettingsDialog>

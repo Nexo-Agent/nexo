@@ -56,11 +56,11 @@ pub fn delete_messages_after(
 }
 
 #[tauri::command]
-pub fn cancel_message(chat_id: String, state: State<'_, AppState>) -> Result<(), AppError> {
-    // Send cancellation signal for the chat
+pub async fn cancel_message(chat_id: String, state: State<'_, AppState>) -> Result<(), AppError> {
     state
         .chat_service
-        .cancel_message(&chat_id)
+        .cancel_message(&chat_id, &state.app_handle)
+        .await
         .map_err(|e| AppError::Generic(e.to_string()))?;
 
     Ok(())

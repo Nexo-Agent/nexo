@@ -348,12 +348,20 @@ impl ConversationTurnController {
                 )
                 .await;
 
-            let result = match execution_result {
+            let (_result, llm_content) = match execution_result {
                 Ok(tool_result) => {
                     successful_count += 1;
+                    let llm_text = tool_result.to_llm_content();
+                    if tool_result.truncated {
+                        tracing::warn!(
+                            tool = %tool_call.function.name,
+                            raw_size = tool_result.raw_size,
+                            "Tool output truncated"
+                        );
+                    }
                     let result_value: serde_json::Value =
-                        serde_json::from_str(&tool_result.content).unwrap_or_else(|_| {
-                            serde_json::Value::String(tool_result.content.clone())
+                        serde_json::from_str(&llm_text).unwrap_or_else(|_| {
+                            serde_json::Value::String(llm_text.clone())
                         });
 
                     let completed_data = serde_json::json!({
@@ -380,7 +388,7 @@ impl ConversationTurnController {
                         )
                         .await?;
 
-                    result_value
+                    (result_value, llm_text)
                 }
                 Err(e) => {
                     if matches!(e, AppError::Cancelled) {
@@ -431,12 +439,13 @@ impl ConversationTurnController {
                         )
                         .await?;
 
-                    serde_json::json!({ "error": error_msg })
+                    let error_value = serde_json::json!({ "error": error_msg });
+                    let llm_text = serde_json::to_string(&error_value)?;
+                    (error_value, llm_text)
                 }
             };
 
             let tool_result_message_id = format!("tool_result_{}", tool_call.id);
-            let llm_content = serde_json::to_string(&result)?;
 
             message_service.create(
                 tool_result_message_id,

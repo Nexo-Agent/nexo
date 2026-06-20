@@ -49,8 +49,8 @@ impl ChatService {
         }
     }
 
-    pub fn cancel_message(&self, chat_id: &str) -> Result<(), AppError> {
-        futures::executor::block_on(self.conversation_manager.cancel_turn(chat_id))
+    pub async fn cancel_message(&self, chat_id: &str, app: &AppHandle) -> Result<(), AppError> {
+        self.conversation_manager.cancel_turn(chat_id, app).await
     }
 
     pub fn create(
@@ -130,9 +130,9 @@ impl ChatService {
 
     pub fn delete_by_workspace_id(&self, workspace_id: String) -> Result<(), AppError> {
         let chats = self.repository.get_by_workspace_id(&workspace_id)?;
-        for chat in &chats {
-            self.artifact_service.delete_by_chat(&chat.id)?;
-        }
+        let chat_ids: Vec<String> = chats.iter().map(|c| c.id.clone()).collect();
+        self.artifact_service
+            .delete_by_workspace_chats(&chat_ids)?;
         self.repository.delete_by_workspace_id(&workspace_id)
     }
 
@@ -331,7 +331,9 @@ impl ChatService {
                 .await;
         }
 
-        self.conversation_manager.cancel_turn(&chat_id).await?;
+        self.conversation_manager
+            .cancel_turn(&chat_id, &app)
+            .await?;
 
         self.message_service
             .delete_messages_after(chat_id.clone(), message_id.clone())?;

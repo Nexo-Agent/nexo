@@ -1,4 +1,5 @@
 use crate::error::AppError;
+use crate::events::MessageEmitter;
 use crate::features::conversation::emitter::ConversationEmitter;
 use crate::features::conversation::types::{
     ConversationPhase, ConversationPhaseKind, ConversationSnapshot, ConversationSummary,
@@ -20,7 +21,7 @@ struct ChatRuntime {
 
 impl ChatRuntime {
     fn new() -> Self {
-        let (cancel_tx, _) = broadcast::channel(1);
+        let (cancel_tx, _) = broadcast::channel(16);
         Self {
             phase: ConversationPhase::idle(),
             queue: VecDeque::new(),
@@ -133,20 +134,46 @@ impl ConversationJobManager {
         })
     }
 
-    pub async fn cancel_turn(&self, chat_id: &str) -> Result<(), AppError> {
-        let mut runtimes = self.runtimes.lock().await;
-        if let Some(runtime) = runtimes.get_mut(chat_id) {
-            let _ = runtime.cancel_tx.send(());
-            runtime.queue.clear();
-            if let Some(turn_id) = runtime.active_turn_id.clone() {
-                runtime.phase = ConversationPhase {
-                    kind: ConversationPhaseKind::Cancelled,
-                    turn_id: Some(turn_id),
-                    ..Default::default()
-                };
+    pub async fn cancel_turn(&self, chat_id: &str, app: &AppHandle) -> Result<(), AppError> {
+        let emit_info = {
+            let mut runtimes = self.runtimes.lock().await;
+            if let Some(runtime) = runtimes.get_mut(chat_id) {
+                let _ = runtime.cancel_tx.send(());
+                runtime.queue.clear();
+                let turn_id = runtime.active_turn_id.clone();
+                let active_message_id = runtime.phase.active_message_id.clone();
+                if let Some(ref tid) = turn_id {
+                    runtime.phase = ConversationPhase {
+                        kind: ConversationPhaseKind::Cancelled,
+                        turn_id: Some(tid.clone()),
+                        active_message_id: active_message_id.clone(),
+                        iteration: None,
+                        tool_call_id: None,
+                        error: None,
+                    };
+                    Some((tid.clone(), active_message_id))
+                } else {
+                    runtime.phase = ConversationPhase::idle();
+                    None
+                }
             } else {
-                runtime.phase = ConversationPhase::idle();
+                None
             }
+        };
+
+        if let Some((turn_id, active_message_id)) = emit_info {
+            let _ = ConversationEmitter::new(app.clone()).emit_turn_phase_changed(
+                chat_id.to_string(),
+                turn_id,
+                ConversationPhase {
+                    kind: ConversationPhaseKind::Cancelled,
+                    turn_id: None,
+                    active_message_id,
+                    iteration: None,
+                    tool_call_id: None,
+                    error: None,
+                },
+            );
         }
         Ok(())
     }
@@ -334,6 +361,11 @@ impl ConversationJobManager {
                             tool_call_id: None,
                             error: None,
                         },
+                    );
+
+                    let _ = MessageEmitter::new(app.clone()).emit_message_cancelled(
+                        chat_id.clone(),
+                        assistant_message_id.clone(),
                     );
 
                     if let Some(tx) = completion {

@@ -154,6 +154,7 @@ impl ToolRuntime {
             .ok_or_else(|| AppError::Validation(format!("Tool spec not found: {tool_name}")))?;
 
         let timeout = spec.behavior.default_timeout;
+        let source_id = spec.source_id.clone();
 
         let source = self.sources[*source_idx].clone();
         let tool_name_owned = tool_name.to_string();
@@ -161,7 +162,8 @@ impl ToolRuntime {
 
         let exec_future = async move { source.execute(&tool_name_owned, arguments, &ctx).await };
 
-        match timeout {
+        let start = std::time::Instant::now();
+        let execution_result = match timeout {
             None if spec.behavior.interaction == ToolInteraction::AwaitUser => {
                 tokio::select! {
                     result = exec_future => result,
@@ -182,7 +184,26 @@ impl ToolRuntime {
                     _ = cancellation_rx.recv() => Err(AppError::Cancelled),
                 }
             }
-        }
+        };
+
+        let duration_ms = start.elapsed().as_millis() as u64;
+        let sentry_result: Result<(), Box<dyn std::error::Error>> = execution_result
+            .as_ref()
+            .map(|_| ())
+            .map_err(|e| {
+                Box::new(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    e.to_string(),
+                )) as Box<dyn std::error::Error>
+            });
+        crate::lib::sentry_helpers::track_tool_execution(
+            tool_name,
+            &source_id,
+            duration_ms,
+            &sentry_result,
+        );
+
+        execution_result
     }
 }
 

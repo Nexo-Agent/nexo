@@ -396,6 +396,12 @@ export function useConversationEventProjector() {
     const unlistenChunk = listenToEvent<MessageChunkEvent>(
       TauriEvents.MESSAGE_CHUNK,
       (payload) => {
+        const phaseKind =
+          store.getState().conversationRuntime.byChatId[payload.chat_id]?.phase
+            .kind;
+        if (phaseKind === 'cancelled') {
+          return;
+        }
         dispatch(
           messagesApi.util.updateQueryData(
             'getMessages',
@@ -417,6 +423,12 @@ export function useConversationEventProjector() {
     const unlistenThinkingChunk = listenToEvent<ThinkingChunkEvent>(
       TauriEvents.THINKING_CHUNK,
       (payload) => {
+        const phaseKind =
+          store.getState().conversationRuntime.byChatId[payload.chat_id]?.phase
+            .kind;
+        if (phaseKind === 'cancelled') {
+          return;
+        }
         dispatch(
           messagesApi.util.updateQueryData(
             'getMessages',
@@ -467,7 +479,13 @@ export function useConversationEventProjector() {
 
     const unlistenCancelled = listenToEvent<MessageCancelledEvent>(
       TauriEvents.MESSAGE_CANCELLED,
-      () => {}
+      (payload) => {
+        dispatch(
+          messagesApi.util.invalidateTags([
+            { type: 'Message', id: `LIST_${payload.chat_id}` },
+          ])
+        );
+      }
     );
 
     const unlistenMetadataUpdated = listenToEvent<MessageMetadataUpdatedEvent>(

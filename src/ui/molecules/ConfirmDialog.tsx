@@ -22,6 +22,8 @@ interface ConfirmDialogProps {
   variant?: 'default' | 'destructive';
   isLoading?: boolean;
   icon?: React.ReactNode;
+  /** Compact layout matching add/rename workspace dialogs */
+  compact?: boolean;
 }
 
 export function ConfirmDialog({
@@ -35,6 +37,7 @@ export function ConfirmDialog({
   variant = 'destructive',
   isLoading = false,
   icon,
+  compact = false,
 }: ConfirmDialogProps) {
   const { t } = useTranslation(['common']);
 
@@ -45,6 +48,52 @@ export function ConfirmDialog({
       // Errors should be handled by the parent
     }
   };
+
+  const resolvedConfirmLabel =
+    confirmLabel ||
+    (variant === 'destructive' ? t('common:delete') : t('common:confirm'));
+
+  if (compact) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="items-stretch gap-0 p-4 sm:max-w-xs">
+          <div className="flex flex-col gap-3">
+            <DialogTitle className="m-0 text-sm font-medium leading-none">
+              {title}
+            </DialogTitle>
+            <DialogDescription className="m-0 text-xs text-muted-foreground leading-relaxed">
+              {description}
+            </DialogDescription>
+            <div className="flex justify-end gap-1.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2"
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                {cancelLabel || t('common:cancel')}
+              </Button>
+              <Button
+                type="button"
+                variant={variant}
+                size="sm"
+                className="h-7 px-3"
+                onClick={handleConfirm}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                ) : null}
+                {resolvedConfirmLabel}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -94,10 +143,7 @@ export function ConfirmDialog({
             {isLoading ? (
               <Loader2 className="size-4 animate-spin mr-2" />
             ) : null}
-            {confirmLabel ||
-              (variant === 'destructive'
-                ? t('common:delete')
-                : t('common:confirm'))}
+            {resolvedConfirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -168,9 +168,10 @@ impl AnthropicProvider {
             next = stream.next() => next,
              () = async {
                 if let Some(ref mut rx) = cancellation_rx {
-                    let _ = rx.recv().await;
+                    crate::services::llm::cancel::wait_for_broadcast_cancel(rx).await;
+                } else {
+                    futures::future::pending::<()>().await;
                 }
-                futures::future::pending::<()>().await;
             }, if cancellation_rx.is_some() => {
                 return Err(AppError::Cancelled);
             }
