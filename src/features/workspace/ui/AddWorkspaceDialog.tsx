@@ -2,13 +2,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
 import { Input } from '@/ui/atoms/input';
-import { Label } from '@/ui/atoms/label';
 import {
   Dialog,
-  DialogBody,
   DialogContent,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/ui/atoms/dialog/component';
 
@@ -30,63 +26,62 @@ export function AddWorkspaceDialog({
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledOnOpenChange || setInternalOpen;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim()) {
-      const workspaceName = name.trim();
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
       setName('');
-      setOpen(false);
-      if (onAddWorkspaceCallback) {
-        onAddWorkspaceCallback(workspaceName);
-      }
     }
+    setOpen(nextOpen);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const workspaceName = name.trim();
+    if (!workspaceName) return;
+
+    setName('');
+    setOpen(false);
+    onAddWorkspaceCallback?.(workspaceName);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <DialogHeader>
-            <DialogTitle>{t('addNewWorkspace')}</DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              {t('addNewWorkspaceDescription')}
-            </p>
-          </DialogHeader>
-          <DialogBody>
-            <div className="space-y-2">
-              <Label htmlFor="workspace-name">{t('workspaceName')}</Label>
-              <Input
-                id="workspace-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('enterWorkspaceName')}
-                className="w-full"
-                autoFocus
-                data-tour="workspace-name-input"
-              />
-            </div>
-          </DialogBody>
-          <DialogFooter className="justify-between gap-2">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="items-stretch gap-0 p-4 sm:max-w-xs">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <DialogTitle className="m-0 text-sm font-medium leading-none">
+            {t('addNewWorkspace')}
+          </DialogTitle>
+
+          <Input
+            id="workspace-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t('enterWorkspaceName')}
+            className="h-8"
+            autoFocus
+            aria-label={t('workspaceName')}
+            data-tour="workspace-name-input"
+          />
+
+          <div className="flex justify-end gap-1.5">
             <Button
               type="button"
-              variant="outline"
-              onClick={() => {
-                setOpen(false);
-                setName('');
-              }}
-              className="flex-1"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2"
+              onClick={() => handleOpenChange(false)}
             >
               {t('cancel', { ns: 'common' })}
             </Button>
             <Button
               type="submit"
+              size="sm"
+              className="h-7 px-3"
               disabled={!name.trim()}
-              className="flex-1"
               data-tour="workspace-add-btn"
             >
               {t('add', { ns: 'common' })}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

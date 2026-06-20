@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
-import { WorkspaceSelector } from '@/features/workspace';
 import { About } from '@/features/settings';
 import { ChatSearchDialog } from '@/features/chat/ui/ChatSearchDialog';
 import { ChatRightPanel } from '@/features/chat/ui/ChatRightPanel';
@@ -48,26 +47,23 @@ export function MainLayout() {
       <TitleBar
         leftContent={
           activePage === 'chat' ? (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => dispatch(toggleSidebar())}
-                aria-label={
-                  isSidebarCollapsed
-                    ? t('expandSidebar', { ns: 'common' })
-                    : t('collapseSidebar', { ns: 'common' })
-                }
-                className="h-7 w-7"
-              >
-                {isSidebarCollapsed ? (
-                  <PanelLeftOpen className="size-4" />
-                ) : (
-                  <PanelLeftClose className="size-4" />
-                )}
-              </Button>
-              <WorkspaceSelector />
-            </>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => dispatch(toggleSidebar())}
+              aria-label={
+                isSidebarCollapsed
+                  ? t('expandSidebar', { ns: 'common' })
+                  : t('collapseSidebar', { ns: 'common' })
+              }
+              className="h-7 w-7"
+            >
+              {isSidebarCollapsed ? (
+                <PanelLeftOpen className="size-4" />
+              ) : (
+                <PanelLeftClose className="size-4" />
+              )}
+            </Button>
           ) : titleBarText ? (
             <div className="flex items-center gap-2">
               <Button

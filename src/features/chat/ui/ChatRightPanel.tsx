@@ -52,15 +52,15 @@ export function ChatRightPanel() {
   return (
     <div className="flex h-full flex-col bg-background border-l border-border">
       {/* Topbar */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-background/50 backdrop-blur-md px-1 pr-3">
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+      <div className="flex h-9 shrink-0 items-center justify-between border-b border-border bg-background/50 backdrop-blur-md px-1 pr-2">
+        <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
             <Tooltip key={tab.id}>
               <TooltipTrigger asChild>
                 <button
                   onClick={() => dispatch(setRightPanelTab(tab.id))}
                   className={cn(
-                    'relative flex size-9 items-center justify-center rounded-md transition-colors duration-200',
+                    'relative flex size-7 items-center justify-center rounded-md transition-colors duration-200',
                     activeTab === tab.id
                       ? 'bg-accent text-accent-foreground'
                       : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'

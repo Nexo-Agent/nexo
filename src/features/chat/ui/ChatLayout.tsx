@@ -7,12 +7,12 @@ interface ChatLayoutProps {
   content: ReactNode;
 }
 
-const MIN_SIDEBAR_WIDTH = 200;
-const MAX_SIDEBAR_WIDTH = 600;
-const DEFAULT_SIDEBAR_WIDTH = 280;
+const MIN_SIDEBAR_WIDTH = 180;
+const MAX_SIDEBAR_WIDTH = 480;
+const DEFAULT_SIDEBAR_WIDTH = 240;
 
 export const CHAT_WIDTH_CLASSES =
-  'mx-auto max-w-xl lg:max-w-2xl xl:max-w-3xl px-4';
+  'mx-auto max-w-2xl lg:max-w-3xl xl:max-w-4xl px-3';
 
 export function ChatLayout({ sidebar, content }: ChatLayoutProps) {
   const isSidebarCollapsed = useAppSelector(
@@ -71,7 +71,7 @@ export function ChatLayout({ sidebar, content }: ChatLayoutProps) {
       >
         <div
           className={cn(
-            'h-full transition-opacity duration-300 ease-in-out',
+            'h-full overflow-hidden transition-opacity duration-300 ease-in-out',
             isSidebarCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'
           )}
           style={{ width: sidebarWidth }}

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import {
-  MessageSquare,
   Plus,
   Trash2,
   Pencil,
   Settings,
+  SlidersHorizontal,
   Download,
   FileText,
   FileJson,
+  Search,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
@@ -19,15 +20,11 @@ import {
   DropdownMenuTrigger,
 } from '@/ui/atoms/dropdown-menu';
 import { Input } from '@/ui/atoms/input';
-import { Label } from '@/ui/atoms/label';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { Separator } from '@/ui/atoms/separator';
 import {
   Dialog,
-  DialogBody,
   DialogContent,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/ui/atoms/dialog/component';
 import { ContextMenu } from '@/ui/atoms/context-menu';
@@ -36,12 +33,20 @@ import { useComponentPerformance } from '@/hooks/useComponentPerformance';
 import type { Message } from '@/app/types';
 import { useChats } from '../hooks/useChats';
 import { useWorkspaces } from '@/features/workspace';
+import { WorkspaceSelector } from '@/features/workspace/ui/WorkspaceSelector';
 import { useExportChat } from '@/features/chat/hooks/useExportChat';
 import { useAppDispatch } from '@/app/hooks';
-import { setWorkspaceSettingsOpen } from '@/features/ui/state/uiSlice';
+import {
+  setWorkspaceSettingsOpen,
+  navigateToSettings,
+} from '@/features/ui/state/uiSlice';
+import { setSearchOpen } from '../state/chatSearchSlice';
 import { logger } from '@/lib/logger';
 import { isActiveConversationPhase } from '../state/conversationRuntimeSlice';
 import { ConfirmDialog } from '@/ui/molecules/ConfirmDialog';
+
+const sidebarActionClass =
+  'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] text-sidebar-foreground transition-colors hover:bg-accent hover:text-accent-foreground';
 
 export function ChatSidebar() {
   // Track render performance
@@ -160,146 +165,156 @@ export function ChatSidebar() {
   };
 
   return (
-    <div className="flex h-full w-full flex-col border-r border-sidebar-border bg-sidebar select-none">
-      {/* New Chat Button */}
-      <div className="p-2">
-        <Button
-          onClick={handleNewChat}
-          className="w-full justify-center gap-2"
-          variant="default"
-        >
-          <Plus className="size-4" />
-          <span>{t('common:newConversation')}</span>
-        </Button>
+    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-sidebar select-none">
+      <div className="shrink-0 px-2 pt-1.5 pb-2">
+        <div className="flex flex-col gap-0.5">
+          <button
+            type="button"
+            className={sidebarActionClass}
+            onClick={handleNewChat}
+          >
+            <Plus className="size-3.5 shrink-0" />
+            <span>{t('common:newConversation')}</span>
+          </button>
+          <button
+            type="button"
+            className={sidebarActionClass}
+            onClick={() => dispatch(setSearchOpen(true))}
+          >
+            <Search className="size-3.5 shrink-0" />
+            <span>{t('common:searchChats')}</span>
+          </button>
+          <button
+            type="button"
+            className={sidebarActionClass}
+            onClick={() => dispatch(navigateToSettings())}
+          >
+            <SlidersHorizontal className="size-3.5 shrink-0" />
+            <span>{t('common:settings')}</span>
+          </button>
+          <button
+            type="button"
+            className={sidebarActionClass}
+            onClick={() => dispatch(setWorkspaceSettingsOpen(true))}
+          >
+            <Settings className="size-3.5 shrink-0" />
+            <span>{t('settings:workspaceSettings')}</span>
+          </button>
+        </div>
       </div>
 
-      <Separator />
+      <Separator className="bg-sidebar-border" />
 
-      {/* Chat List */}
-      <ScrollArea className="flex-1">
-        <div className="p-2">
-          {chats.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center text-sm text-muted-foreground">
-              <MessageSquare className="mb-2 size-8 opacity-50" />
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="px-2 pb-2 pt-2">
+          {chats.filter((chat) => !chat.parentId).length === 0 ? (
+            <div className="px-2 py-6 text-center text-xs text-muted-foreground">
               <p>{t('common:noConversations')}</p>
-              <p className="text-xs">{t('common:createNewConversation')}</p>
             </div>
           ) : (
-            <div className="space-y-1">
-              {chats
-                .filter((chat) => !chat.parentId) // Filter out subagent chats
-                .map((chat) => (
-                  <div
-                    key={chat.id}
-                    className={cn(
-                      'group relative flex cursor-pointer items-center gap-2 rounded-md pl-4 pr-2 py-1.5 transition-[background-color,color,box-shadow]',
-                      'hover:bg-accent hover:text-accent-foreground',
-                      selectedChatId === chat.id
-                        ? 'bg-accent text-accent-foreground shadow-sm'
-                        : 'text-muted-foreground'
-                    )}
-                    onClick={() => {
-                      setContextMenu(null);
-                      handleChatSelect(chat.id);
-                    }}
-                    onContextMenu={(e) => handleContextMenu(e, chat.id)}
-                  >
-                    {selectedChatId === chat.id && (
-                      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-md" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={cn(
-                            'line-clamp-1 text-sm font-medium flex-1',
-                            selectedChatId === chat.id
-                              ? 'text-foreground'
-                              : 'text-sidebar-foreground'
-                          )}
-                        >
-                          {chat.title}
-                        </div>
-                        {/* Proposal C: No icon in row, using bottom shimmer instead */}
-                      </div>
-                    </div>
+            <>
+              <p className="mb-1.5 px-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+                {t('common:recents')}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                {chats
+                  .filter((chat) => !chat.parentId)
+                  .map((chat) => (
+                    <div
+                      key={chat.id}
+                      className={cn(
+                        'group relative min-w-0 cursor-pointer overflow-hidden rounded-md py-1.5 pl-2.5 pr-7 transition-colors',
+                        'hover:bg-accent hover:text-accent-foreground',
+                        selectedChatId === chat.id
+                          ? 'bg-accent text-accent-foreground'
+                          : 'text-muted-foreground'
+                      )}
+                      onClick={() => {
+                        setContextMenu(null);
+                        handleChatSelect(chat.id);
+                      }}
+                      onContextMenu={(e) => handleContextMenu(e, chat.id)}
+                    >
+                      <span
+                        title={chat.title}
+                        className={cn(
+                          'block min-w-0 truncate text-[13px] leading-tight',
+                          selectedChatId === chat.id
+                            ? 'text-foreground'
+                            : 'text-sidebar-foreground'
+                        )}
+                      >
+                        {chat.title}
+                      </span>
 
-                    {(() => {
-                      const runtime = conversationRuntime[chat.id];
-                      const isActive =
-                        runtime &&
-                        isActiveConversationPhase(runtime.phase.kind);
-                      if (!isActive) return null;
-                      const queueDepth = runtime.queue_depth;
-                      return (
-                        <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden rounded-b-md">
-                          <div className="h-full w-full bg-primary/10">
-                            <div className="h-full bg-primary animate-indeterminate-bar" />
+                      {(() => {
+                        const runtime = conversationRuntime[chat.id];
+                        const isActive =
+                          runtime &&
+                          isActiveConversationPhase(runtime.phase.kind);
+                        if (!isActive) return null;
+                        const queueDepth = runtime.queue_depth;
+                        return (
+                          <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden rounded-b-md">
+                            <div className="h-full w-full bg-primary/10">
+                              <div className="h-full bg-primary animate-indeterminate-bar" />
+                            </div>
+                            {queueDepth > 0 && (
+                              <span className="absolute -top-3 right-1 rounded bg-primary px-1 text-[10px] text-primary-foreground">
+                                +{queueDepth}
+                              </span>
+                            )}
                           </div>
-                          {queueDepth > 0 && (
-                            <span className="absolute -top-3 right-1 rounded bg-primary px-1 text-[10px] text-primary-foreground">
-                              +{queueDepth}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })()}
+                        );
+                      })()}
 
-                    {/* Export Button - Visible on hover */}
-                    <div className="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-7 p-0 hover:bg-accent"
+                      <div className="absolute right-0.5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-6 p-0 hover:bg-accent"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                            >
+                              <Download className="size-3.5 text-muted-foreground" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
                             }}
                           >
-                            <Download className="size-4 text-muted-foreground" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                        >
-                          <DropdownMenuItem
-                            onClick={(e) => handleExport(e, chat.id, 'md')}
-                          >
-                            <FileText className="mr-2 size-4" />
-                            Markdown (.md)
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => handleExport(e, chat.id, 'json')}
-                          >
-                            <FileJson className="mr-2 size-4" />
-                            JSON (.json)
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            <DropdownMenuItem
+                              onClick={(e) => handleExport(e, chat.id, 'md')}
+                            >
+                              <FileText className="mr-2 size-4" />
+                              Markdown (.md)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => handleExport(e, chat.id, 'json')}
+                            >
+                              <FileJson className="mr-2 size-4" />
+                              JSON (.json)
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                  </div>
-                ))}
-            </div>
+                  ))}
+              </div>
+            </>
           )}
         </div>
       </ScrollArea>
 
-      <div className="px-2 py-4 mt-auto border-sidebar-border">
-        <Button
-          onClick={() => {
-            dispatch(setWorkspaceSettingsOpen(true));
-          }}
-          className="w-full justify-center gap-2"
-          variant="default"
-        >
-          <Settings className="size-4" />
-          <span>{t('settings:workspaceSettings')}</span>
-        </Button>
+      <div className="mt-auto border-t border-sidebar-border px-2 py-1.5">
+        <WorkspaceSelector compact />
       </div>
 
       {/* Context Menu */}
@@ -330,55 +345,59 @@ export function ChatSidebar() {
       />
 
       {/* Rename Chat Dialog */}
-      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContent>
+      <Dialog
+        open={renameDialogOpen}
+        onOpenChange={(open) => {
+          setRenameDialogOpen(open);
+          if (!open) {
+            setChatToRename(null);
+            setNewChatTitle('');
+          }
+        }}
+      >
+        <DialogContent className="items-stretch gap-0 p-4 sm:max-w-xs">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSaveRename();
             }}
-            className="flex flex-col flex-1 min-h-0"
+            className="flex flex-col gap-3"
           >
-            <DialogHeader>
-              <DialogTitle>{t('common:renameConversation')}</DialogTitle>
-              <p className="text-sm text-muted-foreground">
-                {t('common:enterNewName')}
-              </p>
-            </DialogHeader>
-            <DialogBody>
-              <div className="space-y-2">
-                <Label htmlFor="chat-name">{t('common:enterNewName')}</Label>
-                <Input
-                  id="chat-name"
-                  value={newChatTitle}
-                  onChange={(e) => setNewChatTitle(e.target.value)}
-                  placeholder={t('common:enterNewName')}
-                  className="w-full"
-                  autoFocus
-                />
-              </div>
-            </DialogBody>
-            <DialogFooter className="justify-between gap-2">
-              <Button
-                type="submit"
-                disabled={!newChatTitle.trim()}
-                className="flex-1"
-              >
-                {t('common:save')}
-              </Button>
+            <DialogTitle className="m-0 text-sm font-medium leading-none">
+              {t('common:renameConversation')}
+            </DialogTitle>
+            <Input
+              id="chat-name"
+              value={newChatTitle}
+              onChange={(e) => setNewChatTitle(e.target.value)}
+              placeholder={t('common:enterNewName')}
+              className="h-8"
+              autoFocus
+              aria-label={t('common:enterNewName')}
+            />
+            <div className="flex justify-end gap-1.5">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2"
                 onClick={() => {
                   setRenameDialogOpen(false);
                   setChatToRename(null);
                   setNewChatTitle('');
                 }}
-                className="flex-1"
               >
                 {t('common:cancel')}
               </Button>
-            </DialogFooter>
+              <Button
+                type="submit"
+                size="sm"
+                className="h-7 px-3"
+                disabled={!newChatTitle.trim()}
+              >
+                {t('common:save')}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

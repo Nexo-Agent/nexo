@@ -16,10 +16,12 @@ import type { Workspace } from '../types';
 
 interface WorkspaceSelectorProps {
   onWorkspaceChange?: (workspace?: Workspace) => void;
+  compact?: boolean;
 }
 
 export function WorkspaceSelector({
   onWorkspaceChange: onWorkspaceChangeCallback,
+  compact = false,
 }: WorkspaceSelectorProps = {}) {
   const { t } = useTranslation('settings');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -50,19 +52,26 @@ export function WorkspaceSelector({
         <DropdownMenuTrigger
           className={cn(
             buttonVariants({ variant: 'ghost' }),
-            'h-auto gap-1.5 px-2 py-1 hover:bg-accent'
+            compact
+              ? 'h-8 w-full justify-between gap-2 px-2 py-1 hover:bg-accent'
+              : 'h-auto gap-1.5 px-2 py-1 hover:bg-accent'
           )}
           data-tour="workspace-selector"
         >
-          <div className="flex items-center gap-1.5">
-            <div className="flex size-5 items-center justify-center rounded bg-primary text-[10px] font-medium text-primary-foreground">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex size-5 shrink-0 items-center justify-center rounded bg-primary text-[10px] font-medium text-primary-foreground">
               {selectedWorkspace.name.charAt(0).toUpperCase()}
             </div>
-            <span className="text-sm font-medium">
+            <span
+              className={cn(
+                'truncate font-medium',
+                compact ? 'text-xs' : 'text-sm'
+              )}
+            >
               {selectedWorkspace.name}
             </span>
           </div>
-          <ChevronDown className="size-3.5 opacity-50" />
+          <ChevronDown className="size-3.5 shrink-0 opacity-50" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
           {workspaces.map((workspace) => (
