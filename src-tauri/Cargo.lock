@@ -3028,6 +3028,7 @@ dependencies = [
  "flate2",
  "futures",
  "hex",
+ "javascriptcore-rs",
  "log",
  "notify",
  "notify-debouncer-full",

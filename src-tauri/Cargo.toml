@@ -74,6 +74,7 @@ windows = { version = "0.61", features = [] }
 
 [target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))'.dependencies]
 webkit2gtk = "2.0"
+javascriptcore-rs = { version = "1.1", features = ["v2_28"] }
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
