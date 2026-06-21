@@ -61,7 +61,7 @@ impl ParentPlatformState {
     }
 
     /// Re-read the main webview handle if startup init ran before the main webview was ready.
-    pub const fn ensure_linux_related_view<R: Runtime>(
+    pub fn ensure_linux_related_view<R: Runtime>(
         &mut self,
         app: &AppHandle<R>,
     ) -> Result<(), AppError> {

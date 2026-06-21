@@ -1,5 +1,7 @@
 use crate::error::AppError;
 use crate::features::sandbox::{RuntimeKind, SandboxService};
+#[cfg(windows)]
+use crate::path_util;
 use crate::features::tool::models::MCPTool;
 use rust_mcp_sdk::{
     mcp_client::{client_runtime, ClientHandler, ClientRuntime},
