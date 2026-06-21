@@ -36,7 +36,7 @@ export function MarkdownImage({
         src={src}
         alt={alt || ''}
         className={cn(
-          'max-w-full rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity shadow-sm border border-border/40',
+          'max-w-full rounded-lg hover:opacity-90 transition-opacity shadow-sm border border-border/40',
           className
         )}
         onClick={handleClick}

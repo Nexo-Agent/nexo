@@ -2,11 +2,11 @@
 import { createContext, useContext } from 'react';
 
 type CodeBlockContextType = {
-  code: string;
+ code: string;
 };
 
 export const CodeBlockContext = createContext<CodeBlockContextType>({
-  code: '',
+ code: '',
 });
 
 export const useCodeBlockContext = () => useContext(CodeBlockContext);

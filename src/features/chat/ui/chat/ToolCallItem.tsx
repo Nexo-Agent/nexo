@@ -233,7 +233,7 @@ export const ToolCallItem = memo(
           className="group/tool rounded-sm hover:bg-muted/20"
         >
           <summary
-            className="flex cursor-pointer list-none items-center gap-1.5 py-0.5 pr-1 text-[11px] text-muted-foreground hover:text-foreground"
+            className="flex list-none items-center gap-1.5 py-0.5 pr-1 text-[11px] text-muted-foreground hover:text-foreground"
             onClick={(event) => {
               event.preventDefault();
               handleToggle();

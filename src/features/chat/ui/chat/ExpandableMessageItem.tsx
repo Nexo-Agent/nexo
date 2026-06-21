@@ -31,7 +31,7 @@ export const ExpandableMessageItem = memo(function ExpandableMessageItem({
         <button
           type="button"
           className={cn(
-            'flex items-center gap-2 text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors text-xs font-medium py-1 outline-none cursor-pointer',
+            'flex items-center gap-2 text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors text-xs font-medium py-1 outline-none ',
             headerClassName
           )}
           onClick={onToggle}

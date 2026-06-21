@@ -201,6 +201,10 @@ export function BrowserWebviewHost({
     const el = containerRef.current;
     if (!el) return undefined;
 
+    const mountResyncTimeouts = PANEL_OPEN_RESYNC_DELAYS_MS.map((delay) =>
+      window.setTimeout(() => reportBoundsRef.current(), delay)
+    );
+
     const observer = new ResizeObserver(() => {
       scheduleReport();
     });
@@ -211,6 +215,7 @@ export function BrowserWebviewHost({
     window.addEventListener('scroll', handleWindowChange, true);
 
     return () => {
+      mountResyncTimeouts.forEach((timeout) => window.clearTimeout(timeout));
       observer.disconnect();
       window.removeEventListener('resize', handleWindowChange);
       window.removeEventListener('scroll', handleWindowChange, true);

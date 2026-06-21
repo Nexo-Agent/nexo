@@ -3,7 +3,6 @@ import { useCallback, useSyncExternalStore } from 'react';
 export const SIDEBAR_WIDTH_KEY = 'sidebarWidth';
 export const RIGHT_PANEL_WIDTH_KEY = 'rightAreaWidth';
 export const DEFAULT_SIDEBAR_WIDTH = 240;
-export const SETTINGS_SIDEBAR_WIDTH = 256;
 export const DEFAULT_RIGHT_PANEL_WIDTH = 400;
 
 const SIDEBAR_WIDTH_EVENT = 'nexo:sidebar-width';

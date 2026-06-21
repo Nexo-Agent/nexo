@@ -60,6 +60,19 @@ export function MarkdownArtifactViewer({
         onReload={handleReload}
         reloading={loading}
         copyContent={content}
+        fullscreen={
+          content !== null && !loading && !error
+            ? {
+                content: (
+                  <ScrollArea className="min-h-0 flex-1">
+                    <div className="select-text p-6">
+                      <ArtifactMarkdownContent content={content} />
+                    </div>
+                  </ScrollArea>
+                ),
+              }
+            : null
+        }
       />
       <ScrollArea className="min-h-0 flex-1">
         <div className="select-text p-4">

@@ -67,7 +67,7 @@ export const MessageAttachments = memo(function MessageAttachments({
               <MessageImage
                 src={entry.path}
                 alt={entry.name ?? `Attached image ${index + 1}`}
-                className="max-h-28 w-auto max-w-[220px] cursor-pointer object-contain"
+                className="max-h-28 w-auto max-w-[220px] object-contain"
                 onClick={(url) =>
                   dispatch(
                     setImagePreviewOpen({

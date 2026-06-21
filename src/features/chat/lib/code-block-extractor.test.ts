@@ -12,7 +12,7 @@ x = 10
 \`\`\`
 
 Some text after
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
@@ -28,16 +28,16 @@ Some text after
     const content = `
 \`\`\`mermaid
 graph TD
-  A --> B
+ A --> B
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
     expect(blocks).toHaveLength(1);
     expect(blocks[0]).toEqual({
       id: '0',
-      content: 'graph TD\n  A --> B',
+      content: 'graph TD\n A --> B',
       language: 'mermaid',
     });
   });
@@ -59,7 +59,7 @@ More text
 \`\`\`python
 print("Second")
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
@@ -102,7 +102,7 @@ graph TD
 \`\`\`bash
 echo "ignored"
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
@@ -116,7 +116,7 @@ echo "ignored"
 \`\`\`
 some code
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
@@ -147,7 +147,7 @@ print("mixed case")
 \`\`\`Mermaid
 graph TD
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
@@ -162,11 +162,10 @@ graph TD
 \`\`\`python
 
 
-  print("test")  
-
+ print("test") 
 
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
@@ -178,17 +177,16 @@ graph TD
     const content = `
 \`\`\`python
 def hello():
-    print("Hello")
-    
-    return True
+ print("Hello")
+  return True
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
     expect(blocks).toHaveLength(1);
-    expect(blocks[0].content).toContain('    print("Hello")');
-    expect(blocks[0].content).toContain('    return True');
+    expect(blocks[0].content).toContain(' print("Hello")');
+    expect(blocks[0].content).toContain(' return True');
   });
 
   it('should handle adjacent code blocks', () => {
@@ -199,7 +197,7 @@ print("first")
 \`\`\`python
 print("second")
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 
@@ -214,7 +212,7 @@ print("second")
 text = "Hello @user! #hashtag $money"
 regex = /[a-z]+/g
 \`\`\`
-    `;
+ `;
 
     const blocks = extractCodeBlocks(content);
 

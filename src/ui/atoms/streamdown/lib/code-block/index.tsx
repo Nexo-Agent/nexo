@@ -9,38 +9,38 @@ import { PreviewCodeBlock } from './preview-code-block';
 import { useHighlightedCode } from './use-highlighted-code';
 
 type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
-  code: string;
-  language: string;
-  headerActions?: ReactNode;
+ code: string;
+ language: string;
+ headerActions?: ReactNode;
 };
 
 export const CodeBlock = ({
-  code,
-  language,
-  className,
-  children,
-  headerActions,
-  ...rest
+ code,
+ language,
+ className,
+ children,
+ headerActions,
+ ...rest
 }: CodeBlockProps) => {
-  const result = useHighlightedCode(code, language);
+ const result = useHighlightedCode(code, language);
 
-  return (
-    <CodeBlockContext.Provider value={{ code }}>
-      <CodeBlockContainer language={language}>
-        <CodeBlockHeader language={language}>
-          <CodeBlockCopyButton />
-          {headerActions}
-          {children}
-        </CodeBlockHeader>
-        <CodeBlockBody
-          className={className}
-          language={language}
-          result={result}
-          {...rest}
-        />
-      </CodeBlockContainer>
-    </CodeBlockContext.Provider>
-  );
+ return (
+ <CodeBlockContext.Provider value={{ code }}>
+ <CodeBlockContainer language={language}>
+ <CodeBlockHeader language={language}>
+ <CodeBlockCopyButton />
+ {headerActions}
+ {children}
+ </CodeBlockHeader>
+ <CodeBlockBody
+ className={className}
+ language={language}
+ result={result}
+ {...rest}
+ />
+ </CodeBlockContainer>
+ </CodeBlockContext.Provider>
+ );
 };
 
 export { PreviewCodeBlock, useHighlightedCode };

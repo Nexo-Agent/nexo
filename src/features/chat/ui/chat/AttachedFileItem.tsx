@@ -51,7 +51,7 @@ export const AttachedFileItem = memo(
       <div className="relative group">
         {isImage ? (
           <div
-            className="relative h-16 w-16 overflow-hidden rounded-md border border-border cursor-pointer hover:opacity-80 transition-opacity bg-black/5 dark:bg-white/5 flex items-center justify-center"
+            className="relative h-16 w-16 overflow-hidden rounded-md border border-border hover:opacity-80 transition-opacity bg-black/5 dark:bg-white/5 flex items-center justify-center"
             onClick={(e) => {
               if (objectUrl) {
                 e.stopPropagation();

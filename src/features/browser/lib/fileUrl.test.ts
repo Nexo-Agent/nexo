@@ -28,7 +28,7 @@ describe('absolutePathToFileUrl', () => {
   it('trims whitespace before invoking', async () => {
     invokeCommand.mockResolvedValue('file:///Users/me/chart.html');
 
-    await absolutePathToFileUrl('  /Users/me/chart.html  ');
+    await absolutePathToFileUrl(' /Users/me/chart.html ');
 
     expect(invokeCommand).toHaveBeenCalledWith('path_to_file_url', {
       path: '/Users/me/chart.html',

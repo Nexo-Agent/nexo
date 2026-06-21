@@ -33,7 +33,7 @@ export function AgentCard({
     >
       {/* Header Section */}
       <div
-        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-xl"
+        className="flex items-center gap-3 p-3 hover:bg-muted/30 transition-colors rounded-t-xl"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {/* Icon */}

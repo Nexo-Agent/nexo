@@ -21,7 +21,6 @@ vi.mock('@/hooks/useLogger', () => ({
   }),
 }));
 
-
 vi.mock('lucide-react', () => ({
   Info: () => <div data-testid="info-icon" />,
   Github: () => <div data-testid="github-icon" />,

@@ -15,7 +15,7 @@ export function NoteItem({ note, isActive, onClick, onDelete }: NoteItemProps) {
     <div
       onClick={onClick}
       className={cn(
-        'group flex cursor-pointer items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-[background-color,border-color,box-shadow,ring] duration-200',
+        'group flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-[background-color,border-color,box-shadow,ring] duration-200',
         isActive
           ? 'border-primary/30 bg-primary/10 shadow-sm ring-1 ring-primary/20'
           : 'border-border/40 bg-secondary/15 shadow-none hover:border-border/80 hover:bg-secondary/30 hover:shadow-xs'

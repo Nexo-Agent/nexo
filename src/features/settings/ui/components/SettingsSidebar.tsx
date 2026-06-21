@@ -19,12 +19,13 @@ import {
   SIDEBAR_LIST,
   sidebarItemClass,
 } from '@/features/ui/lib/sidebarStyles';
-import { SETTINGS_SIDEBAR_WIDTH } from '@/features/ui/hooks/useLayoutWidths';
+import { useSidebarWidth } from '@/features/ui/hooks/useLayoutWidths';
 
 export function SettingsSidebar() {
   const { t } = useTranslation(['settings', 'common']);
   const dispatch = useAppDispatch();
   const selectedSection = useAppSelector((state) => state.ui.settingsSection);
+  const sidebarWidth = useSidebarWidth();
 
   const sections = [
     {
@@ -62,7 +63,7 @@ export function SettingsSidebar() {
   return (
     <div
       className="flex h-full shrink-0 flex-col overflow-hidden bg-sidebar select-none"
-      style={{ width: SETTINGS_SIDEBAR_WIDTH }}
+      style={{ width: sidebarWidth }}
     >
       <ScrollArea className="min-h-0 flex-1">
         <SidebarColumnRow className="pt-1 pb-2">

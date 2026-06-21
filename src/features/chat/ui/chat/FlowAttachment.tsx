@@ -33,7 +33,7 @@ function FlowAttachmentInner({
       {/* Flow Preview */}
       <div
         className={cn(
-          'w-full h-full cursor-pointer transition-opacity',
+          'w-full h-full transition-opacity',
           onClick && 'hover:opacity-80'
         )}
         onClick={onClick}

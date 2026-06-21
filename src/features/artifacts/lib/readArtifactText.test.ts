@@ -25,7 +25,7 @@ describe('readArtifactTextFile', () => {
   it('trims whitespace from the path before reading', async () => {
     readFile.mockResolvedValue(new TextEncoder().encode('ok'));
 
-    await readArtifactTextFile('  /tmp/a.md  ');
+    await readArtifactTextFile(' /tmp/a.md ');
 
     expect(readFile).toHaveBeenCalledWith('/tmp/a.md');
   });

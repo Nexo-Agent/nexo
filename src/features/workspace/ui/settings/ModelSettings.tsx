@@ -56,7 +56,7 @@ export function ModelSettings({
         <Label htmlFor="default-model">{t('defaultModel')}</Label>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info className="size-4 text-muted-foreground cursor-help" />
+            <Info className="size-4 text-muted-foreground" />
           </TooltipTrigger>
           <TooltipContent>{t('defaultModelDescription')}</TooltipContent>
         </Tooltip>

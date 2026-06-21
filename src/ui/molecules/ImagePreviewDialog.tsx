@@ -111,11 +111,11 @@ export function ImagePreviewDialog() {
         showCloseButton={false}
       >
         <div
-          className="relative flex items-center justify-center w-full h-full cursor-zoom-out"
+          className="relative flex items-center justify-center w-full h-full"
           onClick={handleClose}
         >
           <div
-            className="relative group w-fit h-fit cursor-default"
+            className="relative group w-fit h-fit"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute top-4 right-4 z-50 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

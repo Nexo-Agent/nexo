@@ -27,32 +27,32 @@ import typescript from 'shiki/langs/typescript.mjs';
 import yaml from 'shiki/langs/yaml.mjs';
 
 export const bundledLanguages: Record<
-  string,
-  LanguageRegistration | LanguageRegistration[]
+ string,
+ LanguageRegistration | LanguageRegistration[]
 > = {
-  javascript,
-  js: javascript, // alias
-  typescript,
-  ts: typescript, // alias
-  jsx,
-  tsx,
-  html,
-  css,
-  json,
-  bash,
-  shellscript,
-  shell: shellscript, // alias
-  sh: bash, // alias
-  yaml,
-  yml: yaml, // alias
-  toml,
-  python,
-  py: python, // alias
-  markdown,
-  md: markdown, // alias
-  sql,
-  go,
-  golang: go, // alias
+ javascript,
+ js: javascript, // alias
+ typescript,
+ ts: typescript, // alias
+ jsx,
+ tsx,
+ html,
+ css,
+ json,
+ bash,
+ shellscript,
+ shell: shellscript, // alias
+ sh: bash, // alias
+ yaml,
+ yml: yaml, // alias
+ toml,
+ python,
+ py: python, // alias
+ markdown,
+ md: markdown, // alias
+ sql,
+ go,
+ golang: go, // alias
 } as const;
 
 export type BundledLanguageName = keyof typeof bundledLanguages;
@@ -61,5 +61,5 @@ export type BundledLanguageName = keyof typeof bundledLanguages;
  * Check if a language is bundled (instant loading)
  */
 export const isBundledLanguage = (
-  language: string
+ language: string
 ): language is BundledLanguageName => language in bundledLanguages;

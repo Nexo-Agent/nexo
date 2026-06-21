@@ -39,9 +39,7 @@ export function EntityCard({
       onClick={!disabled ? onClick : undefined}
       className={cn(
         'group relative rounded-xl border bg-card p-4 transition-all duration-200 overflow-hidden flex flex-col h-full',
-        !disabled &&
-          onClick &&
-          'cursor-pointer hover:shadow-md hover:border-primary/20',
+        !disabled && onClick && 'hover:shadow-md hover:border-primary/20',
         disabled && 'opacity-60 grayscale-[0.5]',
         active && 'border-primary/40 bg-primary/5',
         className

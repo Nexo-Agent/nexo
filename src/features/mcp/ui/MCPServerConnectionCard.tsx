@@ -36,7 +36,7 @@ export const MCPServerConnectionCard = memo(function MCPServerConnectionCard({
         {connection.errorMessage ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <AlertCircle className="size-3.5 shrink-0 text-destructive cursor-help" />
+              <AlertCircle className="size-3.5 shrink-0 text-destructive" />
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-xs">
               <p className="text-sm">{connection.errorMessage}</p>

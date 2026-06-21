@@ -240,8 +240,8 @@ export function MCPSettings({
                       <div
                         onClick={handleSelectAllTools}
                         className={cn(
-                          'size-4 rounded border flex items-center justify-center transition-colors cursor-pointer',
-                          !isConnected && 'opacity-50 cursor-not-allowed',
+                          'size-4 rounded border flex items-center justify-center transition-colors',
+                          !isConnected && 'opacity-50',
                           allSelected &&
                             isConnected &&
                             'bg-primary border-primary',
@@ -317,7 +317,7 @@ export function MCPSettings({
                                   <Label
                                     htmlFor={`tool-${conn.id}-${tool.name}`}
                                     className={cn(
-                                      'text-sm font-medium cursor-pointer truncate',
+                                      'text-sm font-medium truncate',
                                       !isConnected && 'opacity-50'
                                     )}
                                   >

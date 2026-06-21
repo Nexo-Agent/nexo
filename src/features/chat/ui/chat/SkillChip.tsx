@@ -69,7 +69,7 @@ export function SkillChip({
             isMessage
               ? 'bg-primary-foreground text-primary opacity-0 group-hover:opacity-100'
               : 'bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100',
-            disabled && 'opacity-50 cursor-not-allowed'
+            disabled && 'opacity-50'
           )}
           aria-label="Remove skill"
         >

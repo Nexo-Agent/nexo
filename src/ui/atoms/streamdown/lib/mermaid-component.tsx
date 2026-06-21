@@ -10,67 +10,67 @@ import { cn } from './utils';
 import { shouldShowControls, shouldShowMermaidControl } from './control-utils';
 
 const Mermaid = lazy(() =>
-  import('./mermaid').then((mod) => ({ default: mod.CachedMermaid }))
+ import('./mermaid').then((mod) => ({ default: mod.CachedMermaid }))
 );
 
 interface MermaidComponentProps {
-  code: string;
-  className?: string;
+ code: string;
+ className?: string;
 }
 
 export const MermaidComponent = ({
-  code,
-  className,
+ code,
+ className,
 }: MermaidComponentProps) => {
-  const { mermaid: mermaidContext, controls: controlsConfig } =
-    useContext(StreamdownContext);
+ const { mermaid: mermaidContext, controls: controlsConfig } =
+ useContext(StreamdownContext);
 
-  const showMermaidControls = shouldShowControls(controlsConfig, 'mermaid');
-  const showDownload = shouldShowMermaidControl(controlsConfig, 'download');
-  const showFullscreen = shouldShowMermaidControl(controlsConfig, 'fullscreen');
-  const showPanZoomControls = shouldShowMermaidControl(
-    controlsConfig,
-    'panZoom'
-  );
+ const showMermaidControls = shouldShowControls(controlsConfig, 'mermaid');
+ const showDownload = shouldShowMermaidControl(controlsConfig, 'download');
+ const showFullscreen = shouldShowMermaidControl(controlsConfig, 'fullscreen');
+ const showPanZoomControls = shouldShowMermaidControl(
+ controlsConfig,
+ 'panZoom'
+ );
 
-  const previewHeaderActions =
-    showMermaidControls && (showDownload || showFullscreen) ? (
-      <>
-        {showDownload ? (
-          <MermaidDownloadDropdown
-            chart={code}
-            config={mermaidContext?.config}
-          />
-        ) : null}
-        {showFullscreen ? (
-          <MermaidFullscreenButton
-            chart={code}
-            config={mermaidContext?.config}
-          />
-        ) : null}
-      </>
-    ) : null;
+ const previewHeaderActions =
+ showMermaidControls && (showDownload || showFullscreen) ? (
+ <>
+ {showDownload ? (
+ <MermaidDownloadDropdown
+ chart={code}
+ config={mermaidContext?.config}
+ />
+ ) : null}
+ {showFullscreen ? (
+ <MermaidFullscreenButton
+ chart={code}
+ config={mermaidContext?.config}
+ />
+ ) : null}
+ </>
+ ) : null;
 
-  return (
-    <Suspense fallback={<CodeBlockSkeleton />}>
-      <div className={cn('my-1', className)} data-streamdown="mermaid-block">
-        <PreviewCodeBlock
-          code={code}
-          language="mermaid"
-          defaultView="preview"
-          previewAvailable
-          previewHeaderActions={previewHeaderActions}
-          preview={
-            <div className="p-2">
-              <Mermaid
-                chart={code}
-                config={mermaidContext?.config}
-                showControls={showPanZoomControls}
-              />
-            </div>
-          }
-        />
-      </div>
-    </Suspense>
-  );
+ return (
+ <Suspense fallback={<CodeBlockSkeleton />}>
+ <div className={cn('my-1', className)} data-streamdown="mermaid-block">
+ <PreviewCodeBlock
+ code={code}
+ language="mermaid"
+ defaultView="preview"
+ previewAvailable
+ previewHeaderActions={previewHeaderActions}
+ preview={
+ <div className="p-2">
+ <Mermaid
+ chart={code}
+ config={mermaidContext?.config}
+ showControls={showPanZoomControls}
+ />
+ </div>
+ }
+ />
+ </div>
+ </Suspense>
+ );
 };

@@ -104,22 +104,22 @@ export function AppSettings() {
             <SelectItem value="dark">{t('darkTheme')}</SelectItem>
             <SelectItem value="system">{t('systemTheme')}</SelectItem>
             {/* <SelectItem value="github-light">
-              {t('githubLightTheme')}
-            </SelectItem>
-            <SelectItem value="github-dark">{t('githubDarkTheme')}</SelectItem>
-            <SelectItem value="gruvbox">{t('gruvboxTheme')}</SelectItem>
-            <SelectItem value="dracula">{t('draculaTheme')}</SelectItem>
-            <SelectItem value="solarized-light">
-              {t('solarizedLightTheme')}
-            </SelectItem>
-            <SelectItem value="solarized-dark">
-              {t('solarizedDarkTheme')}
-            </SelectItem>
-            <SelectItem value="one-dark-pro">{t('oneDarkProTheme')}</SelectItem>
-            <SelectItem value="one-light">{t('oneLightTheme')}</SelectItem>
-            <SelectItem value="monokai">{t('monokaiTheme')}</SelectItem>
-            <SelectItem value="nord">{t('nordTheme')}</SelectItem>
-            <SelectItem value="ayu-dark">{t('ayuDarkTheme')}</SelectItem> */}
+ {t('githubLightTheme')}
+ </SelectItem>
+ <SelectItem value="github-dark">{t('githubDarkTheme')}</SelectItem>
+ <SelectItem value="gruvbox">{t('gruvboxTheme')}</SelectItem>
+ <SelectItem value="dracula">{t('draculaTheme')}</SelectItem>
+ <SelectItem value="solarized-light">
+ {t('solarizedLightTheme')}
+ </SelectItem>
+ <SelectItem value="solarized-dark">
+ {t('solarizedDarkTheme')}
+ </SelectItem>
+ <SelectItem value="one-dark-pro">{t('oneDarkProTheme')}</SelectItem>
+ <SelectItem value="one-light">{t('oneLightTheme')}</SelectItem>
+ <SelectItem value="monokai">{t('monokaiTheme')}</SelectItem>
+ <SelectItem value="nord">{t('nordTheme')}</SelectItem>
+ <SelectItem value="ayu-dark">{t('ayuDarkTheme')}</SelectItem> */}
           </SelectContent>
         </Select>
       </section>

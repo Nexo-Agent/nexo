@@ -20,7 +20,7 @@ export function SkillSettings({
         <Label className="text-lg font-semibold">{t('skills')}</Label>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info className="size-4 text-muted-foreground cursor-help" />
+            <Info className="size-4 text-muted-foreground" />
           </TooltipTrigger>
           <TooltipContent>
             Skills are specialized instructions and tools that agents can use.

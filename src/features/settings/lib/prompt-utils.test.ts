@@ -74,10 +74,10 @@ describe('prompt-utils', () => {
 
     it('should handle multiline content', () => {
       const content = `
-        Line 1: {{var1}}
-        Line 2: {{var2}}
-        Line 3: {{var1}}
-      `;
+ Line 1: {{var1}}
+ Line 2: {{var2}}
+ Line 3: {{var1}}
+ `;
       const variables = parsePromptVariables(content);
 
       expect(variables).toEqual(['var1', 'var2']);
@@ -181,10 +181,10 @@ describe('prompt-utils', () => {
 
     it('should handle multiline content', () => {
       const content = `
-        Name: {{name}}
-        Age: {{age}}
-        City: {{city}}
-      `;
+ Name: {{name}}
+ Age: {{age}}
+ City: {{city}}
+ `;
       const variables = { name: 'Ivy', age: '28', city: 'SF' };
       const rendered = renderPrompt(content, variables);
 
@@ -233,7 +233,7 @@ You help users with {{task}}.
 
 User: {{user_message}}
 Assistant: {{assistant_response}}
-      `;
+ `;
       const variables = {
         role: 'helpful',
         name: 'AI',

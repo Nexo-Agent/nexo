@@ -31,88 +31,88 @@ const jsonParseRegex = /JSON\.parse\(("(?:[^"\\]|\\.)*")\)/;
  * @returns Language grammar array or null if loading fails
  */
 export async function loadLanguageFromCDN(
-  language: string,
-  cdnBaseUrl?: string | null,
-  timeout: number = DEFAULT_TIMEOUT
+ language: string,
+ cdnBaseUrl?: string | null,
+ timeout: number = DEFAULT_TIMEOUT
 ): Promise<LanguageRegistration[] | null> {
-  // If CDN is explicitly disabled (null), return null immediately
-  if (cdnBaseUrl === null) {
-    return null;
-  }
+ // If CDN is explicitly disabled (null), return null immediately
+ if (cdnBaseUrl === null) {
+ return null;
+ }
 
-  const cdnUrl = cdnBaseUrl ?? DEFAULT_CDN_BASE;
+ const cdnUrl = cdnBaseUrl ?? DEFAULT_CDN_BASE;
 
-  const cacheKey = `${cdnUrl}/${language}`;
+ const cacheKey = `${cdnUrl}/${language}`;
 
-  // Return cached language if available
-  if (cdnLanguageCache.has(cacheKey)) {
-    return cdnLanguageCache.get(cacheKey) as LanguageRegistration[];
-  }
+ // Return cached language if available
+ if (cdnLanguageCache.has(cacheKey)) {
+ return cdnLanguageCache.get(cacheKey) as LanguageRegistration[];
+ }
 
-  // Skip if previously failed
-  if (failedLanguages.has(cacheKey)) {
-    return null;
-  }
+ // Skip if previously failed
+ if (failedLanguages.has(cacheKey)) {
+ return null;
+ }
 
-  try {
-    const url = `${cdnUrl}/${language}.mjs`;
+ try {
+ const url = `${cdnUrl}/${language}.mjs`;
 
-    // Create abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+ // Create abort controller for timeout
+ const controller = new AbortController();
+ const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    const response = await fetch(url, {
-      signal: controller.signal,
-    });
+ const response = await fetch(url, {
+ signal: controller.signal,
+ });
 
-    clearTimeout(timeoutId);
+ clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+ if (!response.ok) {
+ throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+ }
 
-    // Get the module text
-    // Shiki language files have structure: const lang = Object.freeze(JSON.parse("{...}")); export default [lang];
-    const moduleText = await response.text();
+ // Get the module text
+ // Shiki language files have structure: const lang = Object.freeze(JSON.parse("{...}")); export default [lang];
+ const moduleText = await response.text();
 
-    try {
-      // Extract the JSON string from the JSON.parse() call
-      // Need to handle nested quotes and escapes properly
-      const jsonParseMatch = moduleText.match(jsonParseRegex);
-      if (!jsonParseMatch) {
-        throw new Error('Could not find JSON.parse() in CDN response');
-      }
+ try {
+ // Extract the JSON string from the JSON.parse() call
+ // Need to handle nested quotes and escapes properly
+ const jsonParseMatch = moduleText.match(jsonParseRegex);
+ if (!jsonParseMatch) {
+ throw new Error('Could not find JSON.parse() in CDN response');
+ }
 
-      // The matched string is already a valid JSON string literal
-      // We can parse it directly to get the unescaped version
-      const jsonString = JSON.parse(jsonParseMatch[1]);
+ // The matched string is already a valid JSON string literal
+ // We can parse it directly to get the unescaped version
+ const jsonString = JSON.parse(jsonParseMatch[1]);
 
-      // Now parse the actual grammar JSON
-      const langObject = JSON.parse(jsonString) as LanguageRegistration;
+ // Now parse the actual grammar JSON
+ const langObject = JSON.parse(jsonString) as LanguageRegistration;
 
-      // Shiki expects an array, so wrap it
-      const grammar: LanguageRegistration[] = [langObject];
+ // Shiki expects an array, so wrap it
+ const grammar: LanguageRegistration[] = [langObject];
 
-      // Cache the grammar
-      cdnLanguageCache.set(cacheKey, grammar);
+ // Cache the grammar
+ cdnLanguageCache.set(cacheKey, grammar);
 
-      return grammar;
-    } catch (parseError) {
-      throw new Error(
-        `Failed to parse language grammar: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
-      );
-    }
-  } catch (error) {
-    // Mark as failed to avoid repeated attempts
-    failedLanguages.add(cacheKey);
+ return grammar;
+ } catch (parseError) {
+ throw new Error(
+ `Failed to parse language grammar: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
+ );
+ }
+ } catch (error) {
+ // Mark as failed to avoid repeated attempts
+ failedLanguages.add(cacheKey);
 
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+ const errorMessage =
+ error instanceof Error ? error.message : 'Unknown error';
 
-    logger.warn(
-      `[Streamdown] Failed to load language "${language}" from CDN: ${errorMessage}`
-    );
+ logger.warn(
+ `[Streamdown] Failed to load language "${language}" from CDN: ${errorMessage}`
+ );
 
-    return null;
-  }
+ return null;
+ }
 }

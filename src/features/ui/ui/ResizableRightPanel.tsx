@@ -26,13 +26,11 @@ export function ResizableRightPanel({ children }: ResizableRightPanelProps) {
   const startResizing = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setResizing(true);
-    document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
   }, []);
 
   const stopResizing = useCallback(() => {
     setResizing(false);
-    document.body.style.cursor = '';
     document.body.style.userSelect = '';
   }, []);
 
@@ -88,7 +86,7 @@ export function ResizableRightPanel({ children }: ResizableRightPanelProps) {
         <div
           onMouseDown={startResizing}
           className={cn(
-            'absolute top-0 left-0 bottom-0 w-0.5 cursor-col-resize z-50 transition-colors',
+            'absolute top-0 left-0 bottom-0 w-0.5 z-50 transition-colors',
             'hover:bg-primary/20 hover:w-0.5',
             resizing ? 'bg-primary/40 w-0.5' : 'bg-transparent'
           )}

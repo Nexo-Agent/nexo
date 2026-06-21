@@ -14,5 +14,8 @@
   "openInSystem": "Mở bằng ứng dụng hệ thống",
   "viewerReload": "Tải lại xem trước",
   "copyContent": "Sao chép nội dung",
-  "copyContentDone": "Đã sao chép"
+  "copyContentDone": "Đã sao chép",
+  "viewerFullscreen": "Xem toàn màn hình",
+  "viewerFullscreenTitle": "{{title}} — xem trước toàn màn hình",
+  "viewerFullscreenDescription": "Đang xem artifact ở chế độ toàn màn hình"
 }

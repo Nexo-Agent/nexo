@@ -358,17 +358,10 @@
     font-family: inherit;
   }
 
-  /* Ensure buttons and clickable elements have pointer cursor */
-  button:not(:disabled),
-  [role='button']:not(:disabled),
-  a,
-  label[for] {
-    cursor: pointer;
-  }
-
-  button:disabled,
-  [role='button']:disabled {
-    cursor: not-allowed;
+  /* App-wide: use default (normal) cursor only — no pointer/text/help/resize variants. */
+  #root,
+  #root * {
+    cursor: default;
   }
 
   /* Specific overrides for common focus states */
@@ -581,11 +574,11 @@
 }
 
 .btn-install {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50;
 }
 
 .btn-uninstall {
-  @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50;
 }
 
 /* Custom Themes */

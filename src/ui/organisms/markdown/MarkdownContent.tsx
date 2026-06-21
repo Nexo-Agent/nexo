@@ -162,7 +162,7 @@ export function MarkdownContent({
         className={cn(
           'markdown-content',
           className,
-          isStreaming && 'cursor-default [&_*]:cursor-default'
+          isStreaming && 'select-none'
         )}
       >
         <MarkdownMessageProvider messageId={messageId}>

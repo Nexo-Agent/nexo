@@ -16,7 +16,6 @@ import { ResizableRightPanel } from '@/features/ui/ui/ResizableRightPanel';
 import {
   useRightPanelWidth,
   useSidebarWidth,
-  SETTINGS_SIDEBAR_WIDTH,
 } from '@/features/ui/hooks/useLayoutWidths';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
@@ -49,11 +48,7 @@ export function MainLayout() {
   const sidebarWidth = useSidebarWidth();
   const rightPanelWidth = useRightPanelWidth();
   const isChatSidebarCollapsed = activePage === 'chat' && isSidebarCollapsed;
-  const sidebarZoneWidth = isChatSidebarCollapsed
-    ? undefined
-    : activePage === 'chat'
-      ? sidebarWidth
-      : SETTINGS_SIDEBAR_WIDTH;
+  const sidebarZoneWidth = isChatSidebarCollapsed ? undefined : sidebarWidth;
 
   return (
     <div className="flex h-screen flex-col bg-background select-none">

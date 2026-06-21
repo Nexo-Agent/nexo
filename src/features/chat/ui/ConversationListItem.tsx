@@ -28,10 +28,7 @@ export const ConversationListItem = memo(function ConversationListItem({
       role="button"
       tabIndex={0}
       title={chat.title}
-      className={cn(
-        sidebarItemClass(isSelected),
-        'cursor-pointer overflow-hidden'
-      )}
+      className={cn(sidebarItemClass(isSelected), 'overflow-hidden')}
       onClick={() => onSelect(chat.id)}
       onContextMenu={(e) => onContextMenu(e, chat.id)}
       onKeyDown={(e) => {

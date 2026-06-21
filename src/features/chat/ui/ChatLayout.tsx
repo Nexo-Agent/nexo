@@ -37,13 +37,11 @@ export function ChatLayout({ sidebar, content }: ChatLayoutProps) {
   const startResizingSidebar = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setResizingSidebar(true);
-    document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
   }, []);
 
   const stopResizingSidebar = useCallback(() => {
     setResizingSidebar(false);
-    document.body.style.cursor = '';
     document.body.style.userSelect = '';
   }, []);
 

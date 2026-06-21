@@ -30,7 +30,7 @@ export function AdvancedSettings({
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="size-3.5 text-muted-foreground/70 cursor-help" />
+                <Info className="size-3.5 text-muted-foreground/70" />
               </TooltipTrigger>
               <TooltipContent>
                 {t('streamModeDescription', { ns: 'settings' })}
@@ -56,7 +56,7 @@ export function AdvancedSettings({
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="size-3.5 text-muted-foreground/70 cursor-help" />
+                <Info className="size-3.5 text-muted-foreground/70" />
               </TooltipTrigger>
               <TooltipContent>
                 {t('maxIterationsDescription', { ns: 'settings' })}

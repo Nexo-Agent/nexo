@@ -269,7 +269,7 @@ export const PropertyField = ({
             value={(value as string) || defaultColor}
             onChange={(e) => onChange(propertyKey, e.target.value)}
             disabled={readOnly}
-            className="h-9 w-12 p-1 cursor-pointer"
+            className="h-9 w-12 p-1 "
           />
           <Input
             type="text"
@@ -379,7 +379,7 @@ export const PropertyField = ({
                 >
                   <Label
                     htmlFor={`handle-${key}`}
-                    className="text-xs cursor-pointer capitalize"
+                    className="text-xs capitalize"
                   >
                     {t(`propertyLabels.${key}`, { defaultValue: key })}
                   </Label>
@@ -442,7 +442,7 @@ export const PropertyField = ({
           value={(value as number) ?? 1}
           onChange={(e) => onChange(propertyKey, parseFloat(e.target.value))}
           disabled={readOnly}
-          className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+          className="w-full h-1.5 bg-secondary rounded-lg appearance-none accent-primary"
         />
       </div>
     );
@@ -484,10 +484,7 @@ export const PropertyField = ({
     case 'boolean':
       return (
         <div className="flex items-center justify-between space-x-2">
-          <Label
-            htmlFor={`prop-${propertyKey}`}
-            className="cursor-pointer text-sm"
-          >
+          <Label htmlFor={`prop-${propertyKey}`} className="text-sm">
             {label}
           </Label>
           <Switch

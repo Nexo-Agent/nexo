@@ -28,31 +28,31 @@ export function buildScrollbarStyleTag(): string {
 
   const rules = `
 html {
-  scrollbar-width: thin;
-  scrollbar-color: ${thumb} transparent;
+ scrollbar-width: thin;
+ scrollbar-color: ${thumb} transparent;
 }
 * {
-  scrollbar-width: thin;
-  scrollbar-color: ${thumb} transparent;
+ scrollbar-width: thin;
+ scrollbar-color: ${thumb} transparent;
 }
 *::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+ width: 6px;
+ height: 6px;
 }
 *::-webkit-scrollbar-track {
-  background: transparent;
+ background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background-color: ${thumb};
-  border-radius: 9999px;
-  border: 1px solid transparent;
-  background-clip: padding-box;
+ background-color: ${thumb};
+ border-radius: 9999px;
+ border: 1px solid transparent;
+ background-clip: padding-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background-color: ${thumbHover};
+ background-color: ${thumbHover};
 }
 *::-webkit-scrollbar-corner {
-  background: transparent;
+ background: transparent;
 }`.trim();
 
   return `<style data-nexo="scrollbar">${rules}</style>`;

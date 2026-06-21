@@ -59,8 +59,8 @@ const NodeItem = ({ node, readOnly, onDoubleClick }: NodeItemProps) => {
       className={cn(
         'p-3 border rounded-md bg-card shadow-sm transition-[background-color,ring,border-color,box-shadow,opacity] select-none flex flex-col gap-1',
         readOnly
-          ? 'cursor-not-allowed opacity-70'
-          : 'cursor-pointer hover:bg-accent hover:ring-1 hover:ring-primary/20 hover:border-primary/50'
+          ? 'opacity-70'
+          : 'hover:bg-accent hover:ring-1 hover:ring-primary/20 hover:border-primary/50'
       )}
       onDoubleClick={onDoubleClick}
     >

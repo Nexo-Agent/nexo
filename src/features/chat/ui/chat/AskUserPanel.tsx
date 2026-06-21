@@ -206,7 +206,7 @@ export function AskUserPanel({
                       <div key={option.id}>
                         <label
                           className={cn(
-                            'flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors',
+                            'flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors',
                             isSelected
                               ? 'border-primary/50 bg-primary/5'
                               : 'border-transparent bg-muted/40 hover:bg-muted/70'

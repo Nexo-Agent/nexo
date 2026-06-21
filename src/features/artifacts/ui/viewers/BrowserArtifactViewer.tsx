@@ -12,9 +12,35 @@ const BrowserWebviewHost = lazy(() =>
   }))
 );
 
+const WEBVIEW_HOST_CLASS =
+  'h-full min-h-0 flex-1 rounded-lg border-0 bg-muted/20';
+
 interface BrowserArtifactViewerProps {
   artifact: Artifact;
   url: string;
+}
+
+function ArtifactBrowserWebview({
+  tabId,
+  url,
+  hostKey,
+}: {
+  tabId: string;
+  url: string;
+  hostKey: string;
+}) {
+  return (
+    <Suspense
+      fallback={<BrowserStreamSkeleton className={WEBVIEW_HOST_CLASS} />}
+    >
+      <BrowserWebviewHost
+        key={hostKey}
+        tabId={tabId}
+        contentUrl={url}
+        className={WEBVIEW_HOST_CLASS}
+      />
+    </Suspense>
+  );
 }
 
 export function BrowserArtifactViewer({
@@ -24,6 +50,7 @@ export function BrowserArtifactViewer({
   const { activeTabId, openUrlInPanel } = useBrowserTabs();
   const { reload, navigating } = useBrowserNavigation(activeTabId);
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const openingRef = useRef(false);
 
   useEffect(() => {
@@ -46,7 +73,7 @@ export function BrowserArtifactViewer({
     });
   };
 
-  const showSkeleton = loadedUrl !== url || !activeTabId || navigating;
+  const isReady = loadedUrl === url && Boolean(activeTabId) && !navigating;
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
@@ -54,22 +81,31 @@ export function BrowserArtifactViewer({
         artifact={artifact}
         onReload={handleReload}
         reloading={navigating}
+        fullscreen={
+          isReady
+            ? {
+                open: isFullscreen,
+                onOpenChange: setIsFullscreen,
+                content: (
+                  <ArtifactBrowserWebview
+                    tabId={activeTabId!}
+                    url={url}
+                    hostKey="artifact-fullscreen"
+                  />
+                ),
+              }
+            : null
+        }
       />
       <div className="relative min-h-0 flex-1 p-4">
-        {showSkeleton ? (
+        {isFullscreen ? null : !isReady ? (
           <BrowserStreamSkeleton className="h-full min-h-[320px]" />
         ) : (
-          <Suspense
-            fallback={
-              <BrowserStreamSkeleton className="h-full min-h-[320px]" />
-            }
-          >
-            <BrowserWebviewHost
-              tabId={activeTabId}
-              contentUrl={url}
-              className="h-full min-h-[320px]"
-            />
-          </Suspense>
+          <ArtifactBrowserWebview
+            tabId={activeTabId!}
+            url={url}
+            hostKey="artifact-panel"
+          />
         )}
       </div>
     </div>

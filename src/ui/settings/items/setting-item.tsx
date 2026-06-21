@@ -28,7 +28,7 @@ export function SettingLinkItem({
         'w-full flex items-center justify-between px-3.5 py-2 text-sm transition-colors',
         'hover:bg-accent/50 active:bg-accent',
         'border-b last:border-b-0 border-border/40',
-        disabled && 'opacity-50 cursor-not-allowed',
+        disabled && 'opacity-50',
         className
       )}
     >
@@ -105,7 +105,7 @@ export function SettingActionItem({
         'hover:bg-accent/50 active:bg-accent',
         'border-b last:border-b-0 border-border/40',
         variant === 'destructive' && 'text-destructive hover:bg-destructive/10',
-        disabled && 'opacity-50 cursor-not-allowed',
+        disabled && 'opacity-50',
         className
       )}
     >
@@ -173,7 +173,7 @@ export function SettingCheckItem({
         'w-full flex items-center justify-between px-3.5 py-2.5 text-sm transition-colors',
         'hover:bg-accent/50 active:bg-accent',
         'border-b last:border-b-0 border-border/40',
-        disabled && 'opacity-50 cursor-not-allowed',
+        disabled && 'opacity-50',
         className
       )}
     >

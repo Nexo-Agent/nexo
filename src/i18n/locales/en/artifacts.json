@@ -14,5 +14,8 @@
   "openInSystem": "Open in system",
   "viewerReload": "Reload preview",
   "copyContent": "Copy content",
-  "copyContentDone": "Copied"
+  "copyContentDone": "Copied",
+  "viewerFullscreen": "View fullscreen",
+  "viewerFullscreenTitle": "{{title}} — fullscreen preview",
+  "viewerFullscreenDescription": "Viewing artifact preview in fullscreen mode"
 }

@@ -3,7 +3,6 @@ import {
   Send,
   Paperclip,
   Square,
-  Wrench,
   Brain,
   Search,
   X,
@@ -32,7 +31,6 @@ import {
   DropdownMenuRadioItem,
 } from '@/ui/atoms/dropdown-menu';
 import { useGetLLMConnectionsQuery } from '@/features/llm';
-import { useGetActiveToolsForWorkspaceQuery } from '@/features/tools/state/toolsApi';
 import { useWorkspaces } from '@/features/workspace';
 import { useAppDispatch } from '@/app/hooks';
 import type { LLMConnection } from '@/features/llm/types';
@@ -120,12 +118,6 @@ export function ChatInput({
 
   // Get app settings for experimental features
   const { enableWorkflowEditor } = useAppSettings();
-
-  // Calculate active tools from workspace settings - fetching from backend for unified source of truth
-  const { data: activeTools = [] } = useGetActiveToolsForWorkspaceQuery(
-    selectedWorkspaceId || '',
-    { skip: !selectedWorkspaceId }
-  );
 
   // Use messages hook for streaming state
   const { handleStopStreaming, isStreaming, messages } =
@@ -222,7 +214,6 @@ export function ChatInput({
     () => getFileAcceptForCapabilities(modelCapabilities),
     [modelCapabilities]
   );
-  const supportsToolCalling = modelCapabilities.tools;
   const supportsThinking = modelCapabilities.thinking;
 
   const [modelSearchTerm, setModelSearchTerm] = useState('');
@@ -443,7 +434,7 @@ export function ChatInput({
                 placeholder={t('enterMessage')}
                 disabled={disabled}
                 className={cn(
-                  'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 transition-[color,box-shadow,background-color,border-color] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+                  'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 transition-[color,box-shadow,background-color,border-color] outline-none focus-visible:ring-[3px] disabled:opacity-50',
                   'w-full min-h-[40px] max-h-[200px] resize-none leading-relaxed text-sm py-0 px-2 border-0 rounded-lg outline-none flex content-center ring-0 shadow-none focus:ring-0 focus:shadow-none bg-transparent dark:bg-transparent'
                 )}
                 rows={1}
@@ -475,7 +466,7 @@ export function ChatInput({
                   size="icon"
                   onClick={handleUploadClick}
                   disabled={disabled || !supportsFileUpload}
-                  className="h-7 w-7 text-muted-foreground hover:text-foreground border-0 shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground border-0 shadow-none disabled:opacity-50"
                   aria-label={t('uploadFile', { ns: 'common' })}
                   title={
                     supportsFileUpload
@@ -494,82 +485,13 @@ export function ChatInput({
                     size="icon"
                     onClick={() => setFlowDialogOpen(true)}
                     disabled={disabled}
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground border-0 shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground border-0 shadow-none disabled:opacity-50"
                     aria-label="Add workflow"
                     title="Add workflow"
                   >
                     <Workflow className="size-4" />
                   </Button>
                 )}
-
-                {/* Tools Button with Hover Tooltip */}
-                <div className="relative group">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    disabled={disabled || !supportsToolCalling}
-                    className={cn(
-                      'h-7 w-7 text-muted-foreground hover:text-foreground border-0 shadow-none relative',
-                      activeTools.length > 0 &&
-                        'text-primary hover:text-primary',
-                      !supportsToolCalling && 'opacity-50 cursor-not-allowed'
-                    )}
-                    aria-label={t('activeTools', { ns: 'chat' })}
-                  >
-                    <Wrench className="size-4" />
-                  </Button>
-
-                  {/* Hover Tooltip Panel */}
-                  <div className="absolute bottom-full left-0 mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-[opacity,visibility] duration-200 z-50">
-                    {/* Invisible bridge to keep hover active */}
-                    <div className="absolute top-0 left-0 right-0 h-3 translate-y-full"></div>
-                    <div className="bg-popover text-popover-foreground rounded-md border shadow-lg w-80">
-                      <div className="space-y-2 p-3">
-                        {!supportsToolCalling && (
-                          <div className="mb-2 rounded bg-yellow-500/10 p-2 text-xs text-yellow-600 dark:text-yellow-400">
-                            Model does not support tool calling
-                          </div>
-                        )}
-                        <div className="font-semibold text-sm">
-                          {t('activeTools', { ns: 'chat' }) || 'Active Tools'}
-                          <span className="ml-1.5 text-muted-foreground font-normal">
-                            ({activeTools.length})
-                          </span>
-                        </div>
-                        {activeTools.length > 0 ? (
-                          <div className="space-y-1.5 max-h-60 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                            {activeTools.map((tool, index) => (
-                              <div
-                                key={`${tool.name}-${index}`}
-                                className="text-xs p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors"
-                              >
-                                <div className="font-medium text-foreground">
-                                  {tool.name}
-                                </div>
-                                <div className="text-muted-foreground text-[10px] mt-0.5">
-                                  Server: {tool.serverName}
-                                </div>
-                                {tool.description && (
-                                  <div className="text-muted-foreground mt-1 line-clamp-2">
-                                    {tool.description}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-sm text-muted-foreground py-4 text-center">
-                            {t('noActiveTools', { ns: 'chat' }) ||
-                              'No active tools configured'}
-                          </div>
-                        )}
-                      </div>
-                      {/* Arrow */}
-                      <div className="absolute top-full left-4 -mt-px border-4 border-transparent border-t-popover"></div>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Thinking Mode Toggle */}
                 {supportsThinking && (

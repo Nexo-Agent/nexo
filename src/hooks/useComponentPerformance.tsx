@@ -16,8 +16,8 @@ interface UseComponentPerformanceOptions {
  * Usage:
  * ```tsx
  * function MyComponent(props) {
- *   useComponentPerformance({ componentName: 'MyComponent', threshold: 100 });
- *   // ... component logic
+ * useComponentPerformance({ componentName: 'MyComponent', threshold: 100 });
+ * // ... component logic
  * }
  * ```
  */
@@ -78,8 +78,8 @@ export function useComponentPerformance({
  * Usage:
  * ```tsx
  * const TrackedComponent = withPerformanceTracking(MyComponent, {
- *   componentName: 'MyComponent',
- *   threshold: 100,
+ * componentName: 'MyComponent',
+ * threshold: 100,
  * });
  * ```
  */

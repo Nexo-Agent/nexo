@@ -79,8 +79,7 @@ export const MessageFile = ({
         isUser
           ? 'bg-primary-foreground/12 hover:bg-primary-foreground/18 text-primary-foreground'
           : 'bg-muted/60 hover:bg-muted/80 text-foreground ring-1 ring-border/40',
-        isOpening && 'cursor-wait opacity-70',
-        !isOpening && 'cursor-pointer',
+        isOpening && 'opacity-70',
         className
       )}
       onClick={handleClick}

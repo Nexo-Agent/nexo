@@ -47,7 +47,7 @@ function CompactThinkingRow({
       onToggle={(event) => setOpen(event.currentTarget.open)}
       className="group/thought"
     >
-      <summary className="flex cursor-pointer list-none items-center gap-1.5 py-0.5 text-[11px] text-muted-foreground/80 hover:text-muted-foreground">
+      <summary className="flex list-none items-center gap-1.5 py-0.5 text-[11px] text-muted-foreground/80 hover:text-muted-foreground">
         <ChevronRight className="size-3 shrink-0 transition-transform group-open/thought:rotate-90" />
         {step.isStreaming ? (
           <Loader2 className="size-3 shrink-0 animate-spin text-primary/70" />
@@ -116,7 +116,7 @@ export const AgentActivityTimeline = memo(function AgentActivityTimeline({
           className="group/activity rounded-md border border-border/40 bg-muted/10"
         >
           <summary
-            className="flex cursor-pointer list-none items-center gap-1.5 px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+            className="flex list-none items-center gap-1.5 px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
             onClick={(event) => {
               event.preventDefault();
               setUserOpen((current) => !(current ?? activity.defaultExpanded));

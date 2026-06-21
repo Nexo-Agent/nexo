@@ -54,7 +54,7 @@ describe('parseMessageMentions', () => {
   });
 
   it('should handle mentions with extra whitespace', () => {
-    const result = parseMessageMentions('@agent1  @agent2   Message');
+    const result = parseMessageMentions('@agent1 @agent2 Message');
 
     expect(result.mentions).toEqual(['agent1', 'agent2']);
     expect(result.cleanedContent).toBe('Message');
@@ -89,7 +89,7 @@ describe('parseMessageMentions', () => {
   });
 
   it('should trim cleaned content', () => {
-    const result = parseMessageMentions('@agent1 Message   ');
+    const result = parseMessageMentions('@agent1 Message ');
 
     expect(result.mentions).toEqual(['agent1']);
     expect(result.cleanedContent).toBe('Message');

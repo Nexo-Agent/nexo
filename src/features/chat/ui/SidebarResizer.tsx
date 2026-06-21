@@ -66,8 +66,7 @@ export function SidebarResizer({
           style={style}
           onMouseDown={handleMouseDown}
           className={cn(
-            'group/resizer absolute top-0 bottom-0 z-50 flex w-2 -translate-x-1/2 cursor-col-resize items-center justify-center',
-            isResizing && 'cursor-col-resize'
+            'group/resizer absolute top-0 bottom-0 z-50 flex w-2 -translate-x-1/2 items-center justify-center'
           )}
         >
           <span

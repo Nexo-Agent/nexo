@@ -74,7 +74,6 @@ export function WorkspaceSelector({
                 handleWorkspaceChangeWithCallback(workspace);
               }}
               className={cn(
-                'cursor-pointer',
                 selectedWorkspace.id === workspace.id && 'bg-accent'
               )}
             >
@@ -87,7 +86,7 @@ export function WorkspaceSelector({
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleAddClick} className="cursor-pointer">
+          <DropdownMenuItem onClick={handleAddClick}>
             <div className="flex items-center gap-2">
               <Plus className="size-4" />
               <span>{t('addWorkspace')}</span>
