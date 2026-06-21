@@ -1,19 +1,20 @@
 import { Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Import provider icons
+// Import provider icons as emitted asset URLs (not inlined data URIs) so they
+// load reliably under Tauri's production CSP on Windows WebView2.
 import anthropicIcon from '@/assets/provider-icons/anthropic.png';
-import deepInfraIcon from '@/assets/provider-icons/deepinfra.svg';
+import deepInfraIcon from '@/assets/provider-icons/deepinfra.png';
 import deepseekIcon from '@/assets/provider-icons/deepseek.png';
-import fireworksIcon from '@/assets/provider-icons/fireworks.svg';
-import googleIcon from '@/assets/provider-icons/google.svg';
-import groqIcon from '@/assets/provider-icons/groq.svg';
+import fireworksIcon from '@/assets/provider-icons/fireworks-ai.webp?no-inline';
+import googleIcon from '@/assets/provider-icons/google.svg?no-inline';
+import groqIcon from '@/assets/provider-icons/groq.svg?no-inline';
 import litellmIcon from '@/assets/provider-icons/litellm.png';
-import ollamaIcon from '@/assets/provider-icons/ollama.svg';
-import openaiIcon from '@/assets/provider-icons/openai.svg';
-import openrouterIcon from '@/assets/provider-icons/openrouter.svg';
-import togetherIcon from '@/assets/provider-icons/together.svg';
-import vllmIcon from '@/assets/provider-icons/vllm.svg';
+import ollamaIcon from '@/assets/provider-icons/ollama.png';
+import openaiIcon from '@/assets/provider-icons/openai.svg?no-inline';
+import openrouterIcon from '@/assets/provider-icons/openrouter.png';
+import togetherIcon from '@/assets/provider-icons/together-ai.webp?no-inline';
+import vllmIcon from '@/assets/provider-icons/vllm.png';
 
 interface ProviderIconProps {
   provider: string;
@@ -42,7 +43,7 @@ export function ProviderIcon({ provider, className }: ProviderIconProps) {
 
   // Providers that use monochrome icons (likely black by default)
   // These need to be inverted in dark mode to be visible (white).
-  const monochromeProviders = ['openai', 'ollama', 'groq', 'openrouter'];
+  const monochromeProviders = ['openai', 'groq'];
   const isMonochrome = monochromeProviders.includes(p);
 
   if (localIcons[p]) {
