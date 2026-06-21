@@ -53,7 +53,7 @@ pub fn prepend_path_dir(mut env: HashMap<String, String>, dir: &Path) -> HashMap
 }
 
 /// Normalize known path-valued env vars for Windows subprocess compatibility.
-pub fn normalize_env_paths(mut env: HashMap<String, String>) -> HashMap<String, String> {
+pub const fn normalize_env_paths(env: HashMap<String, String>) -> HashMap<String, String> {
     #[cfg(windows)]
     {
         for key in ["UV_PYTHON", "PYTHONHOME", "PYTHONPATH"] {
