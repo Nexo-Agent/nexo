@@ -20,7 +20,6 @@ import {
 } from '@/ui/atoms/collapsible';
 import { Switch } from '@/ui/atoms/switch';
 import { Button } from '@/ui/atoms/button/button';
-import { Separator } from '@/ui/atoms/separator';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { WebSearchSettings } from '@/features/web-search';
 import i18n from '@/i18n/config';
@@ -62,9 +61,9 @@ export function AppSettings() {
   };
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-8 pb-6">
       {/* Language */}
-      <div className="space-y-3">
+      <section className="space-y-2.5">
         <div className="flex items-center gap-2">
           <Languages className="size-4 text-muted-foreground shrink-0" />
           <h3 className="font-medium text-sm leading-none my-0">
@@ -83,12 +82,10 @@ export function AppSettings() {
             <SelectItem value="vi">{t('vietnamese')}</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      <Separator />
+      </section>
 
       {/* Theme */}
-      <div className="space-y-3">
+      <section className="space-y-2.5">
         <div className="flex items-center gap-2">
           <Palette className="size-4 text-muted-foreground shrink-0" />
           <h3 className="font-medium text-sm leading-none my-0">
@@ -125,12 +122,10 @@ export function AppSettings() {
             <SelectItem value="ayu-dark">{t('ayuDarkTheme')}</SelectItem> */}
           </SelectContent>
         </Select>
-      </div>
-
-      <Separator />
+      </section>
 
       {/* Web Search */}
-      <div className="space-y-3">
+      <section className="space-y-2.5">
         <div className="flex items-center gap-2">
           <Search className="size-4 text-muted-foreground shrink-0" />
           <h3 className="font-medium text-sm leading-none my-0">
@@ -138,9 +133,7 @@ export function AppSettings() {
           </h3>
         </div>
         <WebSearchSettings />
-      </div>
-
-      <Separator />
+      </section>
 
       {/* Experiments Collapsible */}
       <Collapsible className="space-y-2">
@@ -159,7 +152,7 @@ export function AppSettings() {
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-3 pt-2">
-          <div className="flex items-center justify-between gap-4 p-3 border rounded-lg bg-card/50">
+          <div className="flex items-center justify-between gap-4 rounded-lg bg-muted/30 p-3">
             <div className="space-y-1">
               <h4 className="text-sm font-medium leading-none">
                 {t('enableWorkflowEditor')}

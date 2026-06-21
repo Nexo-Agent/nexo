@@ -42,13 +42,26 @@ export function SkillsList() {
   };
 
   if (isLoading) {
-    return <div>{t('loadingSkills')}</div>;
+    return (
+      <p className="py-10 text-center text-sm text-muted-foreground">
+        {t('loadingSkills')}
+      </p>
+    );
+  }
+
+  if (!skills?.length) {
+    return (
+      <div className="space-y-2 py-10 text-center text-sm text-muted-foreground">
+        <p>{t('emptyStateDescription')}</p>
+        <p className="text-xs">{t('emptyStateHint')}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {skills?.map((skill) => (
+    <>
+      <div className="flex flex-col gap-2">
+        {skills.map((skill) => (
           <SkillCard
             key={skill.id}
             skill={skill}
@@ -57,18 +70,6 @@ export function SkillsList() {
           />
         ))}
       </div>
-
-      {skills?.length === 0 && (
-        <div className="text-center py-12 border-2 border-dashed rounded-lg space-y-4">
-          <p className="text-muted-foreground max-w-md mx-auto">
-            {t('emptyStateDescription')}
-          </p>
-
-          <p className="text-xs text-muted-foreground max-w-lg mx-auto">
-            {t('emptyStateHint')}
-          </p>
-        </div>
-      )}
 
       <SkillDetails
         skillId={selectedSkillId}
@@ -99,6 +100,6 @@ export function SkillsList() {
       >
         <div className="text-sm text-muted-foreground">{t('cannotUndone')}</div>
       </FormDialog>
-    </div>
+    </>
   );
 }

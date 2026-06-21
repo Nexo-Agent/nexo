@@ -1,138 +1,71 @@
 import { memo } from 'react';
-import { Server, AlertCircle, PowerOff, RefreshCw } from 'lucide-react';
+import { Settings, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
-import { EntityCard } from '@/ui/molecules/EntityCard';
+import { Switch } from '@/ui/atoms/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/atoms/tooltip';
-import type { MCPServerConnection, MCPToolType } from '../types';
+import type { MCPServerConnection } from '../types';
 import { cn } from '@/lib/utils';
 
 interface MCPServerConnectionCardProps {
   connection: MCPServerConnection;
   onEdit: (connection: MCPServerConnection) => void;
-  handleDisconnect: (connection: MCPServerConnection) => void;
-  handleReload: (connection: MCPServerConnection) => void;
+  onToggle: (connection: MCPServerConnection, enabled: boolean) => void;
 }
 
-/**
- * Card component for displaying a single MCP server connection
- * Uses shared EntityCard for consistent UI
- */
 export const MCPServerConnectionCard = memo(function MCPServerConnectionCard({
   connection,
   onEdit,
-  handleDisconnect,
-  handleReload,
+  onToggle,
 }: MCPServerConnectionCardProps) {
   const { t } = useTranslation('settings');
 
-  const statusColor = {
-    connected:
-      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    connecting:
-      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    disconnected: 'bg-muted text-muted-foreground',
-  }[connection.status || 'disconnected'];
+  const isEnabled =
+    connection.status === 'connected' || connection.status === 'connecting';
+  const isConnecting = connection.status === 'connecting';
 
   return (
-    <EntityCard
-      onClick={() => onEdit(connection)}
-      icon={<Server className="size-5 text-primary" />}
-      title={
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="truncate">{connection.name}</span>
-          {connection.errorMessage && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <AlertCircle className="size-4 text-destructive shrink-0 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
-                <p className="text-sm">{connection.errorMessage}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      }
-      subtitle={connection.type}
-      actions={
-        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-          {connection.status === 'connected' && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              onClick={() => handleDisconnect(connection)}
-              title={t('disconnectConnection')}
-            >
-              <PowerOff className="size-3.5" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={() => handleReload(connection)}
-            title={t('reloadConnection')}
-            disabled={connection.status === 'connecting'}
-          >
-            <RefreshCw
-              className={cn(
-                'size-3.5',
-                connection.status === 'connecting' && 'animate-spin'
-              )}
-            />
-          </Button>
-        </div>
-      }
-      extra={
-        <div className="space-y-3 pt-1">
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-tighter',
-                statusColor
-              )}
-            >
-              {connection.status === 'connected'
-                ? t('connected')
-                : connection.status === 'connecting'
-                  ? t('connecting')
-                  : t('disconnected')}
-            </span>
-            <span className="text-[10px] text-muted-foreground truncate flex-1">
-              {connection.url}
-            </span>
-          </div>
+    <div
+      className={cn(
+        'flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/20 px-4 py-3',
+        isConnecting && 'opacity-80'
+      )}
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="truncate text-sm font-medium">{connection.name}</span>
+        {connection.errorMessage ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <AlertCircle className="size-3.5 shrink-0 text-destructive cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="text-sm">{connection.errorMessage}</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
+      </div>
 
-          <div className="flex items-center gap-1.5 overflow-hidden min-h-[24px]">
-            {connection.tools && connection.tools.length > 0 ? (
-              <>
-                <div className="flex flex-wrap gap-1.5">
-                  {connection.tools
-                    .slice(0, 3)
-                    .map((tool: MCPToolType, index: number) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center rounded-md bg-muted/60 px-2 py-1 text-[10px] text-foreground/80 group-hover:bg-muted transition-colors border border-border/40"
-                      >
-                        {tool.name}
-                      </span>
-                    ))}
-                  {connection.tools.length > 3 && (
-                    <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-[10px] text-primary font-medium">
-                      +{connection.tools.length - 3}
-                    </span>
-                  )}
-                </div>
-              </>
-            ) : (
-              <span className="text-[10px] text-muted-foreground/60 italic">
-                {t('noTools', { defaultValue: 'No tools available' })}
-              </span>
-            )}
-          </div>
-        </div>
-      }
-    />
+      <div className="flex shrink-0 items-center gap-1">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-8 text-muted-foreground hover:text-foreground"
+          onClick={() => onEdit(connection)}
+          aria-label={t('editConnection')}
+        >
+          <Settings className="size-4" />
+        </Button>
+        <Switch
+          checked={isEnabled}
+          disabled={isConnecting}
+          onCheckedChange={(checked) => onToggle(connection, checked)}
+          aria-label={t('toggleConnection', {
+            name: connection.name,
+            defaultValue: `Toggle ${connection.name}`,
+          })}
+        />
+      </div>
+    </div>
   );
 });

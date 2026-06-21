@@ -13,14 +13,12 @@ import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { Button } from '@/ui/atoms/button/button';
 import { Input } from '@/ui/atoms/input';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
-import { Separator } from '@/ui/atoms/separator';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
 } from '@/ui/atoms/dialog/component';
 import { ContextMenu } from '@/ui/atoms/context-menu';
-import { cn } from '@/lib/utils';
 import type { Message } from '@/app/types';
 import { useChats } from '../hooks/useChats';
 import { useWorkspaces } from '@/features/workspace';
@@ -33,12 +31,15 @@ import {
 } from '@/features/ui/state/uiSlice';
 import { setSearchOpen } from '../state/chatSearchSlice';
 import { logger } from '@/lib/logger';
-import { isActiveConversationPhase } from '../state/conversationRuntimeSlice';
 import { ConfirmDialog } from '@/ui/molecules/ConfirmDialog';
 import { SidebarUpdateButton } from '@/features/updater/ui/SidebarUpdateButton';
-
-const sidebarActionClass =
-  'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] text-sidebar-foreground';
+import { ConversationList } from './ConversationList';
+import { SidebarColumnRow } from '@/features/ui/ui/SidebarColumnRow';
+import {
+  SIDEBAR_ICON,
+  SIDEBAR_LIST,
+  sidebarItemClass,
+} from '@/features/ui/lib/sidebarStyles';
 
 export function ChatSidebar() {
   // Use workspaces hook to get selectedWorkspaceId
@@ -48,7 +49,6 @@ export function ChatSidebar() {
   const {
     chats,
     selectedChatId,
-    conversationRuntime,
     handleNewChat,
     handleChatSelect,
     handleDeleteChat,
@@ -140,119 +140,62 @@ export function ChatSidebar() {
   };
 
   return (
-    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-sidebar pr-2 select-none">
-      <div className="shrink-0 px-3 pt-1.5 pb-2">
-        <div className="flex flex-col gap-0.5">
+    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-sidebar select-none">
+      <SidebarColumnRow className="shrink-0 pt-1">
+        <div className={SIDEBAR_LIST}>
           <button
             type="button"
-            className={sidebarActionClass}
+            className={sidebarItemClass()}
             onClick={handleNewChat}
           >
-            <Plus className="size-3.5 shrink-0" />
-            <span>{t('common:newConversation')}</span>
+            <Plus className={SIDEBAR_ICON} />
+            <span className="truncate">{t('common:newConversation')}</span>
           </button>
           <button
             type="button"
-            className={sidebarActionClass}
+            className={sidebarItemClass()}
             onClick={() => dispatch(setSearchOpen(true))}
           >
-            <Search className="size-3.5 shrink-0" />
-            <span>{t('common:searchChats')}</span>
+            <Search className={SIDEBAR_ICON} />
+            <span className="truncate">{t('common:searchChats')}</span>
           </button>
           <button
             type="button"
-            className={sidebarActionClass}
+            className={sidebarItemClass()}
             onClick={() => dispatch(navigateToSettings())}
           >
-            <SlidersHorizontal className="size-3.5 shrink-0" />
-            <span>{t('common:settings')}</span>
+            <SlidersHorizontal className={SIDEBAR_ICON} />
+            <span className="truncate">{t('common:settings')}</span>
           </button>
           <button
             type="button"
-            className={sidebarActionClass}
+            className={sidebarItemClass()}
             onClick={() => dispatch(setWorkspaceSettingsOpen(true))}
           >
-            <Settings className="size-3.5 shrink-0" />
-            <span>{t('settings:workspaceSettings')}</span>
+            <Settings className={SIDEBAR_ICON} />
+            <span className="truncate">{t('settings:workspaceSettings')}</span>
           </button>
         </div>
-      </div>
+      </SidebarColumnRow>
 
-      <Separator className="bg-sidebar-border" />
-
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="px-3 pb-2 pt-2">
-          {chats.filter((chat) => !chat.parentId).length === 0 ? (
-            <div className="px-2 py-6 text-center text-xs text-muted-foreground">
-              <p>{t('common:noConversations')}</p>
-            </div>
-          ) : (
-            <>
-              <p className="mb-1.5 px-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
-                {t('common:recents')}
-              </p>
-              <div className="flex flex-col gap-0.5">
-                {chats
-                  .filter((chat) => !chat.parentId)
-                  .map((chat) => (
-                    <div
-                      key={chat.id}
-                      className={cn(
-                        'relative min-w-0 cursor-pointer overflow-hidden rounded-md px-3 py-1.5',
-                        selectedChatId === chat.id
-                          ? 'bg-accent text-accent-foreground'
-                          : 'text-muted-foreground'
-                      )}
-                      onClick={() => {
-                        setContextMenu(null);
-                        handleChatSelect(chat.id);
-                      }}
-                      onContextMenu={(e) => handleContextMenu(e, chat.id)}
-                    >
-                      <span
-                        title={chat.title}
-                        className={cn(
-                          'block min-w-0 truncate text-[13px] leading-tight',
-                          selectedChatId === chat.id
-                            ? 'text-foreground'
-                            : 'text-sidebar-foreground'
-                        )}
-                      >
-                        {chat.title}
-                      </span>
-
-                      {(() => {
-                        const runtime = conversationRuntime[chat.id];
-                        const isActive =
-                          runtime &&
-                          isActiveConversationPhase(runtime.phase.kind);
-                        if (!isActive) return null;
-                        const queueDepth = runtime.queue_depth;
-                        return (
-                          <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden rounded-b-md">
-                            <div className="h-full w-full bg-primary/10">
-                              <div className="h-full bg-primary animate-indeterminate-bar" />
-                            </div>
-                            {queueDepth > 0 && (
-                              <span className="absolute -top-3 right-1 rounded bg-primary px-1 text-[10px] text-primary-foreground">
-                                +{queueDepth}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  ))}
-              </div>
-            </>
-          )}
-        </div>
+      <ScrollArea className="mt-5 min-h-0 min-w-0 flex-1">
+        <SidebarColumnRow className="pb-1 min-w-0">
+          <ConversationList
+            chats={chats}
+            selectedChatId={selectedChatId}
+            onSelect={(chatId) => {
+              setContextMenu(null);
+              handleChatSelect(chatId);
+            }}
+            onContextMenu={handleContextMenu}
+          />
+        </SidebarColumnRow>
       </ScrollArea>
 
-      <div className="mt-auto shrink-0 space-y-2 border-t border-sidebar-border px-3 py-2">
+      <SidebarColumnRow className="mt-auto shrink-0 space-y-1 pb-1.5 pt-1">
         <SidebarUpdateButton />
         <WorkspaceSelector compact />
-      </div>
+      </SidebarColumnRow>
 
       {/* Context Menu */}
       <ContextMenu

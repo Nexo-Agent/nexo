@@ -43,6 +43,8 @@
   "closeDialog": "Đóng dialog",
   "collapseRightPanel": "Thu gọn panel bên phải",
   "collapseSidebar": "Thu gọn sidebar",
+  "sidebarResizerCollapse": "Nhấn để thu gọn {{shortcut}}",
+  "sidebarResizerDrag": "Kéo để thay đổi kích thước",
   "notes": "Ghi chú",
   "skills": "Skills",
   "chatInfo": "Thông tin chat",

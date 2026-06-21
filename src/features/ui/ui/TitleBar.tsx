@@ -3,11 +3,16 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Minus, Square, X, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
+import { SidebarColumnRow } from '@/features/ui/ui/SidebarColumnRow';
 
 interface TitleBarProps {
   leftContent?: ReactNode;
   rightContent?: ReactNode;
   onClose?: () => void;
+  sidebarZoneWidth?: number;
+  isSidebarCollapsed?: boolean;
+  rightPanelWidth?: number;
+  isRightPanelOpen?: boolean;
 }
 
 function detectPlatform() {
@@ -30,6 +35,10 @@ export function TitleBar({
   leftContent,
   rightContent,
   onClose,
+  sidebarZoneWidth,
+  isSidebarCollapsed = false,
+  rightPanelWidth = 0,
+  isRightPanelOpen = false,
 }: TitleBarProps = {}) {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -90,7 +99,7 @@ export function TitleBar({
 
       // On macOS, the green button should toggle fullscreen (like native behavior)
       // Option+Click should maximize instead
-      if (isMacOS) {
+      if (isMacOSPlatform) {
         const isOptionPressed = e.altKey || e.metaKey;
 
         if (isOptionPressed) {
@@ -131,14 +140,14 @@ export function TitleBar({
     }
   };
 
-  const isMacOS = platform === 'macos';
+  const isMacOSPlatform = platform === 'macos';
 
   // Handle double-click on title bar to toggle fullscreen (Windows/Linux)
   // This avoids the gap issue when decorations are disabled
   // macOS doesn't use this behavior, so we only apply it to Windows/Linux
   const handleTitleBarDoubleClick = async (e: React.MouseEvent) => {
     // Skip on macOS
-    if (isMacOS) return;
+    if (isMacOSPlatform) return;
 
     // Only handle if clicking on the draggable area, not on buttons or their containers
     const target = e.target as HTMLElement;
@@ -169,98 +178,129 @@ export function TitleBar({
   };
 
   return (
-    <div
-      data-tauri-drag-region
-      onDoubleClick={handleTitleBarDoubleClick}
-      className={cn(
-        'flex h-8 items-center justify-between border-b border-sidebar-border bg-sidebar select-none',
-        'select-none'
-      )}
-    >
-      {/* Left side - macOS traffic lights or app content */}
-      <div className="flex items-center gap-2 px-3">
-        {isMacOS ? (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleClose}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-close transition-colors hover:bg-window-close-hover"
-              aria-label="Close"
-            >
-              <span className="opacity-0 group-hover:opacity-100">
-                <X className="h-2 w-2 text-window-close-icon" />
-              </span>
-            </button>
-            <button
-              onClick={handleMinimize}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-minimize transition-colors hover:bg-window-minimize-hover"
-              aria-label="Minimize"
-            >
-              <span className="opacity-0 group-hover:opacity-100">
-                <Minus className="h-2 w-2 text-window-minimize-icon" />
-              </span>
-            </button>
-            <button
-              onClick={handleMaximize}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-maximize transition-colors hover:bg-window-maximize-hover"
-              aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-              title={
-                isFullscreen
-                  ? 'Exit Fullscreen (Option+Click to Maximize)'
-                  : 'Enter Fullscreen (Option+Click to Maximize)'
-              }
-            >
-              <span className="opacity-0 group-hover:opacity-100">
-                {isFullscreen ? (
-                  <Maximize2 className="h-2 w-2 text-window-maximize-icon" />
-                ) : (
-                  <Square className="h-2 w-2 text-window-maximize-icon" />
-                )}
-              </span>
-            </button>
-          </div>
-        ) : null}
-        {/* App content on left (Windows/Linux) or after traffic lights (macOS) */}
-        {leftContent && (
-          <div onMouseDown={(e) => e.stopPropagation()} className="flex">
-            {leftContent}
-          </div>
+    <div className="flex h-8 w-full select-none">
+      {/* Sidebar column — matches sidebar below */}
+      <div
+        data-tauri-drag-region={isMacOSPlatform ? undefined : true}
+        onDoubleClick={handleTitleBarDoubleClick}
+        className={cn(
+          'flex shrink-0 min-w-0',
+          isSidebarCollapsed ? 'bg-background' : 'bg-sidebar'
         )}
+        style={
+          !isSidebarCollapsed && sidebarZoneWidth
+            ? { width: sidebarZoneWidth }
+            : undefined
+        }
+      >
+        <SidebarColumnRow
+          className="w-full"
+          leading={
+            isMacOSPlatform ? (
+              <>
+                <button
+                  onClick={handleClose}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-close transition-colors hover:bg-window-close-hover"
+                  aria-label="Close"
+                >
+                  <span className="opacity-0 group-hover:opacity-100">
+                    <X className="h-2 w-2 text-window-close-icon" />
+                  </span>
+                </button>
+                <button
+                  onClick={handleMinimize}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-minimize transition-colors hover:bg-window-minimize-hover"
+                  aria-label="Minimize"
+                >
+                  <span className="opacity-0 group-hover:opacity-100">
+                    <Minus className="h-2 w-2 text-window-minimize-icon" />
+                  </span>
+                </button>
+                <button
+                  onClick={handleMaximize}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="group flex h-3 w-3 items-center justify-center rounded-full bg-window-maximize transition-colors hover:bg-window-maximize-hover"
+                  aria-label={
+                    isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'
+                  }
+                  title={
+                    isFullscreen
+                      ? 'Exit Fullscreen (Option+Click to Maximize)'
+                      : 'Enter Fullscreen (Option+Click to Maximize)'
+                  }
+                >
+                  <span className="opacity-0 group-hover:opacity-100">
+                    {isFullscreen ? (
+                      <Maximize2 className="h-2 w-2 text-window-maximize-icon" />
+                    ) : (
+                      <Square className="h-2 w-2 text-window-maximize-icon" />
+                    )}
+                  </span>
+                </button>
+              </>
+            ) : undefined
+          }
+        >
+          {leftContent ? (
+            <div onMouseDown={(e) => e.stopPropagation()} className="flex">
+              {leftContent}
+            </div>
+          ) : null}
+        </SidebarColumnRow>
       </div>
 
-      {/* Center - draggable area */}
+      {/* Main column — seamless with main content below */}
       <div
         data-tauri-drag-region
-        className={cn('flex-1', isMacOS && !leftContent && 'text-center')}
+        onDoubleClick={handleTitleBarDoubleClick}
+        className="flex min-w-0 flex-1 items-center bg-background"
       >
-        {isMacOS && !leftContent && (
-          <span className="text-xs font-medium text-muted-foreground">
-            Nexo
-          </span>
-        )}
+        <div
+          data-tauri-drag-region
+          className={cn(
+            'h-full flex-1',
+            isMacOSPlatform &&
+              !leftContent &&
+              'flex items-center justify-center'
+          )}
+        >
+          {isMacOSPlatform && !leftContent ? (
+            <span className="text-xs font-medium text-muted-foreground">
+              Nexo
+            </span>
+          ) : null}
+        </div>
       </div>
 
-      {/* Right side - App content + window controls */}
-      <div className="flex items-center">
-        {/* App content on right */}
-        {rightContent && (
+      {/* Right panel column — aligns with right panel below when open */}
+      <div
+        className={cn(
+          'flex shrink-0 items-center bg-background',
+          isRightPanelOpen && rightPanelWidth > 0 && 'justify-end'
+        )}
+        style={
+          isRightPanelOpen && rightPanelWidth > 0
+            ? { width: rightPanelWidth }
+            : undefined
+        }
+      >
+        {rightContent ? (
           <div
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 px-1"
             onMouseDown={(e) => e.stopPropagation()}
           >
             {rightContent}
           </div>
-        )}
+        ) : null}
 
-        {/* Window controls */}
-        {!isMacOS ? (
+        {!isMacOSPlatform ? (
           <div className="flex items-center">
             <button
               onClick={handleMinimize}
               onMouseDown={(e) => e.stopPropagation()}
-              className="flex h-9 w-12 items-center justify-center transition-colors hover:bg-accent"
+              className="flex h-8 w-11 items-center justify-center transition-colors hover:bg-accent"
               aria-label="Minimize"
             >
               <Minus className="h-4 w-4" />
@@ -268,7 +308,7 @@ export function TitleBar({
             <button
               onClick={(e) => handleMaximize(e)}
               onMouseDown={(e) => e.stopPropagation()}
-              className="flex h-9 w-12 items-center justify-center transition-colors hover:bg-accent"
+              className="flex h-8 w-11 items-center justify-center transition-colors hover:bg-accent"
               aria-label={isMaximized ? 'Restore' : 'Maximize'}
             >
               {isMaximized ? (
@@ -280,14 +320,14 @@ export function TitleBar({
             <button
               onClick={handleClose}
               onMouseDown={(e) => e.stopPropagation()}
-              className="flex h-9 w-12 items-center justify-center transition-colors hover:bg-destructive hover:text-destructive-foreground"
+              className="flex h-8 w-11 items-center justify-center transition-colors hover:bg-destructive hover:text-destructive-foreground"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
         ) : rightContent ? null : (
-          <div className="w-12" />
+          <div className="w-3" />
         )}
       </div>
     </div>

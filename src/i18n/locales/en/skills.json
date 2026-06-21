@@ -18,5 +18,8 @@
   "importSkillError": "Failed to import skill",
   "importingSkill": "Importing...",
   "emptyStateDescription": "No skills installed yet. Add skills by opening the skills folder or importing from GitHub.",
-  "emptyStateHint": "Create a folder like my-skill/SKILL.md with YAML frontmatter (name, description) following the Agent Skills spec."
+  "emptyStateHint": "Create a folder like my-skill/SKILL.md with YAML frontmatter (name, description) following the Agent Skills spec.",
+  "skillsPageDescription": "Install reusable agent skills from your filesystem or GitHub.",
+  "skillsSection": "Skills",
+  "viewSkillDetails": "View skill details"
 }

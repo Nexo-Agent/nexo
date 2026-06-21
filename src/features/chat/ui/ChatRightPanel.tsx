@@ -37,9 +37,9 @@ export function ChatRightPanel() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-background border-l border-border">
+    <div className="flex h-full flex-col bg-background">
       {/* Topbar */}
-      <div className="flex h-9 shrink-0 items-center justify-between border-b border-border bg-background/50 backdrop-blur-md px-1 pr-2">
+      <div className="flex h-9 shrink-0 items-center justify-between bg-background/50 px-1 pr-2 backdrop-blur-md">
         <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
             <Tooltip key={tab.id}>

@@ -18,5 +18,8 @@
   "importSkillError": "Không thể nhập skill",
   "importingSkill": "Đang nhập...",
   "emptyStateDescription": "Chưa có skill nào. Thêm skill bằng cách mở thư mục skills hoặc nhập từ GitHub.",
-  "emptyStateHint": "Tạo thư mục dạng my-skill/SKILL.md với YAML frontmatter (name, description) theo Agent Skills spec."
+  "emptyStateHint": "Tạo thư mục dạng my-skill/SKILL.md với YAML frontmatter (name, description) theo Agent Skills spec.",
+  "skillsPageDescription": "Cài đặt agent skills tái sử dụng từ filesystem hoặc GitHub.",
+  "skillsSection": "Skills",
+  "viewSkillDetails": "Xem chi tiết skill"
 }

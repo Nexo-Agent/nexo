@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, Server } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
-import { EmptyState } from '@/ui/atoms/empty-state';
 import { ConfirmDialog } from '@/ui/molecules/ConfirmDialog';
-import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { useAppDispatch } from '@/app/hooks';
-import { SectionHeader } from '@/ui/molecules/SectionHeader';
+import { DOCS_URL } from '@/features/settings/lib/constants';
 import { MCPServerConnectionCard } from './MCPServerConnectionCard';
 import { MCPServerConnectionDialog } from './MCPServerConnectionDialog';
 import {
@@ -35,7 +33,6 @@ export function MCPServerConnections() {
   const { t } = useTranslation('settings');
   const dispatch = useAppDispatch();
 
-  // RTK Query Hooks
   const { data: mcpConnections = [], refetch: refetchConnections } =
     useGetMCPConnectionsQuery();
   const [createConnection] = useCreateMCPConnectionMutation();
@@ -80,10 +77,18 @@ export function MCPServerConnections() {
     if (dialogOpen) {
       loadRuntimes();
     } else {
-      // Reset loading state when dialog closes
       setRuntimesLoading(false);
     }
   }, [dialogOpen]);
+
+  const openDocs = async () => {
+    try {
+      const { openUrl } = await import('@tauri-apps/plugin-opener');
+      await openUrl(DOCS_URL);
+    } catch (error) {
+      logger.error('Failed to open MCP docs link:', error);
+    }
+  };
 
   const handleAdd = () => {
     setEditingConnection(null);
@@ -113,7 +118,6 @@ export function MCPServerConnections() {
 
   const handleReload = async (connection: MCPServerConnection) => {
     try {
-      // Update status to "connecting" immediately before starting connection
       await invokeCommand(TauriCommands.UPDATE_MCP_SERVER_STATUS, {
         id: connection.id,
         status: 'connecting',
@@ -121,10 +125,8 @@ export function MCPServerConnections() {
         errorMessage: null,
       });
 
-      // Invalidate cache to update UI immediately
       refetchConnections();
 
-      // Start connection in background (don't await to avoid blocking UI)
       connectConnection({
         id: connection.id,
         url: connection.url,
@@ -158,10 +160,17 @@ export function MCPServerConnections() {
     }
   };
 
+  const handleToggle = (connection: MCPServerConnection, enabled: boolean) => {
+    if (enabled) {
+      void handleReload(connection);
+    } else {
+      void handleDisconnect(connection);
+    }
+  };
+
   const handleSave = async (connection: Omit<MCPServerConnection, 'id'>) => {
     try {
       if (editingConnection) {
-        // Update existing connection
         const result = await updateConnection({
           id: editingConnection.id,
           connection: {
@@ -175,14 +184,11 @@ export function MCPServerConnections() {
           },
         }).unwrap();
 
-        // Close dialog immediately
         setDialogOpen(false);
         setEditingConnection(null);
 
-        // Show success notification
         dispatch(showSuccess(t('connectionSaved'), t('mcpConnectionUpdated')));
 
-        // If connection needs reconnect
         if (result.needsReconnect) {
           connectConnection({
             id: editingConnection.id,
@@ -196,34 +202,26 @@ export function MCPServerConnections() {
           });
         }
 
-        return; // Exit early for updates
-      } else {
-        // Create new connection
-        const result = await createConnection(connection).unwrap();
-
-        // Close dialog immediately
-        setDialogOpen(false);
-        setEditingConnection(null);
-
-        // Show success notification
-        dispatch(
-          showSuccess(t('connectionSaved'), t('newMCPConnectionCreated'))
-        );
-
-        // Start async connection immediately in background
-        connectConnection({
-          id: result.id,
-          url: connection.url,
-          type: connection.type,
-          headers: connection.headers,
-          env_vars: connection.env_vars,
-          runtime_path: connection.runtime_path,
-        }).catch((error) => {
-          logger.error('Error connecting MCP server:', error);
-        });
-
-        return; // Exit early for new connections
+        return;
       }
+
+      const result = await createConnection(connection).unwrap();
+
+      setDialogOpen(false);
+      setEditingConnection(null);
+
+      dispatch(showSuccess(t('connectionSaved'), t('newMCPConnectionCreated')));
+
+      connectConnection({
+        id: result.id,
+        url: connection.url,
+        type: connection.type,
+        headers: connection.headers,
+        env_vars: connection.env_vars,
+        runtime_path: connection.runtime_path,
+      }).catch((error) => {
+        logger.error('Error connecting MCP server:', error);
+      });
     } catch (error) {
       logger.error('Error saving MCP connection:', error);
       dispatch(showError(t('cannotSaveConnection')));
@@ -231,30 +229,41 @@ export function MCPServerConnections() {
   };
 
   return (
-    <div className="space-y-6 h-full flex flex-col">
-      <SectionHeader>
-        <Button onClick={handleAdd} size="sm">
-          <Plus className="mr-2 size-4" />
+    <div className="space-y-5 pb-6">
+      <p className="-mt-1 text-sm leading-relaxed text-muted-foreground">
+        {t('mcpPageDescription')}{' '}
+        <button
+          type="button"
+          onClick={() => void openDocs()}
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          {t('learnMore')}
+        </button>
+      </p>
+
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-sm font-medium">{t('servers')}</h2>
+        <Button variant="secondary" size="sm" onClick={handleAdd}>
+          <Plus className="size-4" />
           {t('addConnection')}
         </Button>
-      </SectionHeader>
+      </div>
 
       {mcpConnections.length === 0 ? (
-        <EmptyState icon={Server} title={t('noConnections')} />
+        <p className="py-10 text-center text-sm text-muted-foreground">
+          {t('noConnections')}
+        </p>
       ) : (
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {mcpConnections.map((connection) => (
-              <MCPServerConnectionCard
-                key={connection.id}
-                connection={connection}
-                onEdit={handleEdit}
-                handleDisconnect={handleDisconnect}
-                handleReload={handleReload}
-              />
-            ))}
-          </div>
-        </ScrollArea>
+        <div className="flex flex-col gap-2">
+          {mcpConnections.map((connection) => (
+            <MCPServerConnectionCard
+              key={connection.id}
+              connection={connection}
+              onEdit={handleEdit}
+              onToggle={handleToggle}
+            />
+          ))}
+        </div>
       )}
 
       <MCPServerConnectionDialog

@@ -7,13 +7,19 @@ import {
   Wand2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import {
   setSettingsSection,
   type SettingsSection,
 } from '@/features/ui/state/uiSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { SidebarColumnRow } from '@/features/ui/ui/SidebarColumnRow';
+import {
+  SIDEBAR_ICON,
+  SIDEBAR_LIST,
+  sidebarItemClass,
+} from '@/features/ui/lib/sidebarStyles';
+import { SETTINGS_SIDEBAR_WIDTH } from '@/features/ui/hooks/useLayoutWidths';
 
 export function SettingsSidebar() {
   const { t } = useTranslation(['settings', 'common']);
@@ -24,69 +30,66 @@ export function SettingsSidebar() {
     {
       id: 'general' as const,
       label: t('generalSetting'),
-      icon: <SettingsIcon className="size-4" />,
+      icon: SettingsIcon,
     },
     {
       id: 'llm' as const,
       label: t('llmConnections'),
-      icon: <Network className="size-4" />,
+      icon: Network,
     },
     {
       id: 'mcp' as const,
       label: t('mcpServerConnections'),
-      icon: <Server className="size-4" />,
+      icon: Server,
     },
     {
       id: 'skills' as const,
       label: t('skills'),
-      icon: <Wand2 className="size-4" />,
+      icon: Wand2,
     },
     {
       id: 'usage' as const,
       label: 'Usage',
-      icon: <BarChart className="size-4" />,
+      icon: BarChart,
     },
     {
       id: 'about' as const,
       label: t('about'),
-      icon: <Info className="size-4" />,
+      icon: Info,
     },
   ];
 
   return (
-    <div className="w-64 lg:w-72 xl:w-80 border-r border-sidebar-border bg-sidebar flex flex-col shrink-0">
-      <ScrollArea className="flex-1">
-        <div className="p-3">
-          {sections.map((section) => (
-            <button
-              key={section.id}
-              onClick={() =>
-                dispatch(setSettingsSection(section.id as SettingsSection))
-              }
-              data-tour={section.id === 'llm' ? 'settings-llm-tab' : undefined}
-              className={cn(
-                'relative mb-1 w-full flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-[background-color,color,box-shadow] group',
-                'hover:bg-accent hover:text-accent-foreground',
-                selectedSection === section.id
-                  ? 'bg-accent/80 text-accent-foreground shadow-sm'
-                  : 'text-muted-foreground'
-              )}
-            >
-              {selectedSection === section.id && (
-                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-md" />
-              )}
-              <span
-                className={cn(
-                  'transition-transform duration-200',
-                  selectedSection === section.id && 'scale-110'
-                )}
-              >
-                {section.icon}
-              </span>
-              <span>{section.label}</span>
-            </button>
-          ))}
-        </div>
+    <div
+      className="flex h-full shrink-0 flex-col overflow-hidden bg-sidebar select-none"
+      style={{ width: SETTINGS_SIDEBAR_WIDTH }}
+    >
+      <ScrollArea className="min-h-0 flex-1">
+        <SidebarColumnRow className="pt-1 pb-2">
+          <nav className={SIDEBAR_LIST} aria-label={t('title')}>
+            {sections.map((section) => {
+              const Icon = section.icon;
+              const isActive = selectedSection === section.id;
+
+              return (
+                <button
+                  key={section.id}
+                  type="button"
+                  onClick={() =>
+                    dispatch(setSettingsSection(section.id as SettingsSection))
+                  }
+                  data-tour={
+                    section.id === 'llm' ? 'settings-llm-tab' : undefined
+                  }
+                  className={sidebarItemClass(isActive)}
+                >
+                  <Icon className={SIDEBAR_ICON} />
+                  <span className="truncate">{section.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </SidebarColumnRow>
       </ScrollArea>
     </div>
   );

@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react';
-import { Plus, Network } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/atoms/button/button';
-import { EmptyState } from '@/ui/atoms/empty-state';
-import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { useAppDispatch } from '@/app/hooks';
+import { DOCS_URL } from '@/features/settings/lib/constants';
 import {
   useGetLLMConnectionsQuery,
   useCreateLLMConnectionMutation,
@@ -18,7 +17,6 @@ import {
   showSuccess,
 } from '@/features/notifications/state/notificationSlice';
 import { logger } from '@/lib/logger';
-import { SectionHeader } from '@/ui/molecules/SectionHeader';
 import { LLMConnectionCard } from './LLMConnectionCard';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { LLMConnectionDialog } from './LLMConnectionDialog';
@@ -27,7 +25,6 @@ export function LLMConnections() {
   const { t } = useTranslation('settings');
   const dispatch = useAppDispatch();
 
-  // Use RTK Query hooks
   const { data: llmConnections = [] } = useGetLLMConnectionsQuery();
   const [createConnection] = useCreateLLMConnectionMutation();
   const [updateConnection] = useUpdateLLMConnectionMutation();
@@ -41,6 +38,15 @@ export function LLMConnections() {
   const [connectionToDelete, setConnectionToDelete] = useState<string | null>(
     null
   );
+
+  const openDocs = async () => {
+    try {
+      const { openUrl } = await import('@tauri-apps/plugin-opener');
+      await openUrl(DOCS_URL);
+    } catch (error) {
+      logger.error('Failed to open LLM docs link:', error);
+    }
+  };
 
   const handleAdd = useCallback(() => {
     setEditingConnection(null);
@@ -75,7 +81,6 @@ export function LLMConnections() {
           id: connectionId,
           enabled: !currentEnabled,
         }).unwrap();
-        // No toast notification for toggle action
       } catch (error) {
         logger.error('Error toggling LLM connection:', error);
         dispatch(showError(t('cannotToggleConnection')));
@@ -88,7 +93,6 @@ export function LLMConnections() {
     async (connection: Omit<LLMConnection, 'id'>) => {
       try {
         if (editingConnection) {
-          // Update existing connection
           await updateConnection({
             id: editingConnection.id,
             connection: {
@@ -102,7 +106,6 @@ export function LLMConnections() {
 
           dispatch(showSuccess(t('connectionSaved'), t('connectionUpdated')));
         } else {
-          // Create new connection
           await createConnection(connection).unwrap();
           dispatch(
             showSuccess(t('connectionSaved'), t('newConnectionCreated'))
@@ -128,29 +131,46 @@ export function LLMConnections() {
   }, [editingConnection]);
 
   return (
-    <div className="space-y-6">
-      <SectionHeader>
-        <Button onClick={handleAdd} size="sm" data-tour="llm-add-btn">
-          <Plus className="mr-2 size-4" />
+    <div className="space-y-5 pb-6">
+      <p className="-mt-1 text-sm leading-relaxed text-muted-foreground">
+        {t('llmPageDescription')}{' '}
+        <button
+          type="button"
+          onClick={() => void openDocs()}
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          {t('learnMore')}
+        </button>
+      </p>
+
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-sm font-medium">{t('connections')}</h2>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleAdd}
+          data-tour="llm-add-btn"
+        >
+          <Plus className="size-4" />
           {t('addConnection')}
         </Button>
-      </SectionHeader>
+      </div>
 
       {llmConnections.length === 0 ? (
-        <EmptyState icon={Network} title={t('noConnections')} />
+        <p className="py-10 text-center text-sm text-muted-foreground">
+          {t('noConnections')}
+        </p>
       ) : (
-        <ScrollArea className="h-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {llmConnections.map((connection) => (
-              <LLMConnectionCard
-                key={connection.id}
-                connection={connection}
-                onEdit={handleEdit}
-                onToggleEnabled={handleToggleEnabled}
-              />
-            ))}
-          </div>
-        </ScrollArea>
+        <div className="flex flex-col gap-2">
+          {llmConnections.map((connection) => (
+            <LLMConnectionCard
+              key={connection.id}
+              connection={connection}
+              onEdit={handleEdit}
+              onToggleEnabled={handleToggleEnabled}
+            />
+          ))}
+        </div>
       )}
 
       <LLMConnectionDialog

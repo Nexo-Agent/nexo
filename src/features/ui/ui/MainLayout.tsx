@@ -13,6 +13,11 @@ import { ChatRightPanel } from '@/features/chat/ui/ChatRightPanel';
 import { KeyboardShortcutsDialog } from '@/features/shortcuts/ui/KeyboardShortcutsDialog';
 import { TitleBar } from '@/features/ui/ui/TitleBar';
 import { ResizableRightPanel } from '@/features/ui/ui/ResizableRightPanel';
+import {
+  useRightPanelWidth,
+  useSidebarWidth,
+  SETTINGS_SIDEBAR_WIDTH,
+} from '@/features/ui/hooks/useLayoutWidths';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   toggleSidebar,
@@ -41,10 +46,22 @@ export function MainLayout() {
   const workspaceSettingsOpen = useAppSelector(
     (state) => state.ui.workspaceSettingsOpen
   );
+  const sidebarWidth = useSidebarWidth();
+  const rightPanelWidth = useRightPanelWidth();
+  const isChatSidebarCollapsed = activePage === 'chat' && isSidebarCollapsed;
+  const sidebarZoneWidth = isChatSidebarCollapsed
+    ? undefined
+    : activePage === 'chat'
+      ? sidebarWidth
+      : SETTINGS_SIDEBAR_WIDTH;
 
   return (
     <div className="flex h-screen flex-col bg-background select-none">
       <TitleBar
+        sidebarZoneWidth={sidebarZoneWidth}
+        isSidebarCollapsed={isChatSidebarCollapsed}
+        rightPanelWidth={rightPanelWidth}
+        isRightPanelOpen={isRightPanelOpen}
         leftContent={
           activePage === 'chat' ? (
             <Button

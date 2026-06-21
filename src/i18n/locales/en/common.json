@@ -43,6 +43,8 @@
   "closeDialog": "Close dialog",
   "collapseRightPanel": "Collapse right panel",
   "collapseSidebar": "Collapse sidebar",
+  "sidebarResizerCollapse": "Click to collapse {{shortcut}}",
+  "sidebarResizerDrag": "Drag to resize",
   "notes": "Notes",
   "skills": "Skills",
   "chatInfo": "Chat Info",

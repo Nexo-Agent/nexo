@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useAppUpdate } from '../UpdateProvider';
 
 const updateLabelClass =
-  'flex w-full items-center justify-center gap-2 px-2 py-2 text-[13px] font-medium';
+  'flex w-full items-center justify-center gap-2 px-2 py-1 text-sm';
 
 export function SidebarUpdateButton() {
   const { t } = useTranslation(['common', 'settings']);
@@ -48,7 +48,7 @@ export function SidebarUpdateButton() {
         'disabled:pointer-events-none',
         isUpdating
           ? 'bg-muted ring-1 ring-primary/20'
-          : 'bg-primary text-primary-foreground hover:bg-primary/90'
+          : 'bg-primary font-medium text-primary-foreground hover:bg-primary/90'
       )}
     >
       {isUpdating ? (

@@ -28,7 +28,6 @@ vi.mock('@/app/hooks', () => ({
   useAppDispatch: vi.fn(),
 }));
 
-// Mock useLogger
 vi.mock('@/hooks/useLogger', () => ({
   useLogger: () => ({
     info: vi.fn(),
@@ -58,9 +57,8 @@ vi.mock('lucide-react', () => ({
   Plus: () => <div data-testid="icon-Plus" />,
   Trash2: () => <div data-testid="icon-Trash2" />,
   AlertCircle: () => <div data-testid="icon-AlertCircle" />,
-  RefreshCw: () => <div data-testid="icon-RefreshCw" />,
+  Settings: () => <div data-testid="icon-Settings" />,
   Server: () => <div data-testid="icon-Server" />,
-  PowerOff: () => <div data-testid="icon-PowerOff" />,
   XIcon: () => <div data-testid="icon-XIcon" />,
   ChevronDownIcon: () => <div data-testid="icon-ChevronDownIcon" />,
   ChevronUpIcon: () => <div data-testid="icon-ChevronUpIcon" />,
@@ -74,13 +72,6 @@ vi.mock('@/lib/tauri', () => ({
     GET_NODE_RUNTIMES_STATUS: 'get_node_runtimes_status',
     UPDATE_MCP_SERVER_STATUS: 'update_mcp_server_status',
   },
-}));
-
-// Mock atoms that might cause issues in tests
-vi.mock('@/ui/atoms/scroll-area', () => ({
-  ScrollArea: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="scroll-area">{children}</div>
-  ),
 }));
 
 describe('MCPServerConnections', () => {
@@ -145,7 +136,8 @@ describe('MCPServerConnections', () => {
   it('renders correctly with connections', () => {
     render(<MCPServerConnections />);
     expect(screen.getByText('Test MCP')).toBeInTheDocument();
-    expect(screen.getByText('test_tool')).toBeInTheDocument();
+    expect(screen.getByText('servers')).toBeInTheDocument();
+    expect(screen.getByText('mcpPageDescription')).toBeInTheDocument();
   });
 
   it('renders empty state when no connections', () => {
@@ -166,22 +158,26 @@ describe('MCPServerConnections', () => {
     expect(screen.getByText('addNewConnection')).toBeInTheDocument();
   });
 
-  it('opens edit connection dialog when clicking on connection card', async () => {
+  it('opens edit connection dialog when clicking settings button', async () => {
     const user = userEvent.setup();
     render(<MCPServerConnections />);
 
-    await user.click(screen.getByText('Test MCP'));
+    await user.click(screen.getByLabelText('editConnection'));
 
     expect(screen.getByText('editConnection')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test MCP')).toBeInTheDocument();
   });
 
-  it('handles reload connection', async () => {
+  it('handles connect when toggling switch on', async () => {
+    (useGetMCPConnectionsQuery as Mock).mockReturnValue({
+      data: [{ ...mockConnections[0], status: 'disconnected' }],
+      refetch: mockRefetch,
+    });
+
     const user = userEvent.setup();
     render(<MCPServerConnections />);
 
-    const reloadButton = screen.getByTitle('reloadConnection');
-    await user.click(reloadButton);
+    await user.click(screen.getByRole('switch'));
 
     expect(invokeCommand).toHaveBeenCalledWith(
       'update_mcp_server_status',
@@ -191,12 +187,11 @@ describe('MCPServerConnections', () => {
     expect(mockConnect).toHaveBeenCalled();
   });
 
-  it('handles disconnect connection', async () => {
+  it('handles disconnect when toggling switch off', async () => {
     const user = userEvent.setup();
     render(<MCPServerConnections />);
 
-    const disconnectButton = screen.getByTitle('disconnectConnection');
-    await user.click(disconnectButton);
+    await user.click(screen.getByRole('switch'));
 
     expect(mockDisconnect).toHaveBeenCalledWith('1');
     expect(mockDispatch).toHaveBeenCalledWith(
@@ -208,16 +203,11 @@ describe('MCPServerConnections', () => {
     const user = userEvent.setup();
     render(<MCPServerConnections />);
 
-    // Open edit dialog
-    await user.click(screen.getByText('Test MCP'));
-
-    // Click delete in edit dialog
+    await user.click(screen.getByLabelText('editConnection'));
     await user.click(screen.getByText('delete'));
 
-    // Confirm in delete dialog
     expect(screen.getByText(/deleteConnectionConfirm/)).toBeInTheDocument();
 
-    // There might be multiple 'delete' buttons (one in edit dialog, one in confirm dialog)
     const deleteButtons = screen.getAllByText('delete');
     await user.click(deleteButtons[deleteButtons.length - 1]);
 

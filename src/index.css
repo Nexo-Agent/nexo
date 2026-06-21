@@ -119,7 +119,7 @@
   --info: #1b1f27;
 
   /* Mapping to Functional Variables (Tailwind) */
-  --background: var(--bg-base);
+  --background: #f4f5f8;
   --foreground: var(--text-primary);
 
   --card: var(--bg-surface);
@@ -147,11 +147,11 @@
   --input: var(--border-subtle);
   --ring: var(--accent-primary);
 
-  --sidebar: var(--bg-surface);
+  --sidebar: #e6e9ef;
   --sidebar-foreground: var(--text-primary);
   --sidebar-primary: var(--accent-primary);
   --sidebar-primary-foreground: #f6f7f9;
-  --sidebar-accent: var(--bg-base);
+  --sidebar-accent: #d8dde6;
   --sidebar-accent-foreground: var(--text-primary);
   --sidebar-border: var(--border-subtle);
   --sidebar-ring: var(--accent-primary);
@@ -231,7 +231,7 @@
   --error: #f85149;
   --info: #58a6ff;
 
-  --background: var(--bg-base);
+  --background: #08090c;
   --foreground: var(--text-primary);
 
   --card: var(--bg-surface);
@@ -260,11 +260,11 @@
   --input: var(--border-subtle);
   --ring: var(--accent-primary);
 
-  --sidebar: #0f1115;
+  --sidebar: #141720;
   --sidebar-foreground: var(--text-primary);
   --sidebar-primary: var(--accent-primary);
   --sidebar-primary-foreground: #e6e8ee;
-  --sidebar-accent: var(--bg-surface);
+  --sidebar-accent: #1c2030;
   --sidebar-accent-foreground: var(--text-primary);
   --sidebar-border: var(--border-subtle);
   --sidebar-ring: var(--accent-primary);

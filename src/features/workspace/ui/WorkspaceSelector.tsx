@@ -53,23 +53,16 @@ export function WorkspaceSelector({
           className={cn(
             buttonVariants({ variant: 'ghost' }),
             compact
-              ? 'h-8 w-full justify-between gap-2 px-2 py-1'
+              ? 'h-auto w-full justify-between gap-2 rounded-md py-1 text-sm font-normal text-sidebar-foreground/80 hover:bg-transparent hover:text-sidebar-foreground'
               : 'h-auto gap-1.5 px-2 py-1'
           )}
           data-tour="workspace-selector"
         >
-          <div className="flex min-w-0 items-center gap-2">
-            <div className="flex size-5 shrink-0 items-center justify-center rounded bg-primary text-[10px] font-medium text-primary-foreground">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="flex size-3.5 shrink-0 items-center justify-center rounded-sm bg-primary text-[9px] font-medium text-primary-foreground">
               {selectedWorkspace.name.charAt(0).toUpperCase()}
             </div>
-            <span
-              className={cn(
-                'truncate font-medium',
-                compact ? 'text-xs' : 'text-sm'
-              )}
-            >
-              {selectedWorkspace.name}
-            </span>
+            <span className="truncate text-sm">{selectedWorkspace.name}</span>
           </div>
           <ChevronDown className="size-3.5 shrink-0 opacity-50" />
         </DropdownMenuTrigger>

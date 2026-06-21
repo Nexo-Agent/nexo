@@ -1,9 +1,12 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useAppSelector } from '@/app/hooks';
 import { cn } from '@/lib/utils';
+import {
+  DEFAULT_RIGHT_PANEL_WIDTH,
+  usePersistRightPanelWidth,
+} from '@/features/ui/hooks/useLayoutWidths';
 
 const MIN_RIGHT_AREA_WIDTH = 300;
-const DEFAULT_RIGHT_AREA_WIDTH = 400;
 
 interface ResizableRightPanelProps {
   children: ReactNode;
@@ -13,10 +16,11 @@ export function ResizableRightPanel({ children }: ResizableRightPanelProps) {
   const isRightPanelOpen = useAppSelector((state) => state.ui.isRightPanelOpen);
   const [rightAreaWidth, setRightAreaWidth] = useState(() => {
     const saved = localStorage.getItem('rightAreaWidth');
-    const width = saved ? parseInt(saved, 10) : DEFAULT_RIGHT_AREA_WIDTH;
+    const width = saved ? parseInt(saved, 10) : DEFAULT_RIGHT_PANEL_WIDTH;
     const maxWidth = window.innerWidth / 2;
     return Math.min(width, maxWidth);
   });
+  const persistRightPanelWidth = usePersistRightPanelWidth();
   const [resizing, setResizing] = useState(false);
 
   const startResizing = useCallback((e: React.MouseEvent) => {
@@ -32,19 +36,28 @@ export function ResizableRightPanel({ children }: ResizableRightPanelProps) {
     document.body.style.userSelect = '';
   }, []);
 
-  const resize = useCallback((e: MouseEvent) => {
-    let newWidth = window.innerWidth - e.clientX;
-    const maxWidth = window.innerWidth / 2;
-    if (newWidth < MIN_RIGHT_AREA_WIDTH) newWidth = MIN_RIGHT_AREA_WIDTH;
-    if (newWidth > maxWidth) newWidth = maxWidth;
-    setRightAreaWidth(newWidth);
-    localStorage.setItem('rightAreaWidth', newWidth.toString());
-  }, []);
+  const resize = useCallback(
+    (e: MouseEvent) => {
+      let newWidth = window.innerWidth - e.clientX;
+      const maxWidth = window.innerWidth / 2;
+      if (newWidth < MIN_RIGHT_AREA_WIDTH) newWidth = MIN_RIGHT_AREA_WIDTH;
+      if (newWidth > maxWidth) newWidth = maxWidth;
+      setRightAreaWidth(newWidth);
+      persistRightPanelWidth(newWidth);
+    },
+    [persistRightPanelWidth]
+  );
 
   const handleWindowResize = useCallback(() => {
     const maxWidth = window.innerWidth / 2;
-    setRightAreaWidth((prev) => Math.min(prev, maxWidth));
-  }, []);
+    setRightAreaWidth((prev) => {
+      const next = Math.min(prev, maxWidth);
+      if (next !== prev) {
+        persistRightPanelWidth(next);
+      }
+      return next;
+    });
+  }, [persistRightPanelWidth]);
 
   useEffect(() => {
     if (!resizing) return;
@@ -65,9 +78,9 @@ export function ResizableRightPanel({ children }: ResizableRightPanelProps) {
   return (
     <div
       className={cn(
-        'relative shrink-0 overflow-hidden border-l border-border bg-sidebar transition-[width] duration-300 ease-in-out',
+        'relative shrink-0 overflow-hidden bg-sidebar transition-[width] duration-300 ease-in-out',
         resizing && 'transition-none duration-0',
-        !isRightPanelOpen ? 'w-0 border-l-0' : ''
+        !isRightPanelOpen ? 'w-0' : ''
       )}
       style={{ width: isRightPanelOpen ? rightAreaWidth : 0 }}
     >

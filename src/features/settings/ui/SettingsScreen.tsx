@@ -12,7 +12,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 import { useAppSelector } from '@/app/hooks';
-import { Separator } from '@/ui/atoms/separator';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 
 const LLMConnections = lazy(() =>
@@ -97,35 +96,30 @@ export function SettingsScreen() {
     };
 
     return (
-      <div className="max-w-3xl mx-auto pb-10 space-y-8 animate-in fade-in duration-500">
-        <div className="flex flex-col items-center text-center space-y-4 pt-4">
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-secondary/20 rounded-3xl blur opacity-40 group-hover:opacity-75 transition duration-500" />
-            <div className="relative flex items-center justify-center size-24 rounded-2xl bg-background shadow-xl ring-1 ring-border/50">
-              <img
-                src="/icon.svg"
-                alt="Nexo Logo"
-                className="size-14 drop-shadow-sm"
-              />
-            </div>
+      <div className="mx-auto max-w-3xl space-y-8 pb-8 animate-in fade-in duration-500">
+        <div className="flex flex-col items-center space-y-4 pt-2 text-center">
+          <div className="flex size-20 items-center justify-center rounded-2xl bg-background">
+            <img
+              src="/icon.svg"
+              alt="Nexo Logo"
+              className="size-12 drop-shadow-sm"
+            />
           </div>
           <div className="space-y-2">
-            <h3 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
+            <h3 className="text-2xl font-semibold tracking-tight">
               {tCommon('aboutTitle', { defaultValue: 'Nexo Agent' })}
             </h3>
-            <p className="text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
+            <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground">
               {tSettings('aboutDescription') || tCommon('appDescription')}
             </p>
           </div>
         </div>
 
-        <Separator className="opacity-50" />
-
-        <div className="space-y-4">
-          <h4 className="font-semibold text-sm text-foreground/80 uppercase tracking-wider px-1">
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-foreground/80">
             {tCommon('keyFeatures', { defaultValue: 'Core Capabilities' })}
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FeatureCard
               icon={<Network className="size-5" />}
               title="Multi-LLM Support"
@@ -149,11 +143,11 @@ export function SettingsScreen() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <h4 className="font-semibold text-sm text-foreground/80 uppercase tracking-wider px-1">
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-foreground/80">
             {tCommon('resources', { defaultValue: 'Resources' })}
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <ResourceButton
               icon={<Github className="size-4" />}
               label="GitHub"
@@ -172,7 +166,7 @@ export function SettingsScreen() {
           </div>
         </div>
 
-        <div className="pt-8 text-center space-y-1">
+        <div className="space-y-1 pt-4 text-center">
           <p className="text-xs text-muted-foreground">
             Built with Tauri, React & Rust
           </p>
@@ -184,19 +178,19 @@ export function SettingsScreen() {
     );
   }
 
+  const sectionLabel = sections.find((s) => s.id === selectedSection)?.label;
+
   return (
-    <div className="flex h-full bg-background text-foreground">
+    <div className="flex h-full min-h-0 overflow-hidden">
       <SettingsSidebar />
-      <div className="flex-1 flex flex-col">
-        <ScrollArea className="flex-1">
-          <div className="p-6 max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto w-full space-y-6">
-            <div className="mb-6">
-              {selectedSection !== 'about' && (
-                <h1 className="text-2xl font-bold">
-                  {sections.find((s) => s.id === selectedSection)?.label}
-                </h1>
-              )}
-            </div>
+      <div className="flex min-w-0 flex-1 flex-col bg-background">
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="mx-auto w-full max-w-3xl px-4 py-4 lg:px-6">
+            {selectedSection !== 'about' && sectionLabel ? (
+              <h1 className="mb-5 text-lg font-semibold tracking-tight">
+                {sectionLabel}
+              </h1>
+            ) : null}
             <Suspense fallback={<SectionLoader />}>{renderContent()}</Suspense>
           </div>
         </ScrollArea>

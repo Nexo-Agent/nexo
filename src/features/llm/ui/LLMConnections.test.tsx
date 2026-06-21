@@ -54,6 +54,7 @@ vi.mock('lucide-react', () => ({
   CheckCircle2: () => <div data-testid="icon-CheckCircle2" />,
   XCircle: () => <div data-testid="icon-XCircle" />,
   Network: () => <div data-testid="icon-Network" />,
+  Settings: () => <div data-testid="icon-Settings" />,
   XIcon: () => <div data-testid="icon-XIcon" />,
   ChevronDownIcon: () => <div data-testid="icon-ChevronDownIcon" />,
   ChevronUpIcon: () => <div data-testid="icon-ChevronUpIcon" />,
@@ -133,7 +134,9 @@ describe('LLMConnections', () => {
   it('renders correctly with connections', () => {
     render(<LLMConnections />);
     expect(screen.getByText('Test Connection')).toBeInTheDocument();
-    expect(screen.getByText('openai')).toBeInTheDocument();
+    expect(screen.getByText(/OpenAI/)).toBeInTheDocument();
+    expect(screen.getByText('connections')).toBeInTheDocument();
+    expect(screen.getByText('llmPageDescription')).toBeInTheDocument();
   });
 
   it('renders empty state when no connections', () => {
@@ -154,11 +157,11 @@ describe('LLMConnections', () => {
     expect(screen.getByText('addNewConnection')).toBeInTheDocument();
   });
 
-  it('opens edit connection dialog when clicking on connection', async () => {
+  it('opens edit connection dialog when clicking settings button', async () => {
     const user = userEvent.setup();
     render(<LLMConnections />);
 
-    await user.click(screen.getByText('Test Connection'));
+    await user.click(screen.getByLabelText('editConnection'));
 
     expect(screen.getByText('editConnection')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test Connection')).toBeInTheDocument();
@@ -182,7 +185,7 @@ describe('LLMConnections', () => {
     render(<LLMConnections />);
 
     // Click edit first
-    await user.click(screen.getByText('Test Connection'));
+    await user.click(screen.getByLabelText('editConnection'));
 
     // Click delete in dialog
     await user.click(screen.getByText('delete'));
