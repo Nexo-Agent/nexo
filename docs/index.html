@@ -848,6 +848,328 @@
         color: var(--accent-bright);
       }
 
+      /* Showcase — video & screenshots */
+      .showcase-section {
+        padding-top: 2rem;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          rgba(10, 15, 26, 0.55) 40%,
+          transparent
+        );
+      }
+
+      .video-frame {
+        position: relative;
+        margin-bottom: 2rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(96, 165, 250, 0.18);
+        background: var(--bg-elevated);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+      }
+
+      .video-frame::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at 50% 0%,
+          rgba(59, 130, 246, 0.12),
+          transparent 60%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .video-frame iframe {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+
+      .screenshot-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr;
+      }
+
+      .screenshot-card {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .screenshot-card:hover {
+        transform: translateY(-4px);
+      }
+
+      .screenshot-thumb {
+        position: relative;
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: zoom-in;
+        font: inherit;
+        color: inherit;
+        text-align: left;
+      }
+
+      .screenshot-thumb img {
+        width: 100%;
+        height: auto;
+        border-radius: var(--radius) var(--radius) 0 0;
+        border-bottom: 1px solid var(--border);
+        transition: opacity 0.25s ease;
+      }
+
+      .screenshot-thumb:hover img {
+        opacity: 0.92;
+      }
+
+      .screenshot-thumb:focus-visible {
+        outline: 2px solid var(--accent-bright);
+        outline-offset: 2px;
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+
+      .screenshot-zoom-hint {
+        position: absolute;
+        right: 0.75rem;
+        bottom: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        border: 1px solid rgba(96, 165, 250, 0.3);
+        background: rgba(8, 12, 22, 0.82);
+        backdrop-filter: blur(8px);
+        color: var(--text-primary);
+        font-size: 0.75rem;
+        font-weight: 500;
+        opacity: 0;
+        transform: translateY(4px);
+        transition:
+          opacity 0.25s ease,
+          transform 0.25s ease;
+        pointer-events: none;
+      }
+
+      .screenshot-thumb:hover .screenshot-zoom-hint,
+      .screenshot-thumb:focus-visible .screenshot-zoom-hint {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .screenshot-zoom-hint svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        color: var(--accent-bright);
+      }
+
+      .screenshot-caption {
+        padding: 1.125rem 1.25rem 1.25rem;
+      }
+
+      .screenshot-caption h3 {
+        margin: 0 0 0.35rem;
+        font-family: var(--font-display);
+        font-size: 1rem;
+        letter-spacing: -0.02em;
+      }
+
+      .screenshot-caption p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.55;
+      }
+
+      /* Screenshot lightbox */
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.3s ease,
+          visibility 0.3s ease;
+      }
+
+      .lightbox.is-open {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .lightbox-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(3, 5, 8, 0.88);
+        backdrop-filter: blur(12px);
+      }
+
+      .lightbox-panel {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        width: min(100%, 72rem);
+        max-height: calc(100vh - 2rem);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(96, 165, 250, 0.22);
+        background: linear-gradient(
+          165deg,
+          rgba(17, 24, 39, 0.98),
+          rgba(8, 12, 22, 0.96)
+        );
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transform: scale(0.96) translateY(8px);
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .lightbox.is-open .lightbox-panel {
+        transform: scale(1) translateY(0);
+      }
+
+      .lightbox-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .lightbox-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 0.9375rem;
+        letter-spacing: -0.02em;
+      }
+
+      .lightbox-counter {
+        color: var(--text-muted);
+        font-size: 0.8125rem;
+        white-space: nowrap;
+      }
+
+      .lightbox-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition:
+          border-color 0.2s ease,
+          color 0.2s ease,
+          background 0.2s ease;
+      }
+
+      .lightbox-close:hover {
+        border-color: var(--border-hover);
+        color: var(--text-primary);
+        background: rgba(59, 130, 246, 0.08);
+      }
+
+      .lightbox-close svg {
+        width: 1.1rem;
+        height: 1.1rem;
+      }
+
+      .lightbox-stage {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 0;
+        padding: 1rem;
+        overflow: auto;
+      }
+
+      .lightbox-image {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        max-height: calc(100vh - 10rem);
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+      }
+
+      .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(8, 12, 22, 0.9);
+        backdrop-filter: blur(8px);
+        color: var(--text-primary);
+        cursor: pointer;
+        transform: translateY(-50%);
+        transition:
+          border-color 0.2s ease,
+          background 0.2s ease;
+      }
+
+      .lightbox-nav:hover {
+        border-color: var(--border-hover);
+        background: rgba(59, 130, 246, 0.12);
+      }
+
+      .lightbox-nav svg {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      .lightbox-prev {
+        left: 1rem;
+      }
+
+      .lightbox-next {
+        right: 1rem;
+      }
+
+      @media (max-width: 640px) {
+        .lightbox-nav {
+          width: 2.25rem;
+          height: 2.25rem;
+        }
+
+        .lightbox-prev {
+          left: 0.5rem;
+        }
+
+        .lightbox-next {
+          right: 0.5rem;
+        }
+      }
+
       /* Pillars */
       .pillars {
         display: grid;
@@ -1235,6 +1557,10 @@
           grid-template-columns: repeat(4, 1fr);
         }
 
+        .screenshot-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
         .footer-grid {
           flex-direction: row;
           align-items: center;
@@ -1284,6 +1610,7 @@
           <span>Nexo</span>
         </a>
         <nav class="nav-links" aria-label="Primary">
+          <a href="#showcase">Demo</a>
           <a href="#features">Features</a>
           <a href="#workflow">Workflow</a>
           <a href="#use-cases">Use cases</a>
@@ -1339,6 +1666,10 @@
               >
                 <i data-lucide="download"></i>
                 Get the latest release
+              </a>
+              <a class="btn btn-ghost" href="#showcase">
+                <i data-lucide="play-circle"></i>
+                Watch demo
               </a>
               <a
                 class="btn btn-ghost"
@@ -1416,6 +1747,123 @@
               <strong>MIT</strong>
               <span>Open source license</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="showcase" class="showcase-section">
+        <div class="container">
+          <div class="section-header reveal">
+            <div class="section-label">
+              <i data-lucide="monitor-play"></i>
+              See it in action
+            </div>
+            <h2>Watch Nexo work in the real world</h2>
+            <p>
+              A quick walkthrough of the desktop workspace, plus screenshots of
+              multi-provider setup, rich artifacts, and live HTML previews.
+            </p>
+          </div>
+
+          <div class="video-frame reveal">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/sAAteUcoOzE"
+              title="Nexo demo video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              loading="lazy"
+              referrerpolicy="strict-origin-when-cross-origin"
+            ></iframe>
+          </div>
+
+          <div class="screenshot-grid">
+            <figure class="glass-card screenshot-card reveal">
+              <button
+                type="button"
+                class="screenshot-thumb"
+                data-lightbox
+                data-src="screenshots/Variance%20LLM%20providers.png"
+                data-title="Any LLM provider"
+                aria-label="View full size: Any LLM provider"
+              >
+                <img
+                  src="screenshots/Variance%20LLM%20providers.png"
+                  alt="Nexo LLM provider connection dialog showing OpenAI, Gemini, Anthropic, Ollama, and more"
+                  width="1280"
+                  height="720"
+                  loading="lazy"
+                />
+                <span class="screenshot-zoom-hint">
+                  <i data-lucide="expand"></i>
+                  View full size
+                </span>
+              </button>
+              <figcaption class="screenshot-caption">
+                <h3>Any LLM provider</h3>
+                <p>
+                  Connect OpenAI, Gemini, Anthropic, Ollama, OpenRouter, and
+                  dozens more with your own API keys — no vendor lock-in.
+                </p>
+              </figcaption>
+            </figure>
+            <figure class="glass-card screenshot-card reveal reveal-delay-1">
+              <button
+                type="button"
+                class="screenshot-thumb"
+                data-lightbox
+                data-src="screenshots/Markdown%20artifact%20-%20Latex%20render%20for%20scientific.png"
+                data-title="Rich markdown artifacts"
+                aria-label="View full size: Rich markdown artifacts"
+              >
+                <img
+                  src="screenshots/Markdown%20artifact%20-%20Latex%20render%20for%20scientific.png"
+                  alt="Nexo markdown artifact with LaTeX equations rendered for scientific content"
+                  width="1280"
+                  height="720"
+                  loading="lazy"
+                />
+                <span class="screenshot-zoom-hint">
+                  <i data-lucide="expand"></i>
+                  View full size
+                </span>
+              </button>
+              <figcaption class="screenshot-caption">
+                <h3>Rich markdown artifacts</h3>
+                <p>
+                  Generate structured outputs with LaTeX math, tables, and
+                  scientific notation — rendered inline as you iterate.
+                </p>
+              </figcaption>
+            </figure>
+            <figure class="glass-card screenshot-card reveal reveal-delay-2">
+              <button
+                type="button"
+                class="screenshot-thumb"
+                data-lightbox
+                data-src="screenshots/HTML%20artifact%20-%20Visualbility.png"
+                data-title="Live HTML previews"
+                aria-label="View full size: Live HTML previews"
+              >
+                <img
+                  src="screenshots/HTML%20artifact%20-%20Visualbility.png"
+                  alt="Nexo HTML artifact previewed in the built-in browser panel"
+                  width="1280"
+                  height="720"
+                  loading="lazy"
+                />
+                <span class="screenshot-zoom-hint">
+                  <i data-lucide="expand"></i>
+                  View full size
+                </span>
+              </button>
+              <figcaption class="screenshot-caption">
+                <h3>Live HTML previews</h3>
+                <p>
+                  Build dashboards, charts, and UI mocks as artifacts and preview
+                  them instantly in the built-in browser panel.
+                </p>
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
@@ -1999,6 +2447,48 @@
       </div>
     </footer>
 
+    <div
+      class="lightbox"
+      id="screenshot-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="lightbox-title"
+      hidden
+    >
+      <div class="lightbox-backdrop" data-lightbox-close></div>
+      <button
+        type="button"
+        class="lightbox-nav lightbox-prev"
+        aria-label="Previous screenshot"
+      >
+        <i data-lucide="chevron-left"></i>
+      </button>
+      <button
+        type="button"
+        class="lightbox-nav lightbox-next"
+        aria-label="Next screenshot"
+      >
+        <i data-lucide="chevron-right"></i>
+      </button>
+      <div class="lightbox-panel">
+        <div class="lightbox-toolbar">
+          <p class="lightbox-title" id="lightbox-title"></p>
+          <span class="lightbox-counter" id="lightbox-counter"></span>
+          <button
+            type="button"
+            class="lightbox-close"
+            aria-label="Close preview"
+            data-lightbox-close
+          >
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="lightbox-stage">
+          <img class="lightbox-image" id="lightbox-image" alt="" />
+        </div>
+      </div>
+    </div>
+
     <script>
       lucide.createIcons();
 
@@ -2263,6 +2753,93 @@
       }
 
       loadPlatformDownloadLinks();
+
+      (function setupScreenshotLightbox() {
+        const lightbox = document.getElementById('screenshot-lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxCounter = document.getElementById('lightbox-counter');
+        const triggers = Array.from(document.querySelectorAll('[data-lightbox]'));
+        const prevButton = lightbox.querySelector('.lightbox-prev');
+        const nextButton = lightbox.querySelector('.lightbox-next');
+        let activeIndex = 0;
+        let lastFocusedElement = null;
+
+        if (!lightbox || !triggers.length) return;
+
+        const renderSlide = (index) => {
+          const trigger = triggers[index];
+          if (!trigger) return;
+
+          activeIndex = index;
+          const img = trigger.querySelector('img');
+          lightboxImage.src = trigger.dataset.src;
+          lightboxImage.alt = img?.alt || trigger.dataset.title || '';
+          lightboxTitle.textContent = trigger.dataset.title || '';
+          lightboxCounter.textContent = `${index + 1} / ${triggers.length}`;
+        };
+
+        const openLightbox = (index) => {
+          lastFocusedElement = document.activeElement;
+          renderSlide(index);
+          lightbox.hidden = false;
+          requestAnimationFrame(() => {
+            lightbox.classList.add('is-open');
+          });
+          document.body.style.overflow = 'hidden';
+          lucide.createIcons();
+          lightbox.querySelector('.lightbox-close')?.focus();
+        };
+
+        const closeLightbox = () => {
+          if (lightbox.hidden) return;
+
+          lightbox.classList.remove('is-open');
+          document.body.style.overflow = '';
+
+          window.setTimeout(() => {
+            if (lightbox.classList.contains('is-open')) return;
+            lightbox.hidden = true;
+            lightboxImage.removeAttribute('src');
+            lastFocusedElement?.focus();
+          }, 300);
+        };
+
+        const showRelative = (delta) => {
+          const nextIndex = (activeIndex + delta + triggers.length) % triggers.length;
+          renderSlide(nextIndex);
+        };
+
+        triggers.forEach((trigger, index) => {
+          trigger.addEventListener('click', () => openLightbox(index));
+        });
+
+        prevButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          showRelative(-1);
+        });
+
+        nextButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          showRelative(1);
+        });
+
+        lightbox.querySelectorAll('[data-lightbox-close]').forEach((element) => {
+          element.addEventListener('click', closeLightbox);
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (lightbox.hidden) return;
+
+          if (event.key === 'Escape') {
+            closeLightbox();
+          } else if (event.key === 'ArrowLeft') {
+            showRelative(-1);
+          } else if (event.key === 'ArrowRight') {
+            showRelative(1);
+          }
+        });
+      })();
     </script>
   </body>
 </html>
