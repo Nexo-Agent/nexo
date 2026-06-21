@@ -81,16 +81,11 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v1.0.8
+            # Nexo v1.0.9
 
-            ## Improvements
+            ## Bug Fixes
 
-            - Redesigned sidebar and app settings with a cleaner, minimalist layout
-            - Settings sidebar width now matches the chat sidebar
-            - LaTeX math rendering in chat messages (KaTeX)
-            - Fullscreen preview for HTML and markdown artifacts
-            - Simplified chat input toolbar (removed active tools overlay)
-            - Consistent default cursor across the app
+            - Fixed native scrollbars appearing in production builds (Radix ScrollArea hide rules now bundled in CSS for Tauri CSP)
 
             ---
 

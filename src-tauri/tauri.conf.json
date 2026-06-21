@@ -9,7 +9,7 @@
     }
   },
   "productName": "Nexo",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "identifier": "com.nexo.app",
   "build": {
     "beforeDevCommand": "yarn ui:dev",
@@ -61,7 +61,7 @@
     "resources": ["binaries/*"],
     "windows": {
       "wix": {
-        "version": "1.0.8"
+        "version": "1.0.9"
       }
     }
   }
