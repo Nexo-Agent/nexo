@@ -1,42 +1,18 @@
 import { formatDistanceToNow } from 'date-fns';
-import {
-  FileText,
-  FileCode,
-  FileImage,
-  FileJson,
-  Trash2,
-  Package,
-} from 'lucide-react';
+import { Package, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Artifact } from '../types';
 
 interface ArtifactItemProps {
   artifact: Artifact;
+  isActive?: boolean;
   onOpen: () => void;
   onDelete: (e: React.MouseEvent) => void;
 }
 
-function ArtifactFileIcon({ filename }: { filename: string }) {
-  const iconClass =
-    'size-3.5 shrink-0 text-muted-foreground/60 transition-transform duration-200';
-  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
-
-  if (['html', 'htm', 'svg'].includes(ext)) {
-    return <FileImage className={iconClass} />;
-  }
-  if (['json', 'csv', 'yaml', 'yml', 'toml', 'xml'].includes(ext)) {
-    return <FileJson className={iconClass} />;
-  }
-  if (
-    ['ts', 'tsx', 'js', 'jsx', 'py', 'rs', 'css', 'sql', 'sh'].includes(ext)
-  ) {
-    return <FileCode className={iconClass} />;
-  }
-  return <FileText className={iconClass} />;
-}
-
 export function ArtifactItem({
   artifact,
+  isActive = false,
   onOpen,
   onDelete,
 }: ArtifactItemProps) {
@@ -44,19 +20,25 @@ export function ArtifactItem({
     <div
       onClick={onOpen}
       className={cn(
-        'group flex cursor-pointer items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-[background-color,border-color,box-shadow] duration-200',
-        'border-border/40 bg-secondary/15 shadow-none hover:border-border/80 hover:bg-secondary/30 hover:shadow-xs'
+        'group flex cursor-pointer items-center justify-between gap-2 rounded-md border px-4 py-1.5 transition-[background-color,border-color] duration-200',
+        isActive
+          ? 'border-primary/30 bg-primary/10 ring-1 ring-primary/20'
+          : 'border-border/40 bg-secondary/15 hover:border-border/80 hover:bg-secondary/30'
       )}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-2.5">
-        <ArtifactFileIcon filename={artifact.filename} />
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <div className="flex min-w-0 items-center justify-between gap-2">
-            <h4 className="truncate text-[13px] font-medium leading-tight text-foreground/85">
+      <div className="flex min-w-0 flex-1 items-center gap-1">
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-baseline justify-between">
+            <h4
+              className={cn(
+                'truncate text-[14px] font-medium leading-tight font-bold',
+                isActive ? 'text-foreground' : 'text-foreground/85'
+              )}
+            >
               {artifact.title}
             </h4>
-            <span className="shrink-0 text-[10px] font-normal text-muted-foreground/40">
-              {formatDistanceToNow(artifact.created_at, { addSuffix: false })}
+            <span className="shrink-0 text-[10px] text-muted-foreground/50">
+              {formatDistanceToNow(artifact.created_at, { addSuffix: true })}
             </span>
           </div>
           <p className="truncate text-[11px] text-muted-foreground/60">
@@ -66,8 +48,10 @@ export function ArtifactItem({
       </div>
 
       <button
+        type="button"
+        aria-label="Delete"
         onClick={onDelete}
-        className="invisible flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground/40 transition-colors hover:bg-destructive/10 hover:text-destructive group-hover:visible"
+        className="invisible flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground/40 transition-colors hover:bg-destructive/10 hover:text-destructive group-hover:visible"
       >
         <Trash2 className="size-3.5 shrink-0" />
       </button>

@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { resolveWebviewVisible } from './BrowserWebviewHost';
 
 describe('BrowserWebviewHost visibility', () => {
-  it('requires browser tab and open panel for main_panel viewport', () => {
-    expect(resolveWebviewVisible('main_panel', true, true, 'browser')).toBe(
+  it('requires viewer tab and open panel for main_panel viewport', () => {
+    expect(resolveWebviewVisible('main_panel', true, true, 'viewer')).toBe(
       true
     );
-    expect(resolveWebviewVisible('main_panel', true, false, 'browser')).toBe(
+    expect(resolveWebviewVisible('main_panel', true, false, 'viewer')).toBe(
       false
     );
     expect(resolveWebviewVisible('main_panel', true, true, 'artifacts')).toBe(
@@ -15,7 +15,7 @@ describe('BrowserWebviewHost visibility', () => {
   });
 
   it('requires non-zero geometry', () => {
-    expect(resolveWebviewVisible('main_panel', false, true, 'browser')).toBe(
+    expect(resolveWebviewVisible('main_panel', false, true, 'viewer')).toBe(
       false
     );
   });

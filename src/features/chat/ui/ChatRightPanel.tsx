@@ -1,17 +1,17 @@
-import { FileText, Info, Code2, Package, Globe } from 'lucide-react';
+import { FileText, Package, Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { NotesPanel } from '@/features/notes/ui/NotesPanel';
 import { ArtifactsPanel } from '@/features/artifacts/ui/ArtifactsPanel';
+import { ArtifactViewerPanel } from '@/features/artifacts/ui/ArtifactViewerPanel';
 import { useGetArtifactsQuery } from '@/features/artifacts/state/artifactsApi';
-import { BrowserPanel } from '@/features/browser/ui/BrowserPanel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/atoms/tooltip';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { setRightPanelTab } from '@/features/ui/state/uiSlice';
 
 export function ChatRightPanel() {
   const dispatch = useAppDispatch();
-  const { t } = useTranslation(['artifacts', 'browser', 'common']);
+  const { t } = useTranslation(['artifacts', 'common']);
   const activeTab = useAppSelector((state) => state.ui.rightPanelTab);
   const selectedChatId = useAppSelector((state) => state.chats.selectedChatId);
 
@@ -19,38 +19,20 @@ export function ChatRightPanel() {
   useGetArtifactsQuery(selectedChatId ?? '', { skip: !selectedChatId });
 
   const tabs = [
-    { id: 'notes' as const, icon: FileText, label: t('common:notes') },
     { id: 'artifacts' as const, icon: Package, label: t('artifacts:tabLabel') },
-    { id: 'browser' as const, icon: Globe, label: t('browser:tabLabel') },
-    { id: 'skills' as const, icon: Code2, label: t('common:skills') },
-    { id: 'info' as const, icon: Info, label: t('common:chatInfo') },
+    { id: 'viewer' as const, icon: Eye, label: t('artifacts:viewerTabLabel') },
+    { id: 'notes' as const, icon: FileText, label: t('common:notes') },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'notes':
-        return <NotesPanel />;
       case 'artifacts':
         return <ArtifactsPanel />;
-      case 'browser':
-        return <BrowserPanel />;
+      case 'viewer':
+        return <ArtifactViewerPanel />;
+      case 'notes':
       default:
-        return (
-          <div className="flex flex-1 flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-300">
-            <div className="mb-4 rounded-full bg-primary/10 p-4">
-              <Package className="size-8 text-primary" />
-            </div>
-            <h3 className="mb-2 text-lg font-medium text-foreground">
-              {tabs.find((tab) => tab.id === activeTab)?.label}{' '}
-              {t('common:comingSoon')}
-            </h3>
-            <p className="max-w-[200px] text-sm text-muted-foreground">
-              {t('common:rightPanelComingSoonDescription', {
-                tab: tabs.find((tab) => tab.id === activeTab)?.label,
-              })}
-            </p>
-          </div>
-        );
+        return <NotesPanel />;
     }
   };
 

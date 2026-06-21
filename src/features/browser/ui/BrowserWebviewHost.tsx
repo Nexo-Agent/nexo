@@ -46,7 +46,7 @@ export function resolveWebviewVisible(
   if (!geometryVisible) return false;
 
   if (viewport === 'main_panel') {
-    return isRightPanelOpen && rightPanelTab === 'browser';
+    return isRightPanelOpen && rightPanelTab === 'viewer';
   }
 
   return true;
@@ -251,7 +251,7 @@ export function BrowserWebviewHost({
   useEffect(() => {
     if (viewport !== 'main_panel') return;
 
-    const panelActive = isRightPanelOpen && rightPanelTab === 'browser';
+    const panelActive = isRightPanelOpen && rightPanelTab === 'viewer';
 
     if (!panelActive) {
       cancelPanelNavigation();

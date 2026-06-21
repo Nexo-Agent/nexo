@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import type { ArtifactViewerPanelState } from '@/features/artifacts/viewers/types';
 import { invokeCommand, TauriCommands } from '@/lib/tauri';
 import { logger } from '@/lib/logger';
 
@@ -45,8 +46,8 @@ export interface UIState {
   imagePreviewOpen: boolean;
   imagePreviewUrl: string | null;
   isRightPanelOpen: boolean;
-  rightPanelTab: 'notes' | 'skills' | 'info' | 'artifacts' | 'browser';
-  browserPendingUrl: string | null;
+  rightPanelTab: 'artifacts' | 'viewer' | 'notes';
+  artifactViewer: ArtifactViewerPanelState | null;
   experiments: {
     enableWorkflowEditor: boolean;
   };
@@ -179,8 +180,8 @@ const initialState: UIState = {
   imagePreviewOpen: false,
   imagePreviewUrl: null,
   isRightPanelOpen: false,
-  rightPanelTab: 'notes',
-  browserPendingUrl: null,
+  rightPanelTab: 'artifacts',
+  artifactViewer: null,
   experiments: {
     enableWorkflowEditor: false,
   },
@@ -271,9 +272,16 @@ const uiSlice = createSlice({
       }
     },
     toggleRightPanel: (state) => {
+      const opening = !state.isRightPanelOpen;
       state.isRightPanelOpen = !state.isRightPanelOpen;
+      if (opening) {
+        state.rightPanelTab = 'artifacts';
+      }
     },
     setRightPanelOpen: (state, action: PayloadAction<boolean>) => {
+      if (action.payload && !state.isRightPanelOpen) {
+        state.rightPanelTab = 'artifacts';
+      }
       state.isRightPanelOpen = action.payload;
     },
     setRightPanelTab: (
@@ -282,20 +290,20 @@ const uiSlice = createSlice({
     ) => {
       state.rightPanelTab = action.payload;
     },
-    openBrowserInRightPanel: (
+    openArtifactViewerInRightPanel: (
       state,
-      action: PayloadAction<{ url: string | null }>
+      action: PayloadAction<ArtifactViewerPanelState>
     ) => {
-      state.browserPendingUrl = action.payload.url;
-      state.rightPanelTab = 'browser';
+      state.artifactViewer = action.payload;
+      state.rightPanelTab = 'viewer';
       state.isRightPanelOpen = true;
     },
     openArtifactsInRightPanel: (state) => {
       state.rightPanelTab = 'artifacts';
       state.isRightPanelOpen = true;
     },
-    clearBrowserPendingUrl: (state) => {
-      state.browserPendingUrl = null;
+    clearArtifactViewer: (state) => {
+      state.artifactViewer = null;
     },
     setEnableWorkflowEditor: (state, action: PayloadAction<boolean>) => {
       state.experiments.enableWorkflowEditor = action.payload;
@@ -362,9 +370,9 @@ export const {
   toggleRightPanel,
   setRightPanelOpen,
   setRightPanelTab,
-  openBrowserInRightPanel,
+  openArtifactViewerInRightPanel,
   openArtifactsInRightPanel,
-  clearBrowserPendingUrl,
+  clearArtifactViewer,
   setEnableWorkflowEditor,
   setSetupCompleted,
 } = uiSlice.actions;

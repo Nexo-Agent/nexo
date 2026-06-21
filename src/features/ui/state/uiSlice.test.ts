@@ -6,6 +6,7 @@ import uiReducer, {
   setLanguage,
   setTheme,
   setRightPanelTab,
+  openArtifactViewerInRightPanel,
   loadAppSettings,
   UIState,
 } from './uiSlice';
@@ -37,8 +38,8 @@ describe('uiSlice', () => {
     imagePreviewOpen: false,
     imagePreviewUrl: null,
     isRightPanelOpen: false,
-    rightPanelTab: 'notes',
-    browserPendingUrl: null,
+    rightPanelTab: 'artifacts',
+    artifactViewer: null,
     experiments: {
       enableWorkflowEditor: false,
     },
@@ -93,6 +94,24 @@ describe('uiSlice', () => {
     it('should handle setRightPanelTab for artifacts', () => {
       const state = uiReducer(initialState, setRightPanelTab('artifacts'));
       expect(state.rightPanelTab).toBe('artifacts');
+    });
+
+    it('should handle openArtifactViewerInRightPanel', () => {
+      const state = uiReducer(
+        initialState,
+        openArtifactViewerInRightPanel({
+          viewerId: 'markdown',
+          artifactId: 'artifact-1',
+          chatId: 'chat-1',
+        })
+      );
+      expect(state.rightPanelTab).toBe('viewer');
+      expect(state.isRightPanelOpen).toBe(true);
+      expect(state.artifactViewer).toEqual({
+        viewerId: 'markdown',
+        artifactId: 'artifact-1',
+        chatId: 'chat-1',
+      });
     });
   });
 

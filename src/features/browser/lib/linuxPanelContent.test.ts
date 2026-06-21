@@ -4,10 +4,11 @@ import {
   resolveLinuxPanelIframeContent,
 } from './linuxPanelContent';
 
-const readTextFile = vi.fn();
+const readArtifactTextFileMock = vi.fn();
 
-vi.mock('@tauri-apps/plugin-fs', () => ({
-  readTextFile: (...args: unknown[]) => readTextFile(...args),
+vi.mock('@/features/artifacts/lib/readArtifactText', () => ({
+  readArtifactTextFile: (...args: unknown[]) =>
+    readArtifactTextFileMock(...args),
 }));
 
 vi.mock('@/features/chat/lib/html-preview', () => ({
@@ -30,11 +31,13 @@ describe('filePathFromFileUrl', () => {
 
 describe('resolveLinuxPanelIframeContent', () => {
   beforeEach(() => {
-    readTextFile.mockReset();
+    readArtifactTextFileMock.mockReset();
   });
 
   it('loads local HTML artifacts as sandboxed srcdoc', async () => {
-    readTextFile.mockResolvedValue('<html><body>Hello</body></html>');
+    readArtifactTextFileMock.mockResolvedValue(
+      '<html><body>Hello</body></html>'
+    );
 
     await expect(
       resolveLinuxPanelIframeContent('file:///home/me/chart.html')
@@ -43,7 +46,9 @@ describe('resolveLinuxPanelIframeContent', () => {
       value: '<sandbox><html><body>Hello</body></html></sandbox>',
     });
 
-    expect(readTextFile).toHaveBeenCalledWith('/home/me/chart.html');
+    expect(readArtifactTextFileMock).toHaveBeenCalledWith(
+      '/home/me/chart.html'
+    );
   });
 
   it('uses iframe src for remote http(s) URLs', async () => {

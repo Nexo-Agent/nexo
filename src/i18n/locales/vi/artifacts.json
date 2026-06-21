@@ -1,10 +1,18 @@
 {
   "tabLabel": "Artifacts",
+  "viewerTabLabel": "Xem trước",
   "panelDescription": "Các file do trợ lý tạo trong cuộc hội thoại này.",
   "loading": "Đang tải artifacts...",
   "emptyTitle": "Chưa có artifact nào",
   "emptyDescription": "Khi trợ lý tạo trang HTML, tài liệu hoặc file code, chúng sẽ hiển thị ở đây.",
   "noChatTitle": "Chưa chọn cuộc hội thoại",
   "noChatDescription": "Chọn một cuộc hội thoại để xem artifacts.",
-  "deleteConfirm": "Xóa artifact này? File sẽ bị xóa khỏi ổ đĩa."
+  "deleteConfirm": "Xóa artifact này? File sẽ bị xóa khỏi ổ đĩa.",
+  "viewerEmptyTitle": "Chưa mở xem trước",
+  "viewerEmptyDescription": "Chọn một artifact trong danh sách để xem tại đây.",
+  "viewerLoadError": "Không thể tải artifact này.",
+  "openInSystem": "Mở bằng ứng dụng hệ thống",
+  "viewerReload": "Tải lại xem trước",
+  "copyContent": "Sao chép nội dung",
+  "copyContentDone": "Đã sao chép"
 }

@@ -1,10 +1,18 @@
 {
   "tabLabel": "Artifacts",
+  "viewerTabLabel": "Preview",
   "panelDescription": "Files created by the assistant in this conversation.",
   "loading": "Loading artifacts...",
   "emptyTitle": "No artifacts yet",
   "emptyDescription": "When the assistant creates HTML pages, documents, or code files, they will appear here.",
   "noChatTitle": "No chat selected",
   "noChatDescription": "Select a chat to view its artifacts.",
-  "deleteConfirm": "Delete this artifact? The file will be removed from disk."
+  "deleteConfirm": "Delete this artifact? The file will be removed from disk.",
+  "viewerEmptyTitle": "No preview open",
+  "viewerEmptyDescription": "Select an artifact from the list to preview it here.",
+  "viewerLoadError": "Could not load this artifact.",
+  "openInSystem": "Open in system",
+  "viewerReload": "Reload preview",
+  "copyContent": "Copy content",
+  "copyContentDone": "Copied"
 }

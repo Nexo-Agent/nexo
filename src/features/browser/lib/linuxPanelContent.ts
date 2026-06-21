@@ -1,4 +1,4 @@
-import { readTextFile } from '@tauri-apps/plugin-fs';
+import { readArtifactTextFile } from '@/features/artifacts/lib/readArtifactText';
 import { buildSandboxSrcdoc } from '@/features/chat/lib/html-preview';
 import { toPanelIframeSrc, withIframeReloadNonce } from './panelIframeSrc';
 
@@ -31,7 +31,7 @@ export async function resolveLinuxPanelIframeContent(
 
   const filePath = filePathFromFileUrl(trimmed);
   if (filePath) {
-    const html = await readTextFile(filePath);
+    const html = await readArtifactTextFile(filePath);
     return { kind: 'srcdoc', value: buildSandboxSrcdoc(html) };
   }
 

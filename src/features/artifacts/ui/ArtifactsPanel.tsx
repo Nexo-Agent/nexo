@@ -1,11 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import * as opener from '@tauri-apps/plugin-opener';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { openBrowserInRightPanel } from '@/features/ui/state/uiSlice';
-import {
-  absolutePathToFileUrl,
-  isBrowserPreviewableFilename,
-} from '@/features/browser/lib/fileUrl';
+import { openArtifact } from '@/features/artifacts/viewers';
 import { ScrollArea } from '@/ui/atoms/scroll-area';
 import { logger } from '@/lib/logger';
 import {
@@ -19,6 +14,9 @@ export function ArtifactsPanel() {
   const { t } = useTranslation(['artifacts', 'common']);
   const dispatch = useAppDispatch();
   const selectedChatId = useAppSelector((state) => state.chats.selectedChatId);
+  const activeArtifactId = useAppSelector(
+    (state) => state.ui.artifactViewer?.artifactId ?? null
+  );
 
   const { data: artifacts = [], isLoading } = useGetArtifactsQuery(
     selectedChatId ?? '',
@@ -28,13 +26,8 @@ export function ArtifactsPanel() {
   const [deleteArtifact] = useDeleteArtifactMutation();
 
   const handleOpen = async (artifact: Artifact) => {
-    if (isBrowserPreviewableFilename(artifact.filename)) {
-      const url = await absolutePathToFileUrl(artifact.path);
-      dispatch(openBrowserInRightPanel({ url }));
-      return;
-    }
     try {
-      await opener.openPath(artifact.path);
+      await openArtifact(artifact, dispatch);
     } catch (error) {
       logger.error('[ArtifactsPanel] Failed to open artifact:', error);
     }
@@ -48,7 +41,7 @@ export function ArtifactsPanel() {
 
   if (!selectedChatId) {
     return (
-      <div className="flex h-full flex-col p-4">
+      <div className="flex h-full flex-col p-2">
         <ArtifactsEmptyState
           title={t('noChatTitle')}
           description={t('noChatDescription')}
@@ -58,9 +51,9 @@ export function ArtifactsPanel() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
-      <ScrollArea className="-mx-1 flex-1 px-1">
-        <div className="flex flex-col gap-2 pb-4">
+    <div className="flex h-full flex-col overflow-hidden p-2">
+      <ScrollArea className="flex-1">
+        <div className="flex flex-col gap-1 pb-2">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-10 opacity-50">
               <span className="text-xs">{t('loading')}</span>
@@ -70,6 +63,7 @@ export function ArtifactsPanel() {
               <ArtifactItem
                 key={artifact.id}
                 artifact={artifact}
+                isActive={artifact.id === activeArtifactId}
                 onOpen={() => handleOpen(artifact)}
                 onDelete={(e) => {
                   e.stopPropagation();

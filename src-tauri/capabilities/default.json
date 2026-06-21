@@ -45,6 +45,9 @@
         },
         {
           "path": "$APPDATA/mermaid_cache/**"
+        },
+        {
+          "path": "$APPDATA/artifacts/**"
         }
       ]
     },

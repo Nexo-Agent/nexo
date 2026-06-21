@@ -12,11 +12,3 @@ export async function absolutePathToFileUrl(
     path: absolutePath.trim(),
   });
 }
-
-/** Extensions previewable in the embedded Chromium browser. */
-export const BROWSER_PREVIEW_EXTENSIONS = new Set(['html', 'htm', 'pdf']);
-
-export function isBrowserPreviewableFilename(filename: string): boolean {
-  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
-  return BROWSER_PREVIEW_EXTENSIONS.has(ext);
-}
