@@ -19,7 +19,17 @@ export const CodeComponent = ({
   ...props
 }: DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> &
   ExtraProps & { controlElements?: React.ReactNode }) => {
+  const match = className?.match(LANGUAGE_REGEX);
+  const language = match?.at(1) ?? '';
   const inline = node?.position?.start.line === node?.position?.end.line;
+
+  if (language === 'math') {
+    return (
+      <code className={className} {...props}>
+        {children}
+      </code>
+    );
+  }
 
   if (inline) {
     return (
@@ -35,9 +45,6 @@ export const CodeComponent = ({
       </code>
     );
   }
-
-  const match = className?.match(LANGUAGE_REGEX);
-  const language = match?.at(1) ?? '';
 
   // Extract code content from children safely
   let code = '';

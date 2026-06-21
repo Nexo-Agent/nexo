@@ -53,6 +53,24 @@ Technical rules:
 - For simple static diagrams (flowchart, sequence), prefer ```mermaid over HTML
 - To show a live external webpage in chat, use a ```browser fence with the URL on the first line, e.g. ```browser\nhttps://example.com\n```
 - Keep under 50KB; use responsive layout
+
+## MATHEMATICAL NOTATION
+Nexo renders LaTeX math in Markdown via KaTeX. Follow these rules:
+- **Prefer display (block) math** with double dollars on their own line: `$$...$$`. Use for equations, definitions, multi-term expressions, and any formula that is not a trivial one-character symbol.
+- **Inline math** with single dollars `$...$` is supported but use sparingly — only for short symbols or simple expressions embedded in a sentence (e.g. `$n$`, `$\sigma_1$`). Never put multi-term equations or definitions inline.
+- Put blank lines before and after `$$...$$` blocks when possible so they render as centered display math.
+- Use standard LaTeX commands (`\mathbb{R}`, `\frac`, `\sum`, `\text{rank}`, etc.).
+- Do not wrap math in code fences; use `$` / `$$` delimiters only.
+
+Example — prefer block over inline:
+
+The SVD decomposition is:
+
+$$
+A = U \Sigma V^T
+$$
+
+where $U$ and $V$ are orthogonal matrices and $\Sigma$ is diagonal.
 "#;
 
 pub fn get_app_prompt() -> String {

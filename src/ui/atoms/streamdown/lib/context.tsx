@@ -15,7 +15,7 @@ import {
 import { harden } from 'rehype-harden';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkCjkFriendly from 'remark-cjk-friendly';
 import remarkCjkFriendlyGfmStrikethrough from 'remark-cjk-friendly-gfm-strikethrough';
 import remarkGfm from 'remark-gfm';
@@ -27,13 +27,6 @@ import { components as defaultComponents } from './components';
 import { Markdown, type Options } from './markdown';
 import { parseMarkdownIntoBlocks } from './parse-blocks';
 import { cn } from './utils';
-import packageJson from '../package.json';
-
-// Regex patterns defined at top level for performance
-const MIDDLE_DOLLAR_PATTERN = /[^$]\$[^$]/;
-const START_DOLLAR_PATTERN = /^\$[^$]/;
-const END_DOLLAR_PATTERN = /[^$]\$$/;
-
 export type { MermaidConfig } from 'mermaid';
 export type { BundledLanguageName } from './code-block/bundled-languages';
 
@@ -85,10 +78,24 @@ export type StreamdownProps = Options & {
   remend?: Record<string, unknown> | undefined;
 };
 
+const mathSanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    code: [['className', /^language-./, 'math-inline', 'math-display']],
+  },
+};
+
 export const defaultRehypePlugins: Record<string, Pluggable> = {
   raw: rehypeRaw,
-  sanitize: [rehypeSanitize, {}],
-  katex: [rehypeKatex, { errorColor: 'var(--color-muted-foreground)' }],
+  sanitize: [rehypeSanitize, mathSanitizeSchema],
+  katex: [
+    rehypeKatex,
+    {
+      errorColor: 'var(--color-muted-foreground)',
+      strict: 'warn',
+    },
+  ],
   harden: [
     harden,
     {
@@ -103,7 +110,7 @@ export const defaultRehypePlugins: Record<string, Pluggable> = {
 
 export const defaultRemarkPlugins: Record<string, Pluggable> = {
   gfm: [remarkGfm, {}],
-  math: [remarkMath, { singleDollarTextMath: false }],
+  math: [remarkMath, { singleDollarTextMath: true }],
   cjkFriendly: [remarkCjkFriendly, {}],
   cjkFriendlyGfmStrikethrough: [remarkCjkFriendlyGfmStrikethrough, {}],
 } as const;
@@ -202,69 +209,6 @@ const defaultShikiTheme: [BundledTheme, BundledTheme] = [
   'github-dark',
 ];
 
-// Helper functions to reduce complexity
-const checkKatexPlugin = (
-  rehypePlugins: Pluggable[] | null | undefined
-): boolean =>
-  Array.isArray(rehypePlugins) &&
-  rehypePlugins.some((plugin) =>
-    Array.isArray(plugin) ? plugin[0] === rehypeKatex : plugin === rehypeKatex
-  );
-
-const checkSingleDollarEnabled = (
-  remarkPlugins: Pluggable[] | null | undefined
-): boolean => {
-  if (!Array.isArray(remarkPlugins)) {
-    return false;
-  }
-
-  const mathPlugin = remarkPlugins.find((plugin) =>
-    Array.isArray(plugin) ? plugin[0] === remarkMath : plugin === remarkMath
-  );
-
-  if (mathPlugin && Array.isArray(mathPlugin) && mathPlugin[1]) {
-    const config = mathPlugin[1] as { singleDollarTextMath?: boolean };
-    return config.singleDollarTextMath === true;
-  }
-
-  return false;
-};
-
-const checkMathSyntax = (
-  content: string,
-  singleDollarEnabled: boolean
-): boolean => {
-  const hasDoubleDollar = content.includes('$$');
-  const hasSingleDollar =
-    singleDollarEnabled &&
-    (MIDDLE_DOLLAR_PATTERN.test(content) ||
-      START_DOLLAR_PATTERN.test(content) ||
-      END_DOLLAR_PATTERN.test(content));
-  return hasDoubleDollar || hasSingleDollar;
-};
-
-const versionRegex = /^\^/;
-
-const loadKatexCSS = (): void => {
-  // Extract KaTeX version from package.json dependencies
-  const katexVersion = packageJson.dependencies['rehype-katex']
-    .replace(versionRegex, '')
-    .split('.')[0]; // Get major version (e.g., "7" from "^7.0.1")
-
-  // Map rehype-katex major version to KaTeX version
-  // rehype-katex v7 uses KaTeX v0.16
-  const katexVersionMap: Record<string, string> = {
-    '7': '0.16.22',
-  };
-
-  const katexCssVersion = katexVersionMap[katexVersion] || '0.16.22';
-
-  // const link = document.createElement('link');
-  // link.rel = 'stylesheet';
-  // link.href = `/cdn/katex/${katexCssVersion}/katex.min.css`;
-  // document.head.appendChild(link);
-};
-
 export const Streamdown = memo(
   ({
     children,
@@ -351,22 +295,6 @@ export const Streamdown = memo(
       }),
       [components]
     );
-
-    // Only load KaTeX CSS when math syntax is detected in content
-    useEffect(() => {
-      const hasKatexPlugin = checkKatexPlugin(rehypePlugins);
-      if (!hasKatexPlugin) {
-        return;
-      }
-
-      const singleDollarEnabled = checkSingleDollarEnabled(remarkPlugins);
-      const content = typeof children === 'string' ? children : '';
-      const hasMathSyntax = checkMathSyntax(content, singleDollarEnabled);
-
-      if (hasMathSyntax) {
-        loadKatexCSS();
-      }
-    }, [rehypePlugins, remarkPlugins, children]);
 
     const style = useMemo(
       () =>

@@ -149,6 +149,14 @@ export const CustomCodeComponent = ({
     code = children;
   }
 
+  if (language === 'math') {
+    return (
+      <code className={className} {...props}>
+        {children}
+      </code>
+    );
+  }
+
   // For inline code, use original component
   if (inline) {
     return (
