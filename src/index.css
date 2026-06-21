@@ -379,6 +379,20 @@
     box-shadow: none !important;
     border-color: inherit !important;
   }
+
+  /*
+   * Radix ScrollArea hides native scrollbars via runtime <style> tags, which Tauri
+   * production CSP blocks. Bundled here so custom ScrollBar thumbs work on all platforms.
+   */
+  [data-radix-scroll-area-viewport] {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-radix-scroll-area-viewport]::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Markdown content styles */
