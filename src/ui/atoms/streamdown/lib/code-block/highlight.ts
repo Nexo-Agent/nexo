@@ -1,22 +1,53 @@
 // @ts-nocheck
 import {
  type BundledTheme,
- createHighlighter,
  type Highlighter,
  type LanguageRegistration,
  type SpecialLanguage,
  type TokensResult,
 } from 'shiki';
+import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import {
  type BundledLanguageName,
- bundledLanguages,
  isBundledLanguage,
+ loadBundledLanguage,
 } from './bundled-languages';
 import { loadLanguageFromCDN } from './cdn-loader';
 import { logger } from '@/lib/logger';
 
 const jsEngine = createJavaScriptRegexEngine({ forgiving: true });
+
+type ThemeModule = { default: unknown };
+type ThemeLoader = () => Promise<ThemeModule>;
+
+const themeLoaders = {
+ 'github-light': () => import('shiki/themes/github-light.mjs'),
+ 'github-dark': () => import('shiki/themes/github-dark.mjs'),
+ 'material-theme-lighter': () =>
+ import('shiki/themes/material-theme-lighter.mjs'),
+ 'material-theme-darker': () => import('shiki/themes/material-theme-darker.mjs'),
+ dracula: () => import('shiki/themes/dracula.mjs'),
+ 'solarized-light': () => import('shiki/themes/solarized-light.mjs'),
+ 'solarized-dark': () => import('shiki/themes/solarized-dark.mjs'),
+ 'one-dark-pro': () => import('shiki/themes/one-dark-pro.mjs'),
+ 'one-light': () => import('shiki/themes/one-light.mjs'),
+ monokai: () => import('shiki/themes/monokai.mjs'),
+ nord: () => import('shiki/themes/nord.mjs'),
+ 'ayu-dark': () => import('shiki/themes/ayu-dark.mjs'),
+} as const satisfies Record<string, ThemeLoader>;
+
+async function loadTheme(theme: BundledTheme) {
+ const loader = themeLoaders[theme as keyof typeof themeLoaders];
+ if (!loader) {
+ logger.warn(
+ `[Streamdown] Theme "${theme}" is not configured for code highlighting. Falling back to github-light.`
+ );
+ return themeLoaders['github-light']();
+ }
+
+ return loader();
+}
 
 // Singleton cache for highlighters
 const highlighterCache = new Map<string, Promise<Highlighter>>();
@@ -54,8 +85,7 @@ async function loadLanguageGrammar(
 ): Promise<LanguageRegistration | LanguageRegistration[] | null> {
  // Check if it's a bundled language (instant load)
  if (isBundledLanguage(language)) {
- const bundled = bundledLanguages[language as BundledLanguageName];
- return bundled;
+ return loadBundledLanguage(language as BundledLanguageName);
  }
 
  // Otherwise, load from CDN
@@ -99,8 +129,8 @@ export const createShiki = (
  | SpecialLanguage
  )[] = languageGrammar ? [languageGrammar] : ['text'];
 
- const highlighter = await createHighlighter({
- themes: shikiTheme,
+ const highlighter = await createHighlighterCore({
+ themes: [loadTheme(shikiTheme[0]), loadTheme(shikiTheme[1])],
  langs,
  engine: jsEngine,
  });

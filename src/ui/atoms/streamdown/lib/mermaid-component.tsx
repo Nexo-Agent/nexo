@@ -3,11 +3,16 @@ import { Suspense, useContext } from 'react';
 import { lazy } from 'react';
 import { StreamdownContext } from './context';
 import { CodeBlockSkeleton } from './code-block/skeleton';
-import { PreviewCodeBlock } from './code-block/preview-code-block';
 import { MermaidDownloadDropdown } from './mermaid/download-button';
 import { MermaidFullscreenButton } from './mermaid/fullscreen-button';
 import { cn } from './utils';
 import { shouldShowControls, shouldShowMermaidControl } from './control-utils';
+
+const PreviewCodeBlock = lazy(() =>
+ import('./code-block/preview-code-block').then((mod) => ({
+ default: mod.PreviewCodeBlock,
+ }))
+);
 
 const Mermaid = lazy(() =>
  import('./mermaid').then((mod) => ({ default: mod.CachedMermaid }))

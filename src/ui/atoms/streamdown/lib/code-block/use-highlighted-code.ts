@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { useContext, useEffect, useMemo, useState } from 'react';
 import type { TokensResult } from 'shiki';
+import { logger } from '@/lib/logger';
 import { StreamdownContext } from '../context';
-import { getHighlightedTokens } from './highlight';
 
 function buildFallbackTokens(code: string): TokensResult {
  return {
@@ -25,28 +25,48 @@ export function useHighlightedCode(code: string, language: string) {
  const [result, setResult] = useState<TokensResult>(fallback);
 
  useEffect(() => {
- setResult(fallback);
+	 setResult(fallback);
 
- const cachedResult = getHighlightedTokens({
- code,
- language,
- shikiTheme,
- cdnUrl,
- });
+	 let cancelled = false;
 
- if (cachedResult) {
- setResult(cachedResult);
- return;
- }
+	 import('./highlight')
+	 .then(({ getHighlightedTokens }) => {
+	 if (cancelled) {
+	 return;
+	 }
 
- getHighlightedTokens({
- code,
- language,
- shikiTheme,
- cdnUrl,
- callback: setResult,
- });
- }, [code, language, shikiTheme, cdnUrl, fallback]);
+	 const cachedResult = getHighlightedTokens({
+	 code,
+	 language,
+	 shikiTheme,
+	 cdnUrl,
+	 });
+
+	 if (cachedResult) {
+	 setResult(cachedResult);
+	 return;
+	 }
+
+	 getHighlightedTokens({
+	 code,
+	 language,
+	 shikiTheme,
+	 cdnUrl,
+	 callback: (nextResult) => {
+	 if (!cancelled) {
+	 setResult(nextResult);
+	 }
+	 },
+	 });
+	 })
+	 .catch((error) => {
+	 logger.error('Failed to load code highlighter:', error);
+	 });
+
+	 return () => {
+	 cancelled = true;
+	 };
+	 }, [code, language, shikiTheme, cdnUrl, fallback]);
 
  return result;
 }

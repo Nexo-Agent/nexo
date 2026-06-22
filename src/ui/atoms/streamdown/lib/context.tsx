@@ -29,12 +29,6 @@ import { parseMarkdownIntoBlocks } from './parse-blocks';
 import { cn } from './utils';
 export type { MermaidConfig } from 'mermaid';
 export type { BundledLanguageName } from './code-block/bundled-languages';
-
-// biome-ignore lint/performance/noBarrelFile: "required"
-export {
- bundledLanguages,
- isBundledLanguage,
-} from './code-block/bundled-languages';
 export { parseMarkdownIntoBlocks } from './parse-blocks';
 
 export type ControlsConfig =
