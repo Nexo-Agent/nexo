@@ -3,8 +3,8 @@
  * Tracks Redux actions as breadcrumbs and monitors performance
  */
 
-import * as Sentry from '@sentry/react';
 import { Middleware, UnknownAction } from '@reduxjs/toolkit';
+import { addBreadcrumb, captureMessage, setTag } from '@/lib/sentry';
 
 // Actions that should not be tracked (too noisy or contain sensitive data)
 const IGNORED_ACTIONS = [
@@ -102,7 +102,7 @@ export const sentryMiddleware: Middleware = () => (next) => (action) => {
     action.type.includes(critical)
   );
 
-  Sentry.addBreadcrumb({
+  addBreadcrumb({
     category: 'redux.action',
     message: action.type,
     level: isError ? 'error' : isCritical ? 'info' : 'debug',
@@ -114,12 +114,12 @@ export const sentryMiddleware: Middleware = () => (next) => (action) => {
 
   // For critical actions, add tags
   if (isCritical) {
-    Sentry.setTag('last_critical_action', action.type);
+    setTag('last_critical_action', action.type);
   }
 
   // For error actions, capture as Sentry event
   if (isError && action.payload) {
-    Sentry.captureMessage(`Redux Error: ${action.type}`, {
+    captureMessage(`Redux Error: ${action.type}`, {
       level: 'error',
       extra: {
         payload: sanitizePayload(action.payload),
@@ -134,7 +134,7 @@ export const sentryMiddleware: Middleware = () => (next) => (action) => {
 
   // Track slow actions (> 100ms)
   if (duration > 100) {
-    Sentry.addBreadcrumb({
+    addBreadcrumb({
       category: 'redux.performance',
       message: `Slow action: ${action.type}`,
       level: 'warning',

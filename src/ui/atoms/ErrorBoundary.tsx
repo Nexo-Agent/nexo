@@ -1,8 +1,8 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import * as Sentry from '@sentry/react';
 import { Button } from '@/ui/atoms/button/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { captureException, showReportDialog } from '@/lib/sentry';
 
 interface Props {
   children: ReactNode;
@@ -31,14 +31,17 @@ export class ErrorBoundary extends Component<Props, State> {
       errorInfo,
     });
 
-    // Report to Sentry with React context
-    Sentry.withScope((scope) => {
-      scope.setContext('react', {
-        componentStack: errorInfo.componentStack,
-      });
-      scope.setLevel('error');
-      const eventId = Sentry.captureException(error);
-      this.setState({ eventId });
+    void captureException(error, {
+      level: 'error',
+      contexts: {
+        react: {
+          componentStack: errorInfo.componentStack,
+        },
+      },
+    }).then((eventId) => {
+      if (eventId) {
+        this.setState({ eventId });
+      }
     });
   }
 
@@ -48,7 +51,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleReportFeedback = () => {
     if (this.state.eventId) {
-      Sentry.showReportDialog({
+      showReportDialog({
         eventId: this.state.eventId,
         title: 'Report Error',
         subtitle: 'Help us improve by reporting this error',

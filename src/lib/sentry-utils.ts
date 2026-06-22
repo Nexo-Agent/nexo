@@ -3,7 +3,14 @@
  * Provides consistent patterns for tracking user actions and performance
  */
 
-import * as Sentry from '@sentry/react';
+import {
+  addBreadcrumb,
+  captureException,
+  captureMessage,
+  setContext,
+  setTag,
+  setUser,
+} from '@/lib/sentry';
 
 /**
  * Track a user action with context
@@ -13,7 +20,7 @@ export function trackUserAction(
   category: string,
   data?: Record<string, unknown>
 ) {
-  Sentry.addBreadcrumb({
+  addBreadcrumb({
     category: `user.${category}`,
     message: action,
     level: 'info',
@@ -31,9 +38,9 @@ export function setWorkspaceContext(
   workspaceId: string,
   workspaceName?: string
 ) {
-  Sentry.setTag('workspace.id', workspaceId);
+  setTag('workspace.id', workspaceId);
   if (workspaceName) {
-    Sentry.setContext('workspace', {
+    setContext('workspace', {
       id: workspaceId,
       name: workspaceName,
     });
@@ -44,9 +51,9 @@ export function setWorkspaceContext(
  * Track chat context
  */
 export function setChatContext(chatId: string, chatTitle?: string) {
-  Sentry.setTag('chat.id', chatId);
+  setTag('chat.id', chatId);
   if (chatTitle) {
-    Sentry.setContext('chat', {
+    setContext('chat', {
       id: chatId,
       title: chatTitle,
     });
@@ -57,9 +64,9 @@ export function setChatContext(chatId: string, chatTitle?: string) {
  * Track LLM provider context
  */
 export function setLLMContext(provider: string, model: string) {
-  Sentry.setTag('llm.provider', provider);
-  Sentry.setTag('llm.model', model);
-  Sentry.setContext('llm', {
+  setTag('llm.provider', provider);
+  setTag('llm.model', model);
+  setContext('llm', {
     provider,
     model,
   });
@@ -75,7 +82,7 @@ export function trackAPICall(
   success: boolean,
   statusCode?: number
 ) {
-  Sentry.addBreadcrumb({
+  addBreadcrumb({
     category: 'api',
     message: `${method} ${endpoint}`,
     level: success ? 'info' : 'error',
@@ -90,7 +97,7 @@ export function trackAPICall(
 
   // Track slow API calls
   if (duration > 3000) {
-    Sentry.captureMessage(`Slow API call: ${method} ${endpoint}`, {
+    captureMessage(`Slow API call: ${method} ${endpoint}`, {
       level: 'warning',
       extra: {
         duration,
@@ -117,7 +124,7 @@ export function trackMessageSend(
 
   // Track long messages
   if (messageLength > 5000) {
-    Sentry.addBreadcrumb({
+    addBreadcrumb({
       category: 'chat.message',
       message: 'Long message sent',
       level: 'info',
@@ -137,7 +144,7 @@ export function trackStreamingPerformance(
   chunkCount: number,
   tokenCount?: number
 ) {
-  Sentry.addBreadcrumb({
+  addBreadcrumb({
     category: 'chat.streaming',
     message: 'Streaming completed',
     level: 'info',
@@ -152,7 +159,7 @@ export function trackStreamingPerformance(
 
   // Track slow streaming
   if (totalDuration > 30000) {
-    Sentry.captureMessage('Slow streaming response', {
+    captureMessage('Slow streaming response', {
       level: 'warning',
       extra: {
         chatId,
@@ -172,7 +179,7 @@ export function trackToolExecution(
   success: boolean,
   error?: string
 ) {
-  Sentry.addBreadcrumb({
+  addBreadcrumb({
     category: 'mcp.tool',
     message: `Tool: ${toolName}`,
     level: success ? 'info' : 'error',
@@ -185,7 +192,7 @@ export function trackToolExecution(
   });
 
   if (!success && error) {
-    Sentry.captureMessage(`Tool execution failed: ${toolName}`, {
+    captureMessage(`Tool execution failed: ${toolName}`, {
       level: 'error',
       extra: {
         toolName,
@@ -232,7 +239,7 @@ export function trackConnectionOperation(
   );
 
   if (!success && error) {
-    Sentry.captureMessage(`Connection ${operation} failed`, {
+    captureMessage(`Connection ${operation} failed`, {
       level: 'error',
       extra: {
         type,
@@ -254,7 +261,7 @@ export function trackComponentPerformance(
 ) {
   // Only track slow renders
   if (renderTime > 100) {
-    Sentry.addBreadcrumb({
+    addBreadcrumb({
       category: 'ui.performance',
       message: `Slow render: ${componentName}`,
       level: 'warning',
@@ -271,7 +278,7 @@ export function trackComponentPerformance(
  * Track navigation
  */
 export function trackNavigation(from: string, to: string) {
-  Sentry.addBreadcrumb({
+  addBreadcrumb({
     category: 'navigation',
     message: `Navigate: ${from} → ${to}`,
     level: 'info',
@@ -314,7 +321,7 @@ export function trackAgentOperation(
   });
 
   if (!success && error) {
-    Sentry.captureMessage(`Agent ${operation} failed`, {
+    captureMessage(`Agent ${operation} failed`, {
       level: 'error',
       extra: {
         operation,
@@ -329,9 +336,9 @@ export function trackAgentOperation(
  * Clear user context (on logout)
  */
 export function clearUserContext() {
-  Sentry.setUser(null);
-  Sentry.setTag('workspace.id', '');
-  Sentry.setTag('chat.id', '');
+  setUser(null);
+  setTag('workspace.id', '');
+  setTag('chat.id', '');
 }
 
 /**
@@ -345,16 +352,15 @@ export function trackError(
     extra?: Record<string, unknown>;
   }
 ) {
-  Sentry.withScope((scope) => {
-    if (context.component) {
-      scope.setTag('component', context.component);
-    }
-    if (context.action) {
-      scope.setTag('action', context.action);
-    }
-    if (context.extra) {
-      scope.setContext('error_context', context.extra);
-    }
-    Sentry.captureException(error);
+  void captureException(error, {
+    tags: {
+      ...(context.component ? { component: context.component } : {}),
+      ...(context.action ? { action: context.action } : {}),
+    },
+    contexts: context.extra
+      ? {
+          error_context: context.extra,
+        }
+      : undefined,
   });
 }

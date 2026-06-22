@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import * as Sentry from '@sentry/react';
+import { addBreadcrumb, captureMessage } from '@/lib/sentry';
 
 interface UseComponentPerformanceOptions {
   componentName: string;
@@ -44,7 +44,7 @@ export function useComponentPerformance({
 
     // Only track slow renders
     if (renderTime > threshold) {
-      Sentry.addBreadcrumb({
+      addBreadcrumb({
         category: 'ui.performance',
         message: `Slow render: ${componentName}`,
         level: 'warning',
@@ -57,7 +57,7 @@ export function useComponentPerformance({
 
       // Capture as event for very slow renders
       if (renderTime > 500) {
-        Sentry.captureMessage(`Very slow render: ${componentName}`, {
+        captureMessage(`Very slow render: ${componentName}`, {
           level: 'warning',
           extra: {
             renderTime,

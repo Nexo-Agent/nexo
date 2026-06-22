@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import * as Sentry from '@sentry/react';
 import { trace, debug, info, warn, error } from '@tauri-apps/plugin-log';
+import { addBreadcrumb, captureMessage } from '@/lib/sentry';
 
 export enum LogLevel {
   TRACE = 0,
@@ -134,7 +134,7 @@ class Logger {
   private sendToSentry(level: LogLevel, message: string, logData: any) {
     // Sentry breadcrumb
     if (level >= LogLevel.WARN) {
-      Sentry.addBreadcrumb({
+      addBreadcrumb({
         message,
         level: level === LogLevel.WARN ? 'warning' : 'error',
         data: logData,
@@ -143,7 +143,7 @@ class Logger {
 
     // Capture error in Sentry
     if (level === LogLevel.ERROR) {
-      Sentry.captureMessage(message, {
+      captureMessage(message, {
         level: 'error',
         extra: logData,
       });

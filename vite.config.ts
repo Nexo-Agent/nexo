@@ -7,6 +7,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
+const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => ({
@@ -18,10 +19,23 @@ export default defineConfig(async ({ mode }) => ({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT_FRONTEND || 'nexo-frontend',
       authToken: process.env.SENTRY_AUTH_TOKEN,
+      silent: !hasSentryAuthToken,
       // Only upload source maps in production builds
-      disable:
-        process.env.NODE_ENV !== 'production' || !process.env.SENTRY_AUTH_TOKEN,
+      sourcemaps: {
+        disable: process.env.NODE_ENV !== 'production' || !hasSentryAuthToken,
+      },
+      release: {
+        create: hasSentryAuthToken,
+        finalize: hasSentryAuthToken,
+        setCommits: hasSentryAuthToken ? { auto: true } : false,
+      },
       telemetry: false,
+      bundleSizeOptimizations: {
+        excludeDebugStatements: true,
+        excludeReplayIframe: true,
+        excludeReplayShadowDom: true,
+        excludeReplayWorker: true,
+      },
     }),
     mode === 'analyze' &&
       visualizer({
