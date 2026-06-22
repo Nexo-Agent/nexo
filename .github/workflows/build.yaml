@@ -81,11 +81,11 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v1.0.9
+            # Nexo v1.0.10
 
-            ## Bug Fixes
+            ## Performance
 
-            - Fixed native scrollbars appearing in production builds (Radix ScrollArea hide rules now bundled in CSS for Tauri CSP)
+            - Reduced memory allocations during LLM streaming and chat responses for smoother performance
 
             ---
 
