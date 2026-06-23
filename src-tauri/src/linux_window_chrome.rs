@@ -55,20 +55,6 @@ pub fn hide_application_menubar(app: &AppHandle) {
     }
 }
 
-fn hide_native_titlebar(window: &WebviewWindow<Wry>) {
-    let _ = window.set_decorations(false);
-
-    let Ok(gtk_window) = window.gtk_window() else {
-        return;
-    };
-
-    gtk_window.set_decorated(false);
-
-    if let Some(titlebar) = gtk_window.titlebar() {
-        hide_widget_tree(&titlebar);
-        gtk_window.queue_resize();
-    }
-}
 
 fn hide_widget_tree(widget: &gtk::Widget) {
     widget.hide();
