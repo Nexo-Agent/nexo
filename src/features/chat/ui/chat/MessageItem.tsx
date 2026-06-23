@@ -1,5 +1,4 @@
-import { useRef, useCallback, memo, useState, useMemo } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useCallback, memo, useState, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import { MarkdownContent } from '@/ui/organisms/markdown/MarkdownContent';
@@ -41,38 +40,6 @@ export const MessageItem = memo(
   }: MessageItemProps) {
     const [isFlowDialogOpen, setIsFlowDialogOpen] = useState(false);
 
-    // Determine if message is long (more than 500 characters or more than 10 lines)
-    // Memoize this calculation
-    const isLongMessage = useMemo(
-      () =>
-        message.content.length > 500 || message.content.split('\n').length > 10,
-      [message.content]
-    );
-
-    // Disable collapse/expand for streaming messages
-    const canCollapse = isLongMessage && !isStreaming;
-
-    const contentRef = useRef<HTMLDivElement>(null);
-    const messageRef = useRef<HTMLDivElement>(null);
-
-    // Don't collapse by default if it's the last message or if streaming
-    const [isCollapsed, setIsCollapsed] = useState(
-      !isStreaming && !isLastMessage
-    );
-
-    const handleToggleCollapse = useCallback(() => {
-      const newCollapsed = !isCollapsed;
-      setIsCollapsed(newCollapsed);
-
-      // If we're collapsing the message, scroll the top of the message into view
-      if (newCollapsed && messageRef.current) {
-        messageRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }
-    }, [isCollapsed]);
-
     const handleCopy = useCallback(() => {
       onCopy(message.content, message.id);
     }, [message.content, message.id, onCopy]);
@@ -105,15 +72,7 @@ export const MessageItem = memo(
 
     if (agentCardData) {
       return (
-        <div
-          className="flex w-full justify-start my-2"
-          style={
-            {
-              contentVisibility: 'auto',
-              containIntrinsicSize: '100px',
-            } as React.CSSProperties
-          }
-        >
+        <div className="flex w-full justify-start my-2">
           <AgentCard
             agentId={agentCardData.agent_id}
             sessionId={agentCardData.session_id}
@@ -136,21 +95,12 @@ export const MessageItem = memo(
 
     return (
       <div
-        ref={messageRef}
         className={cn(
           'group flex min-w-0 w-full',
           isLastMessage &&
             'animate-in fade-in slide-in-from-bottom-3 duration-500 ease-out',
           message.role === 'user' ? 'justify-end' : 'justify-start'
         )}
-        style={
-          message.role === 'user'
-            ? undefined
-            : ({
-                contentVisibility: 'auto',
-                containIntrinsicSize: '100px',
-              } as React.CSSProperties)
-        }
       >
         <div
           className={cn(
@@ -176,13 +126,9 @@ export const MessageItem = memo(
           >
             <div className="relative">
               <div
-                ref={contentRef}
                 className={cn(
-                  'overflow-hidden transition-[max-height] duration-300 ease-in-out',
-                  isStreaming ? 'select-none' : 'select-text',
-                  canCollapse && isCollapsed
-                    ? 'max-h-[300px]'
-                    : 'max-h-[9999px]'
+                  'overflow-hidden',
+                  isStreaming ? 'select-none' : 'select-text'
                 )}
               >
                 {/* Mentions */}
@@ -247,46 +193,7 @@ export const MessageItem = memo(
                   </div>
                 )}
               </div>
-
-              {/* Gradient fade overlay when collapsed */}
-              {canCollapse && isCollapsed && (
-                <div
-                  className={cn(
-                    'absolute bottom-0 left-0 right-0 h-16 pointer-events-none',
-                    message.role === 'user'
-                      ? 'bg-linear-to-t from-primary to-transparent'
-                      : 'bg-linear-to-t from-muted to-transparent'
-                  )}
-                />
-              )}
             </div>
-
-            {/* Collapse/Expand button */}
-            {canCollapse && (
-              <div
-                className={cn(
-                  'flex items-center mt-2 pt-2',
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                )}
-              >
-                <button
-                  className="text-xs opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1 px-2 py-1 rounded hover:bg-black/5 dark:hover:bg-white/5"
-                  onClick={handleToggleCollapse}
-                >
-                  {isCollapsed ? (
-                    <>
-                      <ChevronDown className="h-3 w-3" />
-                      {t('showMore')}
-                    </>
-                  ) : (
-                    <>
-                      <ChevronUp className="h-3 w-3" />
-                      {t('showLess')}
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
           </div>
 
           <MessageControls

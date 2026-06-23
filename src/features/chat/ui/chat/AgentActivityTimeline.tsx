@@ -34,7 +34,7 @@ function CompactThinkingRow({
   step: Extract<ActivityStep, { kind: 'thinking' }>;
 }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(step.isStreaming);
+  const [open, setOpen] = useState(false);
 
   if (!step.content.trim() && !step.isStreaming) return null;
 
@@ -97,7 +97,7 @@ export const AgentActivityTimeline = memo(function AgentActivityTimeline({
   const { t: translate } = useTranslation('chat');
   const [userOpen, setUserOpen] = useState<boolean | null>(null);
   const timeoutHandledRef = useRef<string | null>(null);
-  const open = userOpen ?? activity.defaultExpanded;
+  const open = userOpen ?? false;
   const summary = useMemo(
     () => summarizeActivity(activity.steps),
     [activity.steps]
@@ -155,7 +155,7 @@ export const AgentActivityTimeline = memo(function AgentActivityTimeline({
             className="flex list-none items-center gap-1.5 px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
             onClick={(event) => {
               event.preventDefault();
-              setUserOpen((current) => !(current ?? activity.defaultExpanded));
+              setUserOpen((current) => !(current ?? false));
             }}
           >
             <ChevronRight className="size-3 shrink-0 transition-transform group-open/activity:rotate-90" />
@@ -203,7 +203,7 @@ export const AgentActivityTimeline = memo(function AgentActivityTimeline({
                   }}
                   variant="compact"
                   onCancel={onCancelToolExecution}
-                  defaultExpanded={true}
+                  defaultExpanded={false}
                   requestTimestamp={pending.timestamp}
                   t={t}
                   onRespond={

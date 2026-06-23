@@ -95,6 +95,22 @@ describe('buildMessageRenderUnits', () => {
     expect(units[0].activity?.steps[0].kind).toBe('thinking');
   });
 
+  it('shows thinking placeholder while assistant is streaming without reasoning content yet', () => {
+    const messages = [assistant('a1', '', 1)];
+
+    const units = buildMessageRenderUnits(messages, {
+      streamingMessageId: 'a1',
+    });
+
+    if (units[0].kind !== 'assistant_turn') return;
+    expect(units[0].activity?.steps[0]).toMatchObject({
+      kind: 'thinking',
+      content: '',
+      isStreaming: true,
+    });
+    expect(units[0].activity?.defaultExpanded).toBe(true);
+  });
+
   it('does not duplicate final assistant content in activity', () => {
     const messages = [
       assistant('a1', 'Done', 1, 'Reasoned briefly'),
@@ -107,6 +123,40 @@ describe('buildMessageRenderUnits', () => {
     const kinds = units[0].activity?.steps.map((step) => step.kind) ?? [];
     expect(kinds).not.toContain('snippet');
     expect(kinds).toEqual(['thinking', 'tool']);
+  });
+
+  it('shows tool placeholder as soon as tool calls are detected', () => {
+    const messages = [
+      assistant('a1', '', 1, undefined),
+      {
+        id: 'a2',
+        role: 'assistant' as const,
+        content: 'Done',
+        timestamp: 2,
+        toolCalls: [
+          {
+            id: 'call-1',
+            name: 'create_artifact',
+            arguments: { name: 'demo' },
+          },
+        ],
+      },
+    ];
+
+    const units = buildMessageRenderUnits(messages);
+    if (units[0].kind !== 'assistant_turn') return;
+
+    const toolStep = units[0].activity?.steps.find(
+      (step) => step.kind === 'tool'
+    );
+    expect(toolStep).toMatchObject({
+      kind: 'tool',
+      data: {
+        id: 'call-1',
+        name: 'create_artifact',
+        status: 'calling',
+      },
+    });
   });
 });
 

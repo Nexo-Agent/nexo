@@ -1,5 +1,6 @@
 import type { Message } from '../../../types';
 import type { PermissionRequest } from '@/features/tools/state/toolPermissionSlice';
+import { toolCallMessageId } from '@/features/chat/lib/messageTimestamps';
 import type { ToolCallData } from '../ToolCallItem';
 import { parseToolCallContent } from './toolCallParsing';
 
@@ -68,7 +69,7 @@ function buildStepsForAssistant(
     streamingMessageId === assistant.id &&
     !hasMeaningfulAssistantContent(assistant.content);
 
-  if (assistant.reasoning?.trim()) {
+  if (assistant.reasoning?.trim() || isStreaming) {
     steps.push({
       kind: 'thinking',
       id: `thinking-${assistant.id}`,
@@ -87,6 +88,10 @@ function buildStepsForAssistant(
     });
   }
 
+  const existingToolCallMessageIds = new Set(
+    toolCalls.map((toolCall) => toolCall.id)
+  );
+
   for (const toolMessage of toolCalls) {
     const data = parseToolCallContent(toolMessage.content);
     if (!data) continue;
@@ -95,6 +100,23 @@ function buildStepsForAssistant(
       id: toolMessage.id,
       message: toolMessage,
       data,
+    });
+  }
+
+  for (const toolCall of assistant.toolCalls ?? []) {
+    if (existingToolCallMessageIds.has(toolCallMessageId(toolCall.id))) {
+      continue;
+    }
+
+    steps.push({
+      kind: 'tool',
+      id: `placeholder-${toolCall.id}`,
+      data: {
+        id: toolCall.id,
+        name: toolCall.name,
+        arguments: toolCall.arguments,
+        status: 'calling',
+      },
     });
   }
 
@@ -189,6 +211,7 @@ export function buildMessageRenderUnits(
       hasMeaningfulAssistantContent(finalAssistant.content) &&
       !finalAssistant.reasoning?.trim() &&
       finalTools.length === 0 &&
+      (finalAssistant.toolCalls?.length ?? 0) === 0 &&
       streamingMessageId !== finalAssistant.id;
 
     if (!finalHasOnlyContent) {

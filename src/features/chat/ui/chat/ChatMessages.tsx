@@ -15,7 +15,7 @@ interface ChatMessagesProps {
 }
 
 export function ChatMessages({
-  chatId,
+  chatId: _chatId,
   messages,
   streamingMessageId,
   onCancelToolExecution,
@@ -26,7 +26,7 @@ export function ChatMessages({
   const { pendingRequests, handlePermissionRespond } = useToolPermission();
 
   return (
-    <ChatScrollArea chatId={chatId} messageCount={messages.length}>
+    <ChatScrollArea>
       <MessageList
         messages={messages}
         enableStreaming={true}
@@ -37,7 +37,8 @@ export function ChatMessages({
         onCancelToolExecution={onCancelToolExecution}
         onEditingMessageIdChange={onEditMessage}
         t={t}
-        className={cn(CHAT_WIDTH_CLASSES, 'py-4')}
+        className="py-4"
+        contentClassName={cn(CHAT_WIDTH_CLASSES, 'pr-8')}
       />
     </ChatScrollArea>
   );

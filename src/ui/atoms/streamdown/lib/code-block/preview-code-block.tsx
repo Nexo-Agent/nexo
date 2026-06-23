@@ -1,10 +1,12 @@
 // @ts-nocheck
-import { useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { CodeBlockBody } from './body';
 import { CodeBlockContainer } from './container';
 import { CodeBlockContext } from './context';
+import { CodeBlockExpandButton } from './expand-button';
 import { CodeBlockHeader } from './header';
 import { CodeBlockCopyButton } from './copy-button';
+import { getTruncatedCodeState } from './truncate';
 import { useHighlightedCode } from './use-highlighted-code';
 import { CodeBlockViewTabs, type CodeBlockView } from './view-tabs';
 
@@ -34,8 +36,18 @@ export function PreviewCodeBlock({
  defaultView = 'code',
 }: PreviewCodeBlockProps) {
  const [view, setView] = useState<CodeBlockView>(defaultView);
- const result = useHighlightedCode(code, language);
+ const [isExpanded, setIsExpanded] = useState(false);
+ const { collapsedCode, hasOverflow, lineCount, visibleLineCount } = useMemo(
+ () => getTruncatedCodeState(code),
+ [code]
+ );
+ const visibleCode = hasOverflow && !isExpanded ? collapsedCode : code;
+ const result = useHighlightedCode(visibleCode, language);
  const showPreview = view === 'preview';
+
+ useEffect(() => {
+ setIsExpanded(false);
+ }, [code]);
 
  return (
  <CodeBlockContext.Provider value={{ code }}>
@@ -65,7 +77,16 @@ export function PreviewCodeBlock({
  {previewAvailable ? preview : previewLoading}
  </div>
  ) : (
+ <>
  <CodeBlockBody language={language} result={result} />
+ {hasOverflow ? (
+ <CodeBlockExpandButton
+ expanded={isExpanded}
+ hiddenLineCount={Math.max(0, lineCount - visibleLineCount)}
+ onToggle={() => setIsExpanded((current) => !current)}
+ />
+ ) : null}
+ </>
  )}
  </CodeBlockContainer>
  </CodeBlockContext.Provider>

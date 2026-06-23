@@ -81,11 +81,14 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Nexo __VERSION__'
           releaseBody: |
-            # Nexo v1.0.10
+            # Nexo v1.0.11
 
-            ## Performance
+            ## What's New
 
-            - Reduced memory allocations during LLM streaming and chat responses for smoother performance
+            - Improved chat scrolling performance with a virtualized message list and more stable scroll behavior
+            - Reduced heavy code block rendering by showing only the first 10 lines until expanded
+            - Show thinking and tool activity states earlier while responses are still streaming
+            - Refined chat scrollbar styling and spacing to better match the app theme
 
             ---
 
