@@ -21,7 +21,7 @@ export default defineConfig(async ({ mode }) => ({
       // Only upload source maps in production builds
       disable:
         process.env.NODE_ENV !== 'production' || !process.env.SENTRY_AUTH_TOKEN,
-      telemetry: false,
+      telemetry: true,
     }),
     mode === 'analyze' &&
       visualizer({
