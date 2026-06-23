@@ -5,8 +5,6 @@ use gtk::prelude::*;
 use std::time::Duration;
 use tauri::{AppHandle, Manager, WebviewWindow, Wry};
 
-const STRIP_DELAYS_MS: &[u32] = &[0, 50, 150, 500];
-
 pub fn configure_frameless_window(window: WebviewWindow<Wry>) {
     if let Err(error) = window.set_decorations(false) {
         log::warn!("Failed to disable window decorations on Linux: {error}");
