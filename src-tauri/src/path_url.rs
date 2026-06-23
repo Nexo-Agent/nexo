@@ -16,15 +16,7 @@ pub fn absolute_path_to_file_url(path: impl AsRef<Path>) -> Result<String, AppEr
         return Ok(trimmed);
     }
 
-    let normalized = path_util::strip_verbatim_prefix(path);
-    Url::from_file_path(&normalized)
-        .map(|url| url.to_string())
-        .map_err(|()| {
-            AppError::Validation(format!(
-                "Cannot convert path to file URL: {}",
-                normalized.display()
-            ))
-        })
+   
 }
 
 #[cfg(test)]
