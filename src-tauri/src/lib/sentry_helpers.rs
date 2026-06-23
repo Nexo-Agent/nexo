@@ -88,38 +88,6 @@ pub fn add_breadcrumb(category: &str, message: String, level: sentry::Level) {
 }
 
 /// Track LLM API call with provider and model context
-pub fn track_llm_call<T>(
-    provider: &str,
-    model: &str,
-    operation: &str,
-    latency_ms: u64,
-    result: &Result<T, Box<dyn std::error::Error>>,
-) {
-    if cfg!(not(debug_assertions)) || std::env::var("SENTRY_ENABLED").is_ok() {
-        sentry::configure_scope(|scope| {
-            scope.set_tag("llm.provider", provider);
-            scope.set_tag("llm.model", model);
-            scope.set_tag("llm.operation", operation);
-            scope.set_extra("llm.latency_ms", latency_ms.into());
-        });
-
-        // Add breadcrumb
-        add_breadcrumb(
-            "llm",
-            format!("LLM call to {provider} ({model}) - {operation} - {latency_ms}ms"),
-            if result.is_ok() {
-                sentry::Level::Info
-            } else {
-                sentry::Level::Error
-            },
-        );
-
-        // Capture error if failed
-        if let Err(e) = result {
-            sentry::capture_message(&format!("LLM call failed: {e}"), sentry::Level::Error);
-        }
-    }
-}
 
 /// Track MCP tool execution
 pub fn track_tool_execution<T>(
