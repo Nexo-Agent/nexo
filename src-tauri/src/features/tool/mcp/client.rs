@@ -379,6 +379,9 @@ impl MCPClientService {
                 let resolved = if let Some(path) = explicit_path {
                     if command == "uv" {
                         rt.resolve("uv", None).to_string_lossy().to_string()
+                    } else if matches!(command, "node" | "npm" | "npx") {
+                        // runtime_path stores the node binary; resolve npx/npm from sandbox
+                        rt.resolve(command, None).to_string_lossy().to_string()
                     } else {
                         path.to_string()
                     }
