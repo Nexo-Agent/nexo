@@ -5,7 +5,7 @@
 /// # Example
 ///
 /// ```
-/// use nexo_lib::track_command;
+/// use cogito_studio_lib::track_command;
 /// use std::io::Error;
 ///
 /// fn main() {

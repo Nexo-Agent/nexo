@@ -9,6 +9,7 @@
     }
   },
   "productName": "Cogito Studio",
+  "mainBinaryName": "cogito-studio",
   "version": "1.0.11",
   "identifier": "com.cogito-studio.app",
   "build": {

@@ -27,7 +27,7 @@ describe('toPanelIframeSrc', () => {
 describe('withIframeReloadNonce', () => {
   it('appends a cache-busting query param', () => {
     expect(withIframeReloadNonce('https://example.com', 2)).toBe(
-      'https://example.com?_nexo=2'
+      'https://example.com?_cogito_studio=2'
     );
   });
 

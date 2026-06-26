@@ -11,17 +11,17 @@ use crate::models::llm_types::{AssistantContent, ChatMessage, ToolCall, ToolCall
 use std::collections::HashMap;
 use std::sync::Arc;
 
-pub struct NexoPromptProvider {
+pub struct CogitoStudioPromptProvider {
     skill_service: Arc<SkillService>,
 }
 
-impl NexoPromptProvider {
+impl CogitoStudioPromptProvider {
     pub const fn new(skill_service: Arc<SkillService>) -> Self {
         Self { skill_service }
     }
 }
 
-impl PromptProvider for NexoPromptProvider {
+impl PromptProvider for CogitoStudioPromptProvider {
     fn build_system_prompt(&self, ctx: &PromptContext<'_>) -> Result<String, AppError> {
         let system_message = ctx
             .system_prompt_override
@@ -78,13 +78,13 @@ impl PromptProvider for NexoPromptProvider {
     }
 }
 
-pub struct NexoMessageBuilder {
+pub struct CogitoStudioMessageBuilder {
     prompt_provider: Arc<dyn PromptProvider>,
     attachment_resolver: Arc<dyn AttachmentResolver>,
     skill_service: Option<Arc<SkillService>>,
 }
 
-impl NexoMessageBuilder {
+impl CogitoStudioMessageBuilder {
     pub fn new(
         prompt_provider: Arc<dyn PromptProvider>,
         attachment_resolver: Arc<dyn AttachmentResolver>,
@@ -140,7 +140,7 @@ impl NexoMessageBuilder {
     }
 }
 
-impl MessageBuilder for NexoMessageBuilder {
+impl MessageBuilder for CogitoStudioMessageBuilder {
     fn build_messages(&self, ctx: &MessageBuildContext<'_>) -> Result<HarnessMessages, AppError> {
         let mut api_messages: Vec<ChatMessage> = Vec::new();
         let assistant_tool_calls = collect_assistant_tool_calls(ctx.existing_messages);
@@ -323,7 +323,10 @@ mod tests {
     #[test]
     fn build_messages_skips_tool_call_role() {
         let builder =
-            NexoMessageBuilder::new_for_test(Arc::new(StubPrompt), test_attachment_resolver());
+            CogitoStudioMessageBuilder::new_for_test(
+                Arc::new(StubPrompt),
+                test_attachment_resolver(),
+            );
 
         let settings = WorkspaceSettings {
             workspace_id: "ws1".to_string(),
@@ -375,7 +378,10 @@ mod tests {
     #[test]
     fn build_messages_reconstructs_assistant_tool_calls() {
         let builder =
-            NexoMessageBuilder::new_for_test(Arc::new(StubPrompt), test_attachment_resolver());
+            CogitoStudioMessageBuilder::new_for_test(
+                Arc::new(StubPrompt),
+                test_attachment_resolver(),
+            );
 
         let settings = WorkspaceSettings {
             workspace_id: "ws1".to_string(),

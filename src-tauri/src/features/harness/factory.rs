@@ -6,7 +6,9 @@ use crate::features::harness::adapters::incoming_files::{
     merge_file_metadata, process_incoming_files,
 };
 use crate::features::harness::adapters::llm::LlmServiceAdapter;
-use crate::features::harness::adapters::prompt::{NexoMessageBuilder, NexoPromptProvider};
+use crate::features::harness::adapters::prompt::{
+    CogitoStudioMessageBuilder, CogitoStudioPromptProvider,
+};
 use crate::features::harness::adapters::session::SqliteSessionStore;
 use crate::features::harness::adapters::title::TitleGenerator;
 use crate::features::harness::attachment::DefaultAttachmentResolver;
@@ -43,11 +45,11 @@ impl HarnessFactory {
         workspace_settings_service: Arc<WorkspaceSettingsService>,
     ) -> Self {
         let prompt_provider: Arc<dyn PromptProvider> =
-            Arc::new(NexoPromptProvider::new(skill_service.clone()));
+            Arc::new(CogitoStudioPromptProvider::new(skill_service.clone()));
         let file_loader = Arc::new(DefaultFileContentLoader);
         let attachment_resolver: Arc<dyn AttachmentResolver> =
             Arc::new(DefaultAttachmentResolver::new(file_loader));
-        let message_builder = Arc::new(NexoMessageBuilder::new(
+        let message_builder = Arc::new(CogitoStudioMessageBuilder::new(
             prompt_provider.clone(),
             attachment_resolver.clone(),
             skill_service,

@@ -120,7 +120,7 @@ _Note: The first run might take a few minutes to compile Rust dependencies._
       "name": "Debug Tauri",
       "type": "lldb",
       "request": "launch",
-      "program": "${workspaceFolder}/src-tauri/target/debug/nexo",
+      "program": "${workspaceFolder}/src-tauri/target/debug/cogito-studio",
       "args": [],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "ui:build"

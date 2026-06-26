@@ -18,7 +18,7 @@ vi.mock('@/features/chat/lib/html-preview', () => ({
 vi.mock('./panelIframeSrc', () => ({
   toPanelIframeSrc: (url: string) => url,
   withIframeReloadNonce: (src: string, nonce: number) =>
-    nonce > 0 ? `${src}?_nexo=${nonce}` : src,
+    nonce > 0 ? `${src}?_cogito_studio=${nonce}` : src,
 }));
 
 describe('filePathFromFileUrl', () => {

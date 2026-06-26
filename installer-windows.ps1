@@ -146,7 +146,7 @@ if (-not $asset) {
     Write-Fail "Could not find Windows installer asset in release '$resolvedVersion'."
 }
 
-$tempDir = Join-Path $env:TEMP ("nexo-installer-" + [guid]::NewGuid().ToString("N"))
+$tempDir = Join-Path $env:TEMP ("cogito-studio-installer-" + [guid]::NewGuid().ToString("N"))
 New-Item -Path $tempDir -ItemType Directory | Out-Null
 $installerPath = Join-Path $tempDir $asset.name
 

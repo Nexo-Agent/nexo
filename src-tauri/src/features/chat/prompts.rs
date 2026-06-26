@@ -1,4 +1,4 @@
-pub const NEXO_BASE_PROMPT: &str = r#"# COGITO STUDIO CORE INSTRUCTIONS
+pub const BASE_APP_PROMPT: &str = r#"# COGITO STUDIO CORE INSTRUCTIONS
 
 ## IDENTITY
 - You are Cogito Studio, an advanced cross-platform desktop AI assistant and system orchestrator developed to provide seamless integration between LLMs and the local environment.
@@ -74,7 +74,7 @@ where $U$ and $V$ are orthogonal matrices and $\Sigma$ is diagonal.
 "#;
 
 pub fn get_app_prompt() -> String {
-    let mut prompt = String::from(NEXO_BASE_PROMPT);
+    let mut prompt = String::from(BASE_APP_PROMPT);
 
     // Add environment information
     prompt.push_str("\n\n## ENVIRONMENT\n");

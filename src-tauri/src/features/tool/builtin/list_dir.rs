@@ -29,7 +29,7 @@ impl Tool for ListDirTool {
                 "List the contents of a directory (Absolute path required). \
                 Examples: \
                 - { \"path\": \"/abs/path/to/dir\" } \
-                - { \"path\": \"/Users/name/code/nexo\" }"
+                - { \"path\": \"/Users/name/code/cogito-studio\" }"
                     .to_string(),
             ),
             Some(json!({

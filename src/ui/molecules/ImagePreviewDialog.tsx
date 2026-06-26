@@ -45,7 +45,7 @@ export function ImagePreviewDialog() {
       // Ensure the downloads directory exists
       await mkdir(downloadsPath, { recursive: true }).catch(() => {});
 
-      let fileName = `nexo_image_${Date.now()}.png`;
+      let fileName = `cogito_studio_image_${Date.now()}.png`;
       if (
         imageUrl.startsWith('http') ||
         (!imageUrl.startsWith('data:') && !imageUrl.startsWith('blob:'))

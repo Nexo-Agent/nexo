@@ -151,7 +151,7 @@ install_linux() {
       info "Installing .deb package..."
       sudo dpkg -i "$deb_path" || sudo apt-get install -f -y
       rm -rf "$tmp_dir"
-      info "Install complete. Run: nexo"
+      info "Install complete. Run: cogito-studio"
       return
     fi
   fi
@@ -172,7 +172,7 @@ install_linux() {
         sudo rpm -i "$rpm_path"
       fi
       rm -rf "$tmp_dir"
-      info "Install complete. Run: nexo"
+      info "Install complete. Run: cogito-studio"
       return
     fi
   fi
@@ -188,7 +188,7 @@ install_linux() {
 
   install_dir="${HOME}/.local/bin"
   mkdir -p "$install_dir"
-  appimage_path="${install_dir}/nexo.AppImage"
+  appimage_path="${install_dir}/cogito-studio.AppImage"
   download_file "$appimage_url" "$appimage_path"
   chmod +x "$appimage_path"
   rm -rf "$tmp_dir"

@@ -815,6 +815,64 @@ dependencies = [
 ]
 
 [[package]]
+name = "cogito-studio"
+version = "1.0.11"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "base64 0.22.1",
+ "block2",
+ "chrono",
+ "flate2",
+ "futures",
+ "gtk",
+ "hex",
+ "javascriptcore-rs",
+ "log",
+ "notify",
+ "notify-debouncer-full",
+ "objc2",
+ "objc2-foundation",
+ "objc2-web-kit",
+ "regex",
+ "reqwest",
+ "rusqlite",
+ "rust-mcp-schema 0.6.0",
+ "rust-mcp-sdk",
+ "rust-mcp-transport",
+ "sentry",
+ "sentry-tracing",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "sha2",
+ "shell-words",
+ "tar",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-clipboard-manager",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-log",
+ "tauri-plugin-opener",
+ "tauri-plugin-process",
+ "tauri-plugin-updater",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "tracing-log",
+ "tracing-subscriber",
+ "ts-rs",
+ "url",
+ "uuid",
+ "webkit2gtk",
+ "webview2-com",
+ "windows",
+ "zip 2.4.2",
+]
+
+[[package]]
 name = "combine"
 version = "4.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3021,64 +3079,6 @@ name = "new_debug_unreachable"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
-
-[[package]]
-name = "nexo"
-version = "1.0.11"
-dependencies = [
- "anyhow",
- "async-trait",
- "base64 0.22.1",
- "block2",
- "chrono",
- "flate2",
- "futures",
- "gtk",
- "hex",
- "javascriptcore-rs",
- "log",
- "notify",
- "notify-debouncer-full",
- "objc2",
- "objc2-foundation",
- "objc2-web-kit",
- "regex",
- "reqwest",
- "rusqlite",
- "rust-mcp-schema 0.6.0",
- "rust-mcp-sdk",
- "rust-mcp-transport",
- "sentry",
- "sentry-tracing",
- "serde",
- "serde_json",
- "serde_yaml",
- "sha2",
- "shell-words",
- "tar",
- "tauri",
- "tauri-build",
- "tauri-plugin-clipboard-manager",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-log",
- "tauri-plugin-opener",
- "tauri-plugin-process",
- "tauri-plugin-updater",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "tracing-log",
- "tracing-subscriber",
- "ts-rs",
- "url",
- "uuid",
- "webkit2gtk",
- "webview2-com",
- "windows",
- "zip 2.4.2",
-]
 
 [[package]]
 name = "nix"

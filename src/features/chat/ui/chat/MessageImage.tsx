@@ -149,7 +149,7 @@ export const MessageImage = ({
       // Ensure the downloads directory exists (it should, but just in case)
       await mkdir(downloadsPath, { recursive: true }).catch(() => {});
 
-      let fileName = `nexo_image_${Date.now()}.png`;
+      let fileName = `cogito_studio_image_${Date.now()}.png`;
       if (src.startsWith('http') || !src.startsWith('data:')) {
         const parts = src.split('/');
         const lastPart = parts[parts.length - 1]?.split('?')[0];

@@ -5,8 +5,8 @@ export const RIGHT_PANEL_WIDTH_KEY = 'rightAreaWidth';
 export const DEFAULT_SIDEBAR_WIDTH = 240;
 export const DEFAULT_RIGHT_PANEL_WIDTH = 400;
 
-const SIDEBAR_WIDTH_EVENT = 'nexo:sidebar-width';
-const RIGHT_PANEL_WIDTH_EVENT = 'nexo:right-panel-width';
+const SIDEBAR_WIDTH_EVENT = 'cogito-studio:sidebar-width';
+const RIGHT_PANEL_WIDTH_EVENT = 'cogito-studio:right-panel-width';
 
 function readSidebarWidth(): number {
   const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);

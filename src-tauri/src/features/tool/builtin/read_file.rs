@@ -81,10 +81,10 @@ mod tests {
     async fn read_file_returns_content() {
         let mut temp = tempfile::NamedTempFile::new().expect("temp file");
         use std::io::Write;
-        writeln!(temp, "hello nexo").expect("write temp");
+        writeln!(temp, "hello cogito studio").expect("write temp");
         let path = temp.path().to_string_lossy().to_string();
 
         let content = fs::read_to_string(&path).await.expect("read file");
-        assert!(content.contains("hello nexo"));
+        assert!(content.contains("hello cogito studio"));
     }
 }

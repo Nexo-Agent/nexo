@@ -24,5 +24,5 @@ export function toPanelIframeSrc(url: string): string {
 export function withIframeReloadNonce(src: string, nonce: number): string {
   if (nonce <= 0 || src === 'about:blank') return src;
   const separator = src.includes('?') ? '&' : '?';
-  return `${src}${separator}_nexo=${nonce}`;
+  return `${src}${separator}_cogito_studio=${nonce}`;
 }

@@ -270,7 +270,8 @@ mod tests {
 
     #[test]
     fn resolve_disk_path_uses_filename_when_available() {
-        let dir = std::env::temp_dir().join(format!("nexo-artifact-test-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir()
+            .join(format!("cogito-studio-artifact-test-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = ArtifactService::resolve_disk_path(
             &dir,
@@ -284,7 +285,8 @@ mod tests {
 
     #[test]
     fn resolve_disk_path_suffixes_on_collision() {
-        let dir = std::env::temp_dir().join(format!("nexo-artifact-test-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir()
+            .join(format!("cogito-studio-artifact-test-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join("chart.html"), "v1").unwrap();
         let path = ArtifactService::resolve_disk_path(
