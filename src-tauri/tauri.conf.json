@@ -10,7 +10,7 @@
   },
   "productName": "Cogito Studio",
   "mainBinaryName": "cogito-studio",
-  "version": "1.0.11",
+  "version": "0.0.1",
   "identifier": "com.cogito-studio.app",
   "build": {
     "beforeDevCommand": "yarn ui:dev",
@@ -62,7 +62,7 @@
     "resources": ["binaries/*"],
     "windows": {
       "wix": {
-        "version": "1.0.11"
+        "version": "0.0.1"
       }
     }
   }

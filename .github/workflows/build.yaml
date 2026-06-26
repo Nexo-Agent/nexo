@@ -81,14 +81,13 @@ jobs:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Cogito Studio __VERSION__'
           releaseBody: |
-            # Cogito Studio v1.0.11
+            # Cogito Studio v0.0.1
 
             ## What's New
 
-            - Improved chat scrolling performance with a virtualized message list and more stable scroll behavior
-            - Reduced heavy code block rendering by showing only the first 10 lines until expanded
-            - Show thinking and tool activity states earlier while responses are still streaming
-            - Refined chat scrollbar styling and spacing to better match the app theme
+            - Hard reset release history and restart versioning from 0.0.1
+            - Publish a clean baseline release for Cogito Studio
+            - Continue distributing desktop builds through the standard updater channel
 
             ---
 
