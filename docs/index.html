@@ -253,10 +253,16 @@
       }
 
       .brand img {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 9px;
-        box-shadow: 0 0 24px rgba(59, 130, 246, 0.25);
+        width: auto;
+        height: 2.25rem;
+        max-width: min(11.5rem, 42vw);
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .site-footer .brand img {
+        height: 1.875rem;
+        max-width: min(10rem, 50vw);
       }
 
       .nav-links {
@@ -1606,8 +1612,12 @@
     <header class="site-header" id="top">
       <div class="container nav">
         <a class="brand" href="#top">
-          <img src="assets/logo.svg" width="32" height="32" alt="Cogito Studio logo" />
-          <span>Cogito Studio</span>
+          <img
+            src="assets/logo.svg"
+            width="52"
+            height="52"
+            alt="Cogito Studio"
+          />
         </a>
         <nav class="nav-links" aria-label="Primary">
           <a href="#showcase">Demo</a>
@@ -2414,8 +2424,12 @@
     <footer class="site-footer">
       <div class="container footer-grid">
         <div class="brand">
-          <img src="assets/logo.svg" width="28" height="28" alt="" />
-          <span>Cogito Studio</span>
+          <img
+            src="assets/logo.svg"
+            width="46"
+            height="46"
+            alt="Cogito Studio"
+          />
         </div>
         <nav class="footer-links" aria-label="Footer">
           <a

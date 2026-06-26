@@ -1,8 +1,8 @@
 <p align="center">
-    <img width="200" alt="Cogito Studio Logo" src="https://raw.githubusercontent.com/CogitoForge-AI/cogito-studio/refs/heads/main/logo.svg">
+    <img width="420" alt="Cogito Studio — All-in-One Workspace AI" src="public/horizontal-logo.svg">
 </p>
 
-<h1 align="center">Cogito Studio - All-in-One Workspace AI</h1>
+<h1 align="center">All-in-One Workspace AI</h1>
 
 <div align="center">
   
