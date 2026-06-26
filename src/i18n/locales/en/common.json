@@ -1,6 +1,6 @@
 {
   "about": "About",
-  "aboutTitle": "About Nexo",
+  "aboutTitle": "About Cogito Studio",
   "actions": "Actions",
   "add": "Add",
   "back": "Back",
@@ -315,7 +315,7 @@
   "viewAndInstall": "View & Install",
   "welcomeDescription": "A desktop application for interacting with large language models. Create conversations, manage workspaces, and connect to LLM providers.",
   "welcomeFeaturesTitle": "Key Features",
-  "welcomeTitle": "Welcome to Nexo",
+  "welcomeTitle": "Welcome to Cogito Studio",
   "workspaceName": "Workspace Name",
   "workspaceSettings": "Workspace Settings",
   "workspaceSettingsMenu": "Settings",

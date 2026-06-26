@@ -11,8 +11,8 @@ Only the latest stable release and the current `main` branch are supported for s
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Nexo, please **DO NOT** open a public issue.
-Instead, please email us at [ask@nkthanh.dev](mailto:ask@nkthanh.dev) with the subject "Nexo Security Vulnerability".
+If you discover a security vulnerability in Cogito Studio, please **DO NOT** open a public issue.
+Instead, please email us at [ask@nkthanh.dev](mailto:ask@nkthanh.dev) with the subject "Cogito Studio Security Vulnerability".
 
 We will acknowledge your email within 48 hours and provide an estimated timeline for a fix.
 
@@ -20,15 +20,15 @@ We will acknowledge your email within 48 hours and provide an estimated timeline
 
 ### 1. Data Privacy (Local First)
 
-Nexo is designed to be local-first.
+Cogito Studio is designed to be local-first.
 
 - **Database**: All chat history and embeddings are stored in a local SQLite database file on your machine.
 - **API Keys**: LLM API keys are stored in your local configuration (verify encryption status in settings).
-- **Telemetry**: Nexo currently does **not** collect telemetry data.
+- **Telemetry**: Cogito Studio currently does **not** collect telemetry data.
 
 ### 2. Code Execution (Sandboxing)
 
-Nexo allows running Python and Node.js code snippets via its runtime.
+Cogito Studio allows running Python and Node.js code snippets via its runtime.
 
 - **Warning**: These runtimes execute code on your local machine. While we aim to sandbox these environments, **never execute code from untrusted sources** or code that you do not understand.
 - **Network Access**: Be aware that code running in the agent environment may have network access depending on your system configuration.

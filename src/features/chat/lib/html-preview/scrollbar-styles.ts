@@ -20,7 +20,7 @@ function resolveScrollbarColors(): { thumb: string; thumbHover: string } {
 }
 
 /**
- * Inline scrollbar styles matching Nexo chat ScrollArea (thin track, rounded thumb).
+ * Inline scrollbar styles matching the Cogito Studio chat ScrollArea.
  * Injected into sandboxed HTML previews because iframe scrollbars cannot be styled from the parent.
  */
 export function buildScrollbarStyleTag(): string {
@@ -55,5 +55,5 @@ html {
  background: transparent;
 }`.trim();
 
-  return `<style data-nexo="scrollbar">${rules}</style>`;
+  return `<style data-cogito-studio="scrollbar">${rules}</style>`;
 }

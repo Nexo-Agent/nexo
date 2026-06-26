@@ -12,14 +12,15 @@ pub fn create_menu(app: &AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::Wr
     // macOS Application Menu
     #[cfg(target_os = "macos")]
     let app_menu = {
-        let about = MenuItemBuilder::with_id("about", "About Nexo").build(app)?;
+        let about =
+            MenuItemBuilder::with_id("about", "About Cogito Studio").build(app)?;
         let settings = MenuItemBuilder::with_id("app_settings", "Settings...")
             .accelerator("Command+,")
             .build(app)?;
         let check_updates =
             MenuItemBuilder::with_id("check_updates", "Check for Updates...").build(app)?;
 
-        SubmenuBuilder::new(app, "Nexo")
+        SubmenuBuilder::new(app, "Cogito Studio")
             .items(&[
                 &about,
                 &PredefinedMenuItem::separator(app)?,

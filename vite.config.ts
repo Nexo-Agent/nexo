@@ -17,7 +17,7 @@ export default defineConfig(async ({ mode }) => ({
     // Sentry plugin for uploading source maps (only in production builds)
     sentryVitePlugin({
       org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT_FRONTEND || 'nexo-frontend',
+      project: process.env.SENTRY_PROJECT_FRONTEND || 'cogito-studio-frontend',
       authToken: process.env.SENTRY_AUTH_TOKEN,
       silent: !hasSentryAuthToken,
       // Only upload source maps in production builds
@@ -40,7 +40,7 @@ export default defineConfig(async ({ mode }) => ({
     mode === 'analyze' &&
       visualizer({
         filename: 'dist/bundle-stats.html',
-        title: 'Nexo Frontend Bundle Analysis',
+        title: 'Cogito Studio Frontend Bundle Analysis',
         template: 'treemap',
         gzipSize: true,
         brotliSize: true,

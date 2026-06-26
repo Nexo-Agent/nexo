@@ -1,6 +1,6 @@
 param(
-    [string]$RepoOwner = "Nexo-Agent",
-    [string]$RepoName = "nexo",
+    [string]$RepoOwner = "CogitoForge-AI",
+    [string]$RepoName = "cogito-studio",
     [string]$Version = "latest",
     [switch]$Silent
 )
@@ -132,8 +132,8 @@ if (-not $release -or -not $release.tag_name) {
 $resolvedVersion = $release.tag_name
 Write-Info "Using release: $resolvedVersion"
 
-$msiName = "Nexo_${resolvedVersion}_x64_en-US.msi"
-$exeName = "Nexo_${resolvedVersion}_x64-setup.exe"
+$msiName = "Cogito Studio_${resolvedVersion}_x64_en-US.msi"
+$exeName = "Cogito Studio_${resolvedVersion}_x64-setup.exe"
 
 $asset = Get-AssetByName -Release $release -AssetName $msiName
 $installerType = "msi"
@@ -159,4 +159,4 @@ if ($installerType -eq "msi") {
     Install-Exe -ExePath $installerPath -IsSilent:$Silent.IsPresent
 }
 
-Write-Info "Install complete. You can launch Nexo from Start Menu."
+Write-Info "Install complete. You can launch Cogito Studio from Start Menu."

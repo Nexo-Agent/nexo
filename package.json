@@ -2,7 +2,7 @@
   "name": "llm-client",
   "private": true,
   "version": "1.0.11",
-  "identifier": "com.nexo.app",
+  "identifier": "com.cogito-studio.app",
   "type": "module",
   "scripts": {
     "ui:dev": "vite",
@@ -11,7 +11,7 @@
     "ui:preview": "vite preview",
     "tauri": "tauri",
     "gen:bindings": "cd src-tauri && cargo test --package nexo --lib constants::tests::generate_typescript_bindings -- --nocapture",
-    "dev": "yarn gen:bindings && tauri dev --config '{\"identifier\":\"com.nexo.app.dev\"}'",
+    "dev": "yarn gen:bindings && tauri dev --config '{\"identifier\":\"com.cogito-studio.app.dev\"}'",
     "build": "yarn gen:bindings && tauri build",
     "i18n:scan": "i18next-scanner --config i18next-scanner.config.cjs",
     "i18n:extract": "i18next-scanner --config i18next-scanner.config.cjs",

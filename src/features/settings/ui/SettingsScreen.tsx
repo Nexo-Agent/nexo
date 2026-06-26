@@ -101,13 +101,13 @@ export function SettingsScreen() {
           <div className="flex size-20 items-center justify-center rounded-2xl bg-background">
             <img
               src="/icon.svg"
-              alt="Nexo Logo"
+              alt="Cogito Studio Logo"
               className="size-12 drop-shadow-sm"
             />
           </div>
           <div className="space-y-2">
             <h3 className="text-2xl font-semibold tracking-tight">
-              {tCommon('aboutTitle', { defaultValue: 'Nexo Agent' })}
+              {tCommon('aboutTitle', { defaultValue: 'Cogito Studio' })}
             </h3>
             <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground">
               {tSettings('aboutDescription') || tCommon('appDescription')}
@@ -171,7 +171,7 @@ export function SettingsScreen() {
             Built with Tauri, React & Rust
           </p>
           <p className="text-[10px] text-muted-foreground/60">
-            © {new Date().getFullYear()} Nexo Agent. Open Source Software.
+            © {new Date().getFullYear()} Cogito Studio. Open Source Software.
           </p>
         </div>
       </div>

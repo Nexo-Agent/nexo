@@ -158,7 +158,7 @@ export function FirstRunSetup({ open }: { open: boolean }) {
   };
 
   const titles: Record<Step, string> = {
-    welcome: 'Chào mừng đến với Nexo',
+    welcome: 'Chào mừng đến với Cogito Studio',
     'llm-setup': 'Kết nối AI của bạn',
   };
 

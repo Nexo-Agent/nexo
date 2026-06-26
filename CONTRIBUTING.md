@@ -1,15 +1,15 @@
-# Contributing to Nexo
+# Contributing to Cogito Studio
 
-Thank you for your interest in contributing to Nexo! We welcome contributions from everyone. By participating in this project, you agree to abide by our code of conduct.
+Thank you for your interest in contributing to Cogito Studio! We welcome contributions from everyone. By participating in this project, you agree to abide by our code of conduct.
 
 ## 📋 How to Contribute
 
 ### 1. Reporting Bugs
 
-- **Search First**: check the [Issues](https://github.com/magiskboy/nexo/issues) to see if the bug has already been reported.
+- **Search First**: check the [Issues](https://github.com/CogitoForge-AI/cogito-studio/issues) to see if the bug has already been reported.
 - **Detailed Report**: Provide as much information as possible:
   - OS version
-  - Nexo version
+  - Cogito Studio version
   - Steps to reproduce
   - Screenshots/Recordings
 

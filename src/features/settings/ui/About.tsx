@@ -49,7 +49,7 @@ export function About({ open, onOpenChange }: AboutProps) {
             <div className="flex items-center justify-center size-14 rounded-2xl bg-background shadow-md ring-1 ring-border/50">
               <img
                 src="/icon.svg"
-                alt="Nexo Logo"
+                alt="Cogito Studio Logo"
                 className="size-8 drop-shadow-sm"
               />
             </div>
@@ -163,7 +163,11 @@ export function About({ open, onOpenChange }: AboutProps) {
             <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
               <span>{t('madeWith', { defaultValue: 'Made with' })}</span>
               <Heart className="size-3 fill-error text-error" />
-              <span>{t('byTeam', { defaultValue: 'by the Nexo team' })}</span>
+              <span>
+                {t('byTeam', {
+                  defaultValue: 'by the Cogito Studio team',
+                })}
+              </span>
             </div>
           </div>
         </DialogBody>

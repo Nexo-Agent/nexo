@@ -57,7 +57,7 @@ impl MCPClientService {
         InitializeRequestParams {
             capabilities: ClientCapabilities::default(),
             client_info: Implementation {
-                name: "nexo".to_string(),
+                name: "cogito-studio".to_string(),
                 title: None,
                 version: "0.1.0".to_string(),
             },

@@ -1,6 +1,6 @@
 {
   "about": "Giới thiệu",
-  "aboutTitle": "Về Nexo",
+  "aboutTitle": "Về Cogito Studio",
   "actions": "Hành động",
   "add": "Thêm",
   "back": "Quay lại",
@@ -314,7 +314,7 @@
   "viewAndInstall": "View & Install",
   "welcomeDescription": "Ứng dụng desktop để tương tác với các mô hình ngôn ngữ lớn. Tạo cuộc trò chuyện, quản lý workspace và kết nối với các LLM providers.",
   "welcomeFeaturesTitle": "Tính năng nổi bật",
-  "welcomeTitle": "Chào mừng đến với Nexo",
+  "welcomeTitle": "Chào mừng đến với Cogito Studio",
   "workspaceName": "Tên workspace",
   "workspaceSettings": "Cài đặt Workspace",
   "workspaceSettingsMenu": "Cài đặt workspace",

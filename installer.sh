@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_OWNER="${REPO_OWNER:-Nexo-Agent}"
-REPO_NAME="${REPO_NAME:-nexo}"
+REPO_OWNER="${REPO_OWNER:-CogitoForge-AI}"
+REPO_NAME="${REPO_NAME:-cogito-studio}"
 VERSION="${VERSION:-latest}"
 
 readonly REPO_OWNER
@@ -85,8 +85,8 @@ install_macos() {
   local dmg_name=""
 
   case "$arch" in
-    arm64|aarch64) dmg_name="Nexo_${RESOLVED_VERSION}_aarch64.dmg" ;;
-    x86_64|amd64) dmg_name="Nexo_${RESOLVED_VERSION}_x64.dmg" ;;
+    arm64|aarch64) dmg_name="Cogito Studio_${RESOLVED_VERSION}_aarch64.dmg" ;;
+    x86_64|amd64) dmg_name="Cogito Studio_${RESOLVED_VERSION}_x64.dmg" ;;
     *)
       error "Unsupported macOS architecture: ${arch}"
       exit 1
@@ -111,22 +111,22 @@ install_macos() {
   info "Mounting DMG..."
   hdiutil attach "$dmg_path" -mountpoint "$mount_point" -nobrowse -quiet
 
-  if [ ! -d "${mount_point}/Nexo.app" ]; then
+  if [ ! -d "${mount_point}/Cogito Studio.app" ]; then
     hdiutil detach "$mount_point" -quiet || true
-    error "Nexo.app not found inside DMG."
+    error "Cogito Studio.app not found inside DMG."
     exit 1
   fi
 
-  info "Installing Nexo.app to /Applications..."
+  info "Installing Cogito Studio.app to /Applications..."
   if [ -w "/Applications" ]; then
-    cp -R "${mount_point}/Nexo.app" "/Applications/Nexo.app"
+    cp -R "${mount_point}/Cogito Studio.app" "/Applications/Cogito Studio.app"
   else
-    sudo cp -R "${mount_point}/Nexo.app" "/Applications/Nexo.app"
+    sudo cp -R "${mount_point}/Cogito Studio.app" "/Applications/Cogito Studio.app"
   fi
 
   hdiutil detach "$mount_point" -quiet || true
   rm -rf "$tmp_dir"
-  info "Install complete. Open it from Applications: Nexo.app"
+  info "Install complete. Open it from Applications: Cogito Studio.app"
 }
 
 install_linux() {
@@ -143,7 +143,7 @@ install_linux() {
 
   if command -v apt-get >/dev/null 2>&1 && command -v dpkg >/dev/null 2>&1; then
     local deb_name deb_url deb_path
-    deb_name="Nexo_${RESOLVED_VERSION}_amd64.deb"
+    deb_name="Cogito Studio_${RESOLVED_VERSION}_amd64.deb"
     deb_url="$(pick_asset_url "$release_json" "$deb_name" || true)"
     if [ -n "$deb_url" ]; then
       deb_path="${tmp_dir}/${deb_name}"
@@ -158,7 +158,7 @@ install_linux() {
 
   if command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1 || command -v rpm >/dev/null 2>&1; then
     local rpm_name rpm_url rpm_path
-    rpm_name="Nexo-${RESOLVED_VERSION}-1.x86_64.rpm"
+    rpm_name="Cogito Studio-${RESOLVED_VERSION}-1.x86_64.rpm"
     rpm_url="$(pick_asset_url "$release_json" "$rpm_name" || true)"
     if [ -n "$rpm_url" ]; then
       rpm_path="${tmp_dir}/${rpm_name}"
@@ -178,7 +178,7 @@ install_linux() {
   fi
 
   local appimage_name appimage_url appimage_path install_dir
-  appimage_name="Nexo_${RESOLVED_VERSION}_amd64.AppImage"
+  appimage_name="Cogito Studio_${RESOLVED_VERSION}_amd64.AppImage"
   appimage_url="$(pick_asset_url "$release_json" "$appimage_name" || true)"
   if [ -z "$appimage_url" ]; then
     rm -rf "$tmp_dir"

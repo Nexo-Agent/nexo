@@ -268,7 +268,7 @@ export function TitleBar({
         >
           {isMacOSPlatform && !leftContent ? (
             <span className="text-xs font-medium text-muted-foreground">
-              Nexo
+              Cogito Studio
             </span>
           ) : null}
         </div>

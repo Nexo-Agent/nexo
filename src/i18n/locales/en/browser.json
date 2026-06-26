@@ -4,7 +4,7 @@
   "sessionEnded": "Browser session ended",
   "streamAlt": "Browser stream",
   "downloadTitle": "Downloading Chromium",
-  "downloadDescription": "Nexo is downloading the browser runtime (~150MB). This only happens once.",
+  "downloadDescription": "Cogito Studio is downloading the browser runtime (~150MB). This only happens once.",
   "demoTitle": "Browser (dev)",
   "open": "Open",
   "tabLabel": "Browser",

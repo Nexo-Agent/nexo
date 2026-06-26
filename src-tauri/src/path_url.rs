@@ -59,10 +59,10 @@ mod tests {
     fn strips_verbatim_prefix_before_converting() {
         assert_eq!(
             absolute_path_to_file_url(
-                r"\\?\C:\Users\nguye\AppData\Roaming\com.nexo.app.dev\artifacts\chart.html"
+                r"\\?\C:\Users\nguye\AppData\Roaming\com.cogito-studio.app.dev\artifacts\chart.html"
             )
             .unwrap(),
-            "file:///C:/Users/nguye/AppData/Roaming/com.nexo.app.dev/artifacts/chart.html"
+            "file:///C:/Users/nguye/AppData/Roaming/com.cogito-studio.app.dev/artifacts/chart.html"
         );
     }
 

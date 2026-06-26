@@ -79,9 +79,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: __VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: 'Nexo __VERSION__'
+          releaseName: 'Cogito Studio __VERSION__'
           releaseBody: |
-            # Nexo v1.0.11
+            # Cogito Studio v1.0.11
 
             ## What's New
 
@@ -92,7 +92,7 @@ jobs:
 
             ---
 
-            Report issues at: https://github.com/Nexo-Agent/nexo/issues
+            Report issues at: https://github.com/CogitoForge-AI/cogito-studio/issues
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

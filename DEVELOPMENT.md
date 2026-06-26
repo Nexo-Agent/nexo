@@ -1,6 +1,6 @@
 # Development Guide
 
-Welcome to the Nexo development guide! This document will help you set up your environment, build the project, and start contributing.
+Welcome to the Cogito Studio development guide! This document will help you set up your environment, build the project, and start contributing.
 
 ## 🛠 Prerequisites
 
@@ -74,8 +74,8 @@ If `voices` is 0 after a few seconds, install/configure the packages above and r
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Nexo-Agent/nexo.git
-cd nexo
+git clone https://github.com/CogitoForge-AI/cogito-studio.git
+cd cogito-studio
 ```
 
 ### 2. Install Dependencies

@@ -39,7 +39,9 @@ describe('FirstRunSetup', () => {
 
   it('renders welcome step initially', () => {
     render(<FirstRunSetup open={true} />);
-    expect(screen.getByText('Chào mừng đến với Nexo')).toBeInTheDocument();
+    expect(
+      screen.getByText('Chào mừng đến với Cogito Studio')
+    ).toBeInTheDocument();
     expect(screen.getByText('Bắt đầu thiết lập')).toBeInTheDocument();
   });
 
