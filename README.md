@@ -110,19 +110,46 @@ bash <(curl -fsSL https://studio.cogito-ai.org/installer.sh)
 
 You can also download packaged releases from the [GitHub Releases page](https://github.com/CogitoForge-AI/cogito-studio/releases).
 
+## Demo Video
+
+[Watch Cogito Studio on YouTube](https://youtu.be/sAAteUcoOzE?si=yF1pjPGO_7TQrwDX)
+
 ## Screenshots
 
-### Multi-provider workspace
-
-![Cogito Studio multi-provider setup](docs/screenshots/Variance%20LLM%20providers.png)
-
-### Scientific and technical Markdown rendering
-
-![Cogito Studio Markdown artifact with LaTeX](docs/screenshots/Markdown%20artifact%20-%20Latex%20render%20for%20scientific.png)
-
-### Visual and HTML artifact workflow
-
-![Cogito Studio HTML artifact preview](docs/screenshots/HTML%20artifact%20-%20Visualbility.png)
+<table>
+  <tr>
+    <td align="center"><strong>Main Screen</strong></td>
+    <td align="center"><strong>Usage</strong></td>
+  </tr>
+  <tr>
+    <td><img alt="Cogito Studio main screen" src="screenshots/main-screen.png"></td>
+    <td><img alt="Cogito Studio usage view" src="screenshots/usage.png"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>MCP</strong></td>
+    <td align="center"><strong>Settings</strong></td>
+  </tr>
+  <tr>
+    <td><img alt="Cogito Studio MCP integration" src="screenshots/mcp.png"></td>
+    <td><img alt="Cogito Studio application settings" src="screenshots/app-setting.png"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Multi-LLM Providers</strong></td>
+    <td align="center"><strong>About</strong></td>
+  </tr>
+  <tr>
+    <td><img alt="Cogito Studio multi-LLM providers" src="screenshots/multi-llm-providers.png"></td>
+    <td><img alt="Cogito Studio about screen" src="screenshots/about.png"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Science Expression</strong></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><img alt="Cogito Studio science expression rendering" src="screenshots/science-expression.png"></td>
+    <td></td>
+  </tr>
+</table>
 
 ## Why Users Star Projects Like This
 
